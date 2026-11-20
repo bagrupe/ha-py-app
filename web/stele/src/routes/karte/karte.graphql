@@ -1,0 +1,27 @@
+query StelePois($kommuneId: JSON, $limit: Int) {
+  pois(where: {kommune: {equals: $kommuneId}}, limit: $limit) {
+    docs {
+      id
+      title
+      position
+      positionString
+      additionalInformation {
+        heading
+        text
+        kind
+      }
+      category {
+        id
+        title
+        supercategory {
+          id
+          title
+        }
+        icon {
+          id
+          url
+        }
+      }
+    }
+  }
+}

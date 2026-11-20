@@ -1,0 +1,29 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "tasks": {
+    "build": {
+      "outputs": ["dist/**", ".next/**", "!.next/cache/**"],
+      "inputs": ["**/*.ts", "**/*.tsx", ".env.production", ".env"],
+      "env": [
+        "VITE_GOVMANAGER_VORGANGSTYP",
+        "VITE_GOVMANAGER_MANDANTENSCHLUESSEL",
+        "VITE_GOVMANAGER_VORGANGSSCHLUESSEL"
+      ]
+    },
+    "build-storybook": {
+      "outputs": ["storybook-static/**"]
+    },
+    "graphql": {
+      "outputs": ["src/**/*.generated.ts", "src/**/*.graphql"],
+      "cache": false
+    },
+    "dev": {
+      "cache": false,
+      "persistent": true
+    },
+    "lint": {},
+    "lint:check": {},
+    "prettier:check": {},
+    "prettier:fix": {}
+  }
+}

@@ -1,0 +1,16 @@
+name: storybook
+ingress:
+  hostPrefix: storybook
+  paths:
+    - /
+deployment:
+  port: 80
+  image:
+    example: true
+    name: web-storybook
+  resources:
+    requests:
+      cpu: 1m
+      memory: 25Mi
+    limits:
+      memory: 75Mi

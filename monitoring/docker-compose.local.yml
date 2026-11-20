@@ -1,0 +1,25 @@
+# Local development overrides — use together with docker-compose.yml:
+#   docker compose -f docker-compose.yml -f docker-compose.local.yml -p hameln-monitoring up -d
+services:
+  pushgateway:
+    ports:
+      - "${PUSHGATEWAY_PORT:-9091}:9091"
+
+  blackbox:
+    ports:
+      - "${BLACKBOX_PORT:-9115}:9115"
+
+  prometheus:
+    ports:
+      - "${PROMETHEUS_PORT:-9090}:9090"
+    environment:
+      LOCAL_APP_HOST: ${LOCAL_APP_HOST:-host.docker.internal}
+      STAGING_SERVER_IP: 127.0.0.1
+      PREPROD_SERVER_IP: 127.0.0.1
+      PRODUCTION_SERVER_IP: 127.0.0.1
+
+  grafana:
+    ports:
+      - "${GRAFANA_PORT:-3000}:3000"
+    environment:
+      GF_SERVER_ROOT_URL: http://localhost:${GRAFANA_PORT:-3000}/

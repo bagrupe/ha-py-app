@@ -1,0 +1,122 @@
+==== Einrichtung von Prozess-Tags
+
+Einige Funktionen der mobilen App sind nicht über die allgemeine Antragsliste
+aufrufbar, sondern über feste Einstiegspunkte in der App (z. B. Mängelmelder,
+Feedback, Ideenmelder). Die App ordnet diese Funktionen über einen *ProzessTag*
+dem zugehörigen Prozess in der Postgres-Datenbank zu.
+
+Dafür müssen zwei Voraussetzungen erfüllt sein:
+
+* Es existiert ein veröffentlichter Prozess in Bereich A (siehe
+  xref:anwender/backoffice/prozesse-anlegen.adoc[Prozess anlegen]).
+* Der Prozess ist in der Tabelle `ProzessProzessTag` mit einem Eintrag in
+  `ProzessTags` verknüpft (siehe <<Datenbanken,Datenbanken>>).
+
+===== Getaggte Funktionen
+
+[cols="1,2,2"]
+|===
+| Funktion | Prozessname | ProzessTag
+
+| Mängelmelder
+| `Mängelmelder`
+| `Mängelmelder`
+
+| Feedback
+| `Feedback`
+| `Feedback`
+
+| Ideenmelder
+| `Ideenmelder`
+| `Ideenmelder`
+|===
+
+===== Wann ist eine manuelle Einrichtung nötig?
+
+In der lokalen Entwicklung können Mängelmelder-, Feedback- und Ideenmelder-Prozess
+inklusive Tag-Verknüpfung über den `ProzesseSeeder` angelegt werden, sofern
+`DataSeeder__Enabled` aktiviert ist (siehe xref:entwickler/ci-cd.adoc[CI/CD]).
+Auf Staging, Pre-Production und Production ist der Data Seeder deaktiviert.
+
+Beim Aufsetzen einer leeren Umgebung ohne Datenbank-Dump und ohne aktiven Data
+Seeder ist der unten beschriebene Ablauf für alle getaggten Funktionen
+manuell auszuführen.
+
+===== Voraussetzungen
+
+Für die manuelle Einrichtung werden benötigt:
+
+* Zugang zu Bereich A (Backoffice / Prozessverwaltung)
+* Zugang zur Postgres-Datenbank der jeweiligen Umgebung
+
+===== Ablauf
+
+Die folgenden Schritte gelten für jede getaggte Funktion. Prozessname und
+ProzessTag entnehmen Sie der Tabelle oben.
+
+====== 1. Prozess in Bereich A anlegen
+
+Im Backoffice:
+
+. `Prozessverwaltung` öffnen
+. `Neuen Prozess anlegen` wählen
+. Prozess mit dem passenden Namen anlegen (z. B. `Ideenmelder`)
+. Prozess bearbeiten
+. `Ende`-Schritt hinzufügen
+. Speichern und veröffentlichen
+
+Weitere Details zum Anlegen und Bearbeiten von Prozessen finden sich in
+xref:anwender/backoffice/prozesse-anlegen.adoc[Prozess anlegen] und
+xref:anwender/backoffice/prozesse-bearbeiten.adoc[Prozesse bearbeiten].
+
+====== 2. Prozess-ID in Postgres auslesen
+
+```sql
+SELECT "Id", "Name", "KommuneId"
+FROM "UserFacingProzesse"
+WHERE "Discriminator" = 'Prozess'
+  AND "Name" ILIKE '%<PROZESSNAME>%';
+```
+
+`<PROZESSNAME>` durch den Namen aus der Tabelle ersetzen, z. B. `Ideen`,
+`Mängel` oder `Feedback`.
+
+Die zurückgegebene `Id` wird im nächsten Schritt als Prozess-ID benötigt.
+
+====== 3. ProzessTag in Postgres anlegen
+
+```sql
+INSERT INTO "ProzessTags" ("Id", "Tag")
+VALUES (gen_random_uuid(), '<PROZESSTAG>')
+RETURNING "Id";
+```
+
+`<PROZESSTAG>` durch den Tag aus der Tabelle ersetzen, z. B. `Ideenmelder`,
+`Mängelmelder` oder `Feedback`.
+
+Die zurückgegebene `Id` ist die Tag-ID für den Verknüpfungsschritt.
+
+[NOTE]
+====
+Prüfen Sie vor dem Anlegen, ob der Tag bereits existiert:
+
+[source,sql]
+----
+SELECT "Id", "Tag" FROM "ProzessTags" WHERE "Tag" = '<PROZESSTAG>';
+----
+
+Existiert der Tag bereits, kann dessen `Id` direkt im nächsten Schritt
+verwendet werden.
+====
+
+====== 4. Prozess mit ProzessTag verbinden
+
+```sql
+INSERT INTO "ProzessProzessTag" ("ProzesseId", "TagsId")
+VALUES (
+  '<PROZESS-ID>',
+  '<TAG-ID>'
+);
+```
+
+`<PROZESS-ID>` und `<TAG-ID>` durch die Werte aus Schritt 2 bzw. 3 ersetzen.

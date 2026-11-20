@@ -1,0 +1,50 @@
+diff --git a/build/modern/focusManager.js b/build/modern/focusManager.js
+index ec162069527770a50ab65e2d4e764e49fb595299..d8e0cdc2d6c3ee54c5df46158151c18e02ace828 100644
+--- a/build/modern/focusManager.js
++++ b/build/modern/focusManager.js
+@@ -31,7 +31,9 @@ var FocusManager = class extends Subscribable {
+   }
+   setEventListener(setup) {
+     this.#setup = setup;
+-    this.#cleanup?.();
++    if (this.#cleanup) {
++      this.#cleanup?.();
++    }
+     this.#cleanup = setup((focused) => {
+       if (typeof focused === "boolean") {
+         this.setFocused(focused);
+@@ -61,8 +63,5 @@ var FocusManager = class extends Subscribable {
+   }
+ };
+ var focusManager = new FocusManager();
+-export {
+-  FocusManager,
+-  focusManager
+-};
++export { FocusManager, focusManager };
+ //# sourceMappingURL=focusManager.js.map
+diff --git a/build/modern/onlineManager.js b/build/modern/onlineManager.js
+index 2adb2ad682a58429d586195f035c50a0c956aeab..a880cd81be930c1148faa5f32271473319a1b344 100644
+--- a/build/modern/onlineManager.js
++++ b/build/modern/onlineManager.js
+@@ -34,7 +34,9 @@ var OnlineManager = class extends Subscribable {
+   }
+   setEventListener(setup) {
+     this.#setup = setup;
+-    this.#cleanup?.();
++    if (this.#cleanup) {
++      this.#cleanup?.();
++    }
+     this.#cleanup = setup(this.setOnline.bind(this));
+   }
+   setOnline(online) {
+@@ -51,8 +53,5 @@ var OnlineManager = class extends Subscribable {
+   }
+ };
+ var onlineManager = new OnlineManager();
+-export {
+-  OnlineManager,
+-  onlineManager
+-};
++export { OnlineManager, onlineManager };
+ //# sourceMappingURL=onlineManager.js.map

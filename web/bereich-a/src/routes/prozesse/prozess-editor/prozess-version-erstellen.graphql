@@ -1,0 +1,31 @@
+mutation NeueProzessVersionErstellen($input: ProzessVersionErstellenInput!) {
+  prozessVersionErstellen(input: $input) {
+    prozess {
+      ...ProzessEditorProzess
+    }
+  }
+}
+
+fragment ProzessEditorProzess on Prozess {
+  id
+  name
+  istOeffentlich
+  tags {
+    id
+  }
+
+  latestVersion {
+    id
+    publishedAt
+    start {
+      id
+    }
+    rollen {
+      id
+      name
+    }
+    alleSchritte @export(exportName: "ProzessEditorSchritt") {
+      ...ProzessEditorSchritt
+    }
+  }
+}

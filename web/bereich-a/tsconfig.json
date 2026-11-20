@@ -1,0 +1,9 @@
+{
+  "extends": "@kommunal/tsconfig/react-app.json",
+  "compilerOptions": {
+    "allowImportingTsExtensions": true,
+    "baseUrl": "./"
+  },
+  "include": ["src/**/*", ".storybook/**/*"],
+  "references": [{"path": "./tsconfig.node.json"}]
+}

@@ -1,0 +1,142 @@
+==== Prozessbaukasten
+:toc:
+
+===== Überblick
+
+Der Prozessbaukasten ermöglicht es, beliebig komplexe, versionierte Prozesse als gerichtete Graphen zu modellieren, zu validieren und auszuführen.
+Die Prozesse können über das Frontend visuell erstellt und verwaltet werden.
+Die Ausführung und Steuerung der Prozesse erfolgt im Backend, das die gesamte Prozesslogik, Versionierung und Zuständigkeiten kapselt.
+
+Der Code des Prozessbaukastens teilt sich primär zwischen dem Backend und Bereich-A auf:
+
+* **Backend**: `API/Features/Prozess`
+* **Bereich-A**: `src/routes/prozesse/prozess-editor`
+
+===== Domänenmodell und Architektur
+
+====== Grundstruktur eines Prozesses
+
+* *Prozess*: Ein Prozess ist ein versionierter, gerichteter Graph (siehe auch <<Der Prozesseditor,Einleitung Prozesseditor>>).
+Jede Änderung erzeugt eine neue Version (`ProzessVersion`).
+Prozesse können getaggt und einer Gruppe zugeordnet werden (für Veröffentlichung in der App, siehe <<Übersicht und Veröffentlichung von Prozessen,Übersicht und Veröffentlichung von Prozessen>>).
+
+* *Schritte (Nodes)*: Abstrakte Basisklasse `Schritt` mit diversen Spezialisierungen:
+** `Ende-Schritt`
+** `Formular-Schritt` (mit Feldern/Slots)
+** `Programmatischer Schritt` (z.B. Automatisierung)
+** `Bezahlen-Schritt` & `Warte-auf-Bezahlung-abgeschlossen-Schritt`
+** `Ghost-Schritt` (existiert nur Temporär im Frontend als Platzhalter)
+
+Details zu Schritt-Typen und deren Bedeutung finden sich in <<Prozesse bearbeiten,Prozesse bearbeiten>>.
+
+* *Verbindungen (Edges)*: Leiten von einem Schritt zum nächsten. Können Bedingungen (Expressions) enthalten, die steuern, ob sie aktiviert werden dürfen.
+Verbindungen können als Buttons im Antrag erscheinen.
+
+* *Slots & SlotValues*: Slots sind Platzhalter für Nutzereingaben in Schritten (z.B. Formularfelder).
+SlotValues speichern die konkreten Werte pro Ausführung und Bearbeitung. SlotValues können verschlüsselt gespeichert werden.
+
+===== Versionierung
+
+* Jeder Prozess ist versioniert (`ProzessVersion`).
+* Änderungen am Prozess führen zur Duplikation aller enthaltenen Entitäten (Schritte, Verbindungen, Rollen etc.).
+* Parallel existierende Anträge können auf unterschiedlichen Versionen eines Prozesses laufen.
+* Die Versionierung stellt sicher, dass Änderungen keine Auswirkungen auf bereits laufende Anträge haben.
+
+===== Ausführung und Walker
+
+* *Ausführung*: Ein Antrag, der eine bestimmte Version eines Prozesses durchläuft.
+Enthält Referenz auf die Prozessversion, den Nutzer, Bearbeitungen, aktuelle <<Zuständigkeiten,Ist-Zuständigkeit>>, Status etc.
+
+* *Bearbeitung*: Einzelner Bearbeitungsschritt innerhalb einer Ausführung. Speichert den Schritt, SlotValues, User, Zeitstempel, gewählte Verbindung und War-Zuständigkeit.
+
+* *Walker*: Zentrale Komponente zur Steuerung des Prozessablaufs.
+** Prüft aktuelle Schrittposition, verfügbare Verbindungen und deren Bedingungen.
+** Übernimmt SlotValues, prüft Zuständigkeiten und setzt diese korrekt.
+** Nutzt Expressions zur Entscheidung, ob eine Verbindung aktiviert werden kann.
+** Validiert, dass alle Pflichtfelder (Slots) gefüllt sind.
+** Sichert Integrität der Zuständigkeit nach jedem Schritt.
+** Unterstützt auch automatisierte Schritte (Programmatische Schritte).
+
+===== Zuständigkeiten
+Die Zuständigkeit einer Ausführung (Antrag) bestimmt in welchem Postfach eine Ausführung landet und von welcher Person oder Personengruppe sie bearbeitet werden kann.
+
+Es gibt drei Zuständigkeitsdefinitionen, um die Ausführung beim Durchlaufen des Prozesses durch verschiedene Postfächer leiten zu können:
+
+* *Ist-Zuständigkeit* der Ausführung: Die aktuelle Zuständigkeit einer Ausführung. Steuert, wer den nächsten Schritt bearbeiten darf und in welchem Postfach der Antrag erscheint.
+* *Soll-Zuständigkeit* des Schritts: Wird pro Schritt definiert (Bürger, Organisationseinheit, Dienstleister, Dynamisch).
+** Wird bereits bei Prozesserstellung festgelegt.
+** *Dynamische Zuständigkeit*: Wird erst bei Ausführung, nicht bei Prozesserstellung, festgelegt. Über Rollenmechanismus kann die Zuständigkeit aus der Historie übernommen werden.
+Die konkrete Ist-Zuständigkeit der Ausführung muss manuell vom Nutzer vor Übergang in diesen Schritt erfolgen.
+* *War-Zuständigkeit* der Bearbeitung: Historische Zuständigkeit bei einer Bearbeitung, relevant für „dynamische“ Rollenübergabe.
+
+===== Validierung
+
+* *Frontend*: Führt umfangreiche Validierung des Graphen durch (z.B. DFS, Data-Flow-Analysis für Rollen und Slot-Nutzung).
+* *Backend*: Validiert auf Integritätsverletzungen (z.B. ungültige Zuständigkeit nach Bearbeitung, Slot-Prüfungen im Walker).
+
+Hinweise zu Fehlerquellen und Validierungsproblemen finden sich in xref:anwender/backoffice/prozesse-bearbeiten.adoc[Prozesse bearbeiten].
+
+===== Typische Workflows
+
+[cols="1,3"]
+|===
+| Schritt | Beschreibung
+| Prozess anlegen | Über das Backoffice, Auswahl zwischen Prozess und Service-Portal-Link. (Siehe xref:anwender/backoffice/prozesse-anlegen.adoc[Prozess anlegen])
+| Prozess editieren | Visueller Editor (mit @xyflow/react) im Frontend, Drag&Drop, Konfiguration von Schritten und Verbindungen. (Siehe xref:anwender/backoffice/prozesse-bearbeiten.adoc[Prozesse bearbeiten])
+| Validierung | Nach jeder Änderung automatische Prüfung auf Konsistenz und Korrektheit. (Siehe xref:anwender/backoffice/prozesse-bearbeiten.adoc[Prozesse bearbeiten])
+| Versionierung | Jede Speicherung erzeugt eine neue Prozessversion, parallele Bearbeitung von Anträgen möglich. (Siehe xref:anwender/backoffice/prozesse-bearbeiten.adoc[Prozesse bearbeiten])
+| Veröffentlichung | Zuweisung zu einer Prozessgruppe ist Voraussetzung für die Sichtbarkeit in der App. (Siehe xref:anwender/backoffice/prozesse-uebersicht.adoc[Prozess-Übersicht])
+| Ausführung (Antrag) | Nutzer (Bürger, Backoffice, Dienstleister) durchlaufen den Prozess, Walker steuert die Logik. (Siehe xref:anwender/backoffice/prozesse-einleitung.adoc[Einleitung])
+|===
+
+===== Erweiterte technische Details
+
+* *Slot-Typen*:
+** Location, String, Upload, Boolean, Date, Signature, Time, ReadOnly
+** Konfigurierbar mit Optionen, Validierungen, Freigabe-Flags etc.
+
+* *Programmatische Schritte*: Unterstützen Automatisierungen (z.B. Weichen, automatische Übergänge). Werden asynchron (als Cron-Job) ausgeführt.
+
+* *Sicherheit & Datenschutz*: SlotValues können verschlüsselt gespeichert werden (z.B. für personenbezogene Daten).
+
+* *Bearbeitungsrechte*: Der `AusfuehrungZustaendigkeitService` prüft, ob ein Nutzer berechtigt ist, eine Ausführung zu bearbeiten (z.B. über Rollen, Gruppen, Organisationseinheiten).
+
+===== Beispiel: Prozessausführung im Backend
+
+. *Walker initialisieren:*
+  - Lädt Prozessversion und aktuelle Ausführung.
+  - Setzt aktuellen Schritt.
+
+. *Bearbeitung durchführen:*
+  - Nutzer füllt Slots, wählt Verbindung (Button).
+  - Walker prüft: Sind alle Pflichtfelder ausgefüllt? Ist die Verbindung relevant (Expression)? Ist die Zuständigkeit korrekt?
+  - SlotValues werden gespeichert, Zuständigkeit ggf. angepasst.
+
+. *Automatisierte Schritte:*
+  - Programmatische Schritte werden per Cronjob ausgeführt.
+  - Fehler in diesen Schritten werden aktuell nicht im Frontend reflektiert.
+
+===== Wichtige Klassen und Strukturen (Backend)
+
+[cols="1,3"]
+|===
+| Klasse/Enum | Zweck
+| Prozess, ProzessVersion | Prozessmodell und Versionierung
+| Schritt (und Spezialisierungen) | Verschiedene Schritt-Typen (Formular, Programmatisch, Bezahlen, Ende, Platzhalter)
+| Verbindung | Edge im Prozessgraph, enthält ggf. Bedingungen (Expressions)
+| Slot, SlotValue | Platzhalter für Nutzereingaben und deren gespeicherte Werte
+| Ausfuehrung | Laufende Prozessinstanz (Antrag)
+| Bearbeitung | Einzelner Bearbeitungsschritt in einer Ausführung
+| Walker | Engine zur Steuerung und Validierung des Prozessdurchlaufs
+| Zustaendigkeit, ZustaendigkeitArt | Modelliert Zuständigkeiten und deren Typen (Bürger, OE, DL, Dynamisch)
+| AusfuehrungZustaendigkeitService | Prüft Bearbeitungsrechte für Nutzer im Backoffice
+|===
+
+===== Hinweise & Best Practices für Entwickler
+
+* Die Validierung ist zweistufig (Frontend und Backend). Änderungen an der Prozessstruktur sollten immer mit Blick auf die Validierungslogik erfolgen.
+* Prozesse sind strikt versioniert, laufende Anträge bleiben immer an ihre Ursprungs-Version gebunden.
+* Die korrekte Modellierung von Zuständigkeiten ist zentral für die Steuerung der Sichtbarkeit und Bearbeitungsrechte im Backoffice und für Dienstleister.
+* Fehler in Expressions (Bedingungen auf Verbindungen) können dazu führen, dass Prozesse hängen bleiben.
+* Programmatische Schritte können fehlschlagen, Fehler werden aktuell nicht im UI angezeigt.
+* Sehr große Prozesse (z.B. >1000 Elemente) können zu Performanceproblemen im Editor führen. Store- und Rendering-Optimierungen sind möglich.

@@ -1,0 +1,71 @@
+fragment Ausfuehrung on Ausfuehrung {
+  id
+  sharedKeyEncryptedForKommune
+  createdAt
+
+  istZustaendigkeit {
+    art
+    dienstleister {
+      id
+      name
+    }
+    organisationseinheit {
+      id
+      name
+    }
+    mitarbeiterGruppe {
+      id
+      name
+    }
+    zugewiesenePerson {
+      id
+      vorname
+      nachname
+    }
+  }
+
+  prozessVersion {
+    id
+    beschreibungstext
+
+    prozess {
+      id
+      name
+    }
+  }
+
+  currentSchritt {
+    id
+    sollZustaendigkeit {
+      mitarbeiterGruppe {
+        id
+        name
+      }
+    }
+  }
+
+  beschreibungstextSlotValues {
+    ...SlotValue
+  }
+}
+
+query Ausfuehrungen(
+  $status: AusfuehrungStatus
+  $zugewiesen: Boolean
+  $prozessId: UUID
+  $skip: Int
+  $take: Int
+) {
+  ausfuehrungen(
+    status: $status
+    zugewiesen: $zugewiesen
+    prozessId: $prozessId
+    skip: $skip
+    take: $take
+  ) {
+    totalCount
+    items {
+      ...Ausfuehrung
+    }
+  }
+}

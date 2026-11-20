@@ -1,0 +1,46 @@
+services:
+  cadvisor:
+    image: ghcr.io/google/cadvisor:v0.60.5
+    container_name: hameln-cadvisor
+    restart: unless-stopped
+    ports:
+      - "${CADVISOR_PORT:-8081}:8080"
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+      - /dev/disk/:/dev/disk:ro
+    privileged: true
+    devices:
+      - /dev/kmsg
+
+  postgres-exporter:
+    image: prometheuscommunity/postgres-exporter:v0.16.0
+    container_name: hameln-postgres-exporter
+    restart: unless-stopped
+    environment:
+      DATA_SOURCE_NAME: ${POSTGRES_EXPORTER_DATA_SOURCE_NAME}
+    ports:
+      - "${POSTGRES_EXPORTER_PORT:-9187}:9187"
+    networks:
+      - hameln-pyrmont
+
+  mongodb-exporter:
+    image: percona/mongodb_exporter:0.40
+    container_name: hameln-mongodb-exporter
+    restart: unless-stopped
+    command:
+      - --mongodb.uri=${MONGODB_EXPORTER_URI}
+      - --collector.diagnosticdata
+      - --collector.dbstats
+      - --web.listen-address=:9216
+    ports:
+      - "${MONGODB_EXPORTER_PORT:-9216}:9216"
+    networks:
+      - hameln-pyrmont
+
+networks:
+  hameln-pyrmont:
+    external: true
+    name: hameln-pyrmont

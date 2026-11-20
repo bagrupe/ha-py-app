@@ -1,0 +1,34 @@
+query VeranstaltungskalenderFilter(
+  $kommuneId: JSON!
+  $kommuneBereichAId: UUID!
+) {
+  veranstaltungskalenderKategories(
+    where: {
+      AND: [
+        { kommune: { equals: $kommuneId } }
+        { filterkategorie: { equals: true } }
+      ]
+    }
+    limit: 600
+  ) {
+    docs {
+      id
+      label
+    }
+  }
+  veranstaltungskalenderQuellen(
+    where: { kommune: { equals: $kommuneId } }
+    limit: 600
+  ) {
+    docs {
+      id
+      name
+    }
+  }
+  kommune(kommuneId: $kommuneBereichAId) {
+    untereinheiten(where: { isGemeinde: { eq: true } }) {
+      id
+      name
+    }
+  }
+}

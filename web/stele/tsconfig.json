@@ -1,0 +1,10 @@
+{
+  "extends": "@kommunal/tsconfig/react-app.json",
+  "compilerOptions": {
+    "allowImportingTsExtensions": true,
+    "baseUrl": "./",
+    "types": ["vite/client"]
+  },
+  "include": ["src"],
+  "references": [{"path": "./tsconfig.node.json"}]
+}

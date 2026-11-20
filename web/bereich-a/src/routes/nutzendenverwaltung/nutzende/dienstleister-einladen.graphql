@@ -1,0 +1,21 @@
+mutation InviteDienstleisterMitarbeiter(
+  $input: DienstleisterMitarbeiterInviteInput!
+) {
+  dienstleisterMitarbeiterInvite(input: $input) {
+    success
+    errors {
+      ... on Error {
+        message
+      }
+    }
+  }
+}
+
+query DienstleisterEinladenPage {
+  dienstleister(ichKannEinladen: true) {
+    items {
+      id
+      name
+    }
+  }
+}

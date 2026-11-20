@@ -1,0 +1,21 @@
+query kommune($kommuneId: UUID!) {
+  kommune(kommuneId: $kommuneId) @export(exportName: "Kommune") {
+    id
+    name
+    design {
+      colors {
+        primary
+        primaryLight
+      }
+      logo {
+        url
+      }
+      mangelIcon {
+        url
+      }
+      ideenIcon {
+        url
+      }
+    }
+  }
+}

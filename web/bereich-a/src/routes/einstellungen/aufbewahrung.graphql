@@ -1,0 +1,28 @@
+query AufbewahrungsEinstellungen {
+  aufbewahrungsEinstellungen {
+    hardDeleteVerzoegerungMinuten
+    archivVerzoegerungMinuten
+    hardDeleteAktiv
+    archivierungAktiv
+    aktualisiertAm
+  }
+}
+
+mutation AufbewahrungsEinstellungenAktualisieren(
+  $input: AufbewahrungsEinstellungenAktualisierenInput!
+) {
+  aufbewahrungsEinstellungenAktualisieren(input: $input) {
+    einstellungen {
+      hardDeleteVerzoegerungMinuten
+      archivVerzoegerungMinuten
+      hardDeleteAktiv
+      archivierungAktiv
+      aktualisiertAm
+    }
+    errors {
+      ... on Error {
+        message
+      }
+    }
+  }
+}

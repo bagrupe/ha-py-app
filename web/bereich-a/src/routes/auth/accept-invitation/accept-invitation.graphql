@@ -1,0 +1,5 @@
+mutation AcceptInvitation($input: RegisterBackofficeUserInput!) {
+  registerBackofficeUser(input: $input) {
+    result
+  }
+}

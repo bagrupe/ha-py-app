@@ -1,0 +1,39 @@
+query KommuneByBereichAId($bereichAId: ID!){
+  KommuneByBereichAId(kommuneId: $bereichAId) {
+    id
+  }
+}
+query KommuneDesign($bereichAId: ID!) {
+  KommuneByBereichAId(kommuneId: $bereichAId) {
+    design {
+      colors {
+        primary
+        primaryLight
+      }
+      logo {
+        url
+      }
+      fallbackImage {
+        url
+      }
+    }
+  }
+}
+query KommuneMaengelConfig($bereichAId: ID!) {
+  KommuneByBereichAId(kommuneId: $bereichAId) {
+    maengelmelder {
+      maengelZeitfensterStunden
+    }
+    ideenmelder {
+      ideenZeitfensterStunden
+    }
+  }
+}
+query KommuneLegalLinks($bereichAId: ID!) {
+  KommuneByBereichAId(kommuneId: $bereichAId) {
+    legal {
+      impressum
+      privacy
+    }
+  }
+}

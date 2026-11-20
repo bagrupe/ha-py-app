@@ -1,0 +1,96 @@
+fragment ProzessEditorSchritt on Schritt {
+  __typename
+  id
+  titel
+  anweisung
+  erledigungDurchBuerger
+  sollZustaendigkeit {
+    art
+    organisationseinheitId
+    mitarbeiterGruppeId
+    dienstleisterId
+    mitarbeiterGruppe {
+      id
+      name
+      eMailAdressen
+    }
+    dynamischeArten
+    liestRolleId
+    liestRolle {
+      id
+      name
+    }
+  }
+  schreibtRolle {
+    id
+    name
+  }
+  schreibtRolleId
+  versendeEMailAnMitarbeiterGruppe
+  verbindungen {
+    ...ProzessEditorVerbindung
+  }
+
+  nodePosition {
+    x
+    y
+  }
+
+  slots {
+    name
+    encrypted
+    valueType
+    optional
+    brauchtFreigabe
+  }
+
+  ... on FormularSchritt {
+    felder {
+      ...ProzessEditorFormularFeld
+    }
+  }
+
+  ... on BezahlenSchritt {
+    betrag
+    slots {
+      __typename
+      name
+    }
+  }
+
+  ... on WarteAufBezahlungAbgeschlossenSchritt {
+    bezahlenSchrittId
+  }
+
+  ... on GovManagerRestExportSchritt {
+    exportFilePartsAsPdf
+    exportParts {
+      __typename
+
+      ... on FilePart {
+        slotName
+      }
+      ... on JsonPart {
+        ...JsonPart
+      }
+    }
+
+    vorgangsTyp
+    mandantenSchluessel
+    vorgangsSchluessel
+  }
+
+  ... on WarteAufGovManagerSchritt {
+    govManagerSchrittId
+  }
+
+  ... on ProgrammatischerSchritt {
+    implementationAssemblyQualifiedName
+  }
+
+  ... on EmailForwarderExportSchritt {
+    emailAddress
+    subject
+    body
+  }
+}

@@ -1,0 +1,244 @@
+==== Externe Repository-Abhängigkeiten
+
+Dieses Kapitel listet alle externen Quellcode-Abhängigkeiten der Kommunal-App auf,
+die nicht aus den Standard-Paketregistern (npm, NuGet, pub.dev) bezogen werden
+oder die als Fork einer Quelle eingebunden sind. Ergänzend werden Atmina-eigene
+Pakete aufgeführt, die zwar über npm verteilt, aber von Atmina selbst gepflegt
+werden.
+
+Ziel der Dokumentation ist eine Bewertung des Risikos und des Aufwands einer
+möglichen Ablösung dieser Abhängigkeiten.
+
+===== Bestandsaufnahme
+
+====== Atmina-Pakete (npm)
+
+Die folgenden Pakete werden über das öffentliche npm-Register bezogen, von
+Atmina entwickelt und in den Web-Workspaces verwendet.
+
+|===
+| Paket | Version (verwendet) | Workspace | Zweck
+
+| `@atmina/formbuilder`
+| `2.1.2`
+| `bereich-a` (prod)
+| Typsichere Wrapper-API über `react-hook-form`. Wird im gesamten Formular-Layer
+  des Backoffice eingesetzt, einschließlich des Prozessbaukastens.
+
+| `@atmina/local-typescript-operations`
+| `0.9.0`
+| `bereich-a` (prod & dev)
+| GraphQL-Codegen-Plugin mit Unterstützung für die `@export`-Direktive,
+  Erweiterung des `typescript-operations`-Plugins.
+
+| `@atmina/only-enum-types`
+| `0.8.0`
+| `bereich-a` (prod & dev)
+| GraphQL-Codegen-Plugin, erzeugt TypeScript-Definitionen ausschließlich für
+  Enum-Typen.
+|===
+
+`@atmina/linting` wurde im Mai 2026 als interner Workspace `@kommunal/linting`
+unter `web/packages/linting` übernommen und ist somit keine externe
+Abhängigkeit mehr.
+
+Verbreitung im Code:
+
+* `@atmina/formbuilder` wird in 36 Dateien unter `web/bereich-a/src` importiert
+  (Formularfelder, Antrags-Flows, Dialoge).
+* `@atmina/local-typescript-operations` und `@atmina/only-enum-types` werden
+  ausschließlich in `web/bereich-a/codegen.ts` referenziert.
+
+====== Flutter-Forks und Git-Abhängigkeiten (`app/pubspec.yaml`)
+
+|===
+| Paket | Quelle | Eingebunden als | Zweck
+
+| `maps_launcher`
+| `https://github.com/pikaju/flutter-maps-launcher.git` (Branch `master`)
+| Direkte Abhängigkeit
+| Öffnet die plattformeigene Karten-App. Wird in `app/lib/components/detail_page.dart`
+  verwendet.
+
+| `flutter_compass`
+| `https://github.com/AlceoMazza/flutter_compass` (Branch `master`)
+| `dependency_overrides` (transitiv)
+| Kompass-Sensor. Override eines Forks von `hemanthrajv/flutter_compass`.
+
+| `flutter_keyboard_visibility`
+| `https://github.com/MisterJimson/flutter_keyboard_visibility` (Commit `b136e23`)
+| `dependency_overrides` (transitiv)
+| Erkennt das Einblenden der Bildschirmtastatur. Override gegen den
+  AGP-8-kompatiblen Commit, bis ein vollständiges Update der zugehörigen
+  Abhängigkeitskette erfolgt.
+|===
+
+====== Backend (.NET) und sonstige Quellen
+
+* `backend/API/API.csproj` und `backend/UnitTests/UnitTests.csproj` enthalten
+  ausschließlich Pakete aus dem öffentlichen NuGet-Register. Es ist keine
+  `NuGet.Config` mit privaten Quellen hinterlegt.
+* Es existieren keine Git-Submodule (kein `.gitmodules`).
+* Im Web-Workspace ist keine private npm-Registry konfiguriert (`web/.npmrc`).
+
+===== Risikobewertung
+
+====== Atmina-Pakete
+
+Alle vier Pakete liegen als öffentliche Repositories auf GitHub und stehen
+unter der MIT-Lizenz. Sie werden weiterhin auf npm veröffentlicht.
+
+|===
+| Paket | Repository | Letzter Push | Lizenz | Zugang | Risiko
+
+| `@atmina/formbuilder`
+| `github.com/atmina/formbuilder`
+| 2025-10-09
+| MIT
+| Lesend, öffentlich
+| Gering. Aktive Pflege durch Atmina, jüngste Veröffentlichung im Oktober 2025.
+
+| `@atmina/local-typescript-operations`
+| `github.com/ATMINA/graphql-codegen-plugins`
+| 2024-02-29
+| MIT
+| Lesend, öffentlich
+| Mittel. Letzte Veröffentlichung Anfang 2024, aber Codegen-Pipelines sind
+  versionsstabil und kein akuter Update-Druck zu erkennen.
+
+| `@atmina/only-enum-types`
+| `github.com/ATMINA/graphql-codegen-plugins`
+| 2024-02-29
+| MIT
+| Lesend, öffentlich
+| Mittel. Gleiche Lage wie `local-typescript-operations`.
+|===
+
+Da alle Repositories öffentlich und MIT-lizenziert sind, kann der Quellcode
+auch im Falle eines Wegfalls der Pflege durch Atmina übernommen und im eigenen
+Repository weitergeführt werden. Ein Entzug des Zugriffs ist bei einer
+öffentlichen MIT-Quelle praktisch ausgeschlossen.
+
+====== Flutter-Forks
+
+|===
+| Paket | Repository | Letzter Push | Lizenz | Risiko
+
+| `maps_launcher`
+| `github.com/pikaju/flutter-maps-launcher` (kanonisches Repository des Autors)
+| 2024-12-27
+| MIT
+| Mittel. Privatkonto des Autors. Bei Inaktivität oder Sperrung wäre die
+  Quelle nicht mehr erreichbar. Branch `master` ist nicht auf einen Commit
+  gepinnt.
+
+| `flutter_compass`
+| `github.com/AlceoMazza/flutter_compass` (Fork von `hemanthrajv/flutter_compass`)
+| 2024-08-09
+| MIT
+| Hoch. Privatkonto, Branch `master` ohne Commit-Pin. Ein Force-Push würde
+  den Build sofort verändern oder brechen.
+
+| `flutter_keyboard_visibility`
+| `github.com/MisterJimson/flutter_keyboard_visibility` (Commit-gepinnt)
+| 2024-08-13
+| MIT
+| Gering. Da auf einen festen Commit gepinnt, wirkt sich ein Force-Push
+  oder eine Repo-Löschung erst beim nächsten Auflösen der Abhängigkeiten
+  aus, lässt sich aber jederzeit über den Lockfile rekonstruieren.
+|===
+
+===== Aufwand einer Ablösung
+
+====== Strategie für Atmina-Pakete: Vendoring nach `web/common`
+
+Da alle vier Pakete unter der MIT-Lizenz stehen, ist die geplante Vorgehensweise
+für die Ablösung das *Vendoring* der Quellen in den eigenen Workspace
+`web/common`:
+
+. Quellcode aus dem jeweiligen GitHub-Repository unter Beibehaltung der
+  Lizenz- und Urheberrechtshinweise nach `web/common` übernehmen.
+. Die bestehenden Importe in `bereich-a`, `bereich-b` und `e2e` von
+  `@atmina/<paket>` auf den lokalen Pfad in `web/common` umstellen.
+. Externe Abhängigkeit aus den `package.json`-Dateien entfernen.
+. Anschließend kann das Paket eigenständig weiterentwickelt werden, etwa
+  durch Erweiterungen, Anpassungen oder den Wegfall nicht benötigter Teile.
+
+Damit liegt der Quellcode dauerhaft im eigenen Repository. Externe Pflege ist
+weder erforderlich noch ein Risiko.
+
+Aufwandsabschätzung:
+
+|===
+| Paket | Aufwand | Begründung
+
+| `@atmina/formbuilder`
+| Hoch
+| 36 Importstellen, eigene Typhilfsmittel. Keine API-Änderungen notwendig,
+  daher kein semantisches Refactoring. Hauptaufwand liegt in Tests und der
+  einmaligen Codeübernahme.
+
+| `@atmina/local-typescript-operations`
+| Niedrig
+| Eine Konfigurationsdatei (`codegen.ts`). Generierter Code wird einmalig
+  neu erzeugt.
+
+| `@atmina/only-enum-types`
+| Niedrig
+| Wie `local-typescript-operations`.
+|===
+
+====== Strategie für Flutter-Forks
+
+|===
+| Paket | Empfohlene Strategie | Aufwand
+
+| `maps_launcher`
+| Auf `pub.dev`-Version `maps_launcher` umstellen, sofern die dort
+  veröffentlichte Version den benötigten Funktionsumfang abdeckt. Andernfalls
+  Code in einer eigenen Datei in der App vendoren. Es gibt nur eine Importstelle.
+| Niedrig
+
+| `flutter_compass`
+| Override entfernen und stattdessen die offizielle `flutter_compass`-Version
+  von `pub.dev` verwenden. Falls weiterhin ein Patch nötig ist, einen festen
+  Commit-Hash pinnen oder den benötigten Patch in ein eigenes Repository
+  übernehmen.
+| Niedrig bis Mittel
+
+| `flutter_keyboard_visibility`
+| Override entfernen, sobald die zugehörige Abhängigkeitskette
+  (Android Gradle Plugin 8) auf den aktuellen Stand gebracht wurde. Bis
+  dahin: belassen, Pin auf Commit-Hash bleibt sicher.
+| Mittel
+|===
+
+===== Priorisierung
+
+====== Kurzfristig
+
+* `flutter_compass`-Override pinnen oder ablösen. Das Override ohne
+  Commit-Pin auf einem Privatkonto ist die einzige Abhängigkeit mit einem
+  unmittelbar wirksamen Risiko.
+
+====== Mittelfristig
+
+* Vendoring der verbleibenden Atmina-Pakete (`local-typescript-operations`,
+  `only-enum-types`) nach `web/common`. Geringer Aufwand, hoher Effekt auf
+  die Unabhängigkeit von Atmina.
+* Vendoring von `@atmina/formbuilder` nach `web/common`. Höherer Aufwand,
+  aber identische Strategie.
+* Umstellung von `maps_launcher` auf die offizielle pub.dev-Version oder
+  Vendoring in die App.
+
+====== Langfristig oder beobachtend
+
+* `flutter_keyboard_visibility`. Auflösung im Rahmen des AGP-8-Updates.
+* Kontinuierliche Beobachtung der Atmina-Repositories. Solange die Pakete
+  öffentlich und MIT-lizenziert bleiben, besteht kein akuter Handlungsdruck,
+  selbst wenn die Veröffentlichung auf npm endet.
+
+===== Backend
+
+Im Backend (.NET) liegen keine externen Repository-Abhängigkeiten vor, die
+gesondert betrachtet werden müssten. Alle Pakete werden über `nuget.org` bezogen.

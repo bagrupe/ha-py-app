@@ -1,0 +1,107 @@
+query SpecialProzess($kommuneId: UUID!, $tag: String!) {
+  kommune(kommuneId: $kommuneId) {
+    prozessByTag(tag: $tag) {
+      ...Prozess
+    }
+  }
+}
+
+fragment ProzessOwnData on Prozess {
+  id
+  name
+  tags {
+    id
+    tag
+  }
+}
+
+fragment ProzessVersionOwnData on ProzessVersion {
+  id
+  publishedAt
+}
+
+fragment Prozess on Prozess {
+  ...ProzessOwnData
+  kommune {
+    ...KommuneCrypto
+  }
+  currentVersion {
+    ...ProzessVersion
+  }
+}
+
+fragment ProzessVersion on ProzessVersion {
+  ...ProzessVersionOwnData
+  ersteSchritte {
+    ...Schritt
+  }
+  prozess {
+    ...ProzessOwnData
+  }
+}
+
+fragment Schritt on Schritt {
+  id
+  __typename
+  erledigungDurchBuerger
+  titel
+  anweisung
+  slots {
+    name
+    encrypted
+    valueType
+    optional
+  }
+  informationstext
+
+  verbindungen {
+    id
+    name
+    istRelevant
+  }
+
+  ... on FormularSchritt {
+    felder {
+      ...FormularFeld
+    }
+  }
+  ... on BezahlenSchritt {
+    betrag
+  }
+}
+
+fragment FormularFeld on FormularFeld {
+  angezeigterName
+  slotName
+  pflichtfeld
+  anweisung
+  inhaltsTag
+  istRelevant
+  ... on StringFormularFeld {
+    multiline
+    stringOptions: options {
+      key
+      value
+      istRelevant
+    }
+    durchsuchbar
+    validationType
+  }
+
+  ... on UploadFormularFeld {
+    brauchtFreigabe
+    multi
+    document
+  }
+
+  ... on CheckboxListFormularFeld {
+    checkOptions: options {
+      key
+      label
+      defaultChecked
+    }
+  }
+  ... on AnzeigeTextBlockFeld {
+    text
+  }
+}

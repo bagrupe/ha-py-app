@@ -1,0 +1,81 @@
+export const DEFAULT_KARTENLIZENZEN = {
+  root: {
+    type: 'root',
+    children: [
+      {
+        type: 'paragraph',
+        children: [
+          {
+            type: 'text',
+            detail: 0,
+            format: 0,
+            mode: 'normal',
+            style: '',
+            text: '© GeoBasis-DE / ',
+            version: 1,
+          },
+          {
+            type: 'link',
+            children: [
+              {
+                type: 'text',
+                detail: 0,
+                format: 0,
+                mode: 'normal',
+                style: '',
+                text: 'BKG',
+                version: 1,
+              },
+            ],
+            direction: 'ltr',
+            fields: { linkType: 'custom', url: 'https://www.bkg.bund.de/' },
+            format: '',
+            indent: 0,
+            version: 2,
+          },
+          {
+            type: 'text',
+            detail: 0,
+            format: 0,
+            mode: 'normal',
+            style: '',
+            text: ' (2024) ',
+            version: 1,
+          },
+          {
+            type: 'link',
+            children: [
+              {
+                type: 'text',
+                detail: 0,
+                format: 0,
+                mode: 'normal',
+                style: '',
+                text: 'CC BY 4.0',
+                version: 1,
+              },
+            ],
+            direction: 'ltr',
+            fields: {
+              linkType: 'custom',
+              url: 'https://creativecommons.org/licenses/by/4.0/',
+            },
+            format: '',
+            indent: 0,
+            version: 2,
+          },
+        ],
+        direction: 'ltr',
+        format: '',
+        indent: 0,
+        textFormat: 0,
+        textStyle: '',
+        version: 1,
+      },
+    ],
+    direction: 'ltr',
+    format: '',
+    indent: 0,
+    version: 1,
+  },
+}

@@ -1,0 +1,33 @@
+##############################################
+# This file is unused in the original deployment pipeline
+##############################################
+
+.staging-job:
+  rules:
+    - if: $CI_COMMIT_TAG
+      when: never
+    - if: $CI_COMMIT_BRANCH == "main"
+      when: manual
+    - when: never
+
+release:staging:
+  extends: [.release-web, .staging-job]
+  tags:
+    - staging
+  variables:
+    COMPOSE_INFIX: staging
+  before_script:
+    - cp $STAGING_ENV ~/deployments/kommunalapp/staging.env
+  environment:
+    name: staging
+    url: https://internal.example.invalid/
+
+release:app-android:staging:
+  extends: [.release-android, .staging-job]
+  script:
+    - fastlane staging
+
+release:app-ios:staging:
+  extends: [.release-ios, .staging-job]
+  script:
+    - fastlane staging

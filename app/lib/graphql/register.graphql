@@ -1,0 +1,5 @@
+mutation WeakRegister($input: RegisterBuergerWeakInput!) {
+  registerBuergerWeak(input: $input) {
+    buergerId
+  }
+}

@@ -1,0 +1,32 @@
+==== Endpunkte
+
+Die Kommunal-App stellt verschiedene API-Endpunkte bereit, die sich auf die
+beiden Hauptbereiche des Systems verteilen.
+
+===== GraphQL (Bereich-A & Bereich-B)
+
+Das zentrale (Bereich-A) Backend stellt eine GraphQL-API bereit. Die GraphQL-API ist zwischen Bereich-A und Bereich-B (Payload CMS) per Schema-Stitching verbunden.
+Dadurch stehen sowohl die Funktionen des Backends als auch die Inhalte des Payload CMS unter einer einheitlichen API zur Verfügung.
+
+* **Lokale Entwicklung:**
+  In der Entwicklungsumgebung kann das GraphQL-Schema direkt über den GraphQL Playground von HotChocolate unter http://localhost:5000/graphql eingesehen und mit Tools wie Nitro interaktiv erkundet werden.
+
+* **Schema-Dokumentation:**
+  Das jeweils aktuell generierte Schema liegt zusätzlich als Datei unter `web/bereich-a/schema.graphql`.
+
+Weitere Details zur Architektur und technischen Umsetzung finden sich in den Kapiteln <<architektur.adoc#,Architektur>> und <<backend.adoc#,Backend>>.
+
+===== REST (Bereich-B)
+
+Bereich-B (Payload CMS) stellt zusätzlich zur GraphQL-Schnittstelle eine eigene REST-API bereit.
+
+* **Swagger-Dokumentation:**
+  Die Swagger Dokumentation wird im Bereich-A als Endpunkt bereitgestellt. Die
+  dafür generierte Schema-Datei liegt in
+  `web/bereich-a/src/routes/api-docs/swagger.json`.
+
+Weitere Informationen zum Payload CMS und seinen Schnittstellen finden sich im Kapitel <<architektur.adoc#,Architektur>>.
+
+===== Zugriff der App auf Bereich-A und Bereich-B
+
+Die App greift ausschließlich über das zentrale Backend (Bereich-A) auf die APIs zu. Ein direkter Zugriff auf das Payload CMS erfolgt nicht.

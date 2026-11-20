@@ -1,0 +1,175 @@
+===== News-Artikel, Integrationen, Veranstaltungmedien
+Die Kommunal-App zeigt News aus den unterschiedlichen Gemeinden an - dies ist die
+Collection, aus der die App die News bezieht.
+
+Die Artikel selbst werden wiederum aus unterschiedlichen Quellen -
+<<integrationen, Integrationen>> genannt - importiert und in der Inhaltspflege
+für das Ausspielen zur App abgelegt.
+
+Die Integrationen sind dabei selbst eine Collection, die die eigentlichen
+Quellen, aus denen die News importiert werden, beherbergen. Um die News zu
+importieren schaut ein automatischer Job regelmäßig in die Collection
+`Integrationen` und fragt dort alle Einträge ab. Anschließend fragt der Job
+sämtliche News in den gefundenen Quellen ab und legt sie in der News-Collection
+ab. Medien, wie Bilder, die in den News enthalten sind, werden in der Collection
+`Veranstaltungsmedien` abgelegt - das ist einfach ein Speicherort für Medien.
+Die App selbst fragt schließlich die Collection `News-Artikel` ab, um die News
+in der App anzuzeigen.
+
+Aktuell werden zwei Arten von `Integrationen` für den Import von News
+unterstützt: `RSS-Feeds` und `NOLIS`. Diese werden in dem Abschnitt
+<<integrationen, Integrationen>> genauer beschrieben.
+
+Natürlich ist auch bei den `News-Artikeln` das händische Anlegen neuer Einträge
+möglich. Dazu wird, wie [oben](#handisch) bereits beschrieben, der entsprechende
+*Create new* Button verwendet.
+
+
+===== Wettermesspunkte
+Auf der Start-Seite zeigt die Kommunal-App aktuelle Wetterinformationen für die
+eigene Gemeinde an. Diese Informationen stammen aus der Collection
+`Wettermesspunkte`.
+
+Die Funktionsweise der Wettermesspunkte ist wie folgt:
+
+- Ein Wettermesspunkt besteht aus einem *Ortsnamen* und den Koordinaten auf der
+Karte, an denen das Wetter genommen werden soll.
+- Nachdem ein Messpunkt angelegt, d.h. ein neuer Eintrag der Collection
+hinzugefügt wurde, importiert die Inhaltspflege die aktuellen Wetterdaten von
+*heute*, *morgen* und *übermorgen* und speichert sie zu dem Messpunkt
+
+Die Wetterdaten werden über die https://openweathermap.org[OpenWeatherMap]
+importiert.
+
+===== Veranstaltungen
+Für Veranstaltungen gibt es gleich drei Collections in der Inhaltspflege:
+
+. Veranstaltungen
+. Veranstaltungskategorien
+. Veranstaltungsquellen
+
+Die App selbst ruft Veranstaltungen aus der gleichnamigen Collection ab. Die
+Einträge in dieser Collection werden wiederum aus `Veranstaltungsquellen`
+importiert. Aktuell sind dies `Destination One` und `Niedersachsen Hub`.
+
+Die Veranstaltungen werden durch einen automatischen Import-Job aus diesen
+Quellen importiert und als Einträge der Collection `Veranstaltungen`
+hinzugefügt.. Dafür verwenden sie aus den unterschiedlichen Gemeinden, die in
+der Inhaltspflege `Untereinheiten` genannt werden, den *amtlichen
+Regionalschlüssel*, um die jeweilige Gemeinde zu identifizieren.
+
+Über den eigentlichen Inhalt der jeweiligen Veranstaltung hinaus haben
+Veranstaltungen Kategorien. Diese werden beim Import ebenfalls abgefragt und als
+Einträge in der Collection `Veranstaltungskategorien` abgelegt.
+
+Medien, wie Bilder, die bei Veranstaltungen importiert werden, werden in der
+Collection `Veranstaltungsmedien` gespeichert.
+
+===== Points of Interest (POI)
+Points of Interest, kurz POIs, sind Orte von Interesse. Dies können Ärzte,
+Bibliothek, aber auch Sensoren sein.
+
+POIs werden in der gleichnamigen Collection abgelegt und sind in zwei Stufen
+kategorisiert: `POI-Kategorie` und `POI-Superkategorie`. Das hat den
+Hintergrund, dass in der App selbst die POIs gefiltert werden können - die
+Superkategorie entspricht dem Bereich, zum Beispiel *Gesundheit* und die
+Kategorie der konkreten Ausprägung, bspw. *Ärzte* oder *Pflegeheime*.
+
+POIs werden aktuell nicht importiert, sondern händisch oder per
+REST-Schnittstelle angelegt. Die jeweiligen Kategorien und Super-Kategorien
+müssen darüberhinaus getrennt angelegt werden.
+
+[anwender_aufrufe]
+===== Aufrufe
+Aufrufe sind Hilfeaufrufe und Mitmach-Aktionen von Vereinen, Institutionen und
+ähnlichen Akteuren, die primär auf der Infostele und ggf. zukünftig in der
+mobilen Kommunal-App angezeigt werden. Sie werden pro Kommune gepflegt und sind
+auf die jeweilige Kommune des Pflegers beschränkt.
+
+====== Anlegen eines Aufrufs
+Über den Menüpunkt `Aufrufe` in der Inhaltspflege können neue Einträge
+hinzugefügt, bestehende bearbeitet oder gelöscht werden. Der Menüpunkt ist nur
+für Nutzer sichtbar, die die Funktionsberechtigung *Aufrufe* besitzen. Die
+Vergabe dieser Berechtigung erfolgt im Rechtebaum in Bereich A.
+
+Jeder Aufruf hat folgende Felder:
+
+- *Titel* (Pflichtfeld): Kurzer, prägnanter Titel.
+- *Beschreibung* (Pflichtfeld): Rich-Text-Beschreibung des Aufrufs.
+- *Aufrufende* (Pflichtfeld): Name des Vereins, der Institution oder der
+  aufrufenden Partei.
+- *Startdatum / Enddatum* (optional): Zeitraum, in dem der Aufruf öffentlich
+  angezeigt werden soll. Liegt der aktuelle Tag außerhalb dieses Zeitraums,
+  wird der Aufruf nicht an anonyme Abrufer (Stele, App) ausgeliefert.
+- *Bild* (optional): Entweder ein hochgeladenes Bild (aus `Aufrufmedien`) oder
+  ein externer Bild-Link. Fehlt das Bild, wird automatisch das *Fallback-Bild*
+  der Kommune verwendet (Design-Tab der Collection `Kommunen`).
+- *QR-Code* (optional): Auswahl zwischen `Kein QR-Code`, `URL`,
+  `Kontaktinformationen` (vCard) oder `Koordinate` (geo:-URI). Die jeweiligen
+  Eingabefelder erscheinen dynamisch basierend auf der Auswahl. Eine Vorschau
+  des QR-Codes wird direkt im Editor angezeigt; der finale QR-Code wird
+  serverseitig als SVG unter `/cms/api/aufrufe/{id}/qr.svg` bereitgestellt.
+- *Kommune*: Automatisch vorausgefüllt mit der Kommune des pflegenden Nutzers.
+  Nur Super-Admins können die Kommune ändern.
+
+====== Ausspielung
+Aufrufe werden der Stele und potenziellen App-Konsumenten über die GraphQL-API
+bereitgestellt. Der Konsument (z.B. die Stele) ist dafür verantwortlich, die
+Anfrage mit einem `where.kommune`-Filter auf seine eigene Kommune einzuschränken
+-- analog zur bestehenden Veranstaltungsabfrage. Ohne diesen Filter liefert der
+Server Einträge aller Kommunen, eingeschränkt auf das aktuelle Datumsfenster.
+
+[anwender_sensoren]
+===== Sensoren
+In der Kommunal-App werden Smart City Sensoren angezeigt. Diese werden, wie alle
+anderen Inhalte auch, aus der Inhaltspflege abgerufen.
+
+Im Unterschied zu anderen Collections sind die Sensoren an eine technische
+Schnittstelle gebunden, aus der die konkreten Informationen der Sensoren
+abgerufen werden. Das bedeutet, dass Sensoren, die in der Inhaltspflege
+hinzugefügt werden, in der Sensorenschnittstelle bekannt sein müssen, damit sie
+erfolgreich importiert werden können.
+
+====== Hintergrund Sensoranbindung
+Sensoren sind im weitesten Sinne Geräte, die Informationen über die Umwelt
+messen, zum Beispiel den Pegelstand eines Gewässers oder die Wetterbedingungen.
+Diese Sensoren haben immer eine Position, d.h. einen Ort, an dem sie sich
+befinden, angegeben in Längen- und Breitengrad, und eine Menge von Messwerten,
+wie die Temperatur oder die Luftfeuchtigkeit.
+
+Solche Sensoren sind üblicherweise nicht direkt mit einem System verbunden, wie
+zum Beispiel die Kommunal-App, sondern mit einem Server, der die Messwerte
+entgegennimmt und in einem geeigneten (technischen) Format und Protokoll den
+eigentlichen Anwendungen zur Verfügung stellt. So auch in der Kommunal-App.
+
+Die Kommunal-App hat eine Verbindung zu einem Server, ganz konkret einer `InfluxDB`
+- eine Datenbank für Zeitreihenmessungen - in der die Daten der Sensoren des
+Landkreises Hameln-Pyrmont gesammelt werden. In diesem Server sind die Sensoren
+bekannt.
+
+Möchte man nun, dass die Messwerte der Sensoren auch in der Kommunal-App verfügbar
+sind, müssen sie über die Inhaltspflege in der Collection `Sensoren` hinzugefügt
+werden. Das Hinzufügen der Sensoren besteht nun im wesentlichen daraus den in
+der `InfluxDB` hinterlegten *Namen* jedes Sensors hinzuzufügen. Auf diese Arte
+kann die Inhaltspflege die Daten der Sensoren, basierend auf dem Namen, aus der
+`InfluxDB` importieren.
+
+====== Sensorarten
+Die Messwerte von Sensoren haben keine inhärente Bedeutung. Beispiel: ein Sensor
+sendet den Messwert `tmp = 17.3`. Aus diesem Wert kann eine Anwendung, zum
+Beispiel die Kommunal-App - gemeint ist hier die mobile App - nicht entscheiden,
+worum es sich dabei handelt.
+
+Aus diesem Grund gibt es die Collection `Sensorarten`. Die hier angegebenen
+Einträge repräsentieren gewissermaßen *Bedeutungen*, die den einzelnen Messungen
+von Sensoren hinzugefügt werden können. Im Beispiel oben könnte man der Messung
+`tmp = 17.3` die Sensorart *Temperatur (C)* hinzufügen. Darüber weiss die mobile
+App, dass es sich um eine Temperatur handelt und dass es erlaubt ist diese Daten
+als Diagramm anzuzeigen.
+
+[NOTE]
+.Kurz und knapp
+====
+Messwerte von Sensoren, die keine Sensorart hinterlegt haben, werden von der
+mobilen App nicht angezeigt!
+====

@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE ikiss SYSTEM "https://www.hameln-pyrmont.de/ikiss.dtd">
+<ikiss>
+    <result>
+            <tevents>
+                <object_full_id>3767.3995.1</object_full_id>
+                <server_id>3767</server_id>
+                <object_id>3995</object_id>
+                <language>de</language>
+                <organizer_server_id>0</organizer_server_id>
+                <organizer_object_id>0</organizer_object_id>
+                <organizer_language></organizer_language>
+                <userfieldtempl_svr_id>0</userfieldtempl_svr_id>
+                <userfieldtempl_id>0</userfieldtempl_id>
+                <location_id>0.0</location_id>
+                <datetime_from>2026-10-23 16:00:00</datetime_from>
+                <datetime_to>2026-10-23 18:00:00</datetime_to>
+                <title><![CDATA[Raus aus der Erschöpfung - Besser schlafen in den Wechseljahren]]></title>
+                <data_short_content><![CDATA[Besser schlafen in den Wechseljahren.]]></data_short_content>
+                <data_content><![CDATA[<p>Raus aus der Ersch&ouml;pfung - Besser schlafen in den Wechseljahren (Erika Musterfrau)&nbsp;</p>
+<p>Fr., 23.10.2026 | 16.00 Uhr</p>
+<p>vhs Haus, Kompetenzschmiede, Raum 008</p>
+<p>Kursnummer P303302HM&nbsp;</p>
+<p><u>Anmeldung</u>: &Uuml;ber die die jweiligen QR-Codes oder per Mail an <ikiss i_lt="contact-eca83f38@example.com" i_ma="contact-eca83f38@example.com" i_tp="3" />&nbsp;</p>
+<ikiss i_mod="med" i_tv="2561.50.1" i_id="3767.3497.1" i_sort="0" i_sm="0" i_la="1" i_nonpar="0" i_tp="22" />
+<p></p>]]></data_content>
+                <location>vhs-Haus, Kompetenzschmiede, Raum 008</location>
+                <region></region>
+                <priceinfo>Kostenfrei</priceinfo>
+                <price>0.00</price>
+                <contact>Anmeldung über die jeweiligen QR-Codes oder per Mail an
+contact-eca83f38@example.com</contact>
+                <fulltext_index_off>false</fulltext_index_off>
+                <pattern>false</pattern>
+                <update_date>2026-09-22 16:23:43</update_date>
+                <create_date>2026-09-22 15:11:19</create_date>
+                <properties>0</properties>
+                <release>true</release>
+                <area>internet</area>
+                <map_id>0</map_id>
+                <map_x>0</map_x>
+                <map_y>0</map_y>
+                <image>/media/custom/3767_3498_1_m.PNG</image>
+                <tUserFields>
+                </tUserFields>
+                <booking></booking>
+                <ResultPic.data></ResultPic.data>
+                <categories></categories>
+                <synonyms></synonyms>
+                <tusers_list>
+                    <tusers>
+                        <user_id>3</user_id>
+                        <nickname>Administrator</nickname>
+                    </tusers>
+                </tusers_list>
+                <remote_identifier_list></remote_identifier_list>
+                <RefKey></RefKey>
+                <timer></timer>
+            </tevents>
+    </result>
+</ikiss>

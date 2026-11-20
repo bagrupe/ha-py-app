@@ -1,0 +1,186 @@
+include:
+  - local: "ci/template.gitlab-ci.yml"
+
+################################################
+# LINTING STAGE
+################################################
+
+.audit-dotnet:
+  stage: lint
+  image: mcr.microsoft.com/dotnet/sdk:8.0
+  allow_failure: true
+  needs: []
+  script:
+    - cd backend
+    - NuGetAudit=false dotnet restore $AUDIT_PROJECT
+    - NuGetAudit=false dotnet list $AUDIT_PROJECT package --vulnerable --include-transitive --format json > $AUDIT_REPORT
+    - cat $AUDIT_REPORT
+  artifacts:
+    when: always
+    expire_in: 1 week
+    paths:
+      - backend/$AUDIT_REPORT
+
+audit:backend:
+  extends: [.audit-dotnet]
+  variables:
+    AUDIT_PROJECT: API/API.csproj
+    AUDIT_REPORT: backend-audit-api.json
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "schedule" && $DEPENDENCY_AUDIT == "TRUE"
+    - if: $TARGET_ENV == "feature" || $TARGET_ENV == "development"
+      changes:
+        - "backend/API/**/*"
+        - "ci/components/backend.gitlab-ci.yml"
+
+audit:backend:dev:
+  extends: [.audit-dotnet]
+  variables:
+    AUDIT_PROJECT: UnitTests/UnitTests.csproj
+    AUDIT_REPORT: backend-audit-unittests.json
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "schedule" && $DEPENDENCY_AUDIT == "TRUE"
+    - if: $TARGET_ENV == "feature" || $TARGET_ENV == "development"
+      changes:
+        - "backend/UnitTests/**/*"
+        - "ci/components/backend.gitlab-ci.yml"
+
+lint:backend:
+  needs: []
+  stage: lint
+  image: mcr.microsoft.com/dotnet/sdk:8.0
+  interruptible: true
+  script:
+    - cd backend
+    - dotnet format --verify-no-changes
+  rules:
+    - if: $TARGET_ENV == "feature"
+      changes:
+        - "backend/**/*"
+
+################################################
+# TEST STAGE
+################################################
+
+test:backend-unit-tests:
+  services:
+    - name: postgres:15-alpine
+      alias: postgres
+    - name: rustfs/rustfs:1.0.0
+      alias: object-storage
+  variables:
+    TEST_DB_CONNECTION: "Server=postgres;Port=5432;Database=domain;UserId=admin;Password=password;Enlist=false"
+    POSTGRES_DB: db
+    POSTGRES_USER: admin
+    POSTGRES_PASSWORD: password
+    RUSTFS_ACCESS_KEY: hameln-test
+    RUSTFS_SECRET_KEY: hameln-test-secret
+    TEST_OBJECT_STORAGE_URL: http://object-storage:9000
+  extends: [.csharp-test]
+  needs: []
+  environment:
+    name: $TARGET_ENV
+  script:
+    # TODO: Configure FIREBASE_CONFIG and uncomment these steps for Firebase Push notifications.
+    # - curl --silent "https://gitlab.com/gitlab-org/incubation-engineering/mobile-devops/download-secure-files/-/raw/main/installer" | bash
+    # - cp .secure_files/$FIREBASE_CONFIG backend/API/kommunalapp-service-account.json
+    - cd backend/UnitTests
+    - dotnet restore --packages /opt/caching/dotnet-packages
+    - SNAPSHOOTER_STRICT_MODE=on dotnet test --test-adapter-path:. --logger:"junit;LogFilePath=..\artifacts\{assembly}-test-result.xml;MethodFormat=Class;FailureBodyFormat=Verbose" --collect:"XPlat Code Coverage" --results-directory ../artifacts/cobertura  -- "DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.ExcludeByFile=**/Migrations/**/*.cs" --no-restore
+    - chmod +x ./print-dotnet-coverage.sh
+    - ./print-dotnet-coverage.sh ../artifacts/cobertura
+  coverage: /TOTAL_COVERAGE=(\d+.\d+)/
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "schedule"
+      when: never
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event" && $CI_DEFAULT_BRANCH == $CI_MERGE_REQUEST_TARGET_BRANCH_NAME
+      changes:
+        - "backend/**/*"
+    - !reference [.sonar-analysis-rules, rules]
+
+test:backend-no-pending-migrations:
+  extends: [.csharp-test]
+  needs: []
+  script:
+    - cd backend/API
+    - dotnet tool restore
+    - dotnet ef migrations has-pending-model-changes --context DomainContext
+    - dotnet ef migrations has-pending-model-changes --context API.Features.Aufbewahrung.Archive.ArchiveContext
+
+test:backend-schema-exports-current:
+  extends: [.csharp-test]
+  needs: []
+  script:
+    - cd backend/API
+    - dotnet run -- export-schema-only
+    - |
+      if git diff --exit-code; then
+        echo "✅ Generated files are up to date."
+      else
+        echo "❌ Generated files have changed. Please re-run graphql introspection before committing."
+        exit 1
+      fi
+
+################################################
+# BUILD STAGE
+################################################
+
+build:backend:
+  extends: [.dotnet-build]
+  environment:
+    name: $TARGET_ENV
+  script:
+    # TODO: Configure FIREBASE_CONFIG and uncomment these steps for Firebase Push notifications.
+    # - curl --silent "https://gitlab.com/gitlab-org/incubation-engineering/mobile-devops/download-secure-files/-/raw/main/installer" | bash
+    # - cp .secure_files/$FIREBASE_CONFIG API/kommunalapp-service-account.json
+    - restore_and_publish API/API.csproj
+  artifacts:
+    expire_in: 15 mins
+  rules:
+    - if: $TARGET_ENV == "feature"
+      changes:
+        - "backend/**/*"
+    - if: $CI_COMMIT_TAG =~ /^backend-.*$/ # Triggered on tag -> staging or production
+      when: on_success
+      variables:
+        NuGetAudit: "false"
+
+################################################
+# PACKAGE STAGE
+################################################
+
+package:backend:
+  stage: package
+  extends: [.package-template]
+  tags:
+    - docker-build-new
+  needs:
+    - job: build:backend
+      artifacts: true
+      optional: false
+  script:
+    - echo "Building version backend-${IMAGE_TAG#*-}"
+    - docker build -t $CI_REGISTRY_IMAGE/backend:backend-"${IMAGE_TAG#*-}" -f backend/Dockerfile backend
+  rules:
+    - if: $CI_COMMIT_TAG =~ /^backend-.*$/ # Triggered on tag -> staging or production
+      when: on_success
+    - if: $TARGET_ENV == "feature"
+      when: never
+
+
+push:backend:
+  stage: push
+  extends: [.push-template]
+  tags:
+    - docker-build-new
+  needs: ["package:backend"]
+  script:
+    - docker login -u "gitlab-ci-token" -p $CI_JOB_TOKEN $CI_REGISTRY
+    - echo "Push $CI_REGISTRY_IMAGE/backend:backend-"${IMAGE_TAG#*-}"  to registry"
+    - docker push $CI_REGISTRY_IMAGE/backend:backend-"${IMAGE_TAG#*-}"
+  rules:
+    - if: $CI_COMMIT_TAG =~ /^backend-.*$/ # Triggered on tag -> staging or production
+      when: on_success
+    - if: $TARGET_ENV == "feature"
+      when: never

@@ -1,0 +1,67 @@
+==== LageHelfer-Demomandant (KRL Weserbergland)
+
+Die vollständige Dokumentation (Englisch, Wiki-Navigation) liegt im Wiki: https://gitlab.ergosign-projects.com/hameln-pyrmont/kommunal-app/-/wikis/features/lagehelfer-seeding[Demo tenant seeding].
+
+Importformat: xref:entwickler/lagehelfer-importformat.adoc[LageHelfer-Importformat].
+
+Für Staging und Tests gibt es einen eigenen Mandanten für den LageHelfer: die
+_Kooperative Regionalleitstelle Weserbergland_ (KRL). Daten und Struktur kommen aus
+`seed.json` und `flaechen.geojson` (siehe Importformat-Doku).
+
+===== Aktivierung
+
+Das Seeding ist standardmäßig deaktiviert und unabhängig von `DataSeeder__Enabled`
+bzw. `ENABLE_DATASEEDER`. Für Staging setzt die CI/CD-Dateivariable `STAGING_ENV`
+(siehe xref:entwickler/ci-cd.adoc[CI/CD]) mindestens:
+
+[cols="30%,~"]
+|===
+| Variable
+| Wirkung
+
+| `DataSeeder__LageHelferEnabled=true`
+| Backend legt Kommune, Organisationseinheiten, Gebiete, Abteilungen an; Demo-Nutzer nur außerhalb Production.
+
+| `DataSeeder__LageHelferSeedPath`
+| Verzeichnis mit `seed.json` und `flaechen.geojson`. Auf Staging/PreProd/Prod: `/opt/lagehelfer-seed` (Volume aus Package Registry, wird beim Deploy gesetzt). Lokal: z. B. `Seeders/LageHelfer/Data/example`.
+
+| `DataSeeder__LageHelferKeyEncryptionKey`
+| Base64-Schlüssel für den privaten Kommunen-Schlüssel.
+
+| `ENABLE_LAGEHELFER_SEED=true`
+| Inhaltspflege legt die Kommune an (`LAGEHELFER_KOMMUNE_ID` / `LAGEHELFER_KOMMUNE_NAME`).
+
+|===
+
+Das Seeding ist idempotent (feste IDs aus Schlüsseln) und läuft bei jedem Start.
+Vor dem ersten Lauf auf Staging sollte ein Snapshot erstellt werden.
+
+===== Demo-Logins
+
+Im KRL-`demo`-Abschnitt der `seed.json` (Passwort `123456`, nicht in Production):
+
+[cols="~,~"]
+|===
+| Nutzer
+| Rolle
+
+| `superadmin-krl@example.com`
+| Superadmin
+
+| `admin-krl@example.com`
+| Admin der Landkreise
+
+| `einsatzleitung-hameln@example.com`
+| Einsatzleitung Hameln-Pyrmont
+
+| `einsatzleitung-holzminden@example.com`
+| Einsatzleitung Holzminden
+|===
+
+===== Offene Punkte
+
+* Modell für Zuständigkeiten je Gebiet (inkl. eines Bereichs ohne Zuständigkeit)
+* Menürechte für LageHelfer im Backoffice
+* Teil 2: Daten aus dem Repository in die Package Registry (siehe Plan #513)
+
+Siehe `backend/API/Seeders/LageHelfer/`.

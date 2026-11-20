@@ -1,0 +1,158 @@
+@using System.Drawing
+@using System.Text.Json
+@using API.Features.Auth
+@using API.Features.PdfGenerator
+@using API.Features.Prozess
+@inject PdfImageService PdfImages
+
+<html>
+
+<head>
+  <meta charset="utf-8" />
+  <link rel="stylesheet" href="output.css" />
+  <style>
+    body {
+      --color-primary:
+        @GetColor()
+      ;
+    }
+  </style>
+</head>
+
+<body>
+  @foreach (var bearbeitung in Bearbeitungen)
+  {
+    @if (bearbeitung.Schritt is not (FormularSchritt or BezahlenSchritt))
+    {
+      continue;
+    }
+
+    <div class="border border-gray-300 rounded-xl mb-8 overflow-hidden [break-inside:avoid]">
+      <div class="flex border-b border-b-gray-300 bg-gray-50">
+        <div class="text-xl font-bold px-4 py-2">@bearbeitung.Schritt.Titel</div>
+      </div>
+
+
+      @if (bearbeitung.Schritt is FormularSchritt { Felder.Count: > 0 } formularSchritt)
+      {
+        <div class="flex flex-wrap gap-8 px-4 py-2">
+          @foreach (var feld in formularSchritt.Felder)
+          {
+            <div class="@(MapImagesBySlotName.ContainsKey(feld.SlotName) ? "basis-full" : null)">
+              @if (bearbeitung.SlotValues.FirstOrDefault(sv => sv.SlotName == feld.SlotName) is { } slotValue)
+              {
+                <div class="font-bold">@feld.AngezeigterName
+                  @if (@feld.Pflichtfeld)
+                  {
+                    <span>*</span>
+                  }
+                </div>
+                @switch (slotValue)
+                {
+                  case PlainSlotValue plainSlotValue:
+                    @switch (feld)
+                    {
+                      case UploadFormularFeld:
+                        @foreach (var file in plainSlotValue.Value.EnumerateArray())
+                        {
+                          @if (PdfImages.ToInlineDataUri(file.ToString()) is { } bildDataUri)
+                          {
+                            <img src="@bildDataUri" class="max-w-40 max-h-40 object-contain" alt="" />
+                          }
+                          else
+                          {
+                            <div class="italic">Datei im E-Mail-Anhang</div>
+                          }
+                        }
+                        break;
+
+                      case CheckboxListFormularFeld checkboxListFormularFeld:
+                        var checkedKeys = plainSlotValue.Value.ToString().Split(",");
+                        @foreach (var option in checkboxListFormularFeld.Options)
+                        {
+                          <div class="flex gap-2 items-center">
+                            <input name=@option.Key class="accent-primary rounded-sm size-4" type="checkbox"
+                              checked=@checkedKeys.Contains(option.Key) />
+                            <label for=@option.Key>@option.Label</label>
+                          </div>
+                        }
+                        break;
+
+                      case SignatureFormularFeld:
+                        @if (PdfImages.ToInlineDataUri(plainSlotValue.Value.ToString()) is { } unterschriftDataUri)
+                        {
+                          <img src="@unterschriftDataUri" class="max-w-40 max-h-40 object-contain" alt="" />
+                        }
+                        break;
+
+                      case LocationFormularFeld locationFormularFeld:
+                        var hasAddress = @plainSlotValue.Value.TryGetProperty("addressString", out JsonElement addressString);
+                        var hasCoordinates = @plainSlotValue.Value.TryGetProperty("coordinates", out JsonElement coordinates);
+                        bool renderAddress = hasAddress && addressString.ValueKind != JsonValueKind.Null && addressString.ValueKind !=
+                        JsonValueKind.Undefined;
+                        bool renderCoordinates = hasCoordinates && coordinates.ValueKind != JsonValueKind.Null && coordinates.ValueKind
+                        != JsonValueKind.Undefined;
+
+                        if (@renderAddress)
+                        {
+                          <div>@addressString</div>
+                        }
+
+                        if (@renderCoordinates)
+                        {
+                          <div class="flex gap-2">
+                            <span><b>Long: </b>@($"{coordinates[0].GetDouble():0.#####}")</span>
+                            <span><b>Lat: </b>@($"{coordinates[1].GetDouble():0.#####}")</span>
+                          </div>
+                        }
+
+                        if (MapImagesBySlotName.TryGetValue(feld.SlotName, out var mapDataUri))
+                        {
+                          <div class="mt-2 [break-inside:avoid]">
+                            <img src="@mapDataUri" class="w-full" alt="Karte des Standorts" />
+                            <div class="text-xs text-gray-500">© OpenStreetMap-Mitwirkende</div>
+                          </div>
+                        }
+
+                        break;
+                      default:
+                        <span>@plainSlotValue.Value</span>
+                        break;
+                    }
+
+                    break;
+                  case EncryptedSlotValue:
+                    <span class="italic">Verschlüsselt</span>
+                    break;
+                }
+              }
+            </div>
+          }
+        </div>
+      }
+    </div>
+  }
+</body>
+
+</html>
+
+@code {
+  [Parameter, EditorRequired] public required IReadOnlyList<Bearbeitung> Bearbeitungen { get; set; }
+
+  [Parameter] public string? PrimaryColor { get; set; }
+
+  [Parameter] public IReadOnlyDictionary<string, string> MapImagesBySlotName { get; set; } = new Dictionary<string, string>();
+
+  private string? GetColor()
+  {
+    if (PrimaryColor?.StartsWith("#") == true)
+    {
+      var parsed = ColorTranslator.FromHtml(PrimaryColor);
+
+      return $"{parsed.R} {parsed.G} {parsed.B}";
+    }
+
+    return PrimaryColor;
+  }
+
+}

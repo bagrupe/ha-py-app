@@ -1,0 +1,10 @@
+build
+dist
+node_modules
+build
+dist
+
+.env
+.licensee.json
+.temp
+_bereich-b/

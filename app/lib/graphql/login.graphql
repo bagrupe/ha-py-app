@@ -1,0 +1,16 @@
+mutation WeakLogin($input: LoginBuergerWeakInput!) {
+  loginBuergerWeak(input: $input) {
+    loginPayload {
+      result
+      token
+    }
+  }
+}
+
+mutation RegisterToken($input: NotificationTokenRegisterInput!) {
+  notificationTokenRegister(input: $input) {
+    buerger {
+      id
+    }
+  }
+}

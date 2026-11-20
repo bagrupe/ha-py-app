@@ -1,0 +1,28 @@
+==== Emails
+
+===== Mailpit
+Für die Entwicklung wird https://mailpit.axllent.org/[Mailpit] benutzt. Mailpit fungiert als SMTP Server und speichert die versendeten Emails, sodass man sie im Browser ansehen kann.
+Mailpit ist in der `docker-compose.yml` Datei konfiguriert und wird mit dem Befehl `docker compose up -d` gestartet. Der Zugriff erfolgt über http://localhost:8025
+
+===== Email Versand
+Für den Email Versand wird das Outbox Pattern verwendet. Dabei wird jede Email in der Datenbank zwischengespeichert und dann in einem Hintergrundprozess versendet. (EmailOutboxSendJob.cs)
+Nach erfolgreichem Versenden bzw. nach 3 gescheiterten Versuchen wird die Email aus der Datebank gelöscht.
+
+Weiterer Jobs gibt es für die Passwort Zurücksetzen- und Einladungsmails.
+Diese überprüfen andhand von Eigenschaften, die am Backoffice User bzw. Mitarbeiter gesetzt sind, ob eine Email versendet werden soll. Ist das zutreffend, wird die Email in die Outbox geschrieben.
+
+===== Email Vorlagen
+Die Email Vorlagen befinden sich im backend Projekt im Ordner `API/Features/Email/Templates`.
+Die Vorlagen liegen jeweils im HTML- und Textformat als
+https://learn.microsoft.com/de-de/aspnet/core/razor-pages/?view=aspnetcore-9.0&tabs=visual-studio[Razor Pages] vor.
+Die Methode `AddMailToOutboxAsync` aus EmailService.cs erhält die zu verwendeten Vorlagen als generische Parameter.
+Innerhalb der Methode werden mithilfe des Blazor Renderers die Vorlagen mit ihreren entsprechenden Inhalten gefüllt und in der Datenbank gespeichert.
+Im EmailOutboxSendJob.cs werden die fertigen Emails aus der Datenbank geladen und versendet.
+
+Für die Generierung der Email Vorlagen wird ein eigenes Node Projekt verendet,
+welches im Ordner `web/email-templates` liegt. Um die Email Vorlagen zu exportieren,
+muss im selbigen Verzeichnis der Befehl `pnpm export` ausgeführt werden.
+Diese landen dann als HTML- bzw. Textvorlage in einer .razor Datei im richtigen backend Verzeichnis.
+
+Für die Entwicklung kann `pnpm dev` ausgeführt werden, welches unter localhost:3004 ermöglicht, die im Projekt liegenden Email Vorlagen im Watch-Modus anzusehen.
+

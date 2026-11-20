@@ -1,0 +1,22 @@
+==== Anlegen eines Fallback-Bildes für Kommunen
+
+In der Inhaltspflege kann für jede Kommune ein individuelles Fallback-Bild hinterlegt werden. Dieses Standard-Bild wird in der App als Platzhalter verwendet, wenn beispielsweise für eine News, das Wetter oder eine Veranstaltung kein spezifisches Bild vorhanden ist.
+
+Das Anlegen oder Ändern des Fallback-Bildes erfolgt in diesen drei Schritten:
+
+. *Kommunen auswählen*
++
+Wählen Sie in der linken Menüleiste der Inhaltspflege unter dem Punkt `Sammlungen` den Eintrag `Kommunen` aus.
++
+
+. *Richtige Kommune in der Liste selektieren*
++
+In der nun angezeigten Übersicht der Kommunen suchen Sie nach der gewünschten Kommune (z. B. "Landkreis Hameln-Pyrmont"). Klicken Sie auf den entsprechenden Zeileneintrag, um die Detailansicht zu öffnen.
++
+
+. *Unter Design Fallback-Bild neu hochladen*
++
+Wechseln Sie innerhalb der Detailansicht der Kommune oben auf den Reiter `Design`. Scrollen Sie nach unten zum Abschnitt `Fallback-Bild`. Hier können Sie entweder über den Button `Medium neu hochladen` ein neues Bild von Ihrem Computer hochladen oder mit `Aus vorhandenen auswählen` ein bereits in den Medien (Asset-Bibliothek) hochgeladenes Bild verwenden.
++
+
+Nach dem Hochladen oder Auswählen des Bildes vergessen Sie nicht, die Änderungen oben rechts zu speichern (Publish Changes), damit das Fallback-Bild veröffentlicht wird.

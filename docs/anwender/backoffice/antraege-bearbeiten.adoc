@@ -1,0 +1,48 @@
+==== Bearbeiten von Anträgen
+
+Für den Nutzer-Typ `Sachbearbeiter` bildet das Bearbeiten von Anträgen den Kern
+des Backoffice. Die unterschiedlichen Anträge, die über den Prozesseditor
+entworfen und durch die Nutzer der mobilen App im Backoffice eingereicht werden,
+werden direkt nach dem Login als erstes angezeigt.
+
+Die Hauptansicht des Backoffice teilt sich in die drei Bereiche
+
+- Neue Anträge 
+- Anträge in Bearbeitung 
+- Abgeschlossene Anträge
+
+image::assets/anwender/Antraege_Uebersicht.png[Anträge Übersicht]
+
+Die unterschiedlichen Bereiche zeigen inhaltlich genau das, was der Name
+ausdrückt: als neue Anträge werden solche eingegangenen Anträge verstanden, die
+noch nicht in Bearbeitung sind.
+
+Sobald ein Antrag durch einen Sachbearbeiter übernommen wurde befindet er sich
+*in Bearbeitung*.
+
+Wird ein Antrag abgeschlossen, wird er in der entsprechenden Ansicht angezeigt.
+
+In den unterschiedlichen Ansichten werden immer nur Anträge aus den Abteilungen
+angezeigt, in denen ein Nutzer selbst Mitglied ist - sozusagen die Anträge, für
+die der jeweilige Nutzer zuständig ist. Eine Ausnahme bilden `Super-Admins` und
+`Admins`. `Super-Admins` sehen sämtliche Anträge im gesamten Mandanten, `Admins`
+sehen die Anträge aller Organisationseinheiten und Abteilungen, in denen sie
+Admin sind.
+
+[NOTE]
+.Kurz und knapp
+====
+Die Anträge-Ansichten zeigen ausschließlich Anträge der eigenen Abteilungen!
+====
+
+Grundsätzlich gibt es kein allgemeines Vorgehen bei der Bearbeitung von
+Anträgen, da über den Prozesseditor der Ablauf eines Antrags vorgegeben wird.
+Das bedeutet die Informationen, die in einem Antrag / Prozess erfasst werden,
+werden im Prozesseditor festgelegt, genauso wie die Optionen, zum Beispiel in
+Form von Buttons, die in dem Antrag für die Bearbeitung verfügbar sind. Das
+beinhaltet auch die Übergabe von Anträgen an andere Organisationseinheiten oder
+Dienstleister.
+
+Die Detailansicht eines Antrags kann mit einem Klick auf `Bearbeiten` geöffnet werden.
+
+image::assets/anwender/Antraege_Detailansicht.png[Anträge Detailansicht]

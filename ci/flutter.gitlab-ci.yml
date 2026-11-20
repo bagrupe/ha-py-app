@@ -1,0 +1,55 @@
+variables:
+  FLUTTER_VERSION: 3.44.8
+
+.flutter-linux:
+  image: ubuntu:24.04
+  variables:
+    PUB_CACHE: "${CI_PROJECT_DIR}/.pub-cache"
+    FVM_CACHE_PATH: "${CI_PROJECT_DIR}/.fvm-cache"
+  cache:
+    key: "flutter-linux-${FLUTTER_VERSION}"
+    paths:
+      - .fvm-cache/
+      - .pub-cache/
+  before_script:
+    - set -euo pipefail
+    - apt-get update -qq && apt-get install -y -qq curl git unzip xz-utils ca-certificates
+    - curl -fsSL https://fvm.app/install.sh | bash
+    - export PATH="${HOME}/fvm/bin:${PATH}"
+    - cd "${CI_PROJECT_DIR}/app"
+    - fvm install "$FLUTTER_VERSION"
+    - fvm use "$FLUTTER_VERSION"
+    - export PATH="${CI_PROJECT_DIR}/app/.fvm/flutter_sdk/bin:$PATH"
+
+.flutter:
+  tags:
+    - flutter-ha-py
+  before_script:
+    - cd ${CI_PROJECT_DIR}/${SOURCE_DIR:-.}
+    - fvm install $FLUTTER_VERSION
+    - fvm use $FLUTTER_VERSION
+    # - yes | sdkmanager --licenses || true Skip because of issues with runner
+    - fvm flutter pub get
+  rules:
+    - if: $TARGET_ENV == "feature"
+      changes:
+        - "app/**/*"
+
+.flutter-build:
+  tags:
+    - flutter-ha-py
+  before_script:
+    - cd ${CI_PROJECT_DIR}/${SOURCE_DIR:-.}
+    - fvm install $FLUTTER_VERSION
+    - fvm use $FLUTTER_VERSION
+    # - yes | sdkmanager --licenses || true Skip because of issues with runner
+    - fvm flutter pub get
+    - cd "$CI_PROJECT_DIR/app"
+    - fvm dart run dart_pubspec_licenses:generate --json --ignore app -o assets/licenses/packages.json
+    - cd "${CI_PROJECT_DIR}/${SOURCE_DIR:-.}"
+  rules:
+    - if: $TARGET_ENV == "feature"
+      changes:
+        - "app/**/*"
+    - if: $CI_COMMIT_TAG =~ /^app-.*$/
+      when: always

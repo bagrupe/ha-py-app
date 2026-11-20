@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE ikiss SYSTEM "https://www.hameln-pyrmont.de/ikiss.dtd">
+<ikiss>
+    <result>
+            <tcontent>
+                <object_full_id>3767.1974.1</object_full_id>
+                <server_id>3767</server_id>
+                <object_id>1974</object_id>
+                <language>de</language>
+                <shortname><![CDATA[L 431 - Verkehrsfreigabe der Valentinibrücke am Mittwochnachmittag]]></shortname>
+                <title><![CDATA[L 431 - Verkehrsfreigabe der Valentinibrücke am Mittwochnachmittag]]></title>
+                <data_content><![CDATA[
+<div class="tt_ac"><div class="tc1_ac"><h1>L 431 - Verkehrsfreigabe der Valentinibr&uuml;cke am Mittwochnachmittag</h1><div style="display:inline">
+<p>Ab Mittwoch, 21. Oktober ab ca. 15 Uhr wird die Valentinibr&uuml;cke in Emmerthal wieder f&uuml;r den Verkehr freigegeben werden.</p>
+<p>Das teilt die Nieders&auml;chsische Landesbeh&ouml;rde f&uuml;r Stra&szlig;enbau und Verkehr in Hameln mit.</p>
+<p>Grund waren Asphaltarbeiten auf der Hagenohsener Stra&szlig;e. Wegen umfangreicherer Sch&auml;den als zun&auml;chst sichtbar, musste die Sperrung etwas l&auml;nger aufrechterhalten werden. Der Zeitraum der Herbstferien, der daf&uuml;r vorgesehen war, konnte aber gut eingehalten werden.</p>
+<p>Die Landesbeh&ouml;rde f&uuml;r Stra&szlig;enbau und Verkehr dankt allen Anwohnenden, Gewerbetreibenden und Verkehrsteilnehmenden um Verst&auml;ndnis.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>
+</div></div><div class="tc2_ac">20.10.2026&nbsp;</div></div>
+]]></data_content>
+                <author>Administrator</author>
+                <copyright></copyright>
+                <description><![CDATA[]]></description>
+                <date>2026-10-20 14:16:17</date>
+                <template_server_id>2561</template_server_id>
+                <template_id>1</template_id>
+                <userfieldtempl_svr_id>0</userfieldtempl_svr_id>
+                <userfieldtempl_id>0</userfieldtempl_id>
+                <layout_server_id>2561</layout_server_id>
+                <layout_id>1</layout_id>
+                <fulltext_index_off>true</fulltext_index_off>
+                <pattern>false</pattern>
+                <properties>4</properties>
+                <update_date>2026-10-20 14:20:08</update_date>
+                <create_date>2026-10-20 14:16:17</create_date>
+                <release>true</release>
+                <area>internet</area>
+                <tUserFields>
+                </tUserFields>
+                <tLayout>
+                    <trand_adressen_list>
+                        <rand_adressen>2561.1.1</rand_adressen>
+                        <rand_adressen>2749.880.1</rand_adressen>
+                    </trand_adressen_list>
+                    <nosub-rand_adressen>0</nosub-rand_adressen>
+                    <trand_texte_list>
+                        <rand_texte>3767.130.1</rand_texte>
+                        <rand_texte>2561.7773.1</rand_texte>
+                    </trand_texte_list>
+                    <nosub-rand_texte>0</nosub-rand_texte>
+                    <social-share-btn>1</social-share-btn>
+                    <nosub-social-share-btn>0</nosub-social-share-btn>
+                    <randspalte>1</randspalte>
+                    <nosub-randspalte>0</nosub-randspalte>
+                    <titelfoto></titelfoto>
+                    <nosub-titelfoto>1</nosub-titelfoto>
+                    <rand_bilder>3767.2566.1</rand_bilder>
+                    <nosub-rand_bilder>0</nosub-rand_bilder>
+                </tLayout>
+                <tTpFields>
+                    <title><![CDATA[L 431 - Verkehrsfreigabe der Valentinibr&uuml;cke am Mittwochnachmittag]]></title>
+                    <data_content><![CDATA[
+<p>Ab Mittwoch, 21. Oktober ab ca. 15 Uhr wird die Valentinibr&uuml;cke in Emmerthal wieder f&uuml;r den Verkehr freigegeben werden.</p>
+<p>Das teilt die Nieders&auml;chsische Landesbeh&ouml;rde f&uuml;r Stra&szlig;enbau und Verkehr in Hameln mit.</p>
+<p>Grund waren Asphaltarbeiten auf der Hagenohsener Stra&szlig;e. Wegen umfangreicherer Sch&auml;den als zun&auml;chst sichtbar, musste die Sperrung etwas l&auml;nger aufrechterhalten werden. Der Zeitraum der Herbstferien, der daf&uuml;r vorgesehen war, konnte aber gut eingehalten werden.</p>
+<p>Die Landesbeh&ouml;rde f&uuml;r Stra&szlig;enbau und Verkehr dankt allen Anwohnenden, Gewerbetreibenden und Verkehrsteilnehmenden um Verst&auml;ndnis.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>
+]]></data_content>
+                </tTpFields>
+                <tcategories_list>
+                    <tcategories>
+                        <object_full_id>2561.154</object_full_id>
+                        <data_content><![CDATA[Aktuelles]]></data_content>
+                        <category_server_id>2561</category_server_id>
+                        <category_id>154</category_id>
+                        <release>true</release>
+                        <area>internet</area>
+                        <description><![CDATA[]]></description>
+                        <language>de</language>
+                    </tcategories>
+                </tcategories_list>
+                <synonyms></synonyms>
+                <tusers_list>
+                    <tusers>
+                        <user_id>3</user_id>
+                        <nickname>Administrator</nickname>
+                    </tusers>
+                    <tusers>
+                        <user_id>10</user_id>
+                        <nickname>Administratoren</nickname>
+                    </tusers>
+                    <tusers>
+                        <user_id>1015</user_id>
+                        <nickname>Redakteure</nickname>
+                    </tusers>
+                </tusers_list>
+                <remote_identifier_list></remote_identifier_list>
+                <RefKey></RefKey>
+                <timer></timer>
+            </tcontent>
+    </result>
+</ikiss>

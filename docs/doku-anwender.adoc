@@ -1,0 +1,70 @@
+
+= Kommunal App Anwenderhandbuch
+Kommunal-App Projektteam
+Stand {localdate}
+:doctype: book
+:xrefstyle: full
+:!section-refsig: #https://docs.asciidoctor.org/asciidoc/latest/macros/xref-text-and-style/
+:sectnums:
+:chapter-number:
+:chapter-signifier:
+:toc:
+:figure-caption: Abbildung
+:toc-title: Inhalt
+:toclevels: 3
+:icons: font
+:imagesdir:
+:outline-title: Kommunal App Anwenderhandbuch
+:pdf-theme: ./pdf-theme.yml
+
+== Anwenderhandbuch
+
+include::anwender/backoffice/einleitung.adoc[]
+
+<<<
+=== Administration
+
+include::anwender/backoffice/anlegen-oe.adoc[]
+
+include::anwender/backoffice/einladen-nutzer.adoc[]
+
+include::anwender/backoffice/passwort-reset.adoc[]
+
+include::anwender/backoffice/funktionsberechtigungen-aendern.adoc[]
+
+<<<
+=== Anträge
+
+include::anwender/backoffice/antraege-bearbeiten.adoc[]
+
+include::anwender/backoffice/antraege-weiterleiten.adoc[]
+
+<<<
+=== Prozesseditor
+
+include::anwender/backoffice/prozesse-einleitung.adoc[]
+
+include::anwender/backoffice/prozesse-uebersicht.adoc[]
+
+include::anwender/backoffice/prozesse-anlegen.adoc[]
+
+include::anwender/backoffice/prozesse-bearbeiten.adoc[]
+
+<<<
+=== Inhaltspflege
+
+include::anwender/inhaltspflege/einleitung.adoc[]
+
+include::anwender/inhaltspflege/inhalte-anlegen.adoc[]
+
+==== Collections für die mobile App
+
+include::anwender/inhaltspflege/mobile-app-collections.adoc[]
+
+==== Interne Collections
+
+include::anwender/inhaltspflege/interne-collections.adoc[]
+
+==== Collections für das Backoffice
+
+include::anwender/inhaltspflege/backoffice-collections.adoc[]

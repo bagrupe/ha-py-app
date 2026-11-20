@@ -1,0 +1,14 @@
+name: mongo
+deployment:
+  port:
+    name: mongo
+    number: 27017
+  image:
+    tag: mongo:6.0.7
+  secrets: components/mongo.env
+  resources:
+    requests:
+      cpu: 250m
+      memory: 200Mi
+    limits:
+      memory: 400Mi

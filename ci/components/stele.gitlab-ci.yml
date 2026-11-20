@@ -1,0 +1,66 @@
+################################################
+# BUILD STAGE
+################################################
+
+build:stele:
+  extends: [.pnpm]
+  stage: build
+  needs: []
+  variables:
+    SOURCE_DIR: web
+  script:
+    - pnpm -w generate-sentry
+    # Vite inlines VITE_* at build time; must exist before turbo build (not in Docker package step).
+    - cp "$DEPLOYMENT_ENV_FILE" stele/.env.production
+    - pnpm turbo build --filter stele...
+  artifacts:
+    paths:
+      - web/stele/dist
+    expire_in: 15 mins
+  rules:
+    - if: $TARGET_ENV == "feature"
+      changes:
+        - "web/*"
+        - "web/stele/**/*"
+    - if: $CI_COMMIT_TAG =~ /^backend-.*$/ # Triggered on tag -> staging or production
+      when: always
+  environment:
+    name: $TARGET_ENV
+
+
+################################################
+# PACKAGE STAGE
+################################################
+
+package:stele:
+  stage: package
+  extends: [.package-template]
+  tags:
+    - docker-build-new
+  needs:
+    - job: build:stele
+      artifacts: true
+      optional: false
+  script:
+    - echo "Building version stele-${IMAGE_TAG#*-}"
+    - docker build -t $CI_REGISTRY_IMAGE/stele:stele-"${IMAGE_TAG#*-}" -f web/stele/docker/Dockerfile web/stele
+  rules:
+    - if: $CI_COMMIT_TAG =~ /^backend-.*$/
+      when: on_success
+
+push:stele:
+  stage: push
+  extends: [.push-template]
+  tags:
+    - docker-build-new
+  needs: ["package:stele"]
+  script:
+    - docker login -u "gitlab-ci-token" -p $CI_JOB_TOKEN $CI_REGISTRY
+    - echo "Push $CI_REGISTRY_IMAGE/stele:stele-"${IMAGE_TAG#*-}"  to registry"
+    - docker push $CI_REGISTRY_IMAGE/stele:stele-"${IMAGE_TAG#*-}"
+  rules:
+    - if: $CI_COMMIT_TAG =~ /^backend-.*$/
+      when: on_success
+
+
+# Deployment happens in deployment.gitlab-ci.yml on the backend tag trigger

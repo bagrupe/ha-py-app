@@ -1,0 +1,123 @@
+# Disabled for now, because we don't have any use-cases for this right now.
+
+# ################################################
+# # BUILD STAGE
+# ################################################
+
+# build:storybook-web:
+#   extends: [.pnpm]
+#   stage: build
+#   needs: []
+#   variables:
+#     SOURCE_DIR: web
+#   script:
+#     - pnpm turbo build-storybook --filter bereich-a
+#   artifacts:
+#     paths:
+#       - web/bereich-a/storybook-static
+#     expire_in: 1 hr
+#   rules:
+#     - if: $TARGET_ENV == "development" # Triggered on main branch -> latest
+#       when: on_success
+
+# build:storybook-stele:
+#   extends: [.pnpm]
+#   stage: build
+#   needs: []
+#   variables:
+#     SOURCE_DIR: web
+#   script:
+#     - pnpm turbo build-storybook --filter stele
+#   artifacts:
+#     paths:
+#       - web/stele/storybook-static
+#     expire_in: 1 hr
+#   rules:
+#     - if: $TARGET_ENV == "development"
+#       when: on_success
+
+# ################################################
+# # PACKAGE STAGE
+# ################################################
+
+# package:storybook-web:
+#   stage: package
+#   tags:
+#     - docker-build-new
+#   extends: [.package-template]
+#   needs:
+#     - job: build:storybook-web
+#   script:
+#     - docker build -t $CI_REGISTRY_IMAGE/web-storybook:$IMAGE_TAG -f web/bereich-a/Storybook.Dockerfile web/bereich-a
+#   rules:
+#     - if: $TARGET_ENV == "development" # Triggered on main branch -> latest
+#       when: on_success
+
+# package:storybook-stele:
+#   stage: package
+#   tags:
+#     - docker-build-new
+#   needs:
+#     - job: build:storybook-stele
+#   script:
+#     - docker build -t $CI_REGISTRY_IMAGE/stele-storybook:$IMAGE_TAG -f web/stele/Storybook.Dockerfile web/stele
+#   rules:
+#     - if: $TARGET_ENV == "development"
+#       when: on_success
+
+# ################################################
+# # PUSH STAGE
+# ################################################
+
+# push:storybook-web:
+#   stage: push
+#   extends: [.push-template]
+#   tags:
+#     - docker-build-new
+#   needs:
+#     - job: package:storybook-web
+#   script:
+#     - docker login -u "gitlab-ci-token" -p $CI_JOB_TOKEN $CI_REGISTRY
+#     - echo "Push $CI_REGISTRY_IMAGE/web-storybook:$IMAGE_TAG"
+#     - docker push $CI_REGISTRY_IMAGE/web-storybook:$IMAGE_TAG
+#   rules:
+#     - if: $TARGET_ENV == "development" # Triggered on main branch -> latest
+#       when: on_success
+
+# push:storybook-stele:
+#   stage: push
+#   tags:
+#     - docker-build-new
+#   needs:
+#     - job: package:storybook-stele
+#   script:
+#     - docker login -u "gitlab-ci-token" -p $CI_JOB_TOKEN $CI_REGISTRY
+#     - echo "Push $CI_REGISTRY_IMAGE/stele-storybook:$IMAGE_TAG"
+#     - docker push $CI_REGISTRY_IMAGE/stele-storybook:$IMAGE_TAG
+#   rules:
+#     - if: $TARGET_ENV == "development"
+#       when: on_success
+
+# ################################################
+# # DEPLOYMENT STAGE
+# ################################################
+
+# deploy:ui-playgrounds:
+#   stage: deploy
+#   tags:
+#     - deploy-ha-py
+#   needs:
+#     - push:storybook-web
+#     - push:storybook-stele
+#   variables:
+#     STORYBOOK_PORT: 57161
+#     STELE_STORYBOOK_PORT: 57162
+#   script: |
+#     docker login -u "gitlab-ci-token" -p $CI_JOB_TOKEN $CI_REGISTRY
+#     docker compose -f docker/docker-compose.ui-playgrounds.yml -p hameln-pyrmont down
+#     docker compose -f docker/docker-compose.ui-playgrounds.yml -p hameln-pyrmont pull
+#     docker compose -f docker/docker-compose.ui-playgrounds.yml -p hameln-pyrmont up -d --force-recreate
+
+#   rules:
+#     - if: $TARGET_ENV == "development"
+#       when: on_success

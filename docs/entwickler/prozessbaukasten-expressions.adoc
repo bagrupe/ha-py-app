@@ -1,0 +1,116 @@
+==== Prozessbaukasten - Expressions
+:toc:
+
+===== Überblick
+
+Die Expression Language im Prozessbaukasten ermöglicht es, Bedingungen und Logik direkt an Verbindungen und Schritten zu definieren.
+Sie steuert u.a., ob eine Verbindung "relevant" ist (also im Prozess aktiviert werden kann), und erlaubt die Interaktion mit Nutzereingaben (Slots/SlotValues).
+
+Diese Dokumentation gibt einen technischen Überblick über Syntax, Funktionsweise und Erweiterbarkeit der Expression Language.
+
+[NOTE]
+====
+Für fachliche Beispiele zur Nutzung von Bedingungen siehe <<Prozesse
+bearbeiten,Prozesse bearbeiten>>.
+====
+
+===== Grundprinzip
+
+Expressions sind kleine Ausdrücke, die technisch als String an Verbindungen oder Feldern hinterlegt werden.
+Sie werden beim Durchlauf des Prozesses kontinuierlich ausgewertet und steuern
+so die Auswahl der nächsten möglichen Kanten (Relevanz) sowie die Sichtbarkeit
+und Inhalte von Formular-Feldern.
+
+Für Entscheidungen (z.B. für die Relevanz auf Verbindungen und Feldern) gibt es
+die `BoolExpression` welche zu `true` oder `false` evaluiert.
+
+Darüber hinaus gibt es `StringExpression`, `IntExpression` und
+`LocationExpression` welche zu konkreten Werten evaluiert werden, z.B. um
+bestimmte Slots dynamisch zu befüllen.
+
+===== Interaktion mit Slots und SlotValues
+
+Slots dienen im Prozessbaukasten als Platzhalter für Nutzereingaben, die innerhalb von Formularschritten erfasst werden.
+Um auf den aktuellen Wert eines bestimmten Slots innerhalb eines Ausdrucks zuzugreifen,
+steht die Funktion `slot("slotName")` zur Verfügung.
+Beispielsweise prüft der Ausdruck `slot("kategorie") == "Schaden"`, ob im Feld „kategorie“ der Wert „Schaden“ eingetragen wurde.
+Die zugehörigen SlotValues werden dabei automatisch aus dem aktuellen Stand der Ausführung und Bearbeitung bereitgestellt.
+
+===== Relevanz von Verbindungen
+
+Jede Verbindung zwischen zwei Schritten verfügt über eine sogenannte
+BoolExpression im Feld `IstRelevant`. Diese Expression steuert, ob die Verbindung im aktuellen Zustand „begehbar“ ist – das heißt,
+ob sie im Frontend beispielsweise als Button angezeigt wird und im Prozess genutzt werden kann.
+Standardmäßig gilt eine Verbindung als immer relevant, sofern keine spezielle Bedingung hinterlegt ist.
+
+Ein typisches Beispiel für eine solche Bedingung wäre:
+
+[source]
+----
+slot("kategorie") == "Schaden" && slot("anzahl") > 0
+----
+
+Damit ist die Verbindung nur dann relevant, wenn im Slot „kategorie“ der Wert „Schaden“ eingetragen wurde und gleichzeitig im Slot „anzahl“ ein Wert größer 0 vorliegt.
+Sollte an einer Stelle keine Verbindung als relevant gelten, kann der Prozess nicht fortgeführt werden.
+
+===== Syntax und Operatoren
+
+* Vergleiche
+** `==` -> Gleich
+** `!=` -> Ungleich
+** `>` / `>=` -> Größer als/gleich
+** `<` / `<=` -> Kleiner als/gleich
+* Logik zur Verkettung von Ausdrücken
+** `&&` -> Und
+** `||` -> Oder
+** `(` / `)` -> Gruppierung/Schachtelung von Ausdrücken
+* Arithmetik
+** `+` -> Addition
+** `-` ->  Subtraktion
+** `*` -> Multiplikation
+** `/` -> Division
+
+===== Erweiterte Funktionen
+
+Neben der Funktion `slot(...)` stehen weitere Funktionen zur Verfügung.
+Ein Beispiel ist `isInside("areaName", slot("standort"))`, womit geprüft werden
+kann, ob ein bestimmter Standort innerhalb einer definierten Fläche liegt –
+beispielsweise für Geofencing.
+
+===== Typisierung und Validierung
+
+Beim Parsen und vor der Ausführung eines Ausdrucks wird dessen Typ automatisch geprüft.
+Kommt es beispielsweise zu einem Typfehler – etwa wenn ein String mit einem Integer verglichen wird – so wird dies als Validierungsfehler erkannt und im Editor angezeigt.
+Auch nicht existierende Slots oder ungültige Funktionsaufrufe führen zu Fehlern,
+die entweder beim Speichern oder spätestens während der Ausführung eines Prozesses auftreten.
+
+===== Anpassung und Erweiterung
+
+Die Expression Language ist modular aufgebaut, sodass sie flexibel erweitert werden kann.
+Beispielsweise lassen sich neue Funktionen als zusätzliche Aufrufe im Parser und Evaluator ergänzen,
+etwa um weitere Utility-Funktionen bereitzustellen.
+Auch die Typen und das Handling von Slots sind durch den Einsatz des Visitor-Patterns und einer zentralen Slot-Map erweiterbar.
+Bei Anpassungen an der Expression Language ist jedoch besondere Sorgfalt geboten, da Fehler in diesem Bereich zur Laufzeit dazu führen können,
+dass Prozesse blockiert werden und nicht mehr fortgeführt werden können.
+
+===== Best Practices & Hinweise
+
+Es empfiehlt sich, Expressions möglichst einfach und verständlich zu gestalten.
+Komplexe, verschachtelte Bedingungen sind oft schwer wartbar; daher ist es sinnvoll, mehrere einfache Bedingungen zu verwenden,
+anstatt eine einzige, sehr umfangreiche Expression zu formulieren.
+Änderungen an Slots oder deren Namen sollten stets auch in den Expressions nachgezogen werden,
+da ansonsten Fehler oder unerwartete Prozessabbrüche drohen.
+Fehlerhafte oder zu restriktive Expressions können dazu führen, dass ein Prozess nicht mehr fortgesetzt werden kann.
+Expressions werden sowohl beim Bearbeiten im Frontend als auch bei der
+Ausführung im Backend validiert, jedoch nicht vor Durlaufen des Prozesses
+ausgewertet, was zu Laufzeitfehlern z.B. bei Zugriff auf nicht vorhande Slots
+führen kann.
+
+===== Weiterführende Dokumentation
+
+* xref:anwender/backoffice/prozesse-bearbeiten.adoc[Prozess bearbeiten – Bedingungen an Verbindungen]
+* Backend-Implementierung: `API/Features/Expressions`
+
+---
+
+Fragen oder konkrete Beispiele für Expressions? Gerne nachfragen!

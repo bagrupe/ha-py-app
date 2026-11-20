@@ -1,0 +1,13 @@
+query ProzessVersionenFuerLoeschung($kommuneId: UUID!, $prozessId: UUID!) {
+  kommune(kommuneId: $kommuneId) {
+    prozessById(id: $prozessId) {
+      id
+      versionen {
+        id
+        createdAt
+        publishedAt
+        hatAusfuehrungen
+      }
+    }
+  }
+}

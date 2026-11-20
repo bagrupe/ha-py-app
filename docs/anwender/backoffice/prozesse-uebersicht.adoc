@@ -1,0 +1,99 @@
+==== Übersicht und Veröffentlichung von Prozessen
+
+===== Übersicht und Veröffentlichung von Prozessen
+Zur Übersicht sämtlicher in der Anwendung vorhandener Prozesse gelangt man nach
+dem Login im Backoffice über das *Burger Menü* unter dem Punkt
+`Prozessverwaltung`.
+
+image::assets/anwender/Prozessverwaltung_button.png[Prozessverwaltung]
+
+Diese Ansicht stellt den Einstiegspunkt zum Prozesseditor dar. Hier werden
+tabellarische alle in der Anwendung vorhandenen Prozesse aufgeführt, mit Name,
+der eingeordneten Gruppe, der aktuellen Versionsnummer und der Möglichkeit den
+Prozess zu bearbeiten - also den eigentlichen Editor zu öffnen.
+
+Darüber hinaus können aus dieser Ansicht heraus neue Prozesse angelegt werden
+(über den Button `Neuen Prozess anlegen`), sowie die Prozessgruppen verwaltet
+werden (Button `Prozessgruppen verwalten`).
+
+===== Gruppen und Prozesse veröffentlichen
+Ein wesentlicher Aspekt der Übersichts-Ansicht ist die Möglichkeit Gruppen
+anzulegen und Prozesse zu veröffentlichen (Siehe <<anwender_prozesse_veroeffentlichen, Veröffentlichen von Prozessen>>).
+
+Grundlegend ist der Zusammenhang folgender: Eine Prozessgruppe entspricht
+innerhalb der mobilen App der Darstellung von gruppierten Anträgen. Das bedeutet
+auch, dass nur wenn ein Prozess einer Gruppe zugewiesen ist, der Prozess als
+Antrag in der App angezeigt wird.
+
+[NOTE]
+.Kurz und knapp
+====
+Die Zuweisung eines Prozesses zu einer Gruppe veröffentlicht den Prozess in der
+App.
+====
+
+Prozesse die keine Gruppe zugewiesen haben tauchen entsprechend auch nicht in
+der App auf. Genauso werden keine Gruppen in der App angezeigt, wenn es keinen
+Prozess gibt, der der Gruppe zugewiesen ist.
+
+Folglich benötigt es zwei Dinge: einen Prozess und eine Gruppe.
+
+Eine Gruppe wird angelegt, indem über den Button `Prozessgruppen verwalten`
+unterhalb der Menüleiste der Dialog für die Prozessgruppen geöffnet wird. In dem
+Dialog kann über den Button `Neue Prozessgruppe erstellen` ganz unten im Dialog
+eine neue Prozessgruppe angelegt werden - sie bekommt zunächst standardmäßig den
+Namen `Neue Prozessgruppe`. Über das `Stift-Symbol` schaltet der Dialog in den
+Bearbeitungsmodus, sodass der Name verändert werden kann. Der Stift wird dann
+zum `Disketten-Symbol`, über das der neue Name gespeichert werden kann.
+
+image::assets/anwender/Prozessverwaltung_Gruppen_verwalten.png[Prozessgruppen verwalten]
+
+Um einen Prozess zu veröffentlichen - hier wird angenommen, dass es schon einen
+Prozess gibt - wird beim gewünschten Prozess das `Stift-Symbol` in der
+Tabellen-Spalte `Gruppe` angeklickt. Es öffnet sich die Detailseite des
+Prozesses. Über die `Checkbox` der jeweiligen Gruppe wird der Prozess der Gruppe
+zugewiesen. Ein Prozess kann immer nur exakt einer Gruppe zugewiesen sein. Über
+den Button `Übernehmen` wird die Gruppenzuweisung gespeichert.
+
+image::assets/anwender/Prozesseditor_Prozesse_verwalten.png[Zuordnung eines Prozesses zu einer Gruppe]
+
+Die Zuweisung zu einer Gruppe funktioniert auf die gleiche Art und Weise,
+unabhängig von der Art des Prozesses.
+
+===== Prozesse und Versionen löschen
+
+Aus der Prozessübersicht heraus können sowohl einzelne Prozessversionen als
+auch ganze Prozesse gelöscht werden. Welche Aktion angeboten wird, hängt davon
+ab, ob der Prozess bereits gespeicherte Versionen hat.
+
+Ein Prozess, der neu angelegt, aber noch nie im Prozesseditor gespeichert
+wurde, hat noch keine Version. Für einen solchen Prozess steht in der Übersicht
+direkt der Button `Prozess löschen` zur Verfügung.
+
+Hat ein Prozess mindestens eine Version, steht stattdessen der Button
+`Versionen verwalten` zur Verfügung. Er öffnet einen Dialog mit allen Versionen
+des Prozesses, sortiert nach Erstellungsdatum. Über die Checkboxen können
+einzelne oder über `Alle auswählen` mehrere Versionen ausgewählt und über den
+Button `Ausgewählte löschen` gemeinsam entfernt werden. Jede Löschung muss in
+einem Sicherheitsdialog bestätigt werden, da gelöschte Versionen nicht
+wiederhergestellt werden können.
+
+Nicht jede Version kann gelöscht werden. Eine Version, die nicht löschbar ist,
+zeigt einen erklärenden Hinweis:
+
+- `Ausführungen zugeordnet`: Der Version sind bereits Anträge zugeordnet, auch
+  bereits abgeschlossene. Diese Anträge würden beim Löschen der Version
+  mitgelöscht.
+
+- `Letzte veröffentlichte Version`: Es gibt noch andere, unveröffentlichte
+  Versionen des Prozesses, aber diese ist die einzige veröffentlichte. Ohne sie
+  hätte der Prozess keine für Bürger:innen nutzbare Version mehr.
+
+- `Aktuell aktive Version`: Diese Version ist gerade die für Bürger:innen
+  sichtbare Version des Prozesses. Gäbe es eine ältere, ebenfalls
+  veröffentlichte Version, würde diese beim Löschen automatisch wieder aktiv
+  werden.
+
+Ist eine Version die einzige verbleibende des Prozesses und ihr sind keine
+Anträge zugeordnet, wird beim Löschen dieser Version automatisch auch der
+dann leere Prozess mitgelöscht.

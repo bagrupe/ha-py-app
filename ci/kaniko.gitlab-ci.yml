@@ -1,0 +1,14 @@
+.kaniko_build:
+  stage: package
+  needs: []
+  interruptible: true
+  image:
+    name: gcr.io/kaniko-project/executor:debug
+    entrypoint: [""]
+  before_script:
+    - >
+      function build_and_push_on_develop() {
+        echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
+
+        /kaniko/executor --single-snapshot --context $CI_PROJECT_DIR/$1 --dockerfile $CI_PROJECT_DIR/$1/${3:-Dockerfile} --destination $CI_REGISTRY_IMAGE/$2:${4:-$IMAGE_TAG} --build-arg=CI_COMMIT_REF_NAME --build-arg=CI_COMMIT_SHA --build-arg=SENTRY_AUTH
+      }

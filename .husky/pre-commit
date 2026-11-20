@@ -1,0 +1,5 @@
+
+.gitlab/scripts/formatting.sh
+
+# Documentation (AsciiDoc): rebuild HTML/PDF when docs sources are staged
+.gitlab/scripts/pre-commit-docs.sh

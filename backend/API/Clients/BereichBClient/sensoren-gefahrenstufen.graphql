@@ -1,0 +1,25 @@
+query SensorenGefahrenstufen {
+  # limit: 0 = kein Limit (Payload-Konvention), damit der Job unabhängig von der Sensor-Anzahl
+  # immer alle app-sichtbaren Sensoren prüft.
+  Sensorens(where: { shownInApp: { equals: true } }, limit: 0) {
+    docs {
+      id
+      name
+      titel
+      pegelGefahrenstufe
+      glaetteAlarmLevel
+      letzteBenachrichtigteGefahrenstufe
+      ausstehendeGefahrenstufe
+    }
+  }
+}
+
+mutation SetSensorGefahrenstufeNotified(
+  $sensorId: String!
+  $gefahrenstufe: SensorGefahrenstufe!
+  $confirmed: Boolean!
+) {
+  SetSensorGefahrenstufeNotified(sensorId: $sensorId, gefahrenstufe: $gefahrenstufe, confirmed: $confirmed) {
+    success
+  }
+}

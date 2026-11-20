@@ -1,0 +1,22 @@
+name: mailpit
+ingress:
+  hostPrefix: mailpit
+  paths:
+    - /
+deployment:
+  ports:
+    - name: web
+      number: 80
+    - name: smtp
+      number: 1025
+  image:
+    tag: axllent/mailpit:v1.22
+  resources:
+    requests:
+      cpu: 10m
+      memory: 50Mi
+    limits:
+      memory: 512Mi
+  env:
+    - name: MP_UI_BIND_ADDR
+      value: "0.0.0.0:80"

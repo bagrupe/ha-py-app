@@ -1,0 +1,73 @@
+query Kommune($kommuneId: UUID!) {
+  kommune: kommune(kommuneId: $kommuneId) {
+    ...Kommune
+  }
+}
+
+fragment KommuneCrypto on Kommune {
+  publicKey
+}
+
+fragment Kommune on Kommune {
+  bereichAId: id
+  bereichBId
+  name
+  design {
+    ...KommuneDesign
+  }
+  analytics {
+    ...KommuneAnalytics
+  }
+  rechtsTexte {
+    ...KommuneRechtstexte
+  }
+  defaultPosition
+  abfallkalenderEnabled
+}
+
+fragment KommuneDesign on KommuneDesign {
+  logo {
+    url
+  }
+
+  mangelIcon {
+    id
+    url
+  }
+
+  ideenIcon {
+    id
+    url
+  }
+
+  fallbackImage {
+    url
+  }
+
+  colors {
+    ...KommuneDesignColors
+  }
+  fonts {
+    ...KommuneDesignFonts
+  }
+}
+
+fragment KommuneDesignColors on KommuneDesignColors {
+  primary
+  primaryLight
+}
+
+fragment KommuneDesignFonts on KommuneDesignFonts {
+  body
+  headings
+}
+
+fragment KommuneAnalytics on BereichBKommune_Analytics {
+  siteId
+  url
+}
+
+fragment KommuneRechtstexte on BereichBKommune_Legal {
+  impressum
+  privacy
+}

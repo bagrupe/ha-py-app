@@ -1,0 +1,23 @@
+include:
+  - local: "ci/template.gitlab-ci.yml"
+
+# Release Job for Backend
+release:backend:
+  extends: .release-template
+  variables:
+    RELEASE_NAME: "$IMAGE_TAG Release on $TARGET_ENV"
+    COMPONENT: backend
+  rules:
+    - if: $CI_COMMIT_TAG =~ /^backend-/
+      when: on_success # Only create release if previous stages passed
+
+
+# Release Job for App
+release:app:
+  extends: .release-template
+  variables:
+    RELEASE_NAME: "$IMAGE_TAG Release on $TARGET_ENV"
+    COMPONENT: app
+  rules:
+    - if: $CI_COMMIT_TAG =~ /^app-/
+      when: on_success

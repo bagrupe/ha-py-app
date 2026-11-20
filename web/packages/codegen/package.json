@@ -1,0 +1,26 @@
+{
+  "name": "@kommunalapp/codegen",
+  "type": "module",
+  "main": "./src/index.ts",
+  "bin": {
+    "codegen": "./bin/codegen.js"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@atmina/local-typescript-operations": "0.9.0",
+    "@atmina/only-enum-types": "0.8.0",
+    "@graphql-codegen/add": "6.0.0",
+    "@graphql-codegen/cli": "5.0.7",
+    "@graphql-codegen/near-operation-file-preset": "2.5.0",
+    "@graphql-codegen/typescript-urql": "3.7.3",
+    "@graphql-codegen/urql-introspection": "2.2.1",
+    "@parcel/watcher": "2.5.6",
+    "prettier": "3.0.0"
+  },
+  "devDependencies": {
+    "@kommunal/tsconfig": "workspace:*",
+    "typescript": "5.9.3"
+  }
+}

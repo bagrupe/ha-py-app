@@ -1,0 +1,241 @@
+query VolunteerEntries(
+  $typ: EhrenamtsbankEintragTyp!
+  $kategorieIds: [UUID!]
+  $skip: Int!
+  $take: Int!
+) {
+  ehrenamtsbankEintraege(
+    skip: $skip
+    take: $take
+    filter: { typ: $typ, kategorieIds: $kategorieIds, status: ACTIVE }
+  ) {
+    items {
+      ...VolunteerEntryData
+    }
+    pageInfo {
+      hasNextPage
+    }
+  }
+}
+
+query VolunteerEntry($id: UUID!) {
+  ehrenamtsbankEintrag(id: $id) {
+    ...VolunteerEntryData
+  }
+}
+
+query MyVolunteerEntries($skip: Int!, $take: Int!) {
+  meineEhrenamtsbankEintraege(skip: $skip, take: $take) {
+    items {
+      ...VolunteerEntryData
+    }
+    pageInfo {
+      hasNextPage
+    }
+    totalCount
+  }
+}
+
+mutation CreateVolunteerRequest($input: CreateEhrenamtsbankEintragInput!) {
+  createEhrenamtsbankEintrag(input: $input) {
+    ehrenamtsbankEintrag {
+      id
+      status
+    }
+    errors {
+      __typename
+      ... on Error {
+        message
+      }
+    }
+  }
+}
+
+mutation SubmitVolunteerRequest($input: UpdateEhrenamtsbankEintragStatusInput!) {
+  updateEhrenamtsbankEintragStatus(input: $input) {
+    ehrenamtsbankEintrag {
+      id
+      status
+    }
+    errors {
+      __typename
+      ... on Error {
+        message
+      }
+    }
+  }
+}
+
+mutation CreateVolunteerInterest($input: CreateEhrenamtsbankAnfrageInput!) {
+  createEhrenamtsbankAnfrage(input: $input) {
+    ehrenamtsbankAnfrage {
+      id
+      status
+      nachricht
+      createdAt
+    }
+    errors {
+      __typename
+      ... on Error {
+        message
+      }
+    }
+  }
+}
+
+mutation UpdateVolunteerInterestStatus(
+  $input: UpdateEhrenamtsbankAnfrageStatusInput!
+) {
+  updateEhrenamtsbankAnfrageStatus(input: $input) {
+    ehrenamtsbankAnfrage {
+      id
+      status
+      vereinbartAt
+    }
+    errors {
+      __typename
+      ... on Error {
+        message
+      }
+    }
+  }
+}
+
+mutation ProposeVolunteerInterestCompletion(
+  $input: ProposeEhrenamtsbankAbschlussInput!
+) {
+  proposeEhrenamtsbankAbschluss(input: $input) {
+    ehrenamtsbankAnfrage {
+      id
+      status
+      proposedMinutes
+      proposedDate
+      proposedNote
+      proposedById
+    }
+    errors {
+      __typename
+      ... on Error {
+        message
+      }
+    }
+  }
+}
+
+mutation ConfirmVolunteerInterestCompletion(
+  $input: ConfirmEhrenamtsbankAbschlussInput!
+) {
+  confirmEhrenamtsbankAbschluss(input: $input) {
+    ehrenamtsbankAnfrage {
+      id
+      status
+      proposedMinutes
+      proposedDate
+      proposedNote
+      proposedById
+      transaktion {
+        id
+        minutes
+        performedOn
+        note
+        status
+      }
+    }
+    errors {
+      __typename
+      ... on Error {
+        message
+      }
+    }
+  }
+}
+
+query MyVolunteerTimeCredit {
+  meinEhrenamtsbankZeitkonto {
+    startCreditMinutes
+    creditMinutes
+    debitMinutes
+    balanceMinutes
+  }
+}
+
+query MyVolunteerInterestForEntry($entryId: UUID!) {
+  meineEhrenamtsbankAnfrageFuerEintrag(eintragId: $entryId) {
+    id
+    status
+    nachricht
+    createdAt
+  }
+}
+
+query MyVolunteerInterests($skip: Int!, $take: Int!) {
+  meineEhrenamtsbankAnfragen(skip: $skip, take: $take) {
+    items {
+      id
+      eintragId
+      nachricht
+      status
+      createdAt
+      updatedAt
+      vereinbartAt
+      proposedMinutes
+      proposedDate
+      proposedNote
+      proposedById
+      typ
+      interessent {
+        id
+        vorname
+        nachname
+        phone
+      }
+      eintrag {
+        id
+        title
+        description
+        estimatedDurationMinutes
+        owner {
+          id
+          vorname
+          nachname
+          phone
+        }
+      }
+      transaktion {
+        id
+        minutes
+        performedOn
+        note
+        status
+      }
+    }
+    pageInfo {
+      hasNextPage
+    }
+    totalCount
+  }
+}
+
+fragment VolunteerEntryData on EhrenamtsbankEintrag {
+  id
+  typ
+  title
+  description
+  kategorieId
+  estimatedDurationMinutes
+  availability
+  tags
+  createdAt
+  status
+  imageKey
+  owner {
+    id
+    vorname
+    nachname
+    phoneVerified
+    clearanceVerified
+  }
+  untereinheit {
+    name
+  }
+}

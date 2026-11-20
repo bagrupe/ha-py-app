@@ -1,0 +1,89 @@
+query Poi($id: String!) {
+  poi(id: $id) {
+    id
+    title
+    image {
+      external
+      url
+      internal {
+        ...MedienImage
+      }
+    }
+    position
+    positionString
+    contents {
+      ...RichTextBlock
+      ...ImageBlockMedien
+    }
+    additionalInformation {
+      heading
+      text
+    }
+  }
+}
+
+query Pois($kommuneId: JSON, $sort: String, $limit: Int) {
+  pois(where: { kommune: { equals: $kommuneId } }, sort: $sort, limit: $limit) {
+    docs {
+      id
+      position
+      category {
+        id
+        icon {
+          ...PoiIcon
+        }
+      }
+    }
+  }
+}
+
+query PoiSearch($name: String!, $kommuneId: JSON!) {
+  pois(
+    where: {
+      AND: [{ kommune: { equals: $kommuneId } }, { title: { contains: $name } }]
+    }
+    limit: 10
+  ) {
+    docs {
+      id
+      title
+      position
+      category {
+        id
+        title
+        icon {
+          ...PoiIcon
+        }
+      }
+    }
+  }
+
+  sensoren(
+    where: {
+      AND: [
+        { kommune: { equals: $kommuneId } }
+        { titel: { contains: $name }, shownInApp: { equals: true } }
+      ]
+    }
+    limit: 10
+  ) {
+    docs {
+      id
+      position
+      titel
+      name
+      icon {
+        ...PoiIcon
+      }
+      felder {
+        id
+        werteart {
+          id
+          icon {
+            ...PoiIcon
+          }
+        }
+      }
+    }
+  }
+}

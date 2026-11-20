@@ -1,0 +1,135 @@
+kind: Namespace
+apiVersion: v1
+metadata:
+  name: kommunalapp-feature-branches
+---
+kind: ServiceAccount
+apiVersion: v1
+metadata:
+  name: deploy
+  namespace: kommunalapp-feature-branches
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: deploy-token
+  namespace: kommunalapp-feature-branches
+  annotations:
+    kubernetes.io/service-account.name: deploy
+type: kubernetes.io/service-account-token
+---
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: deploy
+  namespace: kommunalapp-feature-branches
+rules:
+  - verbs:
+      - create
+      - delete
+      - deletecollection
+      - get
+      - list
+      - patch
+      - update
+      - watch
+    apiGroups:
+      - apps
+      - extensions
+      - batch
+      - autoscaling
+      - networking.k8s.io
+      - ''
+    resources:
+      - deployments
+      - replicasets
+      - ingresses
+      - services
+      - secrets
+      - pods
+      - replicationcontrollers
+      - daemonsets
+      - statefulsets
+      - horizontalpodautoscalers
+      - jobs
+      - cronjobs
+      - persistentvolumeclaims
+      - configmaps
+---
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: deploy
+  namespace: kommunalapp-feature-branches
+subjects:
+  - kind: User
+    apiGroup: rbac.authorization.k8s.io
+    name: 'system:serviceaccount:kommunalapp-feature-branches:deploy'
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: deploy
+---
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: read-jobs
+  namespace: kommunalapp-feature-branches
+rules:
+  - verbs:
+      - get
+    apiGroups:
+      - batch
+    resources:
+      - jobs
+---
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  namespace: kommunalapp-feature-branches
+  name: read-jobs
+subjects:
+  - kind: User
+    apiGroup: rbac.authorization.k8s.io
+    name: 'system:serviceaccount:kommunalapp-feature-branches:default'
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: read-jobs
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: wildcard-cert
+  namespace: kommunalapp-feature-branches
+spec:
+  secretName: wildcard-cert
+  issuerRef:
+    kind: ClusterIssuer
+    name: letsencrypt
+  dnsNames:
+    - "*.internal.example.invalid"
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  namespace: kommunalapp-feature-branches
+  name: teleport-access
+rules:
+- apiGroups: ["*"]
+  resources: ["*"]
+  verbs: ["*"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: teleport-access
+  namespace: kommunalapp-feature-branches
+subjects:
+- kind: Group
+  name: system:groups:kommunalapp-feature-branches:developers
+  apiGroup: rbac.authorization.k8s.io
+roleRef:
+  kind: Role
+  name: teleport-access
+  apiGroup: rbac.authorization.k8s.io

@@ -1,0 +1,39 @@
+########################################################
+# 🚧 TODO 🚧
+# Need to rewrite the qa deployment for docker compose setup
+########################################################
+
+# deploy:qa-instance:
+#   stage: deploy
+#   needs:
+#     - package:backend
+#     - package:web-bereich-a
+#     - package:web-bereich-b
+#     - package:web-storybook
+#     - package:widgetbook-web
+#   image: alpine/k8s:1.22.6
+#   interruptible: false
+#   extends: [.prepare-helm-install]
+#   script:
+#     - helm uninstall $CI_ENVIRONMENT_SLUG --wait || true
+#     - helm upgrade $CI_ENVIRONMENT_SLUG . --install --namespace kommunalapp-feature-branches --set imageTag=${IMAGE_TAG} --wait --wait-for-jobs --timeout 10m0s
+#   environment:
+#     name: qa/${CI_COMMIT_REF_NAME}
+#     url: https://${CI_ENVIRONMENT_SLUG}.internal.example.invalid
+#     on_stop: deploy:qa-instance:stop
+#   dependencies: []
+
+# deploy:qa-instance:stop:
+#   variables:
+#     GIT_STRATEGY: none
+#   stage: deploy
+#   image: alpine/k8s:1.22.6
+#   interruptible: false
+#   script:
+#     - helm uninstall $CI_ENVIRONMENT_SLUG || true
+#   when: manual
+#   allow_failure: true
+#   environment:
+#     name: qa/${CI_COMMIT_REF_NAME}
+#     action: stop
+#   dependencies: []

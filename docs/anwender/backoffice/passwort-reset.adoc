@@ -1,0 +1,86 @@
+==== Zurücksetzen des Passworts
+
+Jeder Nutzer kann sein eigenes Passwort zurücksetzen. Das kann auf zwei Wegen
+geschehen:
+
+. Im eingeloggten Zustand
+. Bevor man sich eingeloggt hat, zum Beispiel weil man es vergessen hat
+
+===== Ändern des eigenen Passworts
+Wenn man schon im Backoffice eingeloggt ist kann das Passwort dort auch direkt
+geändert werden. Dazu geht man wie folgt vor:
+
+- Über einen Klick auf den eigenen Namen bzw. den Namen des eingeloggten Nutzers
+am oberen Bildschirmrand öffnet sich das `Nutzer-Menu`.
+
+.Profil - Passwort zurücksetzen
+image::assets/anwender/Profil_Passwort_zuruecksetzen_button.png[Profil - Passwort zurücksetzen] 
+
+- In dem Menü klickt man auf `Passwort zurücksetzen` und gelangt so auf die
+Seite zum Zurücksetzen des eigenen Passworts
+
+- Man gibt zunächst das *alte* Passwort ein und anschließend zwei mal das neue
+
+- Abschließend speichert ein Klick auf `Passwort zurücksetzen` das neue Passwort.
+
+Die Eingabe des alten Passworts ist notwendig, um die Änderung des Passworts zu
+Autorisieren - also um sicherzustellen, dass der Nutzer, der das Passwort
+ändert, auch der richtige ist.
+
+.Passwort zurücksetzen
+image::assets/anwender/Profil_Passwort_zuruecksetzen.png[Passwort zurücksetzen] 
+
+===== Zurücksetzen eines vergessenen Passworts
+Es kann immer mal wieder vorkommen, dass man sein eigenes Passwort vergisst. Um
+in diesem Fall das Passwort zurückzusetzen geht man wie folgt vor - hierbei wird
+angenommen, dass man aus der Anwendung ausgeloggt ist. Darüber hinaus
+funktioniert der Passwort-Reset für jeden Nutzer-Typen. Aber: die Voraussetzung
+ist, dass es mindestens einen anderen Admin gibt, der den Reset bestätigen kann.
+
+Das Zurücksetzen des Passworts für den Fall, dass man es vergessen hat,
+erfordert einen `Admin`-Nutzer, der das Zurücksetzen bestätigen kann - der
+gleiche Ablauf, wie schon bei der Einladung von neuen Nutzern. Daher hier
+einmal der Ablauf im kurzen Überblick:
+
+. Der Nutzer, der sein Passwort zurücksetzen möchte, gibt seine E-Mail-Adresse an
+. Ein Admin oder Super-Admin bestätigt über das Backoffice, dass das Zurücksetzen gestattet ist
+. Der Nutzer schließt den Passwort-Reset ab.
+
+Im Detail ist der Ablauf zum Zurücksetzen des Passworts, wenn man es
+vergessen hat, der Folgende:
+
+**Als Nutzer**:
+
+- Auf der Login-Seite des Backoffice klickt man auf den Link `Passwort
+vergessen?` oberhalb des Anmelden-Buttons.
+- Auf der erscheinenden Seite gibt man die eigene E-Mail-Adresse ein
+- Anschließend klickt man auf `Passwort zurücksetzen`.
+
+.Login - Passwort vergessen
+image::assets/anwender/Login_Passwort_vergessen.png[Passwort vergessen]
+
+**Als Admin / Super-Admin**:
+
+- Der Admin loggt sich im Backoffice ein und wählt über das *Burger-Menu* am
+oberen Bildschirmrand die `Nutzendenverwaltung`
+- In der `Nutzendenverwaltung` taucht oben auf der Seite eine neue Anfrage für
+einen Passwort-Reset auf
+- Über einen Klick auf `Bestätigen` wird dem Nutzer das Zurücksetzen des
+Passworts gestattet
+
+.Passwort vergessen bestätigen
+image::assets/anwender/Nutzendenverwaltung_Passwort_vergessen_bestaetigen.png[Passwort vergessen bestätigen]
+
+**Wieder als Nutzer**:
+
+- Nachdem der Admin / Superadmin das Zurücksetzen bestätigt hat erhält der
+Nutzer eine E-Mail mit einem Link zum Abschließen des Passwort-Resets.
+- Der Link aus der Mail führt auf eine Seite, auf der der Nutzer sein neues
+Passwort zwei mal eingeben muss.
+- Durch einen Klick auf `Passwort zurücksetzen` wird das Passwort schließlich
+zurückgesetzt.
+
+.Login - Passwort zurücksetzen
+image::assets/anwender/Login_Passwort_zuruecksetzen.png[Passwort zurücksetzen]
+
+Nun kann sich der Nutzer wieder im Backoffice anmelden.

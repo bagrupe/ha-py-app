@@ -1,0 +1,13 @@
+query VerfuegbareProzesse {
+  my {
+    id
+    ... on BackofficeUser {
+      kommune {
+        id
+        prozesse @export(exportName: "ProzessEditorProzess") {
+          ...ProzessEditorProzess
+        }
+      }
+    }
+  }
+}

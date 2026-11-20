@@ -1,0 +1,4 @@
+{
+  "extends": "@kommunal/tsconfig/react-app.json",
+  "include": ["src/**/*"]
+}

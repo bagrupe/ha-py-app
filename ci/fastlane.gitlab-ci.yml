@@ -1,0 +1,12 @@
+.fastlane:
+  image: ruby:3.2.2
+  before_script:
+    - !reference [ default, before_script ]
+    - shopt -s expand_aliases
+    - cd ${CI_PROJECT_DIR}/${SOURCE_DIR:-.}
+    - |
+      if ! gem list bundler -i > /dev/null 2>&1; then
+        gem install bundler
+      fi
+    - bundle install
+    - alias fastlane='bundle exec fastlane'

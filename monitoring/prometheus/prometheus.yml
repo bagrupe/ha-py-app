@@ -1,0 +1,93 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+rule_files: []
+
+scrape_configs:
+  - job_name: prometheus
+    static_configs:
+      - targets:
+          - localhost:9090
+
+  - job_name: pushgateway
+    honor_labels: true
+    static_configs:
+      - targets:
+          - pushgateway:9091
+
+  - job_name: node-exporter
+    static_configs:
+      - targets:
+          - ${STAGING_SERVER_IP}:9100
+        labels:
+          environment: staging
+      - targets:
+          - ${PREPROD_SERVER_IP}:9100
+        labels:
+          environment: preprod
+      - targets:
+          - ${PRODUCTION_SERVER_IP}:9100
+        labels:
+          environment: production
+
+  - job_name: cadvisor
+    static_configs:
+      - targets:
+          - ${STAGING_SERVER_IP}:8081
+        labels:
+          environment: staging
+      - targets:
+          - ${PREPROD_SERVER_IP}:8081
+        labels:
+          environment: preprod
+      - targets:
+          - ${PRODUCTION_SERVER_IP}:8081
+        labels:
+          environment: production
+
+  - job_name: postgres-exporter
+    static_configs:
+      - targets:
+          - ${STAGING_SERVER_IP}:9187
+        labels:
+          environment: staging
+      - targets:
+          - ${PREPROD_SERVER_IP}:9187
+        labels:
+          environment: preprod
+      - targets:
+          - ${PRODUCTION_SERVER_IP}:9187
+        labels:
+          environment: production
+
+  - job_name: mongodb-exporter
+    static_configs:
+      - targets:
+          - ${STAGING_SERVER_IP}:9216
+        labels:
+          environment: staging
+      - targets:
+          - ${PREPROD_SERVER_IP}:9216
+        labels:
+          environment: preprod
+      - targets:
+          - ${PRODUCTION_SERVER_IP}:9216
+        labels:
+          environment: production
+
+  - job_name: blackbox
+    metrics_path: /probe
+    file_sd_configs:
+      - files:
+          - /etc/prometheus/targets/blackbox.probes.yml
+        refresh_interval: 30s
+    relabel_configs:
+      - source_labels: [module]
+        target_label: __param_module
+      - source_labels: [__address__]
+        target_label: __param_target
+      - source_labels: [__param_target]
+        target_label: instance
+      - target_label: __address__
+        replacement: blackbox:9115

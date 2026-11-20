@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE ikiss SYSTEM "https://www.hameln-pyrmont.de/ikiss.dtd">
+<ikiss>
+    <result>
+            <tmedia>
+                <object_full_id>3767.3528.1</object_full_id>
+                <server_id>3767</server_id>
+                <object_id>3528</object_id>
+                <language>de</language>
+                <shortname><![CDATA[Fairführer2026-2027]]></shortname>
+                <category_server_id>1</category_server_id>
+                <category_id>2</category_id>
+                <title><![CDATA[Fairführer2026-2027]]></title>
+                <author>Administrator</author>
+                <copyright></copyright>
+                <fulltext_index_off>true</fulltext_index_off>
+                <properties>8</properties>
+                <media_link><![CDATA[]]></media_link>
+                <forcedoc>0</forcedoc>
+                <description><![CDATA[]]></description>
+                <date>0000-00-00 00:00:00</date>
+                <userfieldtempl_svr_id>0</userfieldtempl_svr_id>
+                <userfieldtempl_id>0</userfieldtempl_id>
+                <pattern>false</pattern>
+                <update_date>2026-10-02 11:57:37</update_date>
+                <create_date>2026-10-02 11:57:25</create_date>
+                <release>true</release>
+                <area>internet</area>
+                <tUserFields>
+                </tUserFields>
+                <tdata_list>
+                    <tdata>
+                        <media_path><![CDATA[/media/custom/3767_3528_1.PDF?1790935045]]></media_path>
+                        <media_stream></media_stream>
+                    </tdata>
+                </tdata_list>
+                <tcategories_list>
+                    <tcategories>
+                        <object_full_id>1.2</object_full_id>
+                        <data_content><![CDATA[Dokumente]]></data_content>
+                        <category_server_id>1</category_server_id>
+                        <category_id>2</category_id>
+                        <release>true</release>
+                        <area>internet</area>
+                        <description><![CDATA[]]></description>
+                        <language>de</language>
+                    </tcategories>
+                </tcategories_list>
+                <synonyms></synonyms>
+                <tusers_list>
+                    <tusers>
+                        <user_id>3</user_id>
+                        <nickname>Administrator</nickname>
+                    </tusers>
+                </tusers_list>
+                <remote_identifier_list></remote_identifier_list>
+                <RefKey></RefKey>
+                <timer></timer>
+            </tmedia>
+    </result>
+</ikiss>

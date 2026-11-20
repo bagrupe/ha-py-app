@@ -1,0 +1,74 @@
+==== Anlegen von Organisationseinheiten, Abteilungen und Dienstleistern
+
+Die Nutzenden des Backoffice werden in der Kommunal-App in `Organisationseinheiten`
+und `Abteilungen` organisiert. Diese sind nicht vorgegeben und können durch
+Super-Administratoren selbst angelegt werden. Das Anlegen von
+Organisationseinheiten und Abteilungen ist notwendig, damit sie später im
+Prozesseditor verwendet werden können, um Zuständigkeiten für Prozesse / Anträge
+festzulegen.
+
+Organisationseinheiten und Abteilungen können vom Nutzer-Typ `Super-Admin`
+angelegt werden, Abteilungen innerhalb einer Organisationseinheit können vom
+Nutzer-Typ `Admin` angelegt werden.
+
+Um als `Super-Admin` eine neue Organisationeinheit anzulegen geht man wie folgt vor:
+
+- Zunächst loggt man sich im Backoffice ein und wählt über das sog. *Burger
+Menu* am oberen Bildschirmrand die `Nutzendenverwaltung`.
+
+.Nutzendenverwaltung öffnen
+image::assets/anwender/Nutzendenverwaltung_button.png[Nutzendenverwaltung öffnen] 
+
+- In der sich öffnenden Ansicht öffnet man anschließend über den Button
+`Organisationseinheiten verwalten` am oberen Bildschirmrand den Dialog zur
+Verwaltung von Organisationseinheiten und Abteilungen.
+
+- In dem sich öffnenden Dialog wird am unteren Bildschirmrand, unter `Name
+der Organisationseinheit` der Name eingetragen, optional kann eine E-Mail-Adresse
+angegeben werden
+
+- Ein Klick auf `Hinzufügen` legt die neue Organisationseinheit an
+
+.Organisationseinheit anlegen
+image::assets/anwender/Nutzendenverwaltung_oe_verwalten.png[Organisationseinheit anlegen] 
+
+So erstellte Organisationseinheiten werden anschließend auch in der
+`Inhaltspflege` unter dem Punkt `Untereinheiten` geführt. Handelt es
+sich bei der Organisationseinheit um eine Gemeinde, wie in diesem Beispiel, dann
+kann das über die Inhaltspflege entsprechend markiert werden und anschließend
+ein *amtlicher Regionalschlüssel* vergeben werden.
+
+===== Anlegen von Dienstleistern
+
+Neben Organisationseinheiten und Abteilungen gibt es auch die Möglichkeit externe
+`Dienstleister` in das Backoffice einzuladen. Diese haben dann ebenfalls Zugriff
+auf Anträge. Dienstleister können einzelnen oder mehreren Organisationseinheiten
+zugeordnet werden.
+
+Das Anlegen von Dienstleistern funktioniert analog zum Anlegen von
+Organisationseinheiten oder Abteilungen. Ein wichtiger Unterschied zwischen
+Organisationseinheiten / Abteilungen und Dienstleistern ist jedoch, dass
+für Dienstleister neben dem Namen und der E-Mail-Adresse zugeordnet werden kann
+(über das kleine Stift-Symbol), zu welchen Organisationseinheiten der Dienstleister
+gehört. Diese Einstellung hat zum Beispiel Einfluss darauf welche Nutzer an
+welchen Dienstleister Anträge weiterleiten können.
+
+.Externe Dienstleister anlegen
+
+====== Zuordnen von Dienstleistern zu Organisationseinheiten
+
+Nachdem ein Dienstleister mit Namen und E-Mail-Adresse hinzugefügt wurde, wird
+über das `Stift-Symbol` der Bearbeiten-Modus des Dienstleisters aktiviert und
+die Einstellungen für den spezifischen Dienstleister öffnen sich.
+
+In den Einstellungen können nun die Organisationseinheiten über Checkboxen
+ausgewählt werden, für die der Dienstleister zuständig sein soll. Ein Klick auf
+das `Disketten-Symbol` speichert die Auswahl.
+
+Diese Einstellung hat zur Folge, dass Nutzende, die der jeweiligen
+Organisationseinheit angehören, Anträge an diesen Dienstleister übergeben
+können.
+
+Beispiel: Backoffice-Nutzer, die zur Organisationseinheit Hameln gehören, können
+Anträge nur an Dienstleister weiterleiten, die selbst ebenfalls der
+Organisationseinheit Hameln zugeordnet sind.

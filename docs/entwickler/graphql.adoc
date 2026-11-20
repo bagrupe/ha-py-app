@@ -1,0 +1,9 @@
+==== GraphQL
+
+===== Generierte GraphQL-Clients
+Sowohl das Backoffice als auch die Mobile App verwenden generierte
+GraphQL-Clients, die aus einem einheitlichen Schema erzeugt werden, um die
+Typensicherheit der übertragenen Daten Ende-zu-Ende zu gewährleisten:
+
+- TypeScript: https://the-guild.dev/graphql/codegen/docs[`graphql-code-generator`]
+- Dart: https://pub.dev/packages/graphql_codegen[`graphql_codegen`]

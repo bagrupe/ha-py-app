@@ -1,0 +1,34 @@
+PODS:
+  - cryptography_flutter_plus (0.2.0):
+    - Flutter
+  - Flutter (1.0.0)
+  - flutter_keyboard_visibility (0.0.1):
+    - Flutter
+  - maps_launcher (0.0.1):
+    - Flutter
+
+DEPENDENCIES:
+  - cryptography_flutter_plus (from `.symlinks/plugins/cryptography_flutter_plus/ios`)
+  - Flutter (from `Flutter`)
+  - flutter_keyboard_visibility (from `.symlinks/plugins/flutter_keyboard_visibility/ios`)
+  - maps_launcher (from `.symlinks/plugins/maps_launcher/ios`)
+
+EXTERNAL SOURCES:
+  cryptography_flutter_plus:
+    :path: ".symlinks/plugins/cryptography_flutter_plus/ios"
+  Flutter:
+    :path: Flutter
+  flutter_keyboard_visibility:
+    :path: ".symlinks/plugins/flutter_keyboard_visibility/ios"
+  maps_launcher:
+    :path: ".symlinks/plugins/maps_launcher/ios"
+
+SPEC CHECKSUMS:
+  cryptography_flutter_plus: 44f4e9e4079395fcbb3e7809c0ac2c6ae2d9576f
+  Flutter: cabc95a1d2626b1b06e7179b784ebcf0c0cde467
+  flutter_keyboard_visibility: 4625131e43015dbbe759d9b20daaf77e0e3f6619
+  maps_launcher: edf829809ba9e894d70e569bab11c16352dedb45
+
+PODFILE CHECKSUM: 1339fa8409ca745bc2f0ce06699b8d2c190fae7d
+
+COCOAPODS: 1.16.2

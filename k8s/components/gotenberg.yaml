@@ -1,0 +1,13 @@
+name: gotenberg
+deployment:
+  port:
+    name: web
+    number: 3000
+  image:
+    tag: gotenberg/gotenberg:8
+  resources:
+    requests:
+      cpu: 10m
+      memory: 50Mi
+    limits:
+      memory: 512Mi

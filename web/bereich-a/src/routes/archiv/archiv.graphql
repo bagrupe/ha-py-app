@@ -1,0 +1,44 @@
+query ArchivierteAntraege($search: String, $skip: Int, $take: Int) {
+  archivierteAntraege(search: $search, skip: $skip, take: $take) {
+    totalCount
+    items {
+      id
+      prozessBezeichnung
+      status
+      abgeschlossenAm
+      archiviertAm
+    }
+  }
+}
+
+query ArchivierterAntrag($id: UUID!) {
+  archivierterAntrag(id: $id) {
+    id
+    prozessBezeichnung
+    status
+    createdAt
+    abgeschlossenAm
+    archiviertAm
+    sharedKeyEncryptedForKommune
+    slotWerte {
+      slotName
+      istFreigegeben
+      encrypted
+      encryptedValue {
+        cipher
+        nonce
+        tag
+      }
+      plainValue
+    }
+    verlauf {
+      id
+      createdAt
+      statusAenderung
+      statusAenderungBeschreibung
+      benutzer
+      ziel
+      nachricht
+    }
+  }
+}

@@ -1,0 +1,85 @@
+#!/bin/bash
+
+COMMIT_MSG_FILE=$1
+# Extract only the first line (the commit header) to determine the type
+COMMIT_HEADER=$(head -n 1 "$COMMIT_MSG_FILE")
+# Subject after first ": " (conventional header is type(scope)!: subject)
+SUBJECT="${COMMIT_HEADER#*: }"
+SUBJECT_LC=$(printf '%s' "$SUBJECT" | tr '[:upper:]' '[:lower:]')
+
+# 1. Automatically append Changelog trailers (values must match commitlint validTypes + generate_changelog.sh)
+# Check if a Changelog trailer already exists to avoid duplicates
+if ! grep -qE "^Changelog: " "$COMMIT_MSG_FILE"; then
+  CHANGELOG_TYPE="other"
+
+  # Deprecation called out in the subject (no separate "deprecate" commit type in commitlint)
+  if [[ "$SUBJECT_LC" =~ deprecat ]]; then
+    CHANGELOG_TYPE="deprecated"
+  elif [[ "$COMMIT_HEADER" =~ ^feat(\(.*\))?!?: ]]; then
+    CHANGELOG_TYPE="added"
+  elif [[ "$COMMIT_HEADER" =~ ^fix(\(.*\))?!?: ]]; then
+    CHANGELOG_TYPE="fixed"
+  elif [[ "$COMMIT_HEADER" =~ ^perf(\(.*\))?!?: ]]; then
+    CHANGELOG_TYPE="performance"
+  elif [[ "$COMMIT_HEADER" =~ ^(refactor|style)(\(.*\))?!?: ]]; then
+    CHANGELOG_TYPE="changed"
+  elif [[ "$COMMIT_HEADER" =~ ^docs(\(.*\))?!?: ]]; then
+    CHANGELOG_TYPE="documentation"
+  elif [[ "$COMMIT_HEADER" =~ ^build(\(.*\))?!?: ]]; then
+    CHANGELOG_TYPE="dependencies"
+  elif [[ "$COMMIT_HEADER" =~ ^test(\(.*\))?!?: ]]; then
+    CHANGELOG_TYPE="changed"
+  elif [[ "$COMMIT_HEADER" =~ ^chore(\(.*\))?!?: ]]; then
+    # Dependency-style chores (Renovate, version bumps, lockfiles) → visible Dependencies section
+    if [[ "$SUBJECT_LC" =~ deps|dependenc|bump|packages|package\.json|pubspec|lockfile|gradle|nuget|pnpm|npm|yarn|cocoapods ]]; then
+      CHANGELOG_TYPE="dependencies"
+    fi
+  elif [[ "$COMMIT_HEADER" =~ ^(ci|revert)(\(.*\))?!?: ]]; then
+    CHANGELOG_TYPE="other"
+  fi
+
+  # Safely append the trailer to the end of the commit message using git interpret-trailers
+  git interpret-trailers --in-place --trailer "Changelog: $CHANGELOG_TYPE" "$COMMIT_MSG_FILE"
+fi
+
+# 2. Validate commit message with commitlint (now validates the appended trailer too)
+npx --no -- commitlint --edit "$1" || {
+  echo ""
+  echo "❌  COMMIT FAILED: Invalid Format"
+  echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+  echo "Structure: <type>(<scope>)[optional !]: <subject>"
+  echo "Example:   feat(backend)!: breaking change in API"
+  echo ""
+  echo "1. ALLOWED TYPES:"
+  echo "   feat      (New feature)"
+  echo "   fix       (Bug fix)"
+  echo "   docs      (Documentation)"
+  echo "   style     (Formatting, missing semi-colons, etc)"
+  echo "   refactor  (Code change - no fix/no feature)"
+  echo "   perf      (Performance improvement)"
+  echo "   test      (Adding/correcting tests)"
+  echo "   build     (Build system or external dependencies)"
+  echo "   ci        (CI configuration files and scripts)"
+  echo "   chore     (General maintenance)"
+  echo "   revert    (Reverts a previous commit)"
+  echo ""
+  echo "2. ALLOWED SCOPES:"
+  echo "   app            (Frontend / Mobile app specific)"
+  echo "   backend        (Dotnet)"
+  echo "   bereich-a      (Backoffice)"
+  echo "   bereich-b      (Payload CMS)"
+  echo "   shared         (If more than one area is modified)"
+  echo "   infrastructure (Docker/scripts/workflows)"
+  echo ""
+  echo "3. BREAKING CHANGES:"
+  echo "   Add a '!' after the type/scope to flag a breaking change."
+  echo "   Example: fix(bereich-b)!: remove deprecated field"
+  echo ""
+  echo "4. CHANGELOG TRAILER (auto-appended from type + subject; override with manual trailer):"
+  echo "   added | changed | deprecated | removed | fixed | security | performance |"
+  echo "   documentation | dependencies | other"
+  echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+  echo "💡 TIP: Use command 'task c' for an interactive guide!"
+  echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+  exit 1
+}

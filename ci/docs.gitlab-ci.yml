@@ -1,0 +1,20 @@
+docs:build:
+  image: asciidoctor/docker-asciidoctor
+  stage: build
+  needs: []
+  before_script:
+    - cd docs
+  script:
+    - asciidoctor doku.adoc doku-anwender.adoc
+    - asciidoctor-pdf doku-anwender.adoc
+  artifacts:
+    paths:
+      - docs/doku.html
+      - docs/doku-anwender.html
+      - docs/doku-anwender.pdf
+    expire_in: 1 week
+  rules:
+    - if: $TARGET_ENV == "feature"
+      changes:
+        - "docs/**/*"
+      when: on_success

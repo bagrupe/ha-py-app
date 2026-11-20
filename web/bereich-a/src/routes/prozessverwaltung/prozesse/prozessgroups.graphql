@@ -1,0 +1,48 @@
+mutation UpdateProzessGroup($input: UpdateProzessGroupInput!) {
+  updateProzessGroup(updateProzessGroupInput: $input) {
+    __typename
+    prozessGroup {
+      id
+      name
+    }
+    errors {
+      __typename
+      ... on Error {
+        message
+      }
+    }
+  }
+}
+
+mutation DeleteProzessGroup($input: DeleteProzessGroupInput!) {
+  deleteProzessGroup(deleteProzessGroupInput: $input) {
+    __typename
+    prozessGroup {
+      id
+      name
+    }
+    errors {
+      __typename
+      ... on Error {
+        message
+      }
+    }
+  }
+}
+
+mutation AddProzessGroup($input: AddProzessGroupInput!) {
+  addProzessGroup(addProzessGroupInput: $input) {
+    __typename
+    prozessGroup {
+      __typename
+      id
+      name
+    }
+    errors {
+      __typename
+      ... on Error {
+        message
+      }
+    }
+  }
+}

@@ -1,0 +1,21 @@
+.pnpm:
+  image: node:${NODE_VERSION}-alpine
+  before_script:
+    - !reference [default, before_script]
+    - cd ${CI_PROJECT_DIR}/${SOURCE_DIR:-.}
+    - command -v apk >/dev/null 2>&1 && apk add python3 make g++
+    - corepack enable
+    # This reads the `packageManager` property from package.json
+    - corepack prepare --activate
+    - pnpm config set store-dir /opt/caching/.pnpm-store
+    - pnpm config set package-import-method copy
+    - |
+      if [ "${PNPM_INSTALL:-all}" = "none" ]; then
+        echo "Skipping pnpm install"
+      elif [ "${PNPM_INSTALL:-all}" = "dev" ]; then
+        pnpm install --dev
+      elif [ "${PNPM_INSTALL:-all}" = "prod" ]; then
+        pnpm install --prod
+      else
+        pnpm install
+      fi

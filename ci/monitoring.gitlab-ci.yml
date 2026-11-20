@@ -1,0 +1,99 @@
+include:
+  - local: "/ci/colors.yml"
+  - local: ci/template.gitlab-ci.yml
+
+################################################
+# Monitoring stack deployment
+################################################
+
+monitoring:deploy:
+  stage: deploy
+  extends:
+    - .ssh-connection
+  tags:
+    - docker
+  interruptible: false
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "schedule"
+      when: never
+    - if: $CI_COMMIT_BRANCH == "main"
+      changes:
+        - monitoring/**/*
+      when: on_success
+  script: |
+
+    echo -e "${BLUE}--------------------------------------------------------------------------------------------------------------------------"
+    echo -e "💾 Get monitoring environment variables from GitLab"
+    echo -e "--------------------------------------------------------------------------------------------------------------------------${RESET}"
+
+    cat "$MONITORING_ENV_FILE" >> ./.env
+
+    echo -e "${BLUE}--------------------------------------------------------------------------------------------------------------------------"
+    echo -e "🚛 Copy monitoring stack to remote server"
+    echo -e "--------------------------------------------------------------------------------------------------------------------------${RESET}"
+
+    ssh deploy_user@${SERVER_IP} "mkdir -p /home/deploy_user/monitoring"
+
+    scp -qr monitoring/. deploy_user@${SERVER_IP}:/home/deploy_user/monitoring/
+    scp -q ./.env deploy_user@${SERVER_IP}:/home/deploy_user/monitoring/.env
+
+    ssh deploy_user@${SERVER_IP} << ENDSSH
+    set -e
+    cd /home/deploy_user/monitoring/
+
+    echo -e "${BLUE}--------------------------------------------------------------------------------------------------------------------------"
+    echo -e "🚀 Start monitoring stack"
+    echo -e "--------------------------------------------------------------------------------------------------------------------------${RESET}"
+
+    docker compose -f docker-compose.yml --profile tls -p hameln-monitoring --env-file .env pull
+    docker compose -f docker-compose.yml --profile tls -p hameln-monitoring --env-file .env up -d --force-recreate
+
+    echo -e "${GREEN}--------------------------------------------------------------------------------------------------------------------------"
+    echo -e "✅ Monitoring deployment completed"
+    echo -e "--------------------------------------------------------------------------------------------------------------------------${RESET}"
+
+    echo -e "${BLUE}--------------------------------------------------------------------------------------------------------------------------"
+    echo -e "🧹 Clean up"
+    echo -e "--------------------------------------------------------------------------------------------------------------------------${RESET}"
+
+    rm -f ./.env
+    ENDSSH
+
+  environment:
+    name: monitoring
+
+################################################
+# Monitoring stack stop
+################################################
+
+monitoring:stop:
+  stage: deploy
+  extends:
+    - .ssh-connection
+  tags:
+    - docker
+  when: manual
+  rules:
+    - if: $TARGET_ENV == "staging" || $TARGET_ENV == "preprod" || $TARGET_ENV == "production"
+      when: manual
+      changes:
+        - monitoring/**/*
+  script: |
+
+    ssh deploy_user@${SERVER_IP} << ENDSSH
+    set -e
+    cd /home/deploy_user/monitoring/
+
+    echo -e "${BLUE}--------------------------------------------------------------------------------------------------------------------------"
+    echo -e "🛑 Stop monitoring stack"
+    echo -e "--------------------------------------------------------------------------------------------------------------------------${RESET}"
+
+    docker compose -f docker-compose.yml --profile tls -p hameln-monitoring down --remove-orphans || true
+
+    echo -e "${GREEN}--------------------------------------------------------------------------------------------------------------------------"
+    echo -e "✅ Monitoring stack stopped"
+    echo -e "--------------------------------------------------------------------------------------------------------------------------${RESET}"
+    ENDSSH
+  allow_failure: true
+  environment:
+    name: monitoring

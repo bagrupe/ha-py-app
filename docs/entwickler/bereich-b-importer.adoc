@@ -1,0 +1,67 @@
+==== Importer
+===== Automatischer Import
+Es gibt vier verschiedene Importer, die das CMS in regelmäßigen Abständen
+automatisch mit Inhalten versorgen. Dies geschieht mittels eines Cron-Jobs, der
+die folgenden Inhalte importiert:
+
+- News-Artikel
+- Veranstaltungen
+- Wetter
+- Sensoren
+
+Nach der Initialisierung von Payload werden die Cron-Jobs registriert, wofür das
+https://www.npmjs.com/package/node-cron[node-cron] Paket verwendet wird.
+
+Die importierten Inhalte (Wetterdaten, Sensoren, Veranstaltungen und
+News-Artikel) werden später in der App angezeigt.
+
+Die Importer sind im folgenden Verzeichnis zu finden:
+`web/bereich-b/src/cron-jobs`
+
+===== News-Artikel
+Für den Import von News-Artikeln werden drei Schnittstellen verwendet: NOLIS,
+RSS und IKISS. Jede Schnittstelle hat ihre eigene Importlogik, die die Daten in
+die Payload-Collection news-artikel importiert.
+
+====== Veranstaltungen, Wetter und Sensoren
+Die Veranstaltungen werden über die Plattformen `Niedersachsenhub` und
+Destination One importiert. Für jeden Mandanten, wie beispielsweise
+Hameln-Pyrmont, wird die jeweilige Schnittstelle angesprochen, um die relevante
+Veranstaltungen abzurufen, die sich innerhalb des Landkreises Hameln-Pyrmont
+befinden. Die Zuordnung der Veranstaltungen zu ihren jeweiligen
+Organisationseinheiten bzw. Gemeinden (z.B Emmerthal) erfolgt mithilfe der
+Koordinaten der Veranstaltung. Dabei wird überprüft, ob sich diese Koordinaten
+innerhalb der Grenzen der jeweiligen Organisationseinheit / Gemeinde befinden.
+
+Die Grenzen von Landkreis und Gemeinden liegen als GeoJSON in
+`web/bereich-b/src/cron-jobs/import-veranstaltungen/data/osm-grenzen.json`
+(Quelle: OpenStreetMap, (c) OpenStreetMap-Mitwirkende, ODbL). Der Import löst eine
+Grenze immer in dieser Reihenfolge auf: Steht der Regionalschlüssel in der Datei,
+wird die Grenze aus der Datei verwendet und in der Collection `osm-grenzen`
+angelegt oder aktualisiert (erkennbar am Hash `quellHash`). Nur für
+Regionalschlüssel, die nicht in der Datei stehen, fragt der Import die
+Overpass-API einmalig ab und speichert das Ergebnis, sofern es eine gültige
+Fläche enthält. Schlägt die Abfrage für eine Gemeinde fehl, wird sie in diesem
+Lauf übersprungen (Fehler im Log und in der Fehler-Metrik). Schlägt sie für den
+Landkreis fehl, bricht der Lauf ab.
+
+Sollen die hinterlegten Grenzen aktualisiert werden, wird `osm-grenzen.json` neu
+erzeugt (Overpass-Abfrage
+`relation["de:regionalschluessel"="<Schlüssel>"]["boundary"="administrative"]; out geom;`,
+Umwandlung mit `osmtogeojson`). Beim nächsten Importlauf werden abweichende
+Einträge in `osm-grenzen` automatisch überschrieben. Ein im CMS gelöschter Eintrag
+mit einem Schlüssel aus der Datei wird beim nächsten Importlauf aus der Datei
+wiederhergestellt.
+
+
+Die Wetterdaten werden über https://openweathermap.org/[OpenWeatherMap] importiert.
+
+===== Sensoren
+
+Für den Import von Sensordaten aus der InfluxDB siehe
+<<anwender_sensoren,Sensoren>>.
+
+===== Manueller Import
+Die Poi Collection stellt einen `/upload`-Endpunkt breit. Nachdem eine Datei in
+einem validen GeoJson Format hochgeladen wurden, wird dieser Endpunkt
+angesprochen, um die Poi's in die Payload Collection `poi` zu importieren.

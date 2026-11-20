@@ -1,0 +1,56 @@
+mutation UpdateAbteilung($input: UpdateAbteilungInput!) {
+  updateAbteilung(input: $input) {
+    mitarbeiterGruppe {
+      __typename
+      id
+      name
+      eMailAdressen
+    }
+    errors {
+      __typename
+      ... on Error {
+        message
+      }
+    }
+  }
+}
+
+fragment DeleteAbteilungPayload on DeleteAbteilungPayload {
+  __typename
+  prozessDependencies {
+    prozessId
+    prozessName
+    schrittNamen
+  }
+  success
+  mitarbeiterGruppe {
+    __typename
+    id
+    name
+  }
+}
+
+mutation DeleteAbteilung($input: DeleteAbteilungInput!) {
+  deleteAbteilung(input: $input) {
+    __typename
+
+    ...DeleteAbteilungPayload
+  }
+}
+
+mutation AddAbteilung($input: AddAbteilungInput!) {
+  addAbteilung(input: $input) {
+    mitarbeiterGruppe {
+      __typename
+      id
+      name
+      eMailAdressen
+    }
+    errors {
+      __typename
+      ... on Error {
+        message
+      }
+    }
+  }
+}

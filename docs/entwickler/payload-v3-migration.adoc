@@ -1,0 +1,152 @@
+==== Background and goal
+
+The content area (Bereich-B) ran on Payload v1, which is built on Express and
+has reached end of life. This release moves it to Payload v3, which installs
+directly into a Next.js 15 app and runs the admin panel, the REST API and the
+GraphQL API in the same process.
+
+The jump skips Payload v2 on purpose. v2 is already in maintenance mode, and it
+runs on the same Express-based architecture as v1, so stopping there would not
+get us off the stack we are trying to leave, and we would only have to migrate
+again to reach v3. Going straight to the Next.js-native line does the work once.
+
+The work was done in place under `web/bereich-b`, and the interfaces and data
+stay close to identical for the app and the backend. What follows is a short tour of what moved, plus the
+breaking changes to watch for at cutover.
+
+==== What changed
+
+[cols="1,3"]
+|===
+| Area | Change
+
+| Platform
+| The Express server (`server.ts`) is gone. Payload now runs embedded in
+Next.js 15, and the old boot sequence lives in `onInit` (`payload.config.ts`):
+startup migrations, then indexes, then `seedBenutzer`, then cron jobs. The
+Docker image ships the Next.js standalone output.
+
+| Rich text
+| Payload v3's default editor is Lexical, and Slate is deprecated upstream, so
+the rich text fields moved to Lexical. The rest is a project decision: a
+migration converts the existing Slate content, the importers write Lexical, and
+rich text reaches the app as HTML.
+
+| Database migrations
+| Four native migrations (among them relationships from `string` to `ObjectId`,
+the version schema, and Slate to Lexical) run automatically on startup in
+production, and via `pnpm migrate` in development. Three idempotent startup
+migrations also run on every boot.
+
+| Admin components
+| Custom admin components are now React Server Components, with `'use client'`
+only where a widget needs interactivity. They are wired together through a
+generated `importMap.js`.
+
+| Access control
+| The permission logic was rebuilt against the typed access API of v3 and
+covered by a large unit test suite. The behaviour is unchanged.
+
+| GraphQL
+| Relationship `where` operators are now `JSON` instead of `String`, and `null`
+is dropped from `in` lists (see Breaking changes).
+
+| Authentication
+| `useSessions: false`: the SSO backchannel signs JWTs directly. The internal
+login route is now `/internal/sso/login` rather than `/_internal/...`, because
+Next.js ignores directories that start with an underscore. It is guarded by
+`INTERNAL_API_SECRET`.
+
+| Importers and content
+| The four cron importers keep their schedules, now write Lexical, and bucket
+weather data by Europe/Berlin day. New on top: the `aufrufe` collection
+(Vereinsaufrufe) with QR code generation.
+|===
+
+==== Impact on app and backend
+
+*Mobile app (Flutter):*
+
+* Rich text is rendered as HTML now (`html_rich_text.dart`); the old Slate
+renderer is gone.
+* Eight GraphQL operations were retyped to `JSON` variables, and the v1 pattern
+`in: [...ids, null]` was replaced with `OR: [{ in }, { exists: false }]`.
+* The Dart code generation was rebuilt in full against the v3 schema.
+
+*Backend (.NET):*
+
+* The stitched `BereichB.graphql` schema was regenerated, and the `JSON`
+operators flow through to the app schema.
+* The internal API is now `/internal/` and is authenticated with
+`BereichB__InternalApiSecret`.
+* The CMS address did not change (`+http://bereich-b:3000+`). The port stayed
+the same.
+
+==== Client rich text: HTML instead of a Lexical parser
+
+Payload v3 stores rich text as Lexical, which is a tree of JSON nodes rather
+than plain markup. To show that content in the Flutter app there were two
+realistic paths:
+
+. Parse the Lexical tree directly in Dart and render every node type by hand.
+. Convert Lexical to HTML once on the server, and render that HTML in the app
+with an existing widget.
+
+We chose the second path. The CMS converts Lexical to HTML
+(`web/bereich-b/src/lib/lexical-to-html.ts`), and the app renders it with the
+`HtmlWidget` from the `flutter_widget_from_html_core` package
+(`app/lib/components/html_rich_text.dart`). The widget maps heading tags to the
+app text theme, scales the font size, and opens links through `url_launcher`.
+
+The tradeoff is deliberate. A custom Lexical parser would mean owning a renderer
+that has to cover every Lexical node type and stay in step with Payload
+upstream. That is ongoing maintenance and an easy place for subtle bugs to hide.
+Leaning on a maintained HTML widget moves that work out of our codebase. The
+price is one extra conversion step and being bound to what the HTML widget and
+our style mapping support, which is a fair trade for the kind of content this
+app renders.
+
+==== Breaking changes
+
+IMPORTANT: Check these before cutover. They need coordinated releases or
+specific operational steps.
+
+Some of the points below follow from Payload's own v3 breaking changes, and the
+upstream list is worth reading alongside this page:
+https://github.com/payloadcms/payload/blob/main/docs/migration-guide/v3.mdx#breaking-changes[Payload 2.0 to 3.0 Migration Guide, breaking changes].
+
+. *Shipped app builds get HTTP 400.* Released apps send `String!` variables for
+relationship filters; v3 expects `JSON` and rejects them before execution. The
+app release and the cutover have to be coordinated, for example with a forced
+update window before `CMS_UPSTREAM` is switched over.
+. *`null` is dropped from relationship `in` lists.* The v1 idiom
+`in: [...ids, null]` returns fewer rows. The app replaces it with
+`OR: [{ in }, { exists: false }]`.
+. *Environment variables have to be renamed.* `MONGODB_URI` becomes
+`DATABASE_URL`, `PAYLOAD_PUBLIC_SERVER_URL` becomes `NEXT_PUBLIC_SERVER_URL`,
+and `INTERNAL_API_SECRET` is new. If the old names are left in place, the
+container starts with no database connection.
+. *Rich text is HTML and Lexical, not Slate JSON.* Any client that reads the
+old Slate structure breaks, so check every rich text surface after cutover.
+. *Uploads: new path, and 500 instead of 404.* Media lives under
+`/app/bereich-b/uploads/media`, and a missing file now returns `500` rather
+than `404`. Copy `uploads/media/**` across at cutover.
+
+==== Environment variables (v1 to v3)
+
+[cols="1,1"]
+|===
+| v1 | v3
+
+| `MONGODB_URI`, `MONGODB_USERNAME`, `MONGODB_PASSWORD`
+| `DATABASE_URL` (one URI with the credentials included)
+
+| `PAYLOAD_PUBLIC_SERVER_URL`
+| `NEXT_PUBLIC_SERVER_URL`
+
+| (none)
+| `INTERNAL_API_SECRET` (new, pairs with `BereichB__InternalApiSecret`)
+|===
+
+The full list of environment variables is in the "Umgebungsvariablen:
+Inhaltspflege" section of the CI/CD documentation.

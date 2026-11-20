@@ -1,0 +1,144 @@
+{
+  "POI-Kategorie": {
+    "type": "object",
+    "properties": {
+      "id": {
+        "type": "string"
+      },
+      "title": {
+        "type": "string"
+      }
+    }
+  },
+  "POI": {
+    "type": "object",
+    "properties": {
+      "id": {
+        "type": "string"
+      },
+      "lockedForImport": {
+        "type": "boolean"
+      },
+      "title": {
+        "type": "string"
+      },
+      "category": {
+        "$ref": "#/definitions/POI-Kategorie"
+      },
+      "position": {
+        "type": "array",
+        "items": {
+          "type": "number"
+        },
+        "minItems": 2,
+        "maxItems": 2
+      },
+      "date": {
+        "type": "string"
+      },
+      "text": {
+        "type": "string"
+      },
+      "kommune": {
+        "$ref": "#/definitions/Kommune"
+      }
+    }
+  },
+  "POIUpload": {
+    "type": "object",
+    "properties": {
+      "organisationseinheitId": {
+        "type": "string",
+        "format": "uuid",
+        "example": "00e48df6-0d0f-48d2-9e8d-67fae50d4d26",
+        "required": true
+      },
+      "kategorieId": {
+        "type": "string",
+        "example": "665473d22cd9bd1869c92435",
+        "required": true
+      },
+      "featureCollection": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "required": true,
+            "enum": ["FeatureCollection"]
+          },
+          "name": {
+            "type": "string",
+            "required": true,
+            "example": "test-collection"
+          },
+          "crs": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "required": true,
+                "enum": ["name"]
+              },
+              "properties": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "required": true,
+                    "example": "urn:ogc:def:crs:EPSG::25832"
+                  }
+                }
+              }
+            }
+          },
+          "features": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "enum": ["Feature"],
+                  "required": true
+                },
+                "properties": {
+                  "type": "object",
+                  "properties": {
+                    "OBJECTID": {
+                      "type": "integer",
+                      "example": 1,
+                      "required": true
+                    },
+                    "Name": {
+                      "type": "string",
+                      "example": "Name des POIs",
+                      "required": true
+                    }
+                  }
+                },
+                "geometry": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "enum": ["Point"],
+                      "required": true
+                    },
+                    "coordinates": {
+                      "type": "array",
+                      "items": {
+                        "type": "number"
+                      },
+                      "required": true,
+                      "example": [518175.395, 5766627.915]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

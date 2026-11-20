@@ -1,0 +1,3931 @@
+{
+  "apiVersion": 1,
+  "groups": [
+    {
+      "orgId": 1,
+      "name": "Kommunal App Alerts",
+      "folder": "Kommunal App",
+      "interval": "1m",
+      "rules": [
+        {
+          "uid": "hameln_disk_staging",
+          "title": "Staging – Disk > 80%",
+          "condition": "C",
+          "for": "1m",
+          "noDataState": "NoData",
+          "execErrState": "Error",
+          "dashboardUid": "hameln-overview",
+          "labels": {
+            "severity": "warning",
+            "environment": "staging",
+            "alert_type": "disk"
+          },
+          "annotations": {
+            "summary": "Root disk usage above 80% on Staging",
+            "description": "The root filesystem on Staging has exceeded 80% utilization."
+          },
+          "isPaused": false,
+          "data": [
+            {
+              "refId": "A",
+              "datasourceUid": "prometheus",
+              "model": {
+                "datasource": {
+                  "type": "prometheus",
+                  "uid": "prometheus"
+                },
+                "editorMode": "code",
+                "expr": "1 - (node_filesystem_free_bytes{environment=\"staging\", mountpoint=\"/\"} / node_filesystem_size_bytes{environment=\"staging\", mountpoint=\"/\"})",
+                "instant": true,
+                "intervalMs": 15000,
+                "maxDataPoints": 43200,
+                "range": false,
+                "refId": "A"
+              },
+              "relativeTimeRange": {
+                "from": 600,
+                "to": 0
+              }
+            },
+            {
+              "refId": "B",
+              "datasourceUid": "__expr__",
+              "model": {
+                "datasource": {
+                  "type": "__expr__",
+                  "uid": "__expr__"
+                },
+                "expression": "A",
+                "intervalMs": 1000,
+                "maxDataPoints": 43200,
+                "reducer": "last",
+                "refId": "B",
+                "type": "reduce"
+              }
+            },
+            {
+              "refId": "C",
+              "datasourceUid": "__expr__",
+              "model": {
+                "conditions": [
+                  {
+                    "evaluator": {
+                      "params": [
+                        0.8
+                      ],
+                      "type": "gt"
+                    },
+                    "operator": {
+                      "type": "and"
+                    },
+                    "query": {
+                      "params": []
+                    },
+                    "reducer": {
+                      "type": "last"
+                    },
+                    "type": "query"
+                  }
+                ],
+                "datasource": {
+                  "type": "__expr__",
+                  "uid": "__expr__"
+                },
+                "expression": "B",
+                "intervalMs": 1000,
+                "maxDataPoints": 43200,
+                "refId": "C",
+                "type": "threshold"
+              }
+            }
+          ]
+        },
+        {
+          "uid": "hameln_cpu_staging",
+          "title": "Staging – CPU > 95%",
+          "condition": "C",
+          "for": "2m",
+          "noDataState": "NoData",
+          "execErrState": "Error",
+          "dashboardUid": "hameln-overview",
+          "labels": {
+            "severity": "critical",
+            "environment": "staging",
+            "alert_type": "cpu"
+          },
+          "annotations": {
+            "summary": "Average CPU usage above 95% on Staging for 2 minutes",
+            "description": "Average CPU utilization on Staging has been above 95% for more than 2 minutes."
+          },
+          "isPaused": false,
+          "data": [
+            {
+              "refId": "A",
+              "datasourceUid": "prometheus",
+              "model": {
+                "datasource": {
+                  "type": "prometheus",
+                  "uid": "prometheus"
+                },
+                "editorMode": "code",
+                "expr": "1 - avg(rate(node_cpu_seconds_total{mode=\"idle\", environment=\"staging\"}[5m]))",
+                "instant": true,
+                "intervalMs": 15000,
+                "maxDataPoints": 43200,
+                "range": false,
+                "refId": "A"
+              },
+              "relativeTimeRange": {
+                "from": 600,
+                "to": 0
+              }
+            },
+            {
+              "refId": "B",
+              "datasourceUid": "__expr__",
+              "model": {
+                "datasource": {
+                  "type": "__expr__",
+                  "uid": "__expr__"
+                },
+                "expression": "A",
+                "intervalMs": 1000,
+                "maxDataPoints": 43200,
+                "reducer": "last",
+                "refId": "B",
+                "type": "reduce"
+              }
+            },
+            {
+              "refId": "C",
+              "datasourceUid": "__expr__",
+              "model": {
+                "conditions": [
+                  {
+                    "evaluator": {
+                      "params": [
+                        0.95
+                      ],
+                      "type": "gt"
+                    },
+                    "operator": {
+                      "type": "and"
+                    },
+                    "query": {
+                      "params": []
+                    },
+                    "reducer": {
+                      "type": "last"
+                    },
+                    "type": "query"
+                  }
+                ],
+                "datasource": {
+                  "type": "__expr__",
+                  "uid": "__expr__"
+                },
+                "expression": "B",
+                "intervalMs": 1000,
+                "maxDataPoints": 43200,
+                "refId": "C",
+                "type": "threshold"
+              }
+            }
+          ]
+        },
+        {
+          "uid": "hameln_ram_staging",
+          "title": "Staging – RAM > 95%",
+          "condition": "C",
+          "for": "2m",
+          "noDataState": "NoData",
+          "execErrState": "Error",
+          "dashboardUid": "hameln-overview",
+          "labels": {
+            "severity": "critical",
+            "environment": "staging",
+            "alert_type": "ram"
+          },
+          "annotations": {
+            "summary": "RAM usage above 95% on Staging for 2 minutes",
+            "description": "Memory utilization on Staging has been above 95% for more than 2 minutes."
+          },
+          "isPaused": false,
+          "data": [
+            {
+              "refId": "A",
+              "datasourceUid": "prometheus",
+              "model": {
+                "datasource": {
+                  "type": "prometheus",
+                  "uid": "prometheus"
+                },
+                "editorMode": "code",
+                "expr": "(1 - (node_memory_MemAvailable_bytes{environment=\"staging\"} / node_memory_MemTotal_bytes{environment=\"staging\"}))",
+                "instant": true,
+                "intervalMs": 15000,
+                "maxDataPoints": 43200,
+                "range": false,
+                "refId": "A"
+              },
+              "relativeTimeRange": {
+                "from": 600,
+                "to": 0
+              }
+            },
+            {
+              "refId": "B",
+              "datasourceUid": "__expr__",
+              "model": {
+                "datasource": {
+                  "type": "__expr__",
+                  "uid": "__expr__"
+                },
+                "expression": "A",
+                "intervalMs": 1000,
+                "maxDataPoints": 43200,
+                "reducer": "last",
+                "refId": "B",
+                "type": "reduce"
+              }
+            },
+            {
+              "refId": "C",
+              "datasourceUid": "__expr__",
+              "model": {
+                "conditions": [
+                  {
+                    "evaluator": {
+                      "params": [
+                        0.95
+                      ],
+                      "type": "gt"
+                    },
+                    "operator": {
+                      "type": "and"
+                    },
+                    "query": {
+                      "params": []
+                    },
+                    "reducer": {
+                      "type": "last"
+                    },
+                    "type": "query"
+                  }
+                ],
+                "datasource": {
+                  "type": "__expr__",
+                  "uid": "__expr__"
+                },
+                "expression": "B",
+                "intervalMs": 1000,
+                "maxDataPoints": 43200,
+                "refId": "C",
+                "type": "threshold"
+              }
+            }
+          ]
+        },
+        {
+          "uid": "hameln_infra_staging",
+          "title": "Staging – Infrastruktur nicht OK",
+          "condition": "C",
+          "for": "2m",
+          "noDataState": "NoData",
+          "execErrState": "Error",
+          "dashboardUid": "hameln-overview",
+          "labels": {
+            "severity": "critical",
+            "environment": "staging",
+            "alert_type": "infrastructure"
+          },
+          "annotations": {
+            "summary": "Blackbox probe {{ $labels.probe_type }} failing on Staging",
+            "description": "Blackbox probe {{ $labels.probe_type }} targeting {{ $labels.instance }} has been down for at least 3 minutes on Staging."
+          },
+          "isPaused": false,
+          "data": [
+            {
+              "refId": "A",
+              "datasourceUid": "prometheus",
+              "model": {
+                "datasource": {
+                  "type": "prometheus",
+                  "uid": "prometheus"
+                },
+                "editorMode": "code",
+                "expr": "max_over_time(probe_success{job=\"blackbox\", environment=\"staging\", probe_type=~\"backend_ready|bereich_b_ready|bereich_a_ready|stele_ready|public_app|public_stele\"}[3m])",
+                "instant": true,
+                "intervalMs": 15000,
+                "maxDataPoints": 43200,
+                "range": false,
+                "refId": "A"
+              },
+              "relativeTimeRange": {
+                "from": 600,
+                "to": 0
+              }
+            },
+            {
+              "refId": "B",
+              "datasourceUid": "__expr__",
+              "model": {
+                "datasource": {
+                  "type": "__expr__",
+                  "uid": "__expr__"
+                },
+                "expression": "A",
+                "intervalMs": 1000,
+                "maxDataPoints": 43200,
+                "reducer": "last",
+                "refId": "B",
+                "type": "reduce"
+              }
+            },
+            {
+              "refId": "C",
+              "datasourceUid": "__expr__",
+              "model": {
+                "conditions": [
+                  {
+                    "evaluator": {
+                      "params": [
+                        1
+                      ],
+                      "type": "lt"
+                    },
+                    "operator": {
+                      "type": "and"
+                    },
+                    "query": {
+                      "params": []
+                    },
+                    "reducer": {
+                      "type": "last"
+                    },
+                    "type": "query"
+                  }
+                ],
+                "datasource": {
+                  "type": "__expr__",
+                  "uid": "__expr__"
+                },
+                "expression": "B",
+                "intervalMs": 1000,
+                "maxDataPoints": 43200,
+                "refId": "C",
+                "type": "threshold"
+              }
+            }
+          ]
+        },
+        {
+          "uid": "hameln_disk_preprod",
+          "title": "Preprod – Disk > 80%",
+          "condition": "C",
+          "for": "1m",
+          "noDataState": "NoData",
+          "execErrState": "Error",
+          "dashboardUid": "hameln-overview",
+          "labels": {
+            "severity": "warning",
+            "environment": "preprod",
+            "alert_type": "disk"
+          },
+          "annotations": {
+            "summary": "Root disk usage above 80% on Preprod",
+            "description": "The root filesystem on Preprod has exceeded 80% utilization."
+          },
+          "isPaused": false,
+          "data": [
+            {
+              "refId": "A",
+              "datasourceUid": "prometheus",
+              "model": {
+                "datasource": {
+                  "type": "prometheus",
+                  "uid": "prometheus"
+                },
+                "editorMode": "code",
+                "expr": "1 - (node_filesystem_free_bytes{environment=\"preprod\", mountpoint=\"/\"} / node_filesystem_size_bytes{environment=\"preprod\", mountpoint=\"/\"})",
+                "instant": true,
+                "intervalMs": 15000,
+                "maxDataPoints": 43200,
+                "range": false,
+                "refId": "A"
+              },
+              "relativeTimeRange": {
+                "from": 600,
+                "to": 0
+              }
+            },
+            {
+              "refId": "B",
+              "datasourceUid": "__expr__",
+              "model": {
+                "datasource": {
+                  "type": "__expr__",
+                  "uid": "__expr__"
+                },
+                "expression": "A",
+                "intervalMs": 1000,
+                "maxDataPoints": 43200,
+                "reducer": "last",
+                "refId": "B",
+                "type": "reduce"
+              }
+            },
+            {
+              "refId": "C",
+              "datasourceUid": "__expr__",
+              "model": {
+                "conditions": [
+                  {
+                    "evaluator": {
+                      "params": [
+                        0.8
+                      ],
+                      "type": "gt"
+                    },
+                    "operator": {
+                      "type": "and"
+                    },
+                    "query": {
+                      "params": []
+                    },
+                    "reducer": {
+                      "type": "last"
+                    },
+                    "type": "query"
+                  }
+                ],
+                "datasource": {
+                  "type": "__expr__",
+                  "uid": "__expr__"
+                },
+                "expression": "B",
+                "intervalMs": 1000,
+                "maxDataPoints": 43200,
+                "refId": "C",
+                "type": "threshold"
+              }
+            }
+          ]
+        },
+        {
+          "uid": "hameln_cpu_preprod",
+          "title": "Preprod – CPU > 95%",
+          "condition": "C",
+          "for": "2m",
+          "noDataState": "NoData",
+          "execErrState": "Error",
+          "dashboardUid": "hameln-overview",
+          "labels": {
+            "severity": "critical",
+            "environment": "preprod",
+            "alert_type": "cpu"
+          },
+          "annotations": {
+            "summary": "Average CPU usage above 95% on Preprod for 2 minutes",
+            "description": "Average CPU utilization on Preprod has been above 95% for more than 2 minutes."
+          },
+          "isPaused": false,
+          "data": [
+            {
+              "refId": "A",
+              "datasourceUid": "prometheus",
+              "model": {
+                "datasource": {
+                  "type": "prometheus",
+                  "uid": "prometheus"
+                },
+                "editorMode": "code",
+                "expr": "1 - avg(rate(node_cpu_seconds_total{mode=\"idle\", environment=\"preprod\"}[5m]))",
+                "instant": true,
+                "intervalMs": 15000,
+                "maxDataPoints": 43200,
+                "range": false,
+                "refId": "A"
+              },
+              "relativeTimeRange": {
+                "from": 600,
+                "to": 0
+              }
+            },
+            {
+              "refId": "B",
+              "datasourceUid": "__expr__",
+              "model": {
+                "datasource": {
+                  "type": "__expr__",
+                  "uid": "__expr__"
+                },
+                "expression": "A",
+                "intervalMs": 1000,
+                "maxDataPoints": 43200,
+                "reducer": "last",
+                "refId": "B",
+                "type": "reduce"
+              }
+            },
+            {
+              "refId": "C",
+              "datasourceUid": "__expr__",
+              "model": {
+                "conditions": [
+                  {
+                    "evaluator": {
+                      "params": [
+                        0.95
+                      ],
+                      "type": "gt"
+                    },
+                    "operator": {
+                      "type": "and"
+                    },
+                    "query": {
+                      "params": []
+                    },
+                    "reducer": {
+                      "type": "last"
+                    },
+                    "type": "query"
+                  }
+                ],
+                "datasource": {
+                  "type": "__expr__",
+                  "uid": "__expr__"
+                },
+                "expression": "B",
+                "intervalMs": 1000,
+                "maxDataPoints": 43200,
+                "refId": "C",
+                "type": "threshold"
+              }
+            }
+          ]
+        },
+        {
+          "uid": "hameln_ram_preprod",
+          "title": "Preprod – RAM > 95%",
+          "condition": "C",
+          "for": "2m",
+          "noDataState": "NoData",
+          "execErrState": "Error",
+          "dashboardUid": "hameln-overview",
+          "labels": {
+            "severity": "critical",
+            "environment": "preprod",
+            "alert_type": "ram"
+          },
+          "annotations": {
+            "summary": "RAM usage above 95% on Preprod for 2 minutes",
+            "description": "Memory utilization on Preprod has been above 95% for more than 2 minutes."
+          },
+          "isPaused": false,
+          "data": [
+            {
+              "refId": "A",
+              "datasourceUid": "prometheus",
+              "model": {
+                "datasource": {
+                  "type": "prometheus",
+                  "uid": "prometheus"
+                },
+                "editorMode": "code",
+                "expr": "(1 - (node_memory_MemAvailable_bytes{environment=\"preprod\"} / node_memory_MemTotal_bytes{environment=\"preprod\"}))",
+                "instant": true,
+                "intervalMs": 15000,
+                "maxDataPoints": 43200,
+                "range": false,
+                "refId": "A"
+              },
+              "relativeTimeRange": {
+                "from": 600,
+                "to": 0
+              }
+            },
+            {
+              "refId": "B",
+              "datasourceUid": "__expr__",
+              "model": {
+                "datasource": {
+                  "type": "__expr__",
+                  "uid": "__expr__"
+                },
+                "expression": "A",
+                "intervalMs": 1000,
+                "maxDataPoints": 43200,
+                "reducer": "last",
+                "refId": "B",
+                "type": "reduce"
+              }
+            },
+            {
+              "refId": "C",
+              "datasourceUid": "__expr__",
+              "model": {
+                "conditions": [
+                  {
+                    "evaluator": {
+                      "params": [
+                        0.95
+                      ],
+                      "type": "gt"
+                    },
+                    "operator": {
+                      "type": "and"
+                    },
+                    "query": {
+                      "params": []
+                    },
+                    "reducer": {
+                      "type": "last"
+                    },
+                    "type": "query"
+                  }
+                ],
+                "datasource": {
+                  "type": "__expr__",
+                  "uid": "__expr__"
+                },
+                "expression": "B",
+                "intervalMs": 1000,
+                "maxDataPoints": 43200,
+                "refId": "C",
+                "type": "threshold"
+              }
+            }
+          ]
+        },
+        {
+          "uid": "hameln_infra_preprod",
+          "title": "Preprod – Infrastruktur nicht OK",
+          "condition": "C",
+          "for": "2m",
+          "noDataState": "NoData",
+          "execErrState": "Error",
+          "dashboardUid": "hameln-overview",
+          "labels": {
+            "severity": "critical",
+            "environment": "preprod",
+            "alert_type": "infrastructure"
+          },
+          "annotations": {
+            "summary": "Blackbox probe {{ $labels.probe_type }} failing on Preprod",
+            "description": "Blackbox probe {{ $labels.probe_type }} targeting {{ $labels.instance }} has been down for at least 3 minutes on Preprod."
+          },
+          "isPaused": false,
+          "data": [
+            {
+              "refId": "A",
+              "datasourceUid": "prometheus",
+              "model": {
+                "datasource": {
+                  "type": "prometheus",
+                  "uid": "prometheus"
+                },
+                "editorMode": "code",
+                "expr": "max_over_time(probe_success{job=\"blackbox\", environment=\"preprod\", probe_type=~\"backend_ready|bereich_b_ready|bereich_a_ready|stele_ready|public_app|public_stele\"}[3m])",
+                "instant": true,
+                "intervalMs": 15000,
+                "maxDataPoints": 43200,
+                "range": false,
+                "refId": "A"
+              },
+              "relativeTimeRange": {
+                "from": 600,
+                "to": 0
+              }
+            },
+            {
+              "refId": "B",
+              "datasourceUid": "__expr__",
+              "model": {
+                "datasource": {
+                  "type": "__expr__",
+                  "uid": "__expr__"
+                },
+                "expression": "A",
+                "intervalMs": 1000,
+                "maxDataPoints": 43200,
+                "reducer": "last",
+                "refId": "B",
+                "type": "reduce"
+              }
+            },
+            {
+              "refId": "C",
+              "datasourceUid": "__expr__",
+              "model": {
+                "conditions": [
+                  {
+                    "evaluator": {
+                      "params": [
+                        1
+                      ],
+                      "type": "lt"
+                    },
+                    "operator": {
+                      "type": "and"
+                    },
+                    "query": {
+                      "params": []
+                    },
+                    "reducer": {
+                      "type": "last"
+                    },
+                    "type": "query"
+                  }
+                ],
+                "datasource": {
+                  "type": "__expr__",
+                  "uid": "__expr__"
+                },
+                "expression": "B",
+                "intervalMs": 1000,
+                "maxDataPoints": 43200,
+                "refId": "C",
+                "type": "threshold"
+              }
+            }
+          ]
+        },
+        {
+          "uid": "hameln_disk_production",
+          "title": "Production – Disk > 80%",
+          "condition": "C",
+          "for": "1m",
+          "noDataState": "NoData",
+          "execErrState": "Error",
+          "dashboardUid": "hameln-overview",
+          "labels": {
+            "severity": "warning",
+            "environment": "production",
+            "alert_type": "disk"
+          },
+          "annotations": {
+            "summary": "Root disk usage above 80% on Production",
+            "description": "The root filesystem on Production has exceeded 80% utilization."
+          },
+          "isPaused": false,
+          "data": [
+            {
+              "refId": "A",
+              "datasourceUid": "prometheus",
+              "model": {
+                "datasource": {
+                  "type": "prometheus",
+                  "uid": "prometheus"
+                },
+                "editorMode": "code",
+                "expr": "1 - (node_filesystem_free_bytes{environment=\"production\", mountpoint=\"/\"} / node_filesystem_size_bytes{environment=\"production\", mountpoint=\"/\"})",
+                "instant": true,
+                "intervalMs": 15000,
+                "maxDataPoints": 43200,
+                "range": false,
+                "refId": "A"
+              },
+              "relativeTimeRange": {
+                "from": 600,
+                "to": 0
+              }
+            },
+            {
+              "refId": "B",
+              "datasourceUid": "__expr__",
+              "model": {
+                "datasource": {
+                  "type": "__expr__",
+                  "uid": "__expr__"
+                },
+                "expression": "A",
+                "intervalMs": 1000,
+                "maxDataPoints": 43200,
+                "reducer": "last",
+                "refId": "B",
+                "type": "reduce"
+              }
+            },
+            {
+              "refId": "C",
+              "datasourceUid": "__expr__",
+              "model": {
+                "conditions": [
+                  {
+                    "evaluator": {
+                      "params": [
+                        0.8
+                      ],
+                      "type": "gt"
+                    },
+                    "operator": {
+                      "type": "and"
+                    },
+                    "query": {
+                      "params": []
+                    },
+                    "reducer": {
+                      "type": "last"
+                    },
+                    "type": "query"
+                  }
+                ],
+                "datasource": {
+                  "type": "__expr__",
+                  "uid": "__expr__"
+                },
+                "expression": "B",
+                "intervalMs": 1000,
+                "maxDataPoints": 43200,
+                "refId": "C",
+                "type": "threshold"
+              }
+            }
+          ]
+        },
+        {
+          "uid": "hameln_cpu_production",
+          "title": "Production – CPU > 95%",
+          "condition": "C",
+          "for": "2m",
+          "noDataState": "NoData",
+          "execErrState": "Error",
+          "dashboardUid": "hameln-overview",
+          "labels": {
+            "severity": "critical",
+            "environment": "production",
+            "alert_type": "cpu"
+          },
+          "annotations": {
+            "summary": "Average CPU usage above 95% on Production for 2 minutes",
+            "description": "Average CPU utilization on Production has been above 95% for more than 2 minutes."
+          },
+          "isPaused": false,
+          "data": [
+            {
+              "refId": "A",
+              "datasourceUid": "prometheus",
+              "model": {
+                "datasource": {
+                  "type": "prometheus",
+                  "uid": "prometheus"
+                },
+                "editorMode": "code",
+                "expr": "1 - avg(rate(node_cpu_seconds_total{mode=\"idle\", environment=\"production\"}[5m]))",
+                "instant": true,
+                "intervalMs": 15000,
+                "maxDataPoints": 43200,
+                "range": false,
+                "refId": "A"
+              },
+              "relativeTimeRange": {
+                "from": 600,
+                "to": 0
+              }
+            },
+            {
+              "refId": "B",
+              "datasourceUid": "__expr__",
+              "model": {
+                "datasource": {
+                  "type": "__expr__",
+                  "uid": "__expr__"
+                },
+                "expression": "A",
+                "intervalMs": 1000,
+                "maxDataPoints": 43200,
+                "reducer": "last",
+                "refId": "B",
+                "type": "reduce"
+              }
+            },
+            {
+              "refId": "C",
+              "datasourceUid": "__expr__",
+              "model": {
+                "conditions": [
+                  {
+                    "evaluator": {
+                      "params": [
+                        0.95
+                      ],
+                      "type": "gt"
+                    },
+                    "operator": {
+                      "type": "and"
+                    },
+                    "query": {
+                      "params": []
+                    },
+                    "reducer": {
+                      "type": "last"
+                    },
+                    "type": "query"
+                  }
+                ],
+                "datasource": {
+                  "type": "__expr__",
+                  "uid": "__expr__"
+                },
+                "expression": "B",
+                "intervalMs": 1000,
+                "maxDataPoints": 43200,
+                "refId": "C",
+                "type": "threshold"
+              }
+            }
+          ]
+        },
+        {
+          "uid": "hameln_ram_production",
+          "title": "Production – RAM > 95%",
+          "condition": "C",
+          "for": "2m",
+          "noDataState": "NoData",
+          "execErrState": "Error",
+          "dashboardUid": "hameln-overview",
+          "labels": {
+            "severity": "critical",
+            "environment": "production",
+            "alert_type": "ram"
+          },
+          "annotations": {
+            "summary": "RAM usage above 95% on Production for 2 minutes",
+            "description": "Memory utilization on Production has been above 95% for more than 2 minutes."
+          },
+          "isPaused": false,
+          "data": [
+            {
+              "refId": "A",
+              "datasourceUid": "prometheus",
+              "model": {
+                "datasource": {
+                  "type": "prometheus",
+                  "uid": "prometheus"
+                },
+                "editorMode": "code",
+                "expr": "(1 - (node_memory_MemAvailable_bytes{environment=\"production\"} / node_memory_MemTotal_bytes{environment=\"production\"}))",
+                "instant": true,
+                "intervalMs": 15000,
+                "maxDataPoints": 43200,
+                "range": false,
+                "refId": "A"
+              },
+              "relativeTimeRange": {
+                "from": 600,
+                "to": 0
+              }
+            },
+            {
+              "refId": "B",
+              "datasourceUid": "__expr__",
+              "model": {
+                "datasource": {
+                  "type": "__expr__",
+                  "uid": "__expr__"
+                },
+                "expression": "A",
+                "intervalMs": 1000,
+                "maxDataPoints": 43200,
+                "reducer": "last",
+                "refId": "B",
+                "type": "reduce"
+              }
+            },
+            {
+              "refId": "C",
+              "datasourceUid": "__expr__",
+              "model": {
+                "conditions": [
+                  {
+                    "evaluator": {
+                      "params": [
+                        0.95
+                      ],
+                      "type": "gt"
+                    },
+                    "operator": {
+                      "type": "and"
+                    },
+                    "query": {
+                      "params": []
+                    },
+                    "reducer": {
+                      "type": "last"
+                    },
+                    "type": "query"
+                  }
+                ],
+                "datasource": {
+                  "type": "__expr__",
+                  "uid": "__expr__"
+                },
+                "expression": "B",
+                "intervalMs": 1000,
+                "maxDataPoints": 43200,
+                "refId": "C",
+                "type": "threshold"
+              }
+            }
+          ]
+        },
+        {
+          "uid": "hameln_infra_production",
+          "title": "Production – Infrastruktur nicht OK",
+          "condition": "C",
+          "for": "2m",
+          "noDataState": "NoData",
+          "execErrState": "Error",
+          "dashboardUid": "hameln-overview",
+          "labels": {
+            "severity": "critical",
+            "environment": "production",
+            "alert_type": "infrastructure"
+          },
+          "annotations": {
+            "summary": "Blackbox probe {{ $labels.probe_type }} failing on Production",
+            "description": "Blackbox probe {{ $labels.probe_type }} targeting {{ $labels.instance }} has been down for at least 3 minutes on Production."
+          },
+          "isPaused": false,
+          "data": [
+            {
+              "refId": "A",
+              "datasourceUid": "prometheus",
+              "model": {
+                "datasource": {
+                  "type": "prometheus",
+                  "uid": "prometheus"
+                },
+                "editorMode": "code",
+                "expr": "max_over_time(probe_success{job=\"blackbox\", environment=\"production\", probe_type=~\"backend_ready|bereich_b_ready|bereich_a_ready|stele_ready|public_app|public_stele\"}[3m])",
+                "instant": true,
+                "intervalMs": 15000,
+                "maxDataPoints": 43200,
+                "range": false,
+                "refId": "A"
+              },
+              "relativeTimeRange": {
+                "from": 600,
+                "to": 0
+              }
+            },
+            {
+              "refId": "B",
+              "datasourceUid": "__expr__",
+              "model": {
+                "datasource": {
+                  "type": "__expr__",
+                  "uid": "__expr__"
+                },
+                "expression": "A",
+                "intervalMs": 1000,
+                "maxDataPoints": 43200,
+                "reducer": "last",
+                "refId": "B",
+                "type": "reduce"
+              }
+            },
+            {
+              "refId": "C",
+              "datasourceUid": "__expr__",
+              "model": {
+                "conditions": [
+                  {
+                    "evaluator": {
+                      "params": [
+                        1
+                      ],
+                      "type": "lt"
+                    },
+                    "operator": {
+                      "type": "and"
+                    },
+                    "query": {
+                      "params": []
+                    },
+                    "reducer": {
+                      "type": "last"
+                    },
+                    "type": "query"
+                  }
+                ],
+                "datasource": {
+                  "type": "__expr__",
+                  "uid": "__expr__"
+                },
+                "expression": "B",
+                "intervalMs": 1000,
+                "maxDataPoints": 43200,
+                "refId": "C",
+                "type": "threshold"
+              }
+            }
+          ]
+        },
+        {
+          "uid": "hameln_cron_staging",
+          "title": "Staging – Cron Job überfällig",
+          "condition": "C",
+          "for": "1m",
+          "noDataState": "OK",
+          "execErrState": "Error",
+          "dashboardUid": "hameln-environment-detail",
+          "labels": {
+            "severity": "warning",
+            "environment": "staging",
+            "alert_type": "cron_job"
+          },
+          "annotations": {
+            "summary": "Cron job {{ $labels.job }} ({{ $labels.instance }}) overdue on Staging",
+            "description": "Cron job {{ $labels.job }} has not completed within its expected interval (+1m buffer) on Staging. Overdue by {{ humanizeDuration $values.B.Value }}."
+          },
+          "isPaused": false,
+          "data": [
+            {
+              "refId": "A",
+              "datasourceUid": "prometheus",
+              "model": {
+                "datasource": {
+                  "type": "prometheus",
+                  "uid": "prometheus"
+                },
+                "editorMode": "code",
+                "expr": "(time() - cron_job_last_run_timestamp{environment=\"staging\", instance=\"staging-backend\", job!~\"ObjectStorageOrphanSweepJob|import_veranstaltungen|import_weather|import_sensoren|import_integrations\"}) - cron_job_expected_interval_seconds{environment=\"staging\", instance=\"staging-backend\", job!~\"ObjectStorageOrphanSweepJob|import_veranstaltungen|import_weather|import_sensoren|import_integrations\"}",
+                "instant": true,
+                "intervalMs": 15000,
+                "maxDataPoints": 43200,
+                "range": false,
+                "refId": "A"
+              },
+              "relativeTimeRange": {
+                "from": 600,
+                "to": 0
+              }
+            },
+            {
+              "refId": "B",
+              "datasourceUid": "__expr__",
+              "model": {
+                "datasource": {
+                  "type": "__expr__",
+                  "uid": "__expr__"
+                },
+                "expression": "A",
+                "intervalMs": 1000,
+                "maxDataPoints": 43200,
+                "reducer": "last",
+                "refId": "B",
+                "type": "reduce"
+              }
+            },
+            {
+              "refId": "C",
+              "datasourceUid": "__expr__",
+              "model": {
+                "conditions": [
+                  {
+                    "evaluator": {
+                      "params": [
+                        60
+                      ],
+                      "type": "gt"
+                    },
+                    "operator": {
+                      "type": "and"
+                    },
+                    "query": {
+                      "params": []
+                    },
+                    "reducer": {
+                      "type": "last"
+                    },
+                    "type": "query"
+                  }
+                ],
+                "datasource": {
+                  "type": "__expr__",
+                  "uid": "__expr__"
+                },
+                "expression": "B",
+                "intervalMs": 1000,
+                "maxDataPoints": 43200,
+                "refId": "C",
+                "type": "threshold"
+              }
+            }
+          ]
+        },
+        {
+          "uid": "hameln_cron_failed_staging",
+          "title": "Staging – Cron Job fehlgeschlagen",
+          "condition": "C",
+          "for": "5m",
+          "noDataState": "OK",
+          "execErrState": "Error",
+          "dashboardUid": "hameln-environment-detail",
+          "labels": {
+            "severity": "warning",
+            "environment": "staging",
+            "alert_type": "cron_job"
+          },
+          "annotations": {
+            "summary": "Cron job {{ $labels.job }} failed on Staging",
+            "description": "Cron job {{ $labels.job }} on {{ $labels.instance }} finished with an error on Staging. The last run did not succeed."
+          },
+          "isPaused": false,
+          "data": [
+            {
+              "refId": "A",
+              "datasourceUid": "prometheus",
+              "model": {
+                "datasource": {
+                  "type": "prometheus",
+                  "uid": "prometheus"
+                },
+                "editorMode": "code",
+                "expr": "cron_job_last_success{environment=\"staging\", instance=~\"staging-(backend|bereich-b)\"}",
+                "instant": true,
+                "intervalMs": 15000,
+                "maxDataPoints": 43200,
+                "range": false,
+                "refId": "A"
+              },
+              "relativeTimeRange": {
+                "from": 600,
+                "to": 0
+              }
+            },
+            {
+              "refId": "B",
+              "datasourceUid": "__expr__",
+              "model": {
+                "datasource": {
+                  "type": "__expr__",
+                  "uid": "__expr__"
+                },
+                "expression": "A",
+                "intervalMs": 1000,
+                "maxDataPoints": 43200,
+                "reducer": "last",
+                "refId": "B",
+                "type": "reduce"
+              }
+            },
+            {
+              "refId": "C",
+              "datasourceUid": "__expr__",
+              "model": {
+                "conditions": [
+                  {
+                    "evaluator": {
+                      "params": [
+                        1
+                      ],
+                      "type": "lt"
+                    },
+                    "operator": {
+                      "type": "and"
+                    },
+                    "query": {
+                      "params": []
+                    },
+                    "reducer": {
+                      "type": "last"
+                    },
+                    "type": "query"
+                  }
+                ],
+                "datasource": {
+                  "type": "__expr__",
+                  "uid": "__expr__"
+                },
+                "expression": "B",
+                "intervalMs": 1000,
+                "maxDataPoints": 43200,
+                "refId": "C",
+                "type": "threshold"
+              }
+            }
+          ]
+        },
+        {
+          "uid": "hameln_cron_preprod",
+          "title": "Preprod – Cron Job überfällig",
+          "condition": "C",
+          "for": "1m",
+          "noDataState": "OK",
+          "execErrState": "Error",
+          "dashboardUid": "hameln-environment-detail",
+          "labels": {
+            "severity": "warning",
+            "environment": "preprod",
+            "alert_type": "cron_job"
+          },
+          "annotations": {
+            "summary": "Cron job {{ $labels.job }} ({{ $labels.instance }}) overdue on Preprod",
+            "description": "Cron job {{ $labels.job }} has not completed within its expected interval (+1m buffer) on Preprod. Overdue by {{ humanizeDuration $values.B.Value }}."
+          },
+          "isPaused": false,
+          "data": [
+            {
+              "refId": "A",
+              "datasourceUid": "prometheus",
+              "model": {
+                "datasource": {
+                  "type": "prometheus",
+                  "uid": "prometheus"
+                },
+                "editorMode": "code",
+                "expr": "(time() - cron_job_last_run_timestamp{environment=\"preprod\", instance=\"preprod-backend\", job!~\"ObjectStorageOrphanSweepJob|import_veranstaltungen|import_weather|import_sensoren|import_integrations\"}) - cron_job_expected_interval_seconds{environment=\"preprod\", instance=\"preprod-backend\", job!~\"ObjectStorageOrphanSweepJob|import_veranstaltungen|import_weather|import_sensoren|import_integrations\"}",
+                "instant": true,
+                "intervalMs": 15000,
+                "maxDataPoints": 43200,
+                "range": false,
+                "refId": "A"
+              },
+              "relativeTimeRange": {
+                "from": 600,
+                "to": 0
+              }
+            },
+            {
+              "refId": "B",
+              "datasourceUid": "__expr__",
+              "model": {
+                "datasource": {
+                  "type": "__expr__",
+                  "uid": "__expr__"
+                },
+                "expression": "A",
+                "intervalMs": 1000,
+                "maxDataPoints": 43200,
+                "reducer": "last",
+                "refId": "B",
+                "type": "reduce"
+              }
+            },
+            {
+              "refId": "C",
+              "datasourceUid": "__expr__",
+              "model": {
+                "conditions": [
+                  {
+                    "evaluator": {
+                      "params": [
+                        60
+                      ],
+                      "type": "gt"
+                    },
+                    "operator": {
+                      "type": "and"
+                    },
+                    "query": {
+                      "params": []
+                    },
+                    "reducer": {
+                      "type": "last"
+                    },
+                    "type": "query"
+                  }
+                ],
+                "datasource": {
+                  "type": "__expr__",
+                  "uid": "__expr__"
+                },
+                "expression": "B",
+                "intervalMs": 1000,
+                "maxDataPoints": 43200,
+                "refId": "C",
+                "type": "threshold"
+              }
+            }
+          ]
+        },
+        {
+          "uid": "hameln_cron_failed_preprod",
+          "title": "Preprod – Cron Job fehlgeschlagen",
+          "condition": "C",
+          "for": "5m",
+          "noDataState": "OK",
+          "execErrState": "Error",
+          "dashboardUid": "hameln-environment-detail",
+          "labels": {
+            "severity": "warning",
+            "environment": "preprod",
+            "alert_type": "cron_job"
+          },
+          "annotations": {
+            "summary": "Cron job {{ $labels.job }} failed on Preprod",
+            "description": "Cron job {{ $labels.job }} on {{ $labels.instance }} finished with an error on Preprod. The last run did not succeed."
+          },
+          "isPaused": false,
+          "data": [
+            {
+              "refId": "A",
+              "datasourceUid": "prometheus",
+              "model": {
+                "datasource": {
+                  "type": "prometheus",
+                  "uid": "prometheus"
+                },
+                "editorMode": "code",
+                "expr": "cron_job_last_success{environment=\"preprod\", instance=~\"preprod-(backend|bereich-b)\"}",
+                "instant": true,
+                "intervalMs": 15000,
+                "maxDataPoints": 43200,
+                "range": false,
+                "refId": "A"
+              },
+              "relativeTimeRange": {
+                "from": 600,
+                "to": 0
+              }
+            },
+            {
+              "refId": "B",
+              "datasourceUid": "__expr__",
+              "model": {
+                "datasource": {
+                  "type": "__expr__",
+                  "uid": "__expr__"
+                },
+                "expression": "A",
+                "intervalMs": 1000,
+                "maxDataPoints": 43200,
+                "reducer": "last",
+                "refId": "B",
+                "type": "reduce"
+              }
+            },
+            {
+              "refId": "C",
+              "datasourceUid": "__expr__",
+              "model": {
+                "conditions": [
+                  {
+                    "evaluator": {
+                      "params": [
+                        1
+                      ],
+                      "type": "lt"
+                    },
+                    "operator": {
+                      "type": "and"
+                    },
+                    "query": {
+                      "params": []
+                    },
+                    "reducer": {
+                      "type": "last"
+                    },
+                    "type": "query"
+                  }
+                ],
+                "datasource": {
+                  "type": "__expr__",
+                  "uid": "__expr__"
+                },
+                "expression": "B",
+                "intervalMs": 1000,
+                "maxDataPoints": 43200,
+                "refId": "C",
+                "type": "threshold"
+              }
+            }
+          ]
+        },
+        {
+          "uid": "hameln_cron_production",
+          "title": "Production – Cron Job überfällig",
+          "condition": "C",
+          "for": "1m",
+          "noDataState": "OK",
+          "execErrState": "Error",
+          "dashboardUid": "hameln-environment-detail",
+          "labels": {
+            "severity": "critical",
+            "environment": "production",
+            "alert_type": "cron_job"
+          },
+          "annotations": {
+            "summary": "Cron job {{ $labels.job }} ({{ $labels.instance }}) overdue on Production",
+            "description": "Cron job {{ $labels.job }} has not completed within its expected interval (+1m buffer) on Production. Overdue by {{ humanizeDuration $values.B.Value }}."
+          },
+          "isPaused": false,
+          "data": [
+            {
+              "refId": "A",
+              "datasourceUid": "prometheus",
+              "model": {
+                "datasource": {
+                  "type": "prometheus",
+                  "uid": "prometheus"
+                },
+                "editorMode": "code",
+                "expr": "(time() - cron_job_last_run_timestamp{environment=\"production\", instance=\"production-backend\", job!~\"ObjectStorageOrphanSweepJob|import_veranstaltungen|import_weather|import_sensoren|import_integrations\"}) - cron_job_expected_interval_seconds{environment=\"production\", instance=\"production-backend\", job!~\"ObjectStorageOrphanSweepJob|import_veranstaltungen|import_weather|import_sensoren|import_integrations\"}",
+                "instant": true,
+                "intervalMs": 15000,
+                "maxDataPoints": 43200,
+                "range": false,
+                "refId": "A"
+              },
+              "relativeTimeRange": {
+                "from": 600,
+                "to": 0
+              }
+            },
+            {
+              "refId": "B",
+              "datasourceUid": "__expr__",
+              "model": {
+                "datasource": {
+                  "type": "__expr__",
+                  "uid": "__expr__"
+                },
+                "expression": "A",
+                "intervalMs": 1000,
+                "maxDataPoints": 43200,
+                "reducer": "last",
+                "refId": "B",
+                "type": "reduce"
+              }
+            },
+            {
+              "refId": "C",
+              "datasourceUid": "__expr__",
+              "model": {
+                "conditions": [
+                  {
+                    "evaluator": {
+                      "params": [
+                        60
+                      ],
+                      "type": "gt"
+                    },
+                    "operator": {
+                      "type": "and"
+                    },
+                    "query": {
+                      "params": []
+                    },
+                    "reducer": {
+                      "type": "last"
+                    },
+                    "type": "query"
+                  }
+                ],
+                "datasource": {
+                  "type": "__expr__",
+                  "uid": "__expr__"
+                },
+                "expression": "B",
+                "intervalMs": 1000,
+                "maxDataPoints": 43200,
+                "refId": "C",
+                "type": "threshold"
+              }
+            }
+          ]
+        },
+        {
+          "uid": "hameln_cron_failed_production",
+          "title": "Production – Cron Job fehlgeschlagen",
+          "condition": "C",
+          "for": "5m",
+          "noDataState": "OK",
+          "execErrState": "Error",
+          "dashboardUid": "hameln-environment-detail",
+          "labels": {
+            "severity": "critical",
+            "environment": "production",
+            "alert_type": "cron_job"
+          },
+          "annotations": {
+            "summary": "Cron job {{ $labels.job }} failed on Production",
+            "description": "Cron job {{ $labels.job }} on {{ $labels.instance }} finished with an error on Production. The last run did not succeed."
+          },
+          "isPaused": false,
+          "data": [
+            {
+              "refId": "A",
+              "datasourceUid": "prometheus",
+              "model": {
+                "datasource": {
+                  "type": "prometheus",
+                  "uid": "prometheus"
+                },
+                "editorMode": "code",
+                "expr": "cron_job_last_success{environment=\"production\", instance=~\"production-(backend|bereich-b)\"}",
+                "instant": true,
+                "intervalMs": 15000,
+                "maxDataPoints": 43200,
+                "range": false,
+                "refId": "A"
+              },
+              "relativeTimeRange": {
+                "from": 600,
+                "to": 0
+              }
+            },
+            {
+              "refId": "B",
+              "datasourceUid": "__expr__",
+              "model": {
+                "datasource": {
+                  "type": "__expr__",
+                  "uid": "__expr__"
+                },
+                "expression": "A",
+                "intervalMs": 1000,
+                "maxDataPoints": 43200,
+                "reducer": "last",
+                "refId": "B",
+                "type": "reduce"
+              }
+            },
+            {
+              "refId": "C",
+              "datasourceUid": "__expr__",
+              "model": {
+                "conditions": [
+                  {
+                    "evaluator": {
+                      "params": [
+                        1
+                      ],
+                      "type": "lt"
+                    },
+                    "operator": {
+                      "type": "and"
+                    },
+                    "query": {
+                      "params": []
+                    },
+                    "reducer": {
+                      "type": "last"
+                    },
+                    "type": "query"
+                  }
+                ],
+                "datasource": {
+                  "type": "__expr__",
+                  "uid": "__expr__"
+                },
+                "expression": "B",
+                "intervalMs": 1000,
+                "maxDataPoints": 43200,
+                "refId": "C",
+                "type": "threshold"
+              }
+            }
+          ]
+        },
+        {
+          "uid": "hameln_cron_orphan_sweep_staging",
+          "title": "Staging – ObjectStorageOrphanSweepJob überfällig",
+          "condition": "C",
+          "for": "15m",
+          "noDataState": "OK",
+          "execErrState": "Error",
+          "dashboardUid": "hameln-environment-detail",
+          "labels": {
+            "severity": "warning",
+            "environment": "staging",
+            "alert_type": "cron_job"
+          },
+          "annotations": {
+            "summary": "ObjectStorageOrphanSweepJob overdue on Staging",
+            "description": "ObjectStorageOrphanSweepJob has not completed within its expected hourly interval (+10min buffer) on Staging. Overdue by {{ humanizeDuration $values.B.Value }}."
+          },
+          "isPaused": false,
+          "data": [
+            {
+              "refId": "A",
+              "datasourceUid": "prometheus",
+              "model": {
+                "datasource": {
+                  "type": "prometheus",
+                  "uid": "prometheus"
+                },
+                "editorMode": "code",
+                "expr": "(time() - cron_job_last_run_timestamp{environment=\"staging\", instance=\"staging-backend\", job=\"ObjectStorageOrphanSweepJob\"}) - cron_job_expected_interval_seconds{environment=\"staging\", instance=\"staging-backend\", job=\"ObjectStorageOrphanSweepJob\"}",
+                "instant": true,
+                "intervalMs": 15000,
+                "maxDataPoints": 43200,
+                "range": false,
+                "refId": "A"
+              },
+              "relativeTimeRange": {
+                "from": 600,
+                "to": 0
+              }
+            },
+            {
+              "refId": "B",
+              "datasourceUid": "__expr__",
+              "model": {
+                "datasource": {
+                  "type": "__expr__",
+                  "uid": "__expr__"
+                },
+                "expression": "A",
+                "intervalMs": 1000,
+                "maxDataPoints": 43200,
+                "reducer": "last",
+                "refId": "B",
+                "type": "reduce"
+              }
+            },
+            {
+              "refId": "C",
+              "datasourceUid": "__expr__",
+              "model": {
+                "conditions": [
+                  {
+                    "evaluator": {
+                      "params": [
+                        600
+                      ],
+                      "type": "gt"
+                    },
+                    "operator": {
+                      "type": "and"
+                    },
+                    "query": {
+                      "params": []
+                    },
+                    "reducer": {
+                      "type": "last"
+                    },
+                    "type": "query"
+                  }
+                ],
+                "datasource": {
+                  "type": "__expr__",
+                  "uid": "__expr__"
+                },
+                "expression": "B",
+                "intervalMs": 1000,
+                "maxDataPoints": 43200,
+                "refId": "C",
+                "type": "threshold"
+              }
+            }
+          ]
+        },
+        {
+          "uid": "hameln_cron_orphan_sweep_preprod",
+          "title": "Preprod – ObjectStorageOrphanSweepJob überfällig",
+          "condition": "C",
+          "for": "15m",
+          "noDataState": "OK",
+          "execErrState": "Error",
+          "dashboardUid": "hameln-environment-detail",
+          "labels": {
+            "severity": "warning",
+            "environment": "preprod",
+            "alert_type": "cron_job"
+          },
+          "annotations": {
+            "summary": "ObjectStorageOrphanSweepJob overdue on Preprod",
+            "description": "ObjectStorageOrphanSweepJob has not completed within its expected hourly interval (+10min buffer) on Preprod. Overdue by {{ humanizeDuration $values.B.Value }}."
+          },
+          "isPaused": false,
+          "data": [
+            {
+              "refId": "A",
+              "datasourceUid": "prometheus",
+              "model": {
+                "datasource": {
+                  "type": "prometheus",
+                  "uid": "prometheus"
+                },
+                "editorMode": "code",
+                "expr": "(time() - cron_job_last_run_timestamp{environment=\"preprod\", instance=\"preprod-backend\", job=\"ObjectStorageOrphanSweepJob\"}) - cron_job_expected_interval_seconds{environment=\"preprod\", instance=\"preprod-backend\", job=\"ObjectStorageOrphanSweepJob\"}",
+                "instant": true,
+                "intervalMs": 15000,
+                "maxDataPoints": 43200,
+                "range": false,
+                "refId": "A"
+              },
+              "relativeTimeRange": {
+                "from": 600,
+                "to": 0
+              }
+            },
+            {
+              "refId": "B",
+              "datasourceUid": "__expr__",
+              "model": {
+                "datasource": {
+                  "type": "__expr__",
+                  "uid": "__expr__"
+                },
+                "expression": "A",
+                "intervalMs": 1000,
+                "maxDataPoints": 43200,
+                "reducer": "last",
+                "refId": "B",
+                "type": "reduce"
+              }
+            },
+            {
+              "refId": "C",
+              "datasourceUid": "__expr__",
+              "model": {
+                "conditions": [
+                  {
+                    "evaluator": {
+                      "params": [
+                        600
+                      ],
+                      "type": "gt"
+                    },
+                    "operator": {
+                      "type": "and"
+                    },
+                    "query": {
+                      "params": []
+                    },
+                    "reducer": {
+                      "type": "last"
+                    },
+                    "type": "query"
+                  }
+                ],
+                "datasource": {
+                  "type": "__expr__",
+                  "uid": "__expr__"
+                },
+                "expression": "B",
+                "intervalMs": 1000,
+                "maxDataPoints": 43200,
+                "refId": "C",
+                "type": "threshold"
+              }
+            }
+          ]
+        },
+        {
+          "uid": "hameln_cron_orphan_sweep_production",
+          "title": "Production – ObjectStorageOrphanSweepJob überfällig",
+          "condition": "C",
+          "for": "15m",
+          "noDataState": "OK",
+          "execErrState": "Error",
+          "dashboardUid": "hameln-environment-detail",
+          "labels": {
+            "severity": "critical",
+            "environment": "production",
+            "alert_type": "cron_job"
+          },
+          "annotations": {
+            "summary": "ObjectStorageOrphanSweepJob overdue on Production",
+            "description": "ObjectStorageOrphanSweepJob has not completed within its expected hourly interval (+10min buffer) on Production. Overdue by {{ humanizeDuration $values.B.Value }}."
+          },
+          "isPaused": false,
+          "data": [
+            {
+              "refId": "A",
+              "datasourceUid": "prometheus",
+              "model": {
+                "datasource": {
+                  "type": "prometheus",
+                  "uid": "prometheus"
+                },
+                "editorMode": "code",
+                "expr": "(time() - cron_job_last_run_timestamp{environment=\"production\", instance=\"production-backend\", job=\"ObjectStorageOrphanSweepJob\"}) - cron_job_expected_interval_seconds{environment=\"production\", instance=\"production-backend\", job=\"ObjectStorageOrphanSweepJob\"}",
+                "instant": true,
+                "intervalMs": 15000,
+                "maxDataPoints": 43200,
+                "range": false,
+                "refId": "A"
+              },
+              "relativeTimeRange": {
+                "from": 600,
+                "to": 0
+              }
+            },
+            {
+              "refId": "B",
+              "datasourceUid": "__expr__",
+              "model": {
+                "datasource": {
+                  "type": "__expr__",
+                  "uid": "__expr__"
+                },
+                "expression": "A",
+                "intervalMs": 1000,
+                "maxDataPoints": 43200,
+                "reducer": "last",
+                "refId": "B",
+                "type": "reduce"
+              }
+            },
+            {
+              "refId": "C",
+              "datasourceUid": "__expr__",
+              "model": {
+                "conditions": [
+                  {
+                    "evaluator": {
+                      "params": [
+                        600
+                      ],
+                      "type": "gt"
+                    },
+                    "operator": {
+                      "type": "and"
+                    },
+                    "query": {
+                      "params": []
+                    },
+                    "reducer": {
+                      "type": "last"
+                    },
+                    "type": "query"
+                  }
+                ],
+                "datasource": {
+                  "type": "__expr__",
+                  "uid": "__expr__"
+                },
+                "expression": "B",
+                "intervalMs": 1000,
+                "maxDataPoints": 43200,
+                "refId": "C",
+                "type": "threshold"
+              }
+            }
+          ]
+        },
+        {
+          "uid": "hameln_cron_bb_veran_staging",
+          "title": "Staging – Bereich B import_veranstaltungen überfällig",
+          "condition": "C",
+          "for": "15m",
+          "noDataState": "OK",
+          "execErrState": "Error",
+          "dashboardUid": "hameln-environment-detail",
+          "labels": {
+            "severity": "warning",
+            "environment": "staging",
+            "alert_type": "cron_job",
+            "component": "bereich-b"
+          },
+          "annotations": {
+            "summary": "Bereich B cron job {{ $labels.job }} ({{ $labels.instance }}) overdue on Staging",
+            "description": "Bereich B cron job {{ $labels.job }} has not completed within its expected interval (+1h buffer) on Staging. Overdue by {{ humanizeDuration $values.B.Value }}."
+          },
+          "isPaused": false,
+          "data": [
+            {
+              "refId": "A",
+              "datasourceUid": "prometheus",
+              "model": {
+                "datasource": {
+                  "type": "prometheus",
+                  "uid": "prometheus"
+                },
+                "editorMode": "code",
+                "expr": "(time() - cron_job_last_run_timestamp{environment=\"staging\", instance=\"staging-bereich-b\", job=\"import_veranstaltungen\"}) - cron_job_expected_interval_seconds{environment=\"staging\", instance=\"staging-bereich-b\", job=\"import_veranstaltungen\"}",
+                "instant": true,
+                "intervalMs": 15000,
+                "maxDataPoints": 43200,
+                "range": false,
+                "refId": "A"
+              },
+              "relativeTimeRange": {
+                "from": 600,
+                "to": 0
+              }
+            },
+            {
+              "refId": "B",
+              "datasourceUid": "__expr__",
+              "model": {
+                "datasource": {
+                  "type": "__expr__",
+                  "uid": "__expr__"
+                },
+                "expression": "A",
+                "intervalMs": 1000,
+                "maxDataPoints": 43200,
+                "reducer": "last",
+                "refId": "B",
+                "type": "reduce"
+              }
+            },
+            {
+              "refId": "C",
+              "datasourceUid": "__expr__",
+              "model": {
+                "conditions": [
+                  {
+                    "evaluator": {
+                      "params": [
+                        3600
+                      ],
+                      "type": "gt"
+                    },
+                    "operator": {
+                      "type": "and"
+                    },
+                    "query": {
+                      "params": []
+                    },
+                    "reducer": {
+                      "type": "last"
+                    },
+                    "type": "query"
+                  }
+                ],
+                "datasource": {
+                  "type": "__expr__",
+                  "uid": "__expr__"
+                },
+                "expression": "B",
+                "intervalMs": 1000,
+                "maxDataPoints": 43200,
+                "refId": "C",
+                "type": "threshold"
+              }
+            }
+          ]
+        },
+        {
+          "uid": "hameln_cron_bb_weather_staging",
+          "title": "Staging – Bereich B import_weather überfällig",
+          "condition": "C",
+          "for": "15m",
+          "noDataState": "OK",
+          "execErrState": "Error",
+          "dashboardUid": "hameln-environment-detail",
+          "labels": {
+            "severity": "warning",
+            "environment": "staging",
+            "alert_type": "cron_job",
+            "component": "bereich-b"
+          },
+          "annotations": {
+            "summary": "Bereich B cron job {{ $labels.job }} ({{ $labels.instance }}) overdue on Staging",
+            "description": "Bereich B cron job {{ $labels.job }} has not completed within its expected interval (+1h buffer) on Staging. Overdue by {{ humanizeDuration $values.B.Value }}."
+          },
+          "isPaused": false,
+          "data": [
+            {
+              "refId": "A",
+              "datasourceUid": "prometheus",
+              "model": {
+                "datasource": {
+                  "type": "prometheus",
+                  "uid": "prometheus"
+                },
+                "editorMode": "code",
+                "expr": "(time() - cron_job_last_run_timestamp{environment=\"staging\", instance=\"staging-bereich-b\", job=\"import_weather\"}) - cron_job_expected_interval_seconds{environment=\"staging\", instance=\"staging-bereich-b\", job=\"import_weather\"}",
+                "instant": true,
+                "intervalMs": 15000,
+                "maxDataPoints": 43200,
+                "range": false,
+                "refId": "A"
+              },
+              "relativeTimeRange": {
+                "from": 600,
+                "to": 0
+              }
+            },
+            {
+              "refId": "B",
+              "datasourceUid": "__expr__",
+              "model": {
+                "datasource": {
+                  "type": "__expr__",
+                  "uid": "__expr__"
+                },
+                "expression": "A",
+                "intervalMs": 1000,
+                "maxDataPoints": 43200,
+                "reducer": "last",
+                "refId": "B",
+                "type": "reduce"
+              }
+            },
+            {
+              "refId": "C",
+              "datasourceUid": "__expr__",
+              "model": {
+                "conditions": [
+                  {
+                    "evaluator": {
+                      "params": [
+                        3600
+                      ],
+                      "type": "gt"
+                    },
+                    "operator": {
+                      "type": "and"
+                    },
+                    "query": {
+                      "params": []
+                    },
+                    "reducer": {
+                      "type": "last"
+                    },
+                    "type": "query"
+                  }
+                ],
+                "datasource": {
+                  "type": "__expr__",
+                  "uid": "__expr__"
+                },
+                "expression": "B",
+                "intervalMs": 1000,
+                "maxDataPoints": 43200,
+                "refId": "C",
+                "type": "threshold"
+              }
+            }
+          ]
+        },
+        {
+          "uid": "hameln_cron_bb_sensoren_staging",
+          "title": "Staging – Bereich B import_sensoren überfällig",
+          "condition": "C",
+          "for": "15m",
+          "noDataState": "OK",
+          "execErrState": "Error",
+          "dashboardUid": "hameln-environment-detail",
+          "labels": {
+            "severity": "warning",
+            "environment": "staging",
+            "alert_type": "cron_job",
+            "component": "bereich-b"
+          },
+          "annotations": {
+            "summary": "Bereich B cron job {{ $labels.job }} ({{ $labels.instance }}) overdue on Staging",
+            "description": "Bereich B cron job {{ $labels.job }} has not completed within its expected interval (+1h buffer) on Staging. Overdue by {{ humanizeDuration $values.B.Value }}."
+          },
+          "isPaused": false,
+          "data": [
+            {
+              "refId": "A",
+              "datasourceUid": "prometheus",
+              "model": {
+                "datasource": {
+                  "type": "prometheus",
+                  "uid": "prometheus"
+                },
+                "editorMode": "code",
+                "expr": "(time() - cron_job_last_run_timestamp{environment=\"staging\", instance=\"staging-bereich-b\", job=\"import_sensoren\"}) - cron_job_expected_interval_seconds{environment=\"staging\", instance=\"staging-bereich-b\", job=\"import_sensoren\"}",
+                "instant": true,
+                "intervalMs": 15000,
+                "maxDataPoints": 43200,
+                "range": false,
+                "refId": "A"
+              },
+              "relativeTimeRange": {
+                "from": 600,
+                "to": 0
+              }
+            },
+            {
+              "refId": "B",
+              "datasourceUid": "__expr__",
+              "model": {
+                "datasource": {
+                  "type": "__expr__",
+                  "uid": "__expr__"
+                },
+                "expression": "A",
+                "intervalMs": 1000,
+                "maxDataPoints": 43200,
+                "reducer": "last",
+                "refId": "B",
+                "type": "reduce"
+              }
+            },
+            {
+              "refId": "C",
+              "datasourceUid": "__expr__",
+              "model": {
+                "conditions": [
+                  {
+                    "evaluator": {
+                      "params": [
+                        3600
+                      ],
+                      "type": "gt"
+                    },
+                    "operator": {
+                      "type": "and"
+                    },
+                    "query": {
+                      "params": []
+                    },
+                    "reducer": {
+                      "type": "last"
+                    },
+                    "type": "query"
+                  }
+                ],
+                "datasource": {
+                  "type": "__expr__",
+                  "uid": "__expr__"
+                },
+                "expression": "B",
+                "intervalMs": 1000,
+                "maxDataPoints": 43200,
+                "refId": "C",
+                "type": "threshold"
+              }
+            }
+          ]
+        },
+        {
+          "uid": "hameln_cron_bb_integ_staging",
+          "title": "Staging – Bereich B import_integrations überfällig",
+          "condition": "C",
+          "for": "15m",
+          "noDataState": "OK",
+          "execErrState": "Error",
+          "dashboardUid": "hameln-environment-detail",
+          "labels": {
+            "severity": "warning",
+            "environment": "staging",
+            "alert_type": "cron_job",
+            "component": "bereich-b"
+          },
+          "annotations": {
+            "summary": "Bereich B cron job {{ $labels.job }} ({{ $labels.instance }}) overdue on Staging",
+            "description": "Bereich B cron job {{ $labels.job }} has not completed within its expected interval (+10min buffer) on Staging. Overdue by {{ humanizeDuration $values.B.Value }}."
+          },
+          "isPaused": false,
+          "data": [
+            {
+              "refId": "A",
+              "datasourceUid": "prometheus",
+              "model": {
+                "datasource": {
+                  "type": "prometheus",
+                  "uid": "prometheus"
+                },
+                "editorMode": "code",
+                "expr": "(time() - cron_job_last_run_timestamp{environment=\"staging\", instance=\"staging-bereich-b\", job=\"import_integrations\"}) - cron_job_expected_interval_seconds{environment=\"staging\", instance=\"staging-bereich-b\", job=\"import_integrations\"}",
+                "instant": true,
+                "intervalMs": 15000,
+                "maxDataPoints": 43200,
+                "range": false,
+                "refId": "A"
+              },
+              "relativeTimeRange": {
+                "from": 600,
+                "to": 0
+              }
+            },
+            {
+              "refId": "B",
+              "datasourceUid": "__expr__",
+              "model": {
+                "datasource": {
+                  "type": "__expr__",
+                  "uid": "__expr__"
+                },
+                "expression": "A",
+                "intervalMs": 1000,
+                "maxDataPoints": 43200,
+                "reducer": "last",
+                "refId": "B",
+                "type": "reduce"
+              }
+            },
+            {
+              "refId": "C",
+              "datasourceUid": "__expr__",
+              "model": {
+                "conditions": [
+                  {
+                    "evaluator": {
+                      "params": [
+                        600
+                      ],
+                      "type": "gt"
+                    },
+                    "operator": {
+                      "type": "and"
+                    },
+                    "query": {
+                      "params": []
+                    },
+                    "reducer": {
+                      "type": "last"
+                    },
+                    "type": "query"
+                  }
+                ],
+                "datasource": {
+                  "type": "__expr__",
+                  "uid": "__expr__"
+                },
+                "expression": "B",
+                "intervalMs": 1000,
+                "maxDataPoints": 43200,
+                "refId": "C",
+                "type": "threshold"
+              }
+            }
+          ]
+        },
+        {
+          "uid": "hameln_cron_bb_veran_preprod",
+          "title": "Preprod – Bereich B import_veranstaltungen überfällig",
+          "condition": "C",
+          "for": "15m",
+          "noDataState": "OK",
+          "execErrState": "Error",
+          "dashboardUid": "hameln-environment-detail",
+          "labels": {
+            "severity": "warning",
+            "environment": "preprod",
+            "alert_type": "cron_job",
+            "component": "bereich-b"
+          },
+          "annotations": {
+            "summary": "Bereich B cron job {{ $labels.job }} ({{ $labels.instance }}) overdue on Preprod",
+            "description": "Bereich B cron job {{ $labels.job }} has not completed within its expected interval (+1h buffer) on Preprod. Overdue by {{ humanizeDuration $values.B.Value }}."
+          },
+          "isPaused": false,
+          "data": [
+            {
+              "refId": "A",
+              "datasourceUid": "prometheus",
+              "model": {
+                "datasource": {
+                  "type": "prometheus",
+                  "uid": "prometheus"
+                },
+                "editorMode": "code",
+                "expr": "(time() - cron_job_last_run_timestamp{environment=\"preprod\", instance=\"preprod-bereich-b\", job=\"import_veranstaltungen\"}) - cron_job_expected_interval_seconds{environment=\"preprod\", instance=\"preprod-bereich-b\", job=\"import_veranstaltungen\"}",
+                "instant": true,
+                "intervalMs": 15000,
+                "maxDataPoints": 43200,
+                "range": false,
+                "refId": "A"
+              },
+              "relativeTimeRange": {
+                "from": 600,
+                "to": 0
+              }
+            },
+            {
+              "refId": "B",
+              "datasourceUid": "__expr__",
+              "model": {
+                "datasource": {
+                  "type": "__expr__",
+                  "uid": "__expr__"
+                },
+                "expression": "A",
+                "intervalMs": 1000,
+                "maxDataPoints": 43200,
+                "reducer": "last",
+                "refId": "B",
+                "type": "reduce"
+              }
+            },
+            {
+              "refId": "C",
+              "datasourceUid": "__expr__",
+              "model": {
+                "conditions": [
+                  {
+                    "evaluator": {
+                      "params": [
+                        3600
+                      ],
+                      "type": "gt"
+                    },
+                    "operator": {
+                      "type": "and"
+                    },
+                    "query": {
+                      "params": []
+                    },
+                    "reducer": {
+                      "type": "last"
+                    },
+                    "type": "query"
+                  }
+                ],
+                "datasource": {
+                  "type": "__expr__",
+                  "uid": "__expr__"
+                },
+                "expression": "B",
+                "intervalMs": 1000,
+                "maxDataPoints": 43200,
+                "refId": "C",
+                "type": "threshold"
+              }
+            }
+          ]
+        },
+        {
+          "uid": "hameln_cron_bb_weather_preprod",
+          "title": "Preprod – Bereich B import_weather überfällig",
+          "condition": "C",
+          "for": "15m",
+          "noDataState": "OK",
+          "execErrState": "Error",
+          "dashboardUid": "hameln-environment-detail",
+          "labels": {
+            "severity": "warning",
+            "environment": "preprod",
+            "alert_type": "cron_job",
+            "component": "bereich-b"
+          },
+          "annotations": {
+            "summary": "Bereich B cron job {{ $labels.job }} ({{ $labels.instance }}) overdue on Preprod",
+            "description": "Bereich B cron job {{ $labels.job }} has not completed within its expected interval (+1h buffer) on Preprod. Overdue by {{ humanizeDuration $values.B.Value }}."
+          },
+          "isPaused": false,
+          "data": [
+            {
+              "refId": "A",
+              "datasourceUid": "prometheus",
+              "model": {
+                "datasource": {
+                  "type": "prometheus",
+                  "uid": "prometheus"
+                },
+                "editorMode": "code",
+                "expr": "(time() - cron_job_last_run_timestamp{environment=\"preprod\", instance=\"preprod-bereich-b\", job=\"import_weather\"}) - cron_job_expected_interval_seconds{environment=\"preprod\", instance=\"preprod-bereich-b\", job=\"import_weather\"}",
+                "instant": true,
+                "intervalMs": 15000,
+                "maxDataPoints": 43200,
+                "range": false,
+                "refId": "A"
+              },
+              "relativeTimeRange": {
+                "from": 600,
+                "to": 0
+              }
+            },
+            {
+              "refId": "B",
+              "datasourceUid": "__expr__",
+              "model": {
+                "datasource": {
+                  "type": "__expr__",
+                  "uid": "__expr__"
+                },
+                "expression": "A",
+                "intervalMs": 1000,
+                "maxDataPoints": 43200,
+                "reducer": "last",
+                "refId": "B",
+                "type": "reduce"
+              }
+            },
+            {
+              "refId": "C",
+              "datasourceUid": "__expr__",
+              "model": {
+                "conditions": [
+                  {
+                    "evaluator": {
+                      "params": [
+                        3600
+                      ],
+                      "type": "gt"
+                    },
+                    "operator": {
+                      "type": "and"
+                    },
+                    "query": {
+                      "params": []
+                    },
+                    "reducer": {
+                      "type": "last"
+                    },
+                    "type": "query"
+                  }
+                ],
+                "datasource": {
+                  "type": "__expr__",
+                  "uid": "__expr__"
+                },
+                "expression": "B",
+                "intervalMs": 1000,
+                "maxDataPoints": 43200,
+                "refId": "C",
+                "type": "threshold"
+              }
+            }
+          ]
+        },
+        {
+          "uid": "hameln_cron_bb_sensoren_preprod",
+          "title": "Preprod – Bereich B import_sensoren überfällig",
+          "condition": "C",
+          "for": "15m",
+          "noDataState": "OK",
+          "execErrState": "Error",
+          "dashboardUid": "hameln-environment-detail",
+          "labels": {
+            "severity": "warning",
+            "environment": "preprod",
+            "alert_type": "cron_job",
+            "component": "bereich-b"
+          },
+          "annotations": {
+            "summary": "Bereich B cron job {{ $labels.job }} ({{ $labels.instance }}) overdue on Preprod",
+            "description": "Bereich B cron job {{ $labels.job }} has not completed within its expected interval (+1h buffer) on Preprod. Overdue by {{ humanizeDuration $values.B.Value }}."
+          },
+          "isPaused": false,
+          "data": [
+            {
+              "refId": "A",
+              "datasourceUid": "prometheus",
+              "model": {
+                "datasource": {
+                  "type": "prometheus",
+                  "uid": "prometheus"
+                },
+                "editorMode": "code",
+                "expr": "(time() - cron_job_last_run_timestamp{environment=\"preprod\", instance=\"preprod-bereich-b\", job=\"import_sensoren\"}) - cron_job_expected_interval_seconds{environment=\"preprod\", instance=\"preprod-bereich-b\", job=\"import_sensoren\"}",
+                "instant": true,
+                "intervalMs": 15000,
+                "maxDataPoints": 43200,
+                "range": false,
+                "refId": "A"
+              },
+              "relativeTimeRange": {
+                "from": 600,
+                "to": 0
+              }
+            },
+            {
+              "refId": "B",
+              "datasourceUid": "__expr__",
+              "model": {
+                "datasource": {
+                  "type": "__expr__",
+                  "uid": "__expr__"
+                },
+                "expression": "A",
+                "intervalMs": 1000,
+                "maxDataPoints": 43200,
+                "reducer": "last",
+                "refId": "B",
+                "type": "reduce"
+              }
+            },
+            {
+              "refId": "C",
+              "datasourceUid": "__expr__",
+              "model": {
+                "conditions": [
+                  {
+                    "evaluator": {
+                      "params": [
+                        3600
+                      ],
+                      "type": "gt"
+                    },
+                    "operator": {
+                      "type": "and"
+                    },
+                    "query": {
+                      "params": []
+                    },
+                    "reducer": {
+                      "type": "last"
+                    },
+                    "type": "query"
+                  }
+                ],
+                "datasource": {
+                  "type": "__expr__",
+                  "uid": "__expr__"
+                },
+                "expression": "B",
+                "intervalMs": 1000,
+                "maxDataPoints": 43200,
+                "refId": "C",
+                "type": "threshold"
+              }
+            }
+          ]
+        },
+        {
+          "uid": "hameln_cron_bb_integ_preprod",
+          "title": "Preprod – Bereich B import_integrations überfällig",
+          "condition": "C",
+          "for": "15m",
+          "noDataState": "OK",
+          "execErrState": "Error",
+          "dashboardUid": "hameln-environment-detail",
+          "labels": {
+            "severity": "warning",
+            "environment": "preprod",
+            "alert_type": "cron_job",
+            "component": "bereich-b"
+          },
+          "annotations": {
+            "summary": "Bereich B cron job {{ $labels.job }} ({{ $labels.instance }}) overdue on Preprod",
+            "description": "Bereich B cron job {{ $labels.job }} has not completed within its expected interval (+10min buffer) on Preprod. Overdue by {{ humanizeDuration $values.B.Value }}."
+          },
+          "isPaused": false,
+          "data": [
+            {
+              "refId": "A",
+              "datasourceUid": "prometheus",
+              "model": {
+                "datasource": {
+                  "type": "prometheus",
+                  "uid": "prometheus"
+                },
+                "editorMode": "code",
+                "expr": "(time() - cron_job_last_run_timestamp{environment=\"preprod\", instance=\"preprod-bereich-b\", job=\"import_integrations\"}) - cron_job_expected_interval_seconds{environment=\"preprod\", instance=\"preprod-bereich-b\", job=\"import_integrations\"}",
+                "instant": true,
+                "intervalMs": 15000,
+                "maxDataPoints": 43200,
+                "range": false,
+                "refId": "A"
+              },
+              "relativeTimeRange": {
+                "from": 600,
+                "to": 0
+              }
+            },
+            {
+              "refId": "B",
+              "datasourceUid": "__expr__",
+              "model": {
+                "datasource": {
+                  "type": "__expr__",
+                  "uid": "__expr__"
+                },
+                "expression": "A",
+                "intervalMs": 1000,
+                "maxDataPoints": 43200,
+                "reducer": "last",
+                "refId": "B",
+                "type": "reduce"
+              }
+            },
+            {
+              "refId": "C",
+              "datasourceUid": "__expr__",
+              "model": {
+                "conditions": [
+                  {
+                    "evaluator": {
+                      "params": [
+                        600
+                      ],
+                      "type": "gt"
+                    },
+                    "operator": {
+                      "type": "and"
+                    },
+                    "query": {
+                      "params": []
+                    },
+                    "reducer": {
+                      "type": "last"
+                    },
+                    "type": "query"
+                  }
+                ],
+                "datasource": {
+                  "type": "__expr__",
+                  "uid": "__expr__"
+                },
+                "expression": "B",
+                "intervalMs": 1000,
+                "maxDataPoints": 43200,
+                "refId": "C",
+                "type": "threshold"
+              }
+            }
+          ]
+        },
+        {
+          "uid": "hameln_cron_bb_veran_production",
+          "title": "Production – Bereich B import_veranstaltungen überfällig",
+          "condition": "C",
+          "for": "15m",
+          "noDataState": "OK",
+          "execErrState": "Error",
+          "dashboardUid": "hameln-environment-detail",
+          "labels": {
+            "severity": "critical",
+            "environment": "production",
+            "alert_type": "cron_job",
+            "component": "bereich-b"
+          },
+          "annotations": {
+            "summary": "Bereich B cron job {{ $labels.job }} ({{ $labels.instance }}) overdue on Production",
+            "description": "Bereich B cron job {{ $labels.job }} has not completed within its expected interval (+1h buffer) on Production. Overdue by {{ humanizeDuration $values.B.Value }}."
+          },
+          "isPaused": false,
+          "data": [
+            {
+              "refId": "A",
+              "datasourceUid": "prometheus",
+              "model": {
+                "datasource": {
+                  "type": "prometheus",
+                  "uid": "prometheus"
+                },
+                "editorMode": "code",
+                "expr": "(time() - cron_job_last_run_timestamp{environment=\"production\", instance=\"production-bereich-b\", job=\"import_veranstaltungen\"}) - cron_job_expected_interval_seconds{environment=\"production\", instance=\"production-bereich-b\", job=\"import_veranstaltungen\"}",
+                "instant": true,
+                "intervalMs": 15000,
+                "maxDataPoints": 43200,
+                "range": false,
+                "refId": "A"
+              },
+              "relativeTimeRange": {
+                "from": 600,
+                "to": 0
+              }
+            },
+            {
+              "refId": "B",
+              "datasourceUid": "__expr__",
+              "model": {
+                "datasource": {
+                  "type": "__expr__",
+                  "uid": "__expr__"
+                },
+                "expression": "A",
+                "intervalMs": 1000,
+                "maxDataPoints": 43200,
+                "reducer": "last",
+                "refId": "B",
+                "type": "reduce"
+              }
+            },
+            {
+              "refId": "C",
+              "datasourceUid": "__expr__",
+              "model": {
+                "conditions": [
+                  {
+                    "evaluator": {
+                      "params": [
+                        3600
+                      ],
+                      "type": "gt"
+                    },
+                    "operator": {
+                      "type": "and"
+                    },
+                    "query": {
+                      "params": []
+                    },
+                    "reducer": {
+                      "type": "last"
+                    },
+                    "type": "query"
+                  }
+                ],
+                "datasource": {
+                  "type": "__expr__",
+                  "uid": "__expr__"
+                },
+                "expression": "B",
+                "intervalMs": 1000,
+                "maxDataPoints": 43200,
+                "refId": "C",
+                "type": "threshold"
+              }
+            }
+          ]
+        },
+        {
+          "uid": "hameln_cron_bb_weather_production",
+          "title": "Production – Bereich B import_weather überfällig",
+          "condition": "C",
+          "for": "15m",
+          "noDataState": "OK",
+          "execErrState": "Error",
+          "dashboardUid": "hameln-environment-detail",
+          "labels": {
+            "severity": "critical",
+            "environment": "production",
+            "alert_type": "cron_job",
+            "component": "bereich-b"
+          },
+          "annotations": {
+            "summary": "Bereich B cron job {{ $labels.job }} ({{ $labels.instance }}) overdue on Production",
+            "description": "Bereich B cron job {{ $labels.job }} has not completed within its expected interval (+1h buffer) on Production. Overdue by {{ humanizeDuration $values.B.Value }}."
+          },
+          "isPaused": false,
+          "data": [
+            {
+              "refId": "A",
+              "datasourceUid": "prometheus",
+              "model": {
+                "datasource": {
+                  "type": "prometheus",
+                  "uid": "prometheus"
+                },
+                "editorMode": "code",
+                "expr": "(time() - cron_job_last_run_timestamp{environment=\"production\", instance=\"production-bereich-b\", job=\"import_weather\"}) - cron_job_expected_interval_seconds{environment=\"production\", instance=\"production-bereich-b\", job=\"import_weather\"}",
+                "instant": true,
+                "intervalMs": 15000,
+                "maxDataPoints": 43200,
+                "range": false,
+                "refId": "A"
+              },
+              "relativeTimeRange": {
+                "from": 600,
+                "to": 0
+              }
+            },
+            {
+              "refId": "B",
+              "datasourceUid": "__expr__",
+              "model": {
+                "datasource": {
+                  "type": "__expr__",
+                  "uid": "__expr__"
+                },
+                "expression": "A",
+                "intervalMs": 1000,
+                "maxDataPoints": 43200,
+                "reducer": "last",
+                "refId": "B",
+                "type": "reduce"
+              }
+            },
+            {
+              "refId": "C",
+              "datasourceUid": "__expr__",
+              "model": {
+                "conditions": [
+                  {
+                    "evaluator": {
+                      "params": [
+                        3600
+                      ],
+                      "type": "gt"
+                    },
+                    "operator": {
+                      "type": "and"
+                    },
+                    "query": {
+                      "params": []
+                    },
+                    "reducer": {
+                      "type": "last"
+                    },
+                    "type": "query"
+                  }
+                ],
+                "datasource": {
+                  "type": "__expr__",
+                  "uid": "__expr__"
+                },
+                "expression": "B",
+                "intervalMs": 1000,
+                "maxDataPoints": 43200,
+                "refId": "C",
+                "type": "threshold"
+              }
+            }
+          ]
+        },
+        {
+          "uid": "hameln_cron_bb_sensoren_production",
+          "title": "Production – Bereich B import_sensoren überfällig",
+          "condition": "C",
+          "for": "15m",
+          "noDataState": "OK",
+          "execErrState": "Error",
+          "dashboardUid": "hameln-environment-detail",
+          "labels": {
+            "severity": "critical",
+            "environment": "production",
+            "alert_type": "cron_job",
+            "component": "bereich-b"
+          },
+          "annotations": {
+            "summary": "Bereich B cron job {{ $labels.job }} ({{ $labels.instance }}) overdue on Production",
+            "description": "Bereich B cron job {{ $labels.job }} has not completed within its expected interval (+1h buffer) on Production. Overdue by {{ humanizeDuration $values.B.Value }}."
+          },
+          "isPaused": false,
+          "data": [
+            {
+              "refId": "A",
+              "datasourceUid": "prometheus",
+              "model": {
+                "datasource": {
+                  "type": "prometheus",
+                  "uid": "prometheus"
+                },
+                "editorMode": "code",
+                "expr": "(time() - cron_job_last_run_timestamp{environment=\"production\", instance=\"production-bereich-b\", job=\"import_sensoren\"}) - cron_job_expected_interval_seconds{environment=\"production\", instance=\"production-bereich-b\", job=\"import_sensoren\"}",
+                "instant": true,
+                "intervalMs": 15000,
+                "maxDataPoints": 43200,
+                "range": false,
+                "refId": "A"
+              },
+              "relativeTimeRange": {
+                "from": 600,
+                "to": 0
+              }
+            },
+            {
+              "refId": "B",
+              "datasourceUid": "__expr__",
+              "model": {
+                "datasource": {
+                  "type": "__expr__",
+                  "uid": "__expr__"
+                },
+                "expression": "A",
+                "intervalMs": 1000,
+                "maxDataPoints": 43200,
+                "reducer": "last",
+                "refId": "B",
+                "type": "reduce"
+              }
+            },
+            {
+              "refId": "C",
+              "datasourceUid": "__expr__",
+              "model": {
+                "conditions": [
+                  {
+                    "evaluator": {
+                      "params": [
+                        3600
+                      ],
+                      "type": "gt"
+                    },
+                    "operator": {
+                      "type": "and"
+                    },
+                    "query": {
+                      "params": []
+                    },
+                    "reducer": {
+                      "type": "last"
+                    },
+                    "type": "query"
+                  }
+                ],
+                "datasource": {
+                  "type": "__expr__",
+                  "uid": "__expr__"
+                },
+                "expression": "B",
+                "intervalMs": 1000,
+                "maxDataPoints": 43200,
+                "refId": "C",
+                "type": "threshold"
+              }
+            }
+          ]
+        },
+        {
+          "uid": "hameln_cron_bb_integ_production",
+          "title": "Production – Bereich B import_integrations überfällig",
+          "condition": "C",
+          "for": "15m",
+          "noDataState": "OK",
+          "execErrState": "Error",
+          "dashboardUid": "hameln-environment-detail",
+          "labels": {
+            "severity": "critical",
+            "environment": "production",
+            "alert_type": "cron_job",
+            "component": "bereich-b"
+          },
+          "annotations": {
+            "summary": "Bereich B cron job {{ $labels.job }} ({{ $labels.instance }}) overdue on Production",
+            "description": "Bereich B cron job {{ $labels.job }} has not completed within its expected interval (+10min buffer) on Production. Overdue by {{ humanizeDuration $values.B.Value }}."
+          },
+          "isPaused": false,
+          "data": [
+            {
+              "refId": "A",
+              "datasourceUid": "prometheus",
+              "model": {
+                "datasource": {
+                  "type": "prometheus",
+                  "uid": "prometheus"
+                },
+                "editorMode": "code",
+                "expr": "(time() - cron_job_last_run_timestamp{environment=\"production\", instance=\"production-bereich-b\", job=\"import_integrations\"}) - cron_job_expected_interval_seconds{environment=\"production\", instance=\"production-bereich-b\", job=\"import_integrations\"}",
+                "instant": true,
+                "intervalMs": 15000,
+                "maxDataPoints": 43200,
+                "range": false,
+                "refId": "A"
+              },
+              "relativeTimeRange": {
+                "from": 600,
+                "to": 0
+              }
+            },
+            {
+              "refId": "B",
+              "datasourceUid": "__expr__",
+              "model": {
+                "datasource": {
+                  "type": "__expr__",
+                  "uid": "__expr__"
+                },
+                "expression": "A",
+                "intervalMs": 1000,
+                "maxDataPoints": 43200,
+                "reducer": "last",
+                "refId": "B",
+                "type": "reduce"
+              }
+            },
+            {
+              "refId": "C",
+              "datasourceUid": "__expr__",
+              "model": {
+                "conditions": [
+                  {
+                    "evaluator": {
+                      "params": [
+                        600
+                      ],
+                      "type": "gt"
+                    },
+                    "operator": {
+                      "type": "and"
+                    },
+                    "query": {
+                      "params": []
+                    },
+                    "reducer": {
+                      "type": "last"
+                    },
+                    "type": "query"
+                  }
+                ],
+                "datasource": {
+                  "type": "__expr__",
+                  "uid": "__expr__"
+                },
+                "expression": "B",
+                "intervalMs": 1000,
+                "maxDataPoints": 43200,
+                "refId": "C",
+                "type": "threshold"
+              }
+            }
+          ]
+        },
+        {
+          "uid": "hameln_ssl_invalid_staging",
+          "title": "Staging – SSL-Zertifikat ungültig",
+          "condition": "C",
+          "for": "5m",
+          "noDataState": "OK",
+          "execErrState": "Error",
+          "dashboardUid": "hameln-environment-detail",
+          "labels": {
+            "severity": "critical",
+            "environment": "staging",
+            "alert_type": "ssl"
+          },
+          "annotations": {
+            "summary": "Invalid SSL certificate on public domain in Staging",
+            "description": "Blackbox detected an invalid or untrusted SSL certificate on a public URL in Staging (app or stele domain)."
+          },
+          "isPaused": false,
+          "data": [
+            {
+              "refId": "A",
+              "datasourceUid": "prometheus",
+              "model": {
+                "datasource": {
+                  "type": "prometheus",
+                  "uid": "prometheus"
+                },
+                "editorMode": "code",
+                "expr": "max(probe_failed_due_to_ssl{job=\"blackbox\", environment=\"staging\", probe_type=~\"public_app|public_stele\"})",
+                "instant": true,
+                "intervalMs": 15000,
+                "maxDataPoints": 43200,
+                "range": false,
+                "refId": "A"
+              },
+              "relativeTimeRange": {
+                "from": 600,
+                "to": 0
+              }
+            },
+            {
+              "refId": "B",
+              "datasourceUid": "__expr__",
+              "model": {
+                "datasource": {
+                  "type": "__expr__",
+                  "uid": "__expr__"
+                },
+                "expression": "A",
+                "intervalMs": 1000,
+                "maxDataPoints": 43200,
+                "reducer": "last",
+                "refId": "B",
+                "type": "reduce"
+              }
+            },
+            {
+              "refId": "C",
+              "datasourceUid": "__expr__",
+              "model": {
+                "conditions": [
+                  {
+                    "evaluator": {
+                      "params": [
+                        0
+                      ],
+                      "type": "gt"
+                    },
+                    "operator": {
+                      "type": "and"
+                    },
+                    "query": {
+                      "params": []
+                    },
+                    "reducer": {
+                      "type": "last"
+                    },
+                    "type": "query"
+                  }
+                ],
+                "datasource": {
+                  "type": "__expr__",
+                  "uid": "__expr__"
+                },
+                "expression": "B",
+                "intervalMs": 1000,
+                "maxDataPoints": 43200,
+                "refId": "C",
+                "type": "threshold"
+              }
+            }
+          ]
+        },
+        {
+          "uid": "hameln_ssl_expiry_warning_staging",
+          "title": "Staging – SSL-Zertifikat läuft in < 29 Tagen ab",
+          "condition": "C",
+          "for": "1h",
+          "noDataState": "OK",
+          "execErrState": "Error",
+          "dashboardUid": "hameln-environment-detail",
+          "labels": {
+            "severity": "warning",
+            "environment": "staging",
+            "alert_type": "ssl"
+          },
+          "annotations": {
+            "summary": "SSL certificate expiring within 29 days on Staging",
+            "description": "At least one public domain in Staging has an SSL certificate expiring in less than 29 days (Certbot renews at 30 days — this indicates renewal may have failed)."
+          },
+          "isPaused": false,
+          "data": [
+            {
+              "refId": "A",
+              "datasourceUid": "prometheus",
+              "model": {
+                "datasource": {
+                  "type": "prometheus",
+                  "uid": "prometheus"
+                },
+                "editorMode": "code",
+                "expr": "min((probe_ssl_earliest_cert_expiry{job=\"blackbox\", environment=\"staging\", probe_type=~\"public_app|public_stele\"} - time()) / 86400)",
+                "instant": true,
+                "intervalMs": 15000,
+                "maxDataPoints": 43200,
+                "range": false,
+                "refId": "A"
+              },
+              "relativeTimeRange": {
+                "from": 600,
+                "to": 0
+              }
+            },
+            {
+              "refId": "B",
+              "datasourceUid": "__expr__",
+              "model": {
+                "datasource": {
+                  "type": "__expr__",
+                  "uid": "__expr__"
+                },
+                "expression": "A",
+                "intervalMs": 1000,
+                "maxDataPoints": 43200,
+                "reducer": "last",
+                "refId": "B",
+                "type": "reduce"
+              }
+            },
+            {
+              "refId": "C",
+              "datasourceUid": "__expr__",
+              "model": {
+                "conditions": [
+                  {
+                    "evaluator": {
+                      "params": [
+                        29
+                      ],
+                      "type": "lt"
+                    },
+                    "operator": {
+                      "type": "and"
+                    },
+                    "query": {
+                      "params": []
+                    },
+                    "reducer": {
+                      "type": "last"
+                    },
+                    "type": "query"
+                  }
+                ],
+                "datasource": {
+                  "type": "__expr__",
+                  "uid": "__expr__"
+                },
+                "expression": "B",
+                "intervalMs": 1000,
+                "maxDataPoints": 43200,
+                "refId": "C",
+                "type": "threshold"
+              }
+            }
+          ]
+        },
+        {
+          "uid": "hameln_ssl_expiry_critical_staging",
+          "title": "Staging – SSL-Zertifikat läuft in < 7 Tagen ab",
+          "condition": "C",
+          "for": "15m",
+          "noDataState": "OK",
+          "execErrState": "Error",
+          "dashboardUid": "hameln-environment-detail",
+          "labels": {
+            "severity": "critical",
+            "environment": "staging",
+            "alert_type": "ssl"
+          },
+          "annotations": {
+            "summary": "SSL certificate expiring within 7 days on Staging",
+            "description": "At least one public domain in Staging has an SSL certificate expiring in less than 7 days."
+          },
+          "isPaused": false,
+          "data": [
+            {
+              "refId": "A",
+              "datasourceUid": "prometheus",
+              "model": {
+                "datasource": {
+                  "type": "prometheus",
+                  "uid": "prometheus"
+                },
+                "editorMode": "code",
+                "expr": "min((probe_ssl_earliest_cert_expiry{job=\"blackbox\", environment=\"staging\", probe_type=~\"public_app|public_stele\"} - time()) / 86400)",
+                "instant": true,
+                "intervalMs": 15000,
+                "maxDataPoints": 43200,
+                "range": false,
+                "refId": "A"
+              },
+              "relativeTimeRange": {
+                "from": 600,
+                "to": 0
+              }
+            },
+            {
+              "refId": "B",
+              "datasourceUid": "__expr__",
+              "model": {
+                "datasource": {
+                  "type": "__expr__",
+                  "uid": "__expr__"
+                },
+                "expression": "A",
+                "intervalMs": 1000,
+                "maxDataPoints": 43200,
+                "reducer": "last",
+                "refId": "B",
+                "type": "reduce"
+              }
+            },
+            {
+              "refId": "C",
+              "datasourceUid": "__expr__",
+              "model": {
+                "conditions": [
+                  {
+                    "evaluator": {
+                      "params": [
+                        7
+                      ],
+                      "type": "lt"
+                    },
+                    "operator": {
+                      "type": "and"
+                    },
+                    "query": {
+                      "params": []
+                    },
+                    "reducer": {
+                      "type": "last"
+                    },
+                    "type": "query"
+                  }
+                ],
+                "datasource": {
+                  "type": "__expr__",
+                  "uid": "__expr__"
+                },
+                "expression": "B",
+                "intervalMs": 1000,
+                "maxDataPoints": 43200,
+                "refId": "C",
+                "type": "threshold"
+              }
+            }
+          ]
+        },
+        {
+          "uid": "hameln_ssl_invalid_preprod",
+          "title": "Preprod – SSL-Zertifikat ungültig",
+          "condition": "C",
+          "for": "5m",
+          "noDataState": "OK",
+          "execErrState": "Error",
+          "dashboardUid": "hameln-environment-detail",
+          "labels": {
+            "severity": "critical",
+            "environment": "preprod",
+            "alert_type": "ssl"
+          },
+          "annotations": {
+            "summary": "Invalid SSL certificate on public domain in Preprod",
+            "description": "Blackbox detected an invalid or untrusted SSL certificate on a public URL in Preprod (app or stele domain)."
+          },
+          "isPaused": false,
+          "data": [
+            {
+              "refId": "A",
+              "datasourceUid": "prometheus",
+              "model": {
+                "datasource": {
+                  "type": "prometheus",
+                  "uid": "prometheus"
+                },
+                "editorMode": "code",
+                "expr": "max(probe_failed_due_to_ssl{job=\"blackbox\", environment=\"preprod\", probe_type=~\"public_app|public_stele\"})",
+                "instant": true,
+                "intervalMs": 15000,
+                "maxDataPoints": 43200,
+                "range": false,
+                "refId": "A"
+              },
+              "relativeTimeRange": {
+                "from": 600,
+                "to": 0
+              }
+            },
+            {
+              "refId": "B",
+              "datasourceUid": "__expr__",
+              "model": {
+                "datasource": {
+                  "type": "__expr__",
+                  "uid": "__expr__"
+                },
+                "expression": "A",
+                "intervalMs": 1000,
+                "maxDataPoints": 43200,
+                "reducer": "last",
+                "refId": "B",
+                "type": "reduce"
+              }
+            },
+            {
+              "refId": "C",
+              "datasourceUid": "__expr__",
+              "model": {
+                "conditions": [
+                  {
+                    "evaluator": {
+                      "params": [
+                        0
+                      ],
+                      "type": "gt"
+                    },
+                    "operator": {
+                      "type": "and"
+                    },
+                    "query": {
+                      "params": []
+                    },
+                    "reducer": {
+                      "type": "last"
+                    },
+                    "type": "query"
+                  }
+                ],
+                "datasource": {
+                  "type": "__expr__",
+                  "uid": "__expr__"
+                },
+                "expression": "B",
+                "intervalMs": 1000,
+                "maxDataPoints": 43200,
+                "refId": "C",
+                "type": "threshold"
+              }
+            }
+          ]
+        },
+        {
+          "uid": "hameln_ssl_expiry_warning_preprod",
+          "title": "Preprod – SSL-Zertifikat läuft in < 29 Tagen ab",
+          "condition": "C",
+          "for": "1h",
+          "noDataState": "OK",
+          "execErrState": "Error",
+          "dashboardUid": "hameln-environment-detail",
+          "labels": {
+            "severity": "warning",
+            "environment": "preprod",
+            "alert_type": "ssl"
+          },
+          "annotations": {
+            "summary": "SSL certificate expiring within 29 days on Preprod",
+            "description": "At least one public domain in Preprod has an SSL certificate expiring in less than 29 days (Certbot renews at 30 days — this indicates renewal may have failed)."
+          },
+          "isPaused": false,
+          "data": [
+            {
+              "refId": "A",
+              "datasourceUid": "prometheus",
+              "model": {
+                "datasource": {
+                  "type": "prometheus",
+                  "uid": "prometheus"
+                },
+                "editorMode": "code",
+                "expr": "min((probe_ssl_earliest_cert_expiry{job=\"blackbox\", environment=\"preprod\", probe_type=~\"public_app|public_stele\"} - time()) / 86400)",
+                "instant": true,
+                "intervalMs": 15000,
+                "maxDataPoints": 43200,
+                "range": false,
+                "refId": "A"
+              },
+              "relativeTimeRange": {
+                "from": 600,
+                "to": 0
+              }
+            },
+            {
+              "refId": "B",
+              "datasourceUid": "__expr__",
+              "model": {
+                "datasource": {
+                  "type": "__expr__",
+                  "uid": "__expr__"
+                },
+                "expression": "A",
+                "intervalMs": 1000,
+                "maxDataPoints": 43200,
+                "reducer": "last",
+                "refId": "B",
+                "type": "reduce"
+              }
+            },
+            {
+              "refId": "C",
+              "datasourceUid": "__expr__",
+              "model": {
+                "conditions": [
+                  {
+                    "evaluator": {
+                      "params": [
+                        29
+                      ],
+                      "type": "lt"
+                    },
+                    "operator": {
+                      "type": "and"
+                    },
+                    "query": {
+                      "params": []
+                    },
+                    "reducer": {
+                      "type": "last"
+                    },
+                    "type": "query"
+                  }
+                ],
+                "datasource": {
+                  "type": "__expr__",
+                  "uid": "__expr__"
+                },
+                "expression": "B",
+                "intervalMs": 1000,
+                "maxDataPoints": 43200,
+                "refId": "C",
+                "type": "threshold"
+              }
+            }
+          ]
+        },
+        {
+          "uid": "hameln_ssl_expiry_critical_preprod",
+          "title": "Preprod – SSL-Zertifikat läuft in < 7 Tagen ab",
+          "condition": "C",
+          "for": "15m",
+          "noDataState": "OK",
+          "execErrState": "Error",
+          "dashboardUid": "hameln-environment-detail",
+          "labels": {
+            "severity": "critical",
+            "environment": "preprod",
+            "alert_type": "ssl"
+          },
+          "annotations": {
+            "summary": "SSL certificate expiring within 7 days on Preprod",
+            "description": "At least one public domain in Preprod has an SSL certificate expiring in less than 7 days."
+          },
+          "isPaused": false,
+          "data": [
+            {
+              "refId": "A",
+              "datasourceUid": "prometheus",
+              "model": {
+                "datasource": {
+                  "type": "prometheus",
+                  "uid": "prometheus"
+                },
+                "editorMode": "code",
+                "expr": "min((probe_ssl_earliest_cert_expiry{job=\"blackbox\", environment=\"preprod\", probe_type=~\"public_app|public_stele\"} - time()) / 86400)",
+                "instant": true,
+                "intervalMs": 15000,
+                "maxDataPoints": 43200,
+                "range": false,
+                "refId": "A"
+              },
+              "relativeTimeRange": {
+                "from": 600,
+                "to": 0
+              }
+            },
+            {
+              "refId": "B",
+              "datasourceUid": "__expr__",
+              "model": {
+                "datasource": {
+                  "type": "__expr__",
+                  "uid": "__expr__"
+                },
+                "expression": "A",
+                "intervalMs": 1000,
+                "maxDataPoints": 43200,
+                "reducer": "last",
+                "refId": "B",
+                "type": "reduce"
+              }
+            },
+            {
+              "refId": "C",
+              "datasourceUid": "__expr__",
+              "model": {
+                "conditions": [
+                  {
+                    "evaluator": {
+                      "params": [
+                        7
+                      ],
+                      "type": "lt"
+                    },
+                    "operator": {
+                      "type": "and"
+                    },
+                    "query": {
+                      "params": []
+                    },
+                    "reducer": {
+                      "type": "last"
+                    },
+                    "type": "query"
+                  }
+                ],
+                "datasource": {
+                  "type": "__expr__",
+                  "uid": "__expr__"
+                },
+                "expression": "B",
+                "intervalMs": 1000,
+                "maxDataPoints": 43200,
+                "refId": "C",
+                "type": "threshold"
+              }
+            }
+          ]
+        },
+        {
+          "uid": "hameln_ssl_invalid_production",
+          "title": "Production – SSL-Zertifikat ungültig",
+          "condition": "C",
+          "for": "5m",
+          "noDataState": "OK",
+          "execErrState": "Error",
+          "dashboardUid": "hameln-environment-detail",
+          "labels": {
+            "severity": "critical",
+            "environment": "production",
+            "alert_type": "ssl"
+          },
+          "annotations": {
+            "summary": "Invalid SSL certificate on public domain in Production",
+            "description": "Blackbox detected an invalid or untrusted SSL certificate on a public URL in Production (app or stele domain)."
+          },
+          "isPaused": false,
+          "data": [
+            {
+              "refId": "A",
+              "datasourceUid": "prometheus",
+              "model": {
+                "datasource": {
+                  "type": "prometheus",
+                  "uid": "prometheus"
+                },
+                "editorMode": "code",
+                "expr": "max(probe_failed_due_to_ssl{job=\"blackbox\", environment=\"production\", probe_type=~\"public_app|public_stele\"})",
+                "instant": true,
+                "intervalMs": 15000,
+                "maxDataPoints": 43200,
+                "range": false,
+                "refId": "A"
+              },
+              "relativeTimeRange": {
+                "from": 600,
+                "to": 0
+              }
+            },
+            {
+              "refId": "B",
+              "datasourceUid": "__expr__",
+              "model": {
+                "datasource": {
+                  "type": "__expr__",
+                  "uid": "__expr__"
+                },
+                "expression": "A",
+                "intervalMs": 1000,
+                "maxDataPoints": 43200,
+                "reducer": "last",
+                "refId": "B",
+                "type": "reduce"
+              }
+            },
+            {
+              "refId": "C",
+              "datasourceUid": "__expr__",
+              "model": {
+                "conditions": [
+                  {
+                    "evaluator": {
+                      "params": [
+                        0
+                      ],
+                      "type": "gt"
+                    },
+                    "operator": {
+                      "type": "and"
+                    },
+                    "query": {
+                      "params": []
+                    },
+                    "reducer": {
+                      "type": "last"
+                    },
+                    "type": "query"
+                  }
+                ],
+                "datasource": {
+                  "type": "__expr__",
+                  "uid": "__expr__"
+                },
+                "expression": "B",
+                "intervalMs": 1000,
+                "maxDataPoints": 43200,
+                "refId": "C",
+                "type": "threshold"
+              }
+            }
+          ]
+        },
+        {
+          "uid": "hameln_ssl_expiry_warning_production",
+          "title": "Production – SSL-Zertifikat läuft in < 29 Tagen ab",
+          "condition": "C",
+          "for": "1h",
+          "noDataState": "OK",
+          "execErrState": "Error",
+          "dashboardUid": "hameln-environment-detail",
+          "labels": {
+            "severity": "warning",
+            "environment": "production",
+            "alert_type": "ssl"
+          },
+          "annotations": {
+            "summary": "SSL certificate expiring within 29 days on Production",
+            "description": "At least one public domain in Production has an SSL certificate expiring in less than 29 days (Certbot renews at 30 days — this indicates renewal may have failed)."
+          },
+          "isPaused": false,
+          "data": [
+            {
+              "refId": "A",
+              "datasourceUid": "prometheus",
+              "model": {
+                "datasource": {
+                  "type": "prometheus",
+                  "uid": "prometheus"
+                },
+                "editorMode": "code",
+                "expr": "min((probe_ssl_earliest_cert_expiry{job=\"blackbox\", environment=\"production\", probe_type=~\"public_app|public_stele\"} - time()) / 86400)",
+                "instant": true,
+                "intervalMs": 15000,
+                "maxDataPoints": 43200,
+                "range": false,
+                "refId": "A"
+              },
+              "relativeTimeRange": {
+                "from": 600,
+                "to": 0
+              }
+            },
+            {
+              "refId": "B",
+              "datasourceUid": "__expr__",
+              "model": {
+                "datasource": {
+                  "type": "__expr__",
+                  "uid": "__expr__"
+                },
+                "expression": "A",
+                "intervalMs": 1000,
+                "maxDataPoints": 43200,
+                "reducer": "last",
+                "refId": "B",
+                "type": "reduce"
+              }
+            },
+            {
+              "refId": "C",
+              "datasourceUid": "__expr__",
+              "model": {
+                "conditions": [
+                  {
+                    "evaluator": {
+                      "params": [
+                        29
+                      ],
+                      "type": "lt"
+                    },
+                    "operator": {
+                      "type": "and"
+                    },
+                    "query": {
+                      "params": []
+                    },
+                    "reducer": {
+                      "type": "last"
+                    },
+                    "type": "query"
+                  }
+                ],
+                "datasource": {
+                  "type": "__expr__",
+                  "uid": "__expr__"
+                },
+                "expression": "B",
+                "intervalMs": 1000,
+                "maxDataPoints": 43200,
+                "refId": "C",
+                "type": "threshold"
+              }
+            }
+          ]
+        },
+        {
+          "uid": "hameln_ssl_expiry_critical_production",
+          "title": "Production – SSL-Zertifikat läuft in < 7 Tagen ab",
+          "condition": "C",
+          "for": "15m",
+          "noDataState": "OK",
+          "execErrState": "Error",
+          "dashboardUid": "hameln-environment-detail",
+          "labels": {
+            "severity": "critical",
+            "environment": "production",
+            "alert_type": "ssl"
+          },
+          "annotations": {
+            "summary": "SSL certificate expiring within 7 days on Production",
+            "description": "At least one public domain in Production has an SSL certificate expiring in less than 7 days."
+          },
+          "isPaused": false,
+          "data": [
+            {
+              "refId": "A",
+              "datasourceUid": "prometheus",
+              "model": {
+                "datasource": {
+                  "type": "prometheus",
+                  "uid": "prometheus"
+                },
+                "editorMode": "code",
+                "expr": "min((probe_ssl_earliest_cert_expiry{job=\"blackbox\", environment=\"production\", probe_type=~\"public_app|public_stele\"} - time()) / 86400)",
+                "instant": true,
+                "intervalMs": 15000,
+                "maxDataPoints": 43200,
+                "range": false,
+                "refId": "A"
+              },
+              "relativeTimeRange": {
+                "from": 600,
+                "to": 0
+              }
+            },
+            {
+              "refId": "B",
+              "datasourceUid": "__expr__",
+              "model": {
+                "datasource": {
+                  "type": "__expr__",
+                  "uid": "__expr__"
+                },
+                "expression": "A",
+                "intervalMs": 1000,
+                "maxDataPoints": 43200,
+                "reducer": "last",
+                "refId": "B",
+                "type": "reduce"
+              }
+            },
+            {
+              "refId": "C",
+              "datasourceUid": "__expr__",
+              "model": {
+                "conditions": [
+                  {
+                    "evaluator": {
+                      "params": [
+                        7
+                      ],
+                      "type": "lt"
+                    },
+                    "operator": {
+                      "type": "and"
+                    },
+                    "query": {
+                      "params": []
+                    },
+                    "reducer": {
+                      "type": "last"
+                    },
+                    "type": "query"
+                  }
+                ],
+                "datasource": {
+                  "type": "__expr__",
+                  "uid": "__expr__"
+                },
+                "expression": "B",
+                "intervalMs": 1000,
+                "maxDataPoints": 43200,
+                "refId": "C",
+                "type": "threshold"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

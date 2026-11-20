@@ -1,0 +1,29 @@
+==== Mobile App
+Die Mobile App ist in Flutter geschrieben und ist mit gängigen iOS- und
+Android-Versionen kompatibel. Die Mindestanforderungen an das Betriebssystem
+sind jeweils:
+
+- Android API Level 23 (entspricht Android 6.0 Marshmallow)
+- iOS 12
+
+===== Riverpod: Globales State Management
+Die App nutzt die Riverpod-Library für globales State Management. In Riverpod
+werden verschiedene Zustände der App, wie etwa der Fortschritt eines Antrags,
+in Providers gekapselt. Providers können Abhängigkeiten auf andere Providers
+definieren, und so in das Flutter-Framework integriert werden, dass einzelne
+UI-Elemente auf Änderungen reagieren können.
+
+===== Interaktive Karte
+Die Darstellung der interaktiven Karten mit in der Inhaltspflege definierten
+Points of Interest erfolgt über `flutter_map`. Es werden die Tile Layers von
+OpenStreetMap genutzt.
+
+====== Formulare
+Prozesse, die in der App gestartet werden, bestehen aus dynamischen und daten-
+getriebenen Formularen, die mit der `flutter_form_builder` Library zusammen-
+gesetzt werden.
+
+===== Push Notifications
+Die App nutzt https://firebase.flutter.dev/docs/messaging/overview[Firebase Cloud Messaging (FCM)] für Push Notifications.
+Die App registriert sich bei *FCM* und erhält ein Token, das für die Kommunikation
+mit dem FCM-Server verwendet wird.

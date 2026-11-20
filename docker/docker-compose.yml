@@ -1,0 +1,219 @@
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: hameln-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB:-domain}
+    volumes:
+      - hameln-postgres-volume:/var/lib/postgresql/data
+      - ./postgres/init:/docker-entrypoint-initdb.d:ro
+    networks:
+      - hameln-pyrmont
+
+  postgres-archive:
+    image: postgres:15-alpine
+    container_name: hameln-postgres-archive
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_ARCHIVE_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_ARCHIVE_PASSWORD}
+      POSTGRES_DB: archive
+    volumes:
+      - hameln-postgres-archive-volume:/var/lib/postgresql/data
+    networks:
+      - hameln-pyrmont
+
+  mongodb:
+    image: mongo:6.0.4
+    container_name: hameln-mongodb
+    restart: unless-stopped
+    volumes:
+      - hameln-mongodb-volume:/data/db
+      - ./mongodb/init:/docker-entrypoint-initdb.d:ro
+    env_file: ./.env
+    healthcheck:
+      test: [ "CMD-SHELL", "bash -c '< /dev/tcp/127.0.0.1/27017'" ]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+    networks:
+      - hameln-pyrmont
+
+  bereich-b:
+    image: ${CONTAINER_REGISTRY_IMAGE:?Set CONTAINER_REGISTRY_IMAGE}/web-bereich-b:${WEB_BEREICH_B_IMAGE_VERSION}
+    container_name: hameln-bereich-b
+    restart: unless-stopped
+    env_file: ./.env
+    volumes:
+      - hameln-payload-volume:/app/bereich-b/uploads/media
+    ports:
+      - "${BEREICH_B_PORT:-3001}:3000"
+    networks:
+      - hameln-pyrmont
+
+  bereich-a:
+    image: ${CONTAINER_REGISTRY_IMAGE:?Set CONTAINER_REGISTRY_IMAGE}/web-bereich-a:${WEB_BEREICH_A_IMAGE_VERSION}
+    container_name: hameln-bereich-a
+    restart: unless-stopped
+    env_file: ./.env
+    # Host port 3000 for VPC /health/ready probes (public traffic uses reverse proxy on :80/:443).
+    ports:
+      - "${BEREICH_A_PORT:-3000}:80"
+    networks:
+      - hameln-pyrmont
+
+  backend:
+    image: ${CONTAINER_REGISTRY_IMAGE:?Set CONTAINER_REGISTRY_IMAGE}/backend:${BACKEND_IMAGE_VERSION}
+    container_name: hameln-backend
+    restart: unless-stopped
+    env_file: ./.dotnet_env
+    volumes:
+      - ${MOUNT_POINT}/lagehelfer-seed:/opt/lagehelfer-seed:ro
+    depends_on:
+      postgres:
+        condition: "service_started"
+      postgres-archive:
+        condition: "service_started"
+      bereich-a:
+        condition: "service_started"
+      mongodb:
+        condition: "service_healthy"
+    ports:
+      - "${BACKEND_PORT}:8080"
+    networks:
+      - hameln-pyrmont
+
+  gotenberg:
+    image: gotenberg/gotenberg:8
+    container_name: hameln-gotenborg
+    restart: unless-stopped
+    expose:
+      - 3000
+    networks:
+      - hameln-pyrmont
+
+  keycloak-db:
+    image: postgres:15-alpine
+    container_name: hameln-keycloak-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${KEYCLOAK_DB_USER:-keycloak}
+      POSTGRES_PASSWORD: ${KEYCLOAK_DB_PASSWORD}
+      POSTGRES_DB: ${KEYCLOAK_DB_NAME:-keycloak}
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U \"$$POSTGRES_USER\" -d \"$$POSTGRES_DB\"" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - hameln-keycloak-postgres-volume:/var/lib/postgresql/data
+    networks:
+      - hameln-pyrmont
+
+  # BundID: Keycloak als Identity Broker/SAML Service Provider. Zertifikate/JAR liegen auf dem Host
+  # unter ${MOUNT_POINT}/bundid-secrets/keycloak/ (siehe docs/entwickler/bundid-staging-manuelle-checkliste.md).
+  keycloak:
+    image: ${CONTAINER_REGISTRY_IMAGE:?Set CONTAINER_REGISTRY_IMAGE}/keycloak:${KEYCLOAK_IMAGE_VERSION}
+    container_name: hameln-keycloak
+    restart: unless-stopped
+    depends_on:
+      keycloak-db:
+        condition: service_healthy
+    command: start --import-realm
+    environment:
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://keycloak-db:5432/${KEYCLOAK_DB_NAME:-keycloak}
+      KC_DB_USERNAME: ${KEYCLOAK_DB_USER:-keycloak}
+      KC_DB_PASSWORD: ${KEYCLOAK_DB_PASSWORD}
+      KC_HOSTNAME: auth.example.invalid
+      KC_HOSTNAME_STRICT: "false"
+      KC_HTTP_ENABLED: "true"
+      KC_PROXY_HEADERS: xforwarded
+      KC_HEALTH_ENABLED: "true"
+      KC_METRICS_ENABLED: "true"
+      KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN_USER:-admin}
+      KEYCLOAK_ADMIN_USER: ${KEYCLOAK_ADMIN_USER:-admin}
+      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
+      BUNDID_KEYSTORE_PASSWORD: ${BUNDID_KEYSTORE_PASSWORD}
+      BUNDID_SECRETS_DIR: /opt/keycloak/bundid-secrets
+      KEYCLOAK_URL: http://localhost:8080
+      KC_SPI_SAML_AUTHENTICATION_PREPROCESSOR_BUNDID_PROTOCOL_ONLINE_SERVICE_ID: BMI-B0002535
+      KC_SPI_SAML_AUTHENTICATION_PREPROCESSOR_BUNDID_PROTOCOL_ORGANIZATION_DISPLAY_NAME: ${BUNDID_ORGANIZATION_DISPLAY_NAME:-KommunalApp Hameln-Pyrmont}
+      KC_SPI_SAML_AUTHENTICATION_PREPROCESSOR_BUNDID_PROTOCOL_ENABLED_AUTHN_METHODS: benutzername
+      KC_SPI_SAML_AUTHENTICATION_PREPROCESSOR_BUNDID_PROTOCOL_DISABLED_AUTHN_METHODS: eid,eidas,elster,authega,diia,fink
+    healthcheck:
+      test: [ "CMD-SHELL", "bash -c 'echo >/dev/tcp/127.0.0.1/9000'" ]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 180s
+    volumes:
+      - ./keycloak/realm-kommunalapp.json:/opt/keycloak/data/import/realm-kommunalapp.json:ro
+      - ${MOUNT_POINT}/bundid-secrets/keycloak/keycloak-extension-bundid-status-detail.jar:/opt/keycloak/providers/keycloak-extension-bundid.jar:ro
+      - ${MOUNT_POINT}/bundid-secrets/keycloak:/opt/keycloak/bundid-secrets:ro
+      - ./keycloak/themes/kommunalapp:/opt/keycloak/themes/kommunalapp:ro
+    networks:
+      - hameln-pyrmont
+
+  proxy:
+    image: nginx:1.29.4-alpine
+    container_name: hameln-reverse-proxy
+    env_file: ./.env
+    ports:
+      - 80:80
+      - 443:443
+    volumes:
+      - ${MOUNT_POINT}/reverse-proxy.config:/etc/nginx/conf.d/reverse-proxy.conf
+      - ${MOUNT_POINT}/certbot/conf:/etc/letsencrypt/
+      - ${MOUNT_POINT}/certbot/www:/var/www/certbot/
+    command: "/bin/sh -c 'while :; do sleep 6h & wait $${!}; nginx -s reload; done &
+      nginx -g \"daemon off;\"'"
+    depends_on:
+      - backend
+      - bereich-b
+      - bereich-a
+      - stele
+      - keycloak
+    networks:
+      - hameln-pyrmont
+
+  certbot:
+    image: certbot/certbot:v5.3.1
+    container_name: hameln-certbot
+    env_file: ./.env
+    volumes:
+      - ${MOUNT_POINT}/certbot/conf:/etc/letsencrypt/
+      - ${MOUNT_POINT}/certbot/www:/var/www/certbot/
+    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h &
+      wait $${!}; done;'"
+    networks:
+      - hameln-pyrmont
+
+  stele:
+    image: ${CONTAINER_REGISTRY_IMAGE:?Set CONTAINER_REGISTRY_IMAGE}/stele:${STELE_IMAGE_VERSION}
+    container_name: hameln-stele
+    restart: unless-stopped
+    env_file: ./.env
+    environment:
+      # Runtime only: where nginx proxies /graphql and /api (same stack → backend service)
+      STELE_BACKEND_ORIGIN: ${STELE_BACKEND_ORIGIN:-http://backend:8080}
+    depends_on:
+      - backend
+    ports:
+      - "8080:80"
+    networks:
+      - hameln-pyrmont
+
+volumes:
+  hameln-postgres-volume:
+  hameln-postgres-archive-volume:
+  hameln-mongodb-volume:
+  hameln-payload-volume:
+  hameln-keycloak-postgres-volume:
+
+networks:
+  hameln-pyrmont:
+    name: hameln-pyrmont

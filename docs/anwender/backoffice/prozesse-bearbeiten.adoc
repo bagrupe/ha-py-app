@@ -1,0 +1,238 @@
+==== Prozesse bearbeiten
+
+Kern der `Prozessverwaltung` ist der `Prozesseditor` für echte `Prozesse`.
+Dieser wird aus der `Prozessverwaltung` erreicht, indem bei einem Prozess auf
+`Ablauf bearbeiten` geklickt wird.
+
+Die grundlegende Aufbau eines Prozesses und seinen Bestandteilen wurde bereits
+in der [Einleitung des Prozesseditors](prozesse-einleitung.md) beschrieben. In diesem
+Abschnitt soll es darum gehen, wie die unterschiedlichen Schritte und Verbindungen
+funktionieren.
+
+===== Die Ansicht Prozesseditor
+
+Der Prozesseditor besteht aus drei wesentlichen Elementen:
+
+- der Kopfleiste, in der der Prozessname angezeigt wird, sowie die Buttons zum
+**Speichern** und **Veröffentlichen** eines Prozesses, und der *Toggle-Button*
+zum Umschalten der Darstellung von Verbindungen - mit eckigen oder runden
+Verbindungen.
+
+- dem Arbeitsbereich, in dem der eigentliche Prozess editiert wird
+
+- der Seitenleiste, die aufgeklappt wird, wenn ein Element im Prozesseditor
+angeklickt wird
+
+image::assets/anwender/Prozesseditor_Beispielprozess.png[Prozesseditor]
+
+Neben diesen Standardelementen beinhaltet die Kopfleiste zusätzlich einen Button
+zu *Problemen* im Prozess. Dieser Button kann angeklickt werden, um sich
+anzeigen zu lassen, welche Probleme bestehen.
+
+image::assets/anwender/Prozesseditor_Probleme.png[Prozesseditor Probleme]
+
+====== Speichern und Veröffentlichen von Prozessen
+
+Prozesse müssen aktiv gespeichert werden. Änderungen an einem Prozess werden
+nicht automatisch übernommen. Darüber hinaus ist das Speichern nur dann möglich,
+wenn der Prozess keine Fehler / Probleme enthält - diese werden visuell
+hervorgehoben und sowohl in der *Kopfleiste* als auch direkt an den *Schritten*
+und *Verbindungen*, bei denen es Probleme gibt, angezeigt.
+
+Die Anwendung prüft selbständig auf die strukturelle Korrektheit eines
+Prozesses. Probleme, die so aufgedeckt werden, beinhalten
+
+- Schritte, die einen Ausgang aber keine ausgehende Verbindung haben
+
+- Schritte, die einen Eingang aber keine eingehende Verbindung haben
+
+- Platzhalter, die keinen Schritt enthalten
+
+- Rollenzuordnungen, die nicht erreicht werden können.
+
+Ist ein Prozess strukturell korrekt kann er gespeichert werden, andernfalls ist
+der Button zum Speichern ausgegraut. 
+
+Jedes Speichern legt intern eine neue *Version* des Prozesses an. Die aktuelle
+Version lässt sich in der Prozessübersicht einsehen. Das Speicher von Prozessen
+führt nicht automatisch zur Veröffentlichung - Prozesse müssen aktiv
+veröffentlicht werden.
+
+image::assets/anwender/Prozesseditor_speichern_veroeffentlichen.png[Prozess Veröffentlichen]
+
+====== Hintergrund Versionierung von Prozessen
+
+Mit jedem Speichern eines Prozesses wird eine neue Version angelegt. Die
+Versionsnummern werden beginnend von 1 hochgezählt. Der Hintergrund dieser
+Versionierung liegt in der Integrität von einzelnen, durch Nutzer der mobilen
+App ausgefüllten Anträgen / Prozessen.
+
+Das folgende Beispiel soll den Zusammenhang besser erläutern:
+
+> Ein Nutzer der mobilen App meldet über den Mängelmelder verstreute Scherben an
+> seinem Standort. Er gibt die *Bezeichnung* des Mangels ein, wählt die korrekte
+> *Kategorie* aus und macht noch ein *Foto*, das dem Mangel angehängt wird. Dieser
+> gemeldete Mangel - ein *Antrag* - geht im Backoffice ein und wird vom
+> *Mängelemelder Prozess* automatisch einer Abteilung zugeordnet. Ein zuständiger
+> Sachbearbeiter nimmt sich des gemeldeten Mangels an und stellt fest, dass die
+> Informationen, die beim Mängelmelder erhoben werden, nicht ausreichen und
+> wünscht sich noch zusätzlich einen kurzen Beschreibungstext, den der App-Nutzer
+> ausfüllen muss.  Der Prozess *Mängelmelder* wird darauf hin bearbeitet, sodass
+> das Formular für das Melden von Mängeln nun auch einen Beschreibungstext
+> aufnimmt. In der Zwischenzeit sind aber weitere Mängel ohne diesen Text
+> eingegangen. Diese Mängel dürfen auf der einen Seite nicht verloren gehen. Auf
+> der anderen Seiten enthalten sie aber auch nicht den Beschreibungstext.
+> Infolgedessen muss es möglich sein unterschiedliche *Versionen* von Anträgen zur
+> gleichen Zeit im Backoffice bearbeiten zu können, und es muss möglich sein
+> nahtlos Änderungen an Prozessen vornehmen zu können.
+
+Die Versionierung von Prozessen stellt sicher, dass eingereichte Anträge
+einerseits gültig bleiben und andererseits Änderungen an Prozessen möglich sind,
+ohne dass dabei Seiteneffekte auf bestehende Anträge auftreten.
+
+[[anwender_prozesse_veroeffentlichen]]
+====== Veröffentlichen von Prozessen
+
+Zum Veröffentlichen von Prozessen sind zwei Dinge notwendig
+
+. Der Prozess muss in der *Prozessübersicht* einer Gruppe zugeordnet werden
+. Der Prozess muss innerhalb des *Prozesseditors* veröffentlicht werden
+
+Um sicher zu gehen, dass der Prozess so aussieht, wie man es sich wünscht,
+sollte zuerst der Button *Veröffentlichen* verwendet werden und erst
+anschließend in der Prozessübersicht ein Gruppe zugeordnet werden.
+
+Die Zuordnung oder Entfernung der Zuordnung von bzw. zu einer Gruppe in der
+Prozessübersicht führt unmittelbar zur Veröffentlichung in der App bzw. dem
+Entfernen aus der App.
+
+
+==== Grundlegende Funktionen des Prozesseditors
+
+Wie schon in der <<prozesse, Einleitung des Prozesseditors>>
+beschrieben bestehende Prozesse aus *Schritten* und *Verbindungen*. Ganz
+abstrakt besteht das Erstellen und Bearbeiten eines Prozesses daraus Schritte
+anzulegen und diese miteinander zu verbinden. Der *Start-Schritt* eines
+Prozesses wird beim Anlegen des Prozesses bereits mit angelegt. Darüber hinaus
+ist nicht festgelegt, wie ein Prozess aussehen muss. Festgelegt ist nur, dass er
+in einem *Ende-Schritt* enden muss.
+
+===== Anlegen neuer Schritte
+
+Ausgehend vom *Start-Schritt* oder einem beliebigen anderen Schritt mit einem
+*Ausgang* wird ein neuer Schritt erstellt, indem mit der Maus auf den Ausgang
+des Schritts geklickt und per *Drag and Drop* eine neue Verbindung erstellt
+wird. Wird die Maus losgelassen erscheint ein Menü, in dem ausgewählt werden
+kann, welche Art von Schritt erstellt werden soll.
+
+===== Bearbeiten eines Schritts
+
+Um einen einzelnen Schritt zu bearbeiten, also seine Konfiguration zu ändern,
+wird zunächst mit der linken Maustaste auf den Schritt geklickt. Daraufhin
+erscheint auf der rechten Bildschirmseite der Dialog für die
+Schritt-Einstellungen.
+
+Allen Schritt-Typen gemein ist, dass der Name des Schritts am oberen Rand des
+Dialogs über das *Stift-Symbol* geändert werden kann, und dass dem Schritt eine
+Zuständigkeit zugewiesen werden kann - *Bürger*, *OE*, *DL* oder *Dynamisch*.
+
+image::assets/anwender/Prozesseditor_Seitenleiste_1.png[Prozess Seitenleiste]
+
+
+===== Schritte
+Der Prozesseditor unterstützt unterschiedliche Typen von Schritten, die im
+Folgenden beschrieben werden.
+
+====== Formular-Schritt
+Einer der wichtigsten Schritte ist der `Formular-Schritt`. Dieser Schritt
+ermöglicht es eigene Formulare zu erstellen, die dann wahlweise in der App oder
+im Backoffice angezeigt und befüllt werden können. Somit eignet sich dieser
+Schritt-Typ dazu Informationen zu erfassen. Im Beispiel des *Mängelmelders* sind
+die in der App angezeigten Formulare zur Erfassung eines Mangels tatsächlich
+`Formular-Schritte`.
+
+Die Informationen, die in einem Formular erfasst werden stehen allen folgenden
+Schritten im Prozess zur Verfügung. Das heisst die Werte, die zum Beispiel von
+einem Nutzer der App eingetragen wurden, können in späteren Schritten
+referenziert werden. Speziell `Verbindungen` profitieren davon, da in den
+<<prozesse_regeln_fuer_den_ubergang,Regeln für den Übergang>> ebenfalls auf die Werte
+zugegriffen werden kann. Dadurch ist es möglich Verzweigungen innerhalb eines
+Prozesses abzubilden - abhängig davon, was ein Nutzer eingegeben hat.
+
+Für die Erstellung von Formularen stehen unterschiedlicher `Formular-Felder` zur
+Verfügung:  
+
+
+- Text / Dropdown
+- Datum
+- Uhrzeit
+- Checkbox
+- Upload
+- Unterschrift
+- Textblock (Anzeige von Text)
+- Standort
+
+.Einem Formular-Schritt Felder hinzufügen
+image::assets/anwender/Prozesseditor_Seitenleiste_Felder.png[Felder hinzufügen, 300, align="center"]
+
+Hevorzuheben sind `Text-Felder`. Sie ermöglichen nicht nur die Eingabe von
+reinem Text, sondern erlauben es auch `Dropdowns` mit vorgegebenen Werten zu
+erstellen. Dazu werden wie bei *Checkbox* Optionen hinzugefügt.
+
+Jedes Formular-Feld unterstützt die vier Konfigurationen
+
+- **Name des Slot**: Ein Slot ist der technische Name des Feldes. Er dient dazu
+an einer anderen Stelle Bezug auf den Wert des Feldes zu nehmen. Dieses Feld
+wird nicht angezeigt.
+
+- **Name des Formularfelds**: Der Anzeige-Name des Feldes.
+
+- **Anweisung (Platzhalter)**: Der Platzhalter-Text. Wird bei Feldern angezeigt,
+die einen Platzhalter haben, z.B. dem Textfeld.
+
+- **Ist relevant**: Dieses Feld gibt an, ob ein Formular-Feld angezeigt werden
+soll. Es unterstützt die selben Regeln wie auch die *Bedingung* von
+Verbindungen. Dazu mehr unter <<prozesse_regeln_fuer_den_ubergang,*Regeln für den Übergang*>>
+
+
+====== Verbindungen
+Verbindungen stellen in einem Prozess den Fluss von einem Schritt zum nächsten
+dar. Sie sind darüber hinaus auch der Ort, an dem die
+<<prozesse_regeln_fuer_den_ubergang,Regeln>> festgelegt werden, unter denen der Übergang
+von einem zum nächsten Schritt stattfindet.
+
+Neben Regeln für den Übergang haben Verbindungen zwischen Schritten eine weitere
+Funktion: sie dienen als Aktion für die Bearbeitung von Anträgen. Wird einer
+Verbindung ein Name gegeben wird daraus im Backoffice-Antrag ein Button, der den
+Übergang zum nächsten Schritt anstößt.
+
+[NOTE]
+.Kurz und knapp
+====
+Eine Verbindung mit einem Namen wird ein Button im Antrag.
+====
+
+Dieses Verhalten wird im Prozesseditor visuell dadurch unterstützt, dass über
+dem Namen der Verbindung das kleine Label `Button` angezeigt wird, um zu
+signalisieren, dass es sich im Antrag um einen Button handelt.
+
+[[prozesse_regeln_fuer_den_ubergang]]
+*Regeln für den Übergang* +
+Übergänge zwischen zwei Schritten können mit Regeln ausgestattet werden - sie
+werden `Bedingung` genannt. `Bedingungen` werden auf `Verbindungen` festgelegt
+und in das gleichnamige Feld eingetragen. Beim Anlegen einer neuen Verbindung
+wird das Feld `Bedingung` standardmäßig mit dem Wert `true` befüllt. Dieser Wert
+drückt aus, dass der Übergang zum nächsten Schritt immer möglich ist - so
+gesehen also keiner besonderen Bedingung folgt.
+
+[NOTE]
+.Kurz und knapp
+====
+Die `Bedingung` einer Verbindung gibt an, ob der Übergang zum nächsten Schritt
+möglich ist!
+====
+
+Zum Beispiel:
+> Ist der Übergang zum nächsten Schritt möglich? `true`
+
+

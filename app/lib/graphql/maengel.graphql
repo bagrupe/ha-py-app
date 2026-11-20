@@ -1,0 +1,96 @@
+query Maengel($kommuneId: UUID!) {
+  kommune(kommuneId: $kommuneId) {
+    maengelAusfuehrungen {
+      ...MangelAusfuehrung
+    }
+  }
+}
+
+query MaengelKarte($kommuneId: UUID!, $filter: SlotValueFilterInput) {
+  kommune(kommuneId: $kommuneId) {
+    maengelAusfuehrungen {
+      __typename
+      id
+      userId
+      slotValues(where: $filter) {
+        ...SlotValue
+      }
+      status
+    }
+  }
+}
+
+fragment MangelAusfuehrung on Ausfuehrung {
+  __typename
+  id
+  userId
+  adresse: slotValue(names: "adresse") {
+    ...PlainSlotValue
+  }
+  beschreibung: slotValue(names: "beschreibung") {
+    ...PlainSlotValue
+  }
+  kategorie: slotValue(names: ["_wurzel", "kategorie"]) {
+    ...PlainSlotValue
+  }
+  title: slotValue(names: "titel") {
+    ...PlainSlotValue
+  }
+  bilder: slotValue(names: "bilder") {
+    id
+    slotName
+    slotValueCount
+  }
+  status
+}
+
+fragment PlainSlotValue on PlainSlotValue {
+  ... on PlainSlotValue {
+    id
+    slotName
+    value
+  }
+}
+
+query MeineMaengel {
+  my {
+    id
+    ... on Buerger {
+      maengel {
+        ...MangelAusfuehrung
+      }
+
+      gefolgteAusfuehrungen {
+        ...MangelAusfuehrung
+      }
+    }
+  }
+}
+
+query Mangel($kommuneId: UUID!, $mangelId: UUID!) {
+  kommune(kommuneId: $kommuneId) {
+    id
+    mangelAusfuehrung(id: $mangelId) {
+      ...MangelAusfuehrung
+      aktuellerNutzerFolgt
+
+      historie {
+        id
+        createdAt
+        statusAenderung
+        nachricht
+      }
+    }
+  }
+}
+
+mutation MangelFolgen($input: AusfuehrungFolgenInput!) {
+  ausfuehrungFolgen(input: $input) {
+    buerger {
+      id
+      gefolgteAusfuehrungen {
+        ...MangelAusfuehrung
+      }
+    }
+  }
+}

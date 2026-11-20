@@ -1,0 +1,136 @@
+[[einladen_von_nutzenden]]
+==== Einladen von Nutzenden
+
+Die Kommunal-App kennt im Backoffice drei Typen von Nutzenden
+
+. `Super-Admin`
+. `Admin`
+. `Sachbearbeiter`
+. `Dienstleister`
+
+`Super-Admins` sind Nutzer, die die Berechtigung haben, den gesamten Mandanten
+zu verändern. Das bedeutet sie können systemweit Organisationseinheiten und Abteilungen
+anlegen, Nutzer einladen und auch den Prozesseditor uneingeschränkt nutzen.
+
+`Admins` sind Nutzer, die die Berechtigung haben eine oder mehrere
+Organisationseinheiten zu verwalten. Dort können sie neue Abteilungen anlegen
+oder entfernen und neue Nutzende einladen - jedoch keine `Super-Admins`.
+
+`Sachbearbeiter` sind Nutzer, die die Berechtigung haben Anträge innerhalb ihrer
+Abteilungen zu bearbeiten. Sachbearbeiter können weitere Berechtigungen über
+das Festlegen von `Funktionsberechtigungen` erhalten, sodass sie bspw. Nutzende
+verwalten oder auch den Prozesseditor verwenden dürfen.
+
+Am Beispiel von `Super-Admins` respektive `Admins` funktioniert das Einladen von
+neuen Nutzern wie folgt:
+
+- Zunächst loggt man sich im Backoffice ein - als `Super-Admin` oder `Admin` -
+und wählt über das sog. *Burger Menu* am oberen Bildschirmrand die
+`Nutzendenverwaltung`.
+
+- In der sich öffnenden Ansicht öffnet man über den Button `+ Neu einladen` den
+Dialog für die Benutzereinladung.
+
+- In dem Dialog gibt man nun zunächst die E-Mail-Adresse des Benutzers an, der
+eingeladen werden soll
+
+- Als nächstes wählt man den *Nutzer-Typ* aus, den der neue Nutzer haben soll
+
+    - als `Super-Admin` kann man jeden Nutzer-Typ für sämtliche
+    Organisationseinheiten und Abteilungen einladen
+
+    - als `Admin` kann man weitere Admins und Nutzer für die eigenen
+    Organisationseinheiten einladen
+
+- Anschließend kann man Organisationseinheiten und Abteilungen auswählen, in
+denen der neue Nutzer Mitglied sein soll (abhängig davon, ob man selbst als
+`Super-Admin` oder `Admin` einlädt)
+
+- Die Einladung wird durch einen klick auf den Button `Einladung senden`
+abgeschickt.
+
+.Nutzenden einladen
+
+Der eingeladene Nutzer bekommt nun eine Einladungs-E-Mail an die angegebene
+Adresse zugeschickt, in der ein Link zur Registrierung enthalten ist. Nach einem
+Klick auf den Link gibt er dort seinen Namen ein und wählt ein Passwort.
+
+Abschließend muss die Registrierung des Nutzers durch einen `Super-Admin` oder
+`Admin` der Organisationseinheit im Backoffice bestätigt werden. Ein
+entsprechender Eintrag taucht in der Nutzendenverwaltung auf.
+
+.Nutzenden bestätigen
+
+Nach der Bestätigung durch einen Admin erhält der neue Nutzer eine weitere
+E-Mail, die ihn darüber informiert, dass sein Zugang freigeschaltet wurde - der
+neue Nutzer kann sich nun im Backoffice einloggen. In der folgenden Tabelle ist
+zu sehen welche Standard-Berechtigungen eingeladene Benutzer nach Typ haben. Wie
+diese Berechtigungen verändert werden können ist in <<veraendern_von_funktionsberechtigungen,Verändern von Funktionsberechtigungen>> zu lesen.
+
+Folgende Berechtigungen werden den Nutzertypen standardmäßig zugewiesen
+
+[cols="1,1,1,1"]
+|===
+|Funktion |Nutzer |Admin |Super-Admin
+
+| Prozessverwaltung 
+| icon:times[]
+| icon:times[]
+| icon:check[]
+
+| Anträge
+| OE
+| OE
+| icon:check[]
+
+| News-Artikel
+| icon:times[] 
+| OE
+| icon:check[]
+
+| Wettermesspunkte
+| icon:times[]
+| OE
+| icon:check[]
+
+| Geoflächen 
+| icon:times[] 
+| OE
+| icon:check[]
+
+| POIs
+| icon:times[] 
+| OE 
+| icon:check[]
+
+| Integrationen 
+| icon:times[] 
+| OE
+| icon:check[]
+
+| Sensoren 
+| icon:times[] 
+| OE 
+| icon:check[]
+
+|===
+
+*OE* steht für Organisationseinheit und bedeutet, dass die Funktion immer nur
+die Daten der eigenen Organisationseinheiten berührt.
+
+===== Einladen von Nutzenden von Dienstleistern
+
+Neben den "normalen" Nutzenden des Backoffice können auch für Dienstleister eigene
+Nutzer eingeladen werden. Diese Nutzer sind vergleichbar mit `Sachbearbeitern`, haben
+jedoch keine weitergehenden Rechte. Nutzer von Dienstleistern können ausschließlich
+Anträge sehen, die ihnen (dem Dienstleister) zugeordnet sind, zum Beispiel als Ergebnis
+der Weiterleitung eines Antrags an den Dienstleister. Es ist nicht möglich einem
+Nutzer eines Dienstleisters über Funktionsberechtigungen weiterreichende Rechte zu
+gewähren.
+
+Nutzende von Dienstleistern tauchen zusammen mit allen anderen Nutzern in der Liste
+der Nutzer in der Nutzendenverwaltung auf, können aber nicht bearbeitet, sondern nur
+wieder entfernt werden.
+
+.Dienstleister einladen
+image::assets/anwender/Nutzendenverwaltung_Dienstleister_einladen.png[Dienstleister einladen]

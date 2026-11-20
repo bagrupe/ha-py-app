@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE ikiss SYSTEM "https://www.hameln-pyrmont.de/ikiss.dtd">
+<ikiss>
+    <result>
+            <tcontent_list>
+                <tcontent>
+                    <object_id>3767.1960.1</object_id>
+                    <object_title><![CDATA[Hameln-Pyrmont mag's fair! Der «FairFührer» - ein Einkaufsratgeber für fair gehandelte Waren ist neu erschienen]]></object_title>
+                    <title>Hameln-Pyrmont mag's fair! Der «FairFührer» - ein Einkaufsratgeber für fair gehandelte Waren ist neu erschienen</title>
+                    <description></description>
+                    <data_content></data_content>
+                    <author>Administrator</author>
+                    <date>2026-10-02 11:56:05</date>
+                </tcontent>
+                <tcontent>
+                    <object_id>3767.1974.1</object_id>
+                    <object_title><![CDATA[L 431 - Verkehrsfreigabe der Valentinibrücke am Mittwochnachmittag]]></object_title>
+                    <title>L 431 - Verkehrsfreigabe der Valentinibrücke am Mittwochnachmittag</title>
+                    <description></description>
+                    <data_content></data_content>
+                    <author>Administrator</author>
+                    <date>2026-10-20 14:16:17</date>
+                </tcontent>
+            </tcontent_list>
+    </result>
+</ikiss>

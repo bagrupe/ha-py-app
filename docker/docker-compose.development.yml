@@ -1,0 +1,138 @@
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: hameln-postgres
+    restart: unless-stopped
+    env_file: ../.env
+    expose:
+      - 5432
+    volumes:
+      - postgres-volume:/var/lib/postgresql/data
+    networks:
+      - hameln-pyrmont
+
+  mongodb:
+    image: mongo:6.0.4
+    container_name: hameln-mongodb
+    restart: unless-stopped
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+      retries: 5
+      interval: 5s
+      start_period: 2s
+    expose:
+      - 27017
+    volumes:
+      - mongodb-volume:/data/db
+    env_file: ../.env
+    networks:
+      - hameln-pyrmont
+
+  payload:
+    image: ${CONTAINER_REGISTRY_IMAGE:?Set CONTAINER_REGISTRY_IMAGE}/web-bereich-b:latest
+    container_name: hameln-payload
+    restart: unless-stopped
+    env_file: ../.env
+    # command: >
+    #   sh -c "pnpm cross-env PAYLOAD_CONFIG_PATH=src/payload.config.ts ts-node dist/dataseeder/main.js kommunen pois wettermesspunkte geoflaechen sensorart && pnpm start"
+    volumes:
+      - payload-volume:/app/bereich-b/uploads/media
+    ports:
+      - "57162:3000"
+    networks:
+      - hameln-pyrmont
+    # TODO fix health check. Currently stays on unhealthy
+    # healthcheck:
+    #   test:
+    #     [
+    #       "CMD-SHELL",
+    #       "curl --silent --fail http://localhost:3000/cms/health > /dev/null || exit 1",
+    #     ]
+    #   start_period: 30s
+    #   interval: 10s
+    #   retries: 10
+
+  backoffice:
+    image: ${CONTAINER_REGISTRY_IMAGE:?Set CONTAINER_REGISTRY_IMAGE}/web-bereich-a:latest
+    container_name: hameln-backoffice
+    restart: unless-stopped
+    environment:
+      # v3 CMS service is named "payload" here and listens on 3000 (Next.js standalone)
+      CMS_UPSTREAM: http://payload:3000
+    networks:
+      - hameln-pyrmont
+    ports:
+      - "57160:80"
+
+  backend:
+    image: ${CONTAINER_REGISTRY_IMAGE:?Set CONTAINER_REGISTRY_IMAGE}/backend:latest
+    container_name: hameln-backend
+    restart: unless-stopped
+    networks:
+      - hameln-pyrmont
+    expose:
+      - 8080
+    env_file: ../.dotnet_env
+    depends_on:
+      postgres:
+        condition: "service_started"
+      backoffice:
+        condition: "service_started"
+      # payload:
+      #   condition: "service_healthy"
+
+
+  # mailpit:
+  #   image: axllent/mailpit:v1.22
+  #   container_name: hameln-mailpit
+  #   command:
+  #     - --smtp-relay-config
+  #     - /etc/mailpit/smtp-relay-config.yaml
+  #     - --ui-auth-file
+  #     - /etc/mailpit/passwords.txt
+  #   restart: unless-stopped
+  #   networks:
+  #     - hameln-pyrmont
+  #   expose:
+  #     - 1025
+  #   environment:
+  #     - MP_WEBROOT=mailpit
+  #   volumes:
+  #     - mailpit-volume:/etc/mailpit
+
+  gotenberg:
+    image: gotenberg/gotenberg:8
+    container_name: hameln-gotenborg
+    restart: unless-stopped
+    networks:
+      - hameln-pyrmont
+    expose:
+      - 3002
+
+  stele:
+    build:
+      context: ../web/stele
+      dockerfile: Dockerfile
+    container_name: hameln-stele
+    restart: unless-stopped
+    env_file: ./.env
+    environment:
+      # Runtime only: where nginx proxies /graphql and /api (same stack → backend service)
+      STELE_BACKEND_ORIGIN: ${STELE_BACKEND_ORIGIN:-http://localhost:8080}
+    depends_on:
+      - backend
+    ports:
+      - "57163:80"
+    networks:
+      - hameln-pyrmont
+
+
+volumes:
+  postgres-volume:
+  mongodb-volume:
+  payload-volume:
+  mailpit-volume:
+
+networks:
+  hameln-pyrmont:
+    name: hameln-pyrmont

@@ -1,0 +1,26 @@
+query PublishedNewsArtikel($from: String!, $until: String!) {
+  UnnotifiedNewsArtikel(from: $from, until: $until) {
+      id
+      datum
+      titel
+      teaser
+      titelbilder {
+        bild {
+          sourceUrl
+        }
+      }
+      untereinheit {
+        name
+        id
+      }
+      kommune {
+        bereichAId
+      }
+  }
+}
+
+mutation SetNewsArtikelNotified($ids: [String!]!) {
+  SetNewsArtikelNotified(ids: $ids) {
+    success
+  }
+}

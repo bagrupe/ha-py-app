@@ -1,0 +1,767 @@
+=== Vision und Zielsetzung
+
+Die Vision der Kommunal App ist es, die Kommunikation und Interaktion zwischen
+Bürger:innen und der kommunalen Verwaltung in Deutschland grundlegend zu
+transformieren. Mit der App wird eine benutzerfreundliche und effiziente
+Plattform geschaffen, die den Austausch von Informationen und die Abwicklung von
+Verwaltungsprozessen revolutioniert.  Im Fokus stehen die folgenden Kernziele:
+
+* *Bidirektionale Kommunikation*: Die App ermöglicht einen reibungslosen und
+transparenten Kommunikationsfluss zwischen Bürger:innen und der Verwaltung.
+Anliegen und Anfragen können einfach und schnell übermittelt, bearbeitet und
+verfolgt werden.
+
+* *Effiziente Prozessabwicklung*: Verwaltungsprozesse werden durch die App
+Ende-zu-Ende digitalisiert, wodurch Bearbeitungszeiten verkürzt und die
+Effizienz der Verwaltung erhöht werden.
+
+* *Integration bestehender Systeme*: Durch standardisierte Schnittstellen wird
+eine nahtlose Integration in bestehende Fachverfahren und Verwaltungsportale
+sichergestellt.  Die App fungiert als zentrale Plattform, die Informationen und
+Prozesse bündelt.
+
+* *Ergonomie und Nutzerfreundlichkeit*: Die App bietet ein modernes, intuitives
+Frontend für Bürger:innen sowie ein effizientes Backend für
+Verwaltungsmitarbeiter:innen, um die Nutzung für alle Beteiligten so angenehm
+und effektiv wie möglich zu gestalten.
+
+* *Sicherheit und Datenschutz*: Unter Einhaltung aller gesetzlichen Vorgaben und
+IT-Sicherheitsrichtlinien wird die App eine sichere Umgebung für den Austausch
+sensibler Daten bieten.
+
+* *Informationsweitergabe aus dem Rathaus*: Das Rathaus kann direkt über die App
+aktuelle News, Veranstaltungen und wichtige Ankündigungen an die Bürger:innen
+kommunizieren.  Dies sorgt für schnelle und direkte Informationsweitergabe und
+erhöht die Transparenz und Teilhabe der Bürger:innen am öffentlichen Leben.
+
+Durch die Kommunal App wird die Kommunikation zwischen Bürger:innen und ihrer
+Kommune vereinfacht, Verwaltungsleistungen werden schneller und effizienter
+erbracht, und die Zufriedenheit aller Stakeholder gesteigert. Dies trägt nicht
+nur zur Entlastung der Verwaltungen bei, sondern stärkt auch das Vertrauen der
+Bürger:innen in die öffentlichen Institutionen.
+
+
+=== Adressatenkreis der App
+
+Die Kommunal App ist speziell darauf ausgelegt, die Bedürfnisse verschiedener
+Zielgruppen innerhalb und außerhalb der kommunalen Verwaltung abzudecken. Der
+Adressatenkreis umfasst:
+
+Bürger:innen
+
+* *Einwohner:innen der Kommune*: Personen, die in der jeweiligen Kommune leben und
+direkten Zugang zu kommunalen Dienstleistungen und Informationen benötigen.
+
+* *Pendler:innen und Besucher:innen*: Personen, die regelmäßig in die Kommune
+pendeln oder sich temporär in der Kommune aufhalten und ebenfalls von den
+bereitgestellten Informationen und Dienstleistungen profitieren können.
+
+* *Spezielle Zielgruppen*: Dazu gehören Senior:innen, Menschen mit Behinderungen,
+Eltern und Schüler:innen sowie Mitglieder von Vereinen und anderen
+Organisationen, die spezifische Informationen und Dienstleistungen benötigen.
+
+Kommunale Verwaltung
+
+* *Mitarbeiter:innen der kommunalen Verwaltung*: Personen, die in der Verwaltung
+tätig sind und die App nutzen, um Anfragen zu bearbeiten, interne Kommunikation
+zu führen und Verwaltungsprozesse zu optimieren.
+
+* *Fachabteilungen*: Spezialisierte Abteilungen innerhalb der Verwaltung, die für
+bestimmte Dienstleistungsbereiche zuständig sind, wie zum Beispiel das
+Einwohnermeldeamt, das Bauamt oder das Sozialamt.
+
+Partnerorganisationen und Drittanbieter
+
+* *Bildungs- und Freizeiteinrichtungen*: Schulen, Kindergärten, Bibliotheken,
+Sportvereine und andere Einrichtungen, die Standorte, Informationen und
+Dienstleistungen über die App anbieten können.
+
+* *Sicherheits- und Rettungsdienste*: Feuerwehr, Polizei und andere
+Rettungsdienste, die relevante Informationen schnell und zuverlässig an die
+Bürger:innen kommunizieren müssen und die Lokation ihrer Einrichtungen
+veröffentlichen möchten.
+
+* *Drittanbieter Informationen*: Über standardisierte und individuelle
+Schnittstellen können Informationen von Drittanbietern (z.B. Touristische
+Informationssysteme, Content Management Systeme) eingebunden werden.
+
+Die Kommunal App stellt somit eine zentrale Plattform dar, die vielfältige
+Nutzergruppen zusammenbringt und deren Bedürfnisse in den Bereichen Information,
+Kommunikation und Dienstleistung optimal adressiert. Durch diese breite
+Adressierung werden sowohl Bürger:innen als auch Verwaltungsmitarbeiter:innen in
+die Lage versetzt, effizient und effektiv zu interagieren und von einer
+modernen, digitalen Infrastruktur zu profitieren.
+
+
+=== Hauptfunktionen für Bürger:innen
+
+==== Kommunikation und Interaktion mit der Kommune
+
+===== Mängelmelder
+
+Ein zentrales Merkmal der Kommunal App ist der Mängelmelder, der es Bürger:innen ermöglicht,
+einfach und schnell Mängel in ihrer Umgebung an die zuständige Verwaltung zu melden. Dies kann
+beispielsweise defekte Straßenlaternen, beschädigte Spielplätze, illegale Müllablagerungen oder
+andere Infrastrukturprobleme umfassen.
+Funktionsumfang:
+
+* *Einfache Meldungserstellung*: Nutzer:innen können Mängel unkompliziert über die App
+melden, indem sie eine Beschreibung des Problems eingeben und optional Fotos hinzufügen.
+Die Meldungserfassung ist intuitiv und benutzerfreundlich gestaltet.
+
+* *Standortbestimmung*: Der genaue Standort des gemeldeten Mangels kann entweder manuell
+eingegeben oder per GPS-Daten des Geräts automatisch ermittelt werden. Dies erleichtert es
+der Verwaltung, den genauen Ort des Problems schnell zu lokalisieren.
+
+* *Kategorisierung*: Meldungen können nach verschiedenen Kategorien wie
+"Straßenbeleuchtung", "Spielplätze", "Abfallentsorgung", "Grünanlagen" und weiteren
+sortiert werden. Dies erlaubt eine zielgerichtete Bearbeitung durch die zuständigen
+Abteilungen der Verwaltung.
+
+* *Statusverfolgung*: Bürger:innen können den Bearbeitungsstatus ihrer Meldungen in Echtzeit
+verfolgen. Durch regelmäßige Updates werden sie über den Fortschritt und die ergriffenen
+Maßnahmen informiert, bis das Problem behoben ist.
+
+* *Benachrichtigungsfunktionen*: Nutzer:innen erhalten Push-Notifications und Nachrichten
+im Bereich "Profil" unter "Mitteilungen" über wesentliche Statusänderungen ihrer
+Meldungen.
+
+* *Anonyme Meldungen*: Falls gewünscht, können Meldungen auch anonym eingereicht
+werden, um die Hemmschwelle für die Bürger:innen zu senken und eine größere Beteiligung
+zu erreichen.
+
+Vorteile des Mängelmelders:
+
+* *Direkte Kommunikation*: Der Mängelmelder erleichtert den direkten und unkomplizierten
+Kommunikationsweg zwischen Bürger:innen und Verwaltung, wodurch Probleme schneller
+identifiziert und behoben werden können.
+
+* *Verbesserte Transparenz*: Die Möglichkeit, den Status der gemeldeten Mängel zu verfolgen,
+erhöht die Transparenz und das Vertrauen der Bürger:innen in die Arbeit der Verwaltung.
+
+* *Effizienzsteigerung*: Durch die präzise Standortbestimmung und Kategorisierung der
+Meldungen können Verwaltungsmitarbeiter:innen effizienter arbeiten und Probleme gezielt
+und schneller lösen.
+
+Der Mängelmelder der Kommunal App sorgt somit für eine saubere und
+funktionsfähige Umgebung, indem er es Bürger:innen ermöglicht, aktiv zur
+Verbesserung der öffentlichen Infrastruktur beizutragen. Dies führt zu einer
+gesteigerten Zufriedenheit der Bürger:innen und einer verbesserten
+Lebensqualität in der Kommune.
+
+===== Direkte Kontaktaufnahme mit Verwaltungsmitarbeitern
+
+Über die Funktion "Feedback" im Bereich "Profil" der Kommunal App können
+Bürger:innen direkt Kontakt zur Verwaltung aufnehmen. Diese Funktion ermöglicht
+es den Nutzer:innen, Anregungen, Fragen oder Kritik schnell und unkompliziert an
+die zuständigen Stellen zu übermitteln. Durch die direkte
+Kommunikationsmöglichkeit wird nicht nur die Transparenz und Bürgernähe der
+Verwaltung gestärkt, sondern auch wertvolles Feedback zur Verbesserung und
+Weiterentwicklung der App und der angebotenen Dienstleistungen gesammelt.
+
+
+==== Verwaltung von Anliegen und Anträgen
+
+===== Einreichung von Anträgen
+
+Die Kommunal App ermöglicht die einfache und effiziente Einreichung verschiedenster Anträge
+direkt über das Smartphone. Aktuell werden exemplarisch die Erstanträge und Folgeanträge für
+"Bildungs- und Teilhabeleistungen" vollständig digitalisiert und implementiert.
+
+Funktionsumfang der Antragseinreichung:
+
+* *Vielfältige Formularfeld-Typen*: Die Antragsstrecken umfassen diverse Formularfeld-Typen
+wie Textfelder, Zahlenfelder, Datumsfelder, Adressfelder, Telefonnummern,
+Unterschriftenfelder, Passfoto-Uploads und Dokumenten-Scans. Diese vielfältigen
+Eingabemöglichkeiten sorgen für eine umfassende und präzise Datenerfassung, die den
+Bedarf der jeweiligen Antragsformulare optimal abdeckt.
+
+* *Benutzerfreundlicher Prozess-Designer*: Mithilfe eines benutzerfreundlichen Prozess-
+Designers können Fachleute in den Verwaltungen, selbst ohne Programmierkenntnisse,
+individuelle Antragsstrecken erstellen und anpassen. Dieser Designer bietet intuitive Drag-
+and-Drop-Funktionen zur Zusammenstellung der notwendigen Formularfelder und zur
+Definition von Validierungsregeln.
+
+* *Echtzeit-Validierung*: Eingaben in den Formularen werden in Echtzeit validiert, um
+sicherzustellen, dass alle erforderlichen Informationen korrekt und vollständig erfasst werden.
+Dies reduziert das Risiko von Rückfragen und beschleunigt die Bearbeitungszeit erheblich.
+
+* *Multimediale Unterstützung*: Nutzer:innen können benötigte Dokumente, wie
+beispielsweise Passfotos oder gescannte Unterlagen, direkt über die App hochladen. Dies
+erleichtert die Einreichung von vollständigen und fehlerfreien Anträgen und spart
+Bürger:innen den Weg zum Amt.
+
+* *Digitale Unterschrift*: Die App unterstützt digitale Unterschriften, sodass Bürger:innen
+Anträge direkt auf ihrem Mobilgerät abschließen können.
+
+* *Prozess- und Statusverfolgung*: Nach der Einreichung eines Antrags können Bürger:innen
+den Bearbeitungsstatus in Echtzeit verfolgen. Sie erhalten Benachrichtigungen über den
+Fortschritt ihres Antrags und werden über eventuelle Rückfragen oder den Abschluss der
+Bearbeitung informiert.
+
+Zusammengefasst bietet die Kommunal App eine umfassende, digitale Lösung für die Einreichung
+und bidirektionale Bearbeitung von Anträgen, die sowohl den Bürger:innen als auch den
+Verwaltungseinheiten erhebliche Vorteile hinsichtlich Effizienz, Benutzerfreundlichkeit und
+Bearbeitungsgeschwindigkeit bietet. Die exemplarischen Anträge "Führerschein verlängern" sowie
+die Anträge für "Bildungs- und Teilhabeleistungen" zeigen das Potenzial der App, administrative
+Prozesse grundlegend zu modernisieren.
+
+===== Statusverfolgung von Anträgen
+
+Die Kommunal App bietet eine transparente und effiziente Möglichkeit, den Status eingereichter
+Anträge in Echtzeit zu verfolgen. Diese Funktion stellt sicher, dass Bürger:innen jederzeit über den
+aktuellen Stand ihrer Anliegen informiert sind und bei Bedarf schnell reagieren können.
+Funktionsumfang der Statusverfolgung:
+
+* *Übersicht im Bereich "Service"*: Im Bereich "Service" der App können Nutzer:innen unter
+dem Menüpunkt "Laufende Anträge" eine Übersicht aller aktuell in Bearbeitung befindlichen
+Anträge einsehen. Diese Übersicht enthält relevante Informationen wie den Antragsstatus,
+Datum der Einreichung und die voraussichtliche Bearbeitungsdauer.
+
+* *Detaillierte Statusinformationen*: Jeder Antrag in der Übersicht ist mit detaillierten
+Statusinformationen versehen. Diese Statusinformationen geben Auskunft über die
+verschiedenen Bearbeitungsschritte, die der Antrag bereits durchlaufen hat, sowie über
+anstehende Schritte. Beispiele für Statusmeldungen sind "Eingereicht", "In Bearbeitung",
+"Zusätzliche Informationen benötigt" und "Abgeschlossen."
+
+* *Benachrichtigungen im Bereich "Profil"*: Alle statusrelevanten Benachrichtigungen werden
+zusätzlich im Bereich "Profil" unter "Mitteilungen" angezeigt. Nutzer:innen erhalten Push-
+Benachrichtigungen und E-Mails, sobald sich der Status eines Antrags ändert, eine weitere
+Aktion von ihrer Seite erforderlich ist oder der Antrag abschließend bearbeitet wurde.
+
+* *Interaktive Mitteilungen*: Die Benachrichtigung unter "Mitteilungen" sind interaktiv
+gestaltet, sodass Nutzer:innen direkt auf die entsprechenden Anträge zugreifen und
+gegebenenfalls weitere erforderliche Informationen bereitstellen oder Rückfragen der
+Verwaltung beantworten können.
+
+* *Eingreifmöglichkeiten bei Rückfragen*: Sollte während der Bearbeitung eines Antrags
+zusätzlicher Klärungsbedarf bestehen, wird dies in den Statusanzeigen klar hervorgehoben.
+Bürger:innen können so schnell reagieren und die notwendigen Informationen nachreichen,
+um Verzögerungen zu minimieren.
+
+Vorteile der Statusverfolgung:
+
+* *Transparenz und Vertrauen*: Die Möglichkeit, den Status ihrer Anträge jederzeit einsehen
+zu können, gibt Bürger:innen ein höheres Maß an Transparenz und baut Vertrauen in die
+Effizienz und Zuverlässigkeit der Verwaltung auf.
+
+• *Zeitersparnis*: Durch die Echtzeit-Statusverfolgung und die klaren Benachrichtigungen wird
+der Kommunikationsaufwand reduziert, da unnötige Nachfragen entfallen.
+
+• *Höhere Effizienz*: Die Verwaltung profitiert von konzentrierter Rückmeldung und
+zielgerichteter Kommunikation, die durch die transparente Statusverfolgung gefördert wird.
+
+Die Statusverfolgung von Anträgen in der Kommunal App stellt sicher, dass Bürger:innen stets über
+den Bearbeitungsfortschritt informiert sind und proaktiv eingreifen können, wenn dies erforderlich ist.
+Diese Funktion trägt somit maßgeblich zur Effizienzsteigerung und zur Zufriedenheit aller Beteiligten
+bei.
+
+===== Erinnerungs- und Benachrichtigungsfunktion
+
+Die Kommunal App bietet umfassende Erinnerungs- und Benachrichtigungsfunktionen,
+um Bürger:innen stets auf dem Laufenden zu halten. Aktuell können
+Push-Notifications unter anderem an anstehende Abholtermine des Abfallkalenders
+erinnern, sodass Nutzer:innen keinen Termin verpassen.  Darüber hinaus werden
+Bürger:innen automatisch über Änderungen im Status ihrer eingereichten Anträge
+informiert. Diese Benachrichtigungen erscheinen sowohl in Echtzeit als
+Push-Mitteilungen als auch im Bereich "Profil" unter "Mitteilungen," wodurch
+eine verlässliche und immer zugängliche Informationsquelle geschaffen wird.
+
+==== Informationsdienste
+
+===== News und Updates von der Kommune
+
+Die Kommunal App hält Bürger:innen stets über aktuelle Entwicklungen, wichtige Ankündigungen
+und Ereignisse in ihrer Kommune informiert. Die Neuigkeiten werden prominent auf der Startseite
+der App im Bereich "Aktuelles" angezeigt und bieten den Nutzer:innen eine schnelle Übersicht über
+alle relevanten Informationen.
+
+Funktionsumfang:
+
+* *Anzeige und Individualisierung*: Bürger:innen können die angezeigten Nachrichten auf eine
+oder mehrere Gemeinden beschränken, indem sie im Bereich "Profil" unter
+"Individualisierung" ihre Präferenzen einstellen. Dadurch erhalten sie nur die für sie
+relevanten Meldungen.
+
+* *Zugehörigkeit zu Gemeinden*: Jeder News-Beitrag ist einer bestimmten Gemeinde
+zugeordnet, was direkt im Beitrag angezeigt wird. Dies ermöglicht eine klare Orientierung
+und Zuordnung der Informationen zu den jeweiligen lokalen Behörden.
+
+* *Inhalte und Struktur der Beiträge*: News-Beiträge beinhalten ein Teaser-Bild, das
+Veröffentlichungsdatum, einen Titel, einen Untertitel sowie den vollständigen Text des
+Beitrags. Im Text können zusätzliche Web-Inhalte verlinkt werden, um weiterführende
+Informationen oder externe Ressourcen zugänglich zu machen.
+
+* *Übersicht und Kategorisierung*: Im Bereich "Aktuelles" können Nutzer:innen zur
+vollständigen Liste aller Neuigkeiten navigieren, die nach Erscheinungswoche gruppiert ist.
+Dadurch wird eine strukturierte und leicht navigierbare Übersicht aller vergangenen und
+aktuellen Meldungen gewährleistet.
+
+Durch diese umfassenden Funktionen gewährleistet die Kommunal App, dass Bürger:innen jederzeit
+über die neuesten Entwicklungen in ihrer Gemeinde informiert sind und schnell auf wichtige
+Informationen zugreifen können. Die Möglichkeit zur Individualisierung der News-Anzeige erhöht
+dabei die Relevanz und Benutzerfreundlichkeit der App erheblich.
+
+===== Wetter
+
+Ein weiteres nützliches Feature der Kommunal App ist die Anzeige von Wetterinformationen, die
+durch die Integration der OpenWeather API bereitgestellt werden. Diese Funktion ermöglicht es den
+Bürger:innen, stets aktuelle Wetterdaten für ihre Gemeinde direkt auf der Startseite der App
+abzurufen.
+
+Funktionsumfang:
+
+* *Aktuelle Wetterdaten*: Für jede Gemeinde können die aktuellen Wetterdaten abgerufen und
+angezeigt werden. Dies umfasst Informationen wie Temperatur,
+Niederschlagswahrscheinlichkeit, Windgeschwindigkeit und Luftfeuchtigkeit.
+
+* *Prognose*: Neben den aktuellen Wetterbedingungen wird auch eine Prognose für die
+kommenden zwei Tage bereitgestellt. Dies hilft den Nutzer:innen dabei, ihre Aktivitäten im
+Voraus zu planen und sich auf Wetterveränderungen einzustellen.
+
+* *Übersichtliche Anzeige*: Die Wetterinformationen werden klar und übersichtlich auf der
+Startseite der App im Bereich "Aktuelles" präsentiert. Dies gewährleistet, dass die
+Nutzer:innen schnell und unkompliziert auf die Wetterdaten zugreifen können.
+
+* *Icon-basierte Darstellung*: Für eine schnelle Verständlichkeit werden die
+Wetterinformationen durch aussagekräftige Icons unterstützt, die die jeweiligen
+Wetterbedingungen visuell darstellen.
+
+Vorteile der Wetteranzeige:
+
+* *Aktuelle und relevante Informationen*: Bürger:innen haben stets Zugriff auf die aktuellen
+Wetterbedingungen und Prognosen für ihre Gemeinde, was die Planung von täglichen
+Aktivitäten erleichtert.
+
+* *Nutzerfreundlichkeit*: Die Integration der Wetterdaten direkt auf der Startseite sorgt für eine
+benutzerfreundliche Schnellübersicht, ohne dass zusätzliche Apps oder Webseiten aufgerufen
+werden müssen.
+
+Durch die Einbindung von Wetterdaten aus der OpenWeather API bietet die Kommunal App einen
+zusätzlichen Mehrwert und erhöht die Attraktivität und Nützlichkeit der App im Alltag der
+Bürger:innen. Dies trägt dazu bei, jederzeit gut informiert zu sein und Aktivitäten entsprechend planen
+zu können.
+
+===== Veranstaltungskalender
+
+Der Veranstaltungskalender der Kommunal App, zu finden im Bereich "Termine", bietet eine
+umfassende Übersicht über alle datumsgebundenen Ereignisse in der Gemeinde. Der Kalender ist
+darauf ausgelegt, Bürger:innen schnell und einfach über bevorstehende Veranstaltungen und wichtige
+Termine zu informieren.
+
+Funktionsumfang:
+
+* *Übersicht und Listenansicht*: Der Veranstaltungskalender fasst zunächst alle
+datumgebundenen Ereignisse in einer strukturierten Liste zusammen, die eine schnelle
+Navigation und Orientierung ermöglicht.
+
+* *Such- und Filterfunktionen*: Um die Liste der Termine nach individuellen Bedürfnissen
+einzugrenzen, stehen leistungsfähige Such- und Filterfunktionen zur Verfügung. Die
+Volltextsuche ermöglicht das schnelle Finden von Terminen anhand beliebiger Schlagworte,
+während Filter genutzt werden können, um die Anzeige nach spezifischen Kriterien
+einzugrenzen.
+
+* *Filtermöglichkeiten*:
+
+** *Kategorie*: Bürger:innen können Termine nach Kategorien wie Flohmarkt, Theater,
+Festival, Konzert, Kinderfest und weiteren filtern.
+
+** *Zeitraum*: Ereignisse können nach ihrem Zeitraum gefiltert werden, um nur
+relevante Daten anzuzeigen.
+
+** *Gemeinde*: Filter nach Gemeinde ermöglichen es Nutzer:innen, ausschließlich die
+Veranstaltungen und Termine ihrer Wohn- oder Pendelgemeinde anzuzeigen.
+
+** *Informationsquelle*: Termine können nach ihrer Quelle gefiltert werden, um z.B. nur
+offizielle kommunale oder externe Veranstaltungsinformationen anzuzeigen.
+
+* *Spezialfilter für Abfallkalender*: Speziell für den Abfallkalender kann die Filterung anhand
+der Art des Abfalls (wie Restmüll, Altpapier, Gelber Sack etc.) sowie der Abfuhr-Adresse
+erfolgen, um präzise Informationen zu den nächsten Abholtagen zu erhalten.
+
+* *Navigation und Teilen*: Bei Kalendereinträgen mit Adresse kann direkt die Navigations-App
+des Gerätes zur angegebenen Adresse gestartet werden, um eine einfache und direkte
+Wegführung zu ermöglichen. Darüber hinaus können Kalendereinträge über beliebige Medien
+geteilt werden. Der Empfänger erhält dabei einen Direktlink zur Veranstaltung in der App
+oder eine Aufforderung zur Installation der App, falls diese noch nicht auf dem Gerät
+vorhanden ist.
+
+Durch diese vielseitigen Funktionen stellt der Veranstaltungskalender sicher, dass Bürger:innen stets
+über alle relevanten Veranstaltungen und Termine in ihrer Gemeinde informiert sind und ihre Freizeit
+und Verpflichtungen effektiv planen können. Die zielgerichteten Such- und Filterfunktionen
+erleichtern dabei das Auffinden spezifischer Termine und erhöhen die Benutzerfreundlichkeit der App.
+
+==== Integration von Einrichtungen und Services
+
+Die Kommunal App integriert eine Vielzahl von Einrichtungen und Services, um den Bürger:innen
+umfassende Informationen und Ressourcen bereitzustellen. Diese Einrichtungen und Services sind als
+Points of Interest (POIs) auf einer interaktiven Karte hinterlegt, die eine einfache und intuitive
+Nutzung ermöglicht.
+
+Funktionsumfang:
+
+* *Übersicht über Einrichtungen und Services*: Bürger:innen können über die Karte eine
+Vielzahl von Einrichtungen wie Schulen, Senioren-WGs, Pflegedienste, Krankenhäuser und
+andere relevante Institutionen entdecken. Ebenso finden sie Services wie öffentliche Toiletten,
+Trinkwasserbrunnen, Parks, E-Auto Ladestationen und vieles mehr.
+
+* *Interaktive Karte*: Die interaktive Karte zeigt alle POIs und ermöglicht es den Nutzer:innen,
+schnell und einfach Informationen über die verfügbaren Einrichtungen und Services in ihrer
+Umgebung zu finden. Jeder POI ist mit detaillierten Informationen hinterlegt, die direkt aus
+der Karte abgerufen werden können.
+
+* *Umfangreiche Filtermöglichkeiten*: Über einen umfangreichen und übersichtlich
+kategorisierten Filter können die auf der Karte angezeigten POIs nach individuellen
+Bedürfnissen eingeschränkt werden. Der Filter funktioniert durch die Auswahl von
+Piktogrammen und Titeln, die verschiedene Kategorien repräsentieren.
+
+* *Kategorisierung*: Die Filteroptionen sind klar und übersichtlich in Kategorien unterteilt,
+sodass Nutzer:innen gezielt nach bestimmten Einrichtungen und Services suchen können.
+Diese Kategorien decken ein breites Spektrum ab, um den unterschiedlichen Bedürfnissen der
+Bürger:innen gerecht zu werden.
+
+Durch die Integration von Einrichtungen und Services als Points of Interest bietet die Kommunal App
+einen zentralen und leicht zugänglichen Überblick über wichtige Ressourcen und Annehmlichkeiten
+in der Kommune. Die interaktive Karte und die umfangreichen Filtermöglichkeiten machen es den
+Nutzer:innen leicht, die gewünschten Informationen schnell und effizient zu finden. Dies steigert die
+Nutzbarkeit der App und unterstützt die Bürger:innen dabei, sich in ihrer Umgebung besser
+zurechtzufinden und die verfügbaren Angebote optimal zu nutzen.
+
+==== Individualisierung und Nutzerfreundlichkeit
+
+===== Personalisierbare Benutzeroberfläche
+
+Die Kommunal App bietet eine anpassbare Benutzeroberfläche, die es Nutzer:innen ermöglicht, die
+App nach ihren individuellen Bedürfnissen zu personalisieren:
+
+* *Gemeindenauswahl*: Nutzer:innen können festlegen, für welche Gemeinde(n) sie
+Informationen angezeigt bekommen möchten.
+
+* *Favoriten für Sensoren*: Sensoren, die auf der Karte als Points of Interest (POI) dargestellt
+werden, können favorisiert und somit schneller gefunden werden. Favorisierte Sensoren sind
+im Bereich "Profil" zugreifbar.
+
+* *Personalisierte Antragsdaten*: Persönliche Daten wie Adresse und Geburtsdatum können
+hinterlegt werden, sodass diese bei der Einreichung von Anträgen automatisch vorausgefüllt
+sind. Diese Daten werden sicher, innerhalb der App gespeichert.
+
+* *Personalisierte Abholtermine*: Abholtermine können für die eigene Anschrift personalisiert
+und entsprechend angezeigt werden.
+
+* *Kriterienspezifische Veranstaltungsfilter*: Veranstaltungen können nach individuellen
+Kriterien gefiltert werden, um relevantere Ergebnisse zu erhalten.
+
+* *Individuelle POI-Filter*: POIs auf der Karte können nach spezifischen Kriterien gefiltert
+werden, um nur die für den Nutzer relevanten Informationen anzuzeigen.
+
+Diese Personalisierungsoptionen sorgen für eine benutzerfreundliche und auf individuelle Bedürfnisse
+zugeschnittene Nutzung der Kommunal App.
+
+===== Barrierefreiheit und Inklusionsfunktionen
+
+Die Kommunal App nutzt umfassend alle Barrierefreiheits- und Inklusionsfunktionen, die auf den
+Plattformen Android und iOS zur Verfügung stehen. Dazu gehören:
+
+* *Sprachausgabe (Text-to-Speech)*: Inhalte der App können vorgelesen werden, um Menschen
+mit Sehbehinderungen den Zugang zu Informationen zu erleichtern.
+
+* *Bildschirmlesefunktionen (VoiceOver und TalkBack)*: Die App unterstützt die
+Bildschirmlesefunktionen von iOS (VoiceOver) und Android (TalkBack), die es Nutzern
+ermöglichen, die App per Spracheingabe zu steuern und sich Inhalte vorlesen zu lassen.
+
+* *Vergrößerung*: Die Möglichkeit, über systemeigene Funktionen Bildschirminhalte zu
+vergrößern, unterstützt Nutzer:innen mit Seheinschränkungen.
+
+* *Kontrasteinstellungen*: Die App unterstützt die Anpassung von Kontrasten und
+Farbwechseln, um die Lesbarkeit für Menschen mit Farbsehschwächen oder anderen
+Seheinschränkungen zu verbessern.
+
+Zusätzlich können im Bereich "Aktuelles" die Schriftgrößen der Neuigkeiten-Beiträge individuell
+eingestellt werden, um die Lesbarkeit den persönlichen Bedürfnissen anzupassen. Diese Funktionen
+gewährleisten, dass die App für alle Bürger:innen, unabhängig von ihren individuellen Fähigkeiten,
+nutzbar und zugänglich ist.
+
+=== Hauptfunktionen für die Verwaltung
+
+Die zentralen Funktionen für die Verwaltung befinden sich im Back-Office der
+Anwendung. Hier werden alle Daten, die in der App angezeigt werden, in
+standardisierten Datenformaten gepflegt.  Daten, die von externen Quellen
+stammen, werden zunächst zentral in das Back-Office importiert und normalisiert.
+Verwaltungspersonal hat die Möglichkeit, diese Daten optional zu bearbeiten oder
+vor der Veröffentlichung in der App freizugeben. Dieses zentralisierte
+Datenmanagement sorgt für Konsistenz und Genauigkeit der angezeigten
+Informationen und ermöglicht eine effiziente Verwaltung und Aktualisierung der
+App-Inhalte.
+
+Ebenso kann die App an die Bedürfnisse der Landkreise hinsichtlich Corporate
+Identity angepasst werden: Logo, Farbpallette und Schriftarten sind frei
+konfigurierbar.
+
+==== Effiziente Bearbeitung von Bürgeranfragen
+
+===== Automatisierte Workflows / Prozessbaukasten
+
+Das Back-Office Modul "Prozessbaukasten" ermöglicht es Expert:innen, maßgeschneiderte Prozesse
+für die Verwaltung zu modellieren. Mit BPMN-ähnlichen, grafischen Werkzeugen können diese
+Prozesse intuitiv und visuell gestaltet werden. Der Prozessbaukasten bietet eine Vielzahl von
+Funktionen:
+
+* *Formulareingaben*: Modellierung von Datenerfassungsformularen, die die benötigten
+Informationen von den Nutzer:innen sammeln.
+
+* *Bezahlung von Anträgen*: Einbindung von Zahlungsabwicklungen, um Gebühren für
+Anträge direkt innerhalb des Prozesses zu erheben.
+
+* *Automatisierte Prüfungen*: Integration automatisierter Prüfmechanismen, die eingereichte
+Daten validieren und überprüfen.
+
+* *Aufrufe von externen Diensten / Schnittstellen*: Möglichkeit, externe Dienste und APIs in
+den Prozess einzubinden, um zusätzliche Daten zu integrieren oder Aktionen durchzuführen.
+
+Weitere Prozess-Schritt-Typen können in Zukunft entwickelt und hinzugefügt werden, um den
+Prozessbaukasten kontinuierlich zu erweitern. Die modellierten Prozesse sind sofort als
+Antragsstrecken sowohl in der App als auch im Back-Office verwendbar.
+
+Dank Versionierung können mehrere Evolutionen eines Prozesses parallel existieren und verwendet
+werden, was die Flexibilität und Anpassungsfähigkeit der Verwaltungsprozesse erhöht. Dies stellt
+sicher, dass die Verwaltung stets aktuelle und optimierte Prozesse anbieten kann, ohne die Kontinuität
+bestehender Abläufe zu gefährden.
+
+==== Verwaltungsinterne Kommunikation und Zusammenarbeit
+
+===== Berechtigungssystem
+
+Das Berechtigungssystem der Kommunal App bietet eine umfassende und flexible
+Benutzerverwaltung, die über einfache Nutzerkonten hinausgeht und eine Gliederung in Gruppen und
+Untereinheiten ermöglicht.
+
+* *Benutzerverwaltung*: Verwaltung individueller Benutzerkonten mit spezifischen Rechten
+und Rollen, um den Zugang zu Funktionen und Daten entsprechend den Aufgaben und
+Befugnissen der Nutzer:innen zu steuern.
+
+* *Organisationseinheiten*: Abbildung von Untereinheiten wie Gemeinden, wodurch eine klare
+organisatorische Struktur und gezielte Verwaltung innerhalb der App gewährleistet wird.
+
+* *Abteilungen*: Erstellung von Abteilungen zur Darstellung von Entitäten innerhalb der Verwaltung,
+wie Referate oder Ämter, sowie externen Beteiligten wie Abfallverbänden. Diese
+Abteilungsstruktur erleichtert die Zuweisung von Rechten und Verantwortlichkeiten.
+
+* *Workflow-Planung*: Der Informationsfluss und die Aufgabenverteilung in Workflows, wie
+Freigabeprozesse oder Delegierungen, können entlang dieser Gliederungen geplant und
+verwaltet werden. Dies sorgt für klare Zuständigkeiten und effiziente Prozessabläufe.
+
+Dieses Berechtigungssystem ermöglicht eine gezielte und sichere Steuerung des Zugriffs auf
+Funktionen und Daten innerhalb der App und stellt sicher, dass Informationen und Aufgaben effizient
+entlang der organisatorischen Strukturen weitergeleitet und bearbeitet werden.
+
+==== Integration bestehender Fachverfahren und Schnittstellen
+
+===== Anbindung und Schnittstellen zu Fachverfahren
+
+Die Kommunal App bietet umfassende Möglichkeiten zur Anbindung und Integration bestehender
+Fachverfahren, um die Effizienz und Funktionalität der Verwaltungsprozesse zu maximieren.
+
+* *Einbettung von Serviceportalen*: Elemente eines Serviceportals können nahtlos als Websites
+in die App eingebettet werden. Dies ermöglicht den direkten Zugriff auf wichtige Dienste und
+Informationen innerhalb der App-Oberfläche.
+
+* *Dokumentenmanagement-System Enaio*: Das Dokumentenmanagement-System Enaio
+kann in die Workflows über definierte Prozessschritte integriert werden. Dies ermöglicht die
+einfache Verwaltung, Speicherung und Archivierung von Dokumenten im Rahmen der
+verschiedenen Verwaltungsprozesse.
+
+* *GovManager von GovConnect*: Der GovManager kann als Datenbroker in die
+Prozessschritte eingebunden werden. Er übernimmt die Weiterleitung von Informationen an
+Fachverfahren, beispielsweise per OSCI. Dies sorgt für eine reibungslose Kommunikation
+und Datenübertragung zwischen den verschiedenen Systemen und Fachverfahren.
+
+Diese flexiblen Integrationsmöglichkeiten gewährleisten, dass die Kommunal App nicht nur als
+eigenständige Lösung effektiv arbeitet, sondern auch bestehende Systeme und Prozesse nahtlos
+einbindet.
+
+===== Datenmigration und Synchronisation
+
+Das *Gemeindeverzeichnis* der Kommunal App wird über einen Webservice von
+GovConnect eingelesen und kontinuierlich aktuell gehalten. GovConnect stellt
+eine zuverlässige und stets aktualisierte Datenquelle zur Verfügung, sodass die
+App immer auf dem neuesten Stand ist. Durch die automatische Synchronisation
+werden neue Gemeinden und Änderungen an bestehenden Gemeinden zeitnah in die App
+integriert, ohne dass eine manuelle Pflege erforderlich ist. Dies gewährleistet,
+dass die Nutzer:innen jederzeit auf aktuelle und exakte Informationen zugreifen
+können.
+
+==== Sicherheits- und Datenschutzmaßnahmen
+
+===== Verschlüsselung und Zugriffskontrollen
+
+Ein zentrales Element der Datensicherheit in der Kommunal App ist die feldweise Ende-zu-Ende-
+Verschlüsselung der Formulareingaben in Anträgen. Diese Ende-zu-Ende-Verschlüsselung erstreckt
+sich vom App-Client bis zum Web-Client der zuständigen Organisationseinheit. Dadurch wird
+sichergestellt, dass nur die zuständigen Verwaltungsmitarbeiter:innen und der/die Antragssteller:in auf
+die Daten zugreifen können. Selbst wenn die Systeme, die die verschlüsselten Daten übertragen oder
+speichern, kompromittiert werden, bleiben die vertraulichen Informationen geschützt. Diese robuste
+Verschlüsselungstechnologie gewährleistet höchste Sicherheitsstandards und schützt die sensiblen
+Daten der Bürger:innen vor unberechtigtem Zugriff.
+
+=== Technische Architektur
+
+Der Full Stack Ansatz der Kommunal App umfasst die Entwicklung sowohl eines Frontends als auch
+eines Backends, um eine nahtlose und effiziente Benutzererfahrung zu gewährleisten.
+
+* *Ergonomie-optimiertes Frontend*: Das Frontend der App ist darauf ausgelegt, eine intuitive
+und benutzerfreundliche Interaktion für die Bürger:innen zu bieten. Durch modernes Design
+und eine klare, strukturierte Benutzeroberfläche können Nutzer:innen problemlos auf alle
+angebotenen Dienste zugreifen und ihre Anliegen schnell und effizient erledigen.
+Barrierefreiheit und responsive Gestaltung stellen sicher, dass die App auf sämtlichen
+Endgeräten gut nutzbar ist.
+
+* *Effizienz-optimiertes Backend*: Das Backend ist auf eine optimale Performance und
+Skalierbarkeit ausgelegt, um die Anforderungen der kommunalen Verwaltung effizient zu
+erfüllen. Es ermöglicht die zentrale Datenpflege, das Management von Anträgen und
+Meldungen und unterstützt dabei die Einhaltung von Datenschutz- und Sicherheitsstandards.
+Mit einer robusten Architektur gewährleistet das Backend eine hohe Verfügbarkeit und
+Zuverlässigkeit.
+
+* *Intelligente Integration von Prozessen und Schnittstellen*: Die Full Stack Anwendung
+integriert notwendige Prozesse und Schnittstellen auf intelligente Weise. Dies umfasst die
+nahtlose Verbindung zu externen Systemen und Fachverfahren sowie die Einbindung
+standardisierter Schnittstellen. Die Prozesse sind flexibel und können an individuelle
+Bedürfnisse angepasst werden, um eine reibungslose Abwicklung der Verwaltungsaufgaben
+zu gewährleisten.
+
+Der Full Stack Ansatz stellt sicher, dass die Kommunal App nicht nur eine benutzerfreundliche
+Oberfläche bietet, sondern auch eine leistungsfähige und sichere Backend-Infrastruktur, die den
+Anforderungen der kommunalen Verwaltung gerecht wird. Dies führt zu einer erhöhten Effizienz,
+Benutzerzufriedenheit und einer modernen, digitalen Kommunikation zwischen Bürger:innen und
+Verwaltung.
+
+==== Schnittstellen und Integrationen
+
+===== Schnittstellen und API Management
+
+Zur Integration und Verwaltung von Daten bietet die Kommunal App Schnittstellen an. Es stehen
+sowohl eine GraphQL-Schnittstelle als auch eine Open API Specification 2.0 kompatible REST-
+Schnittstelle zur Verfügung. Diese ermöglichen eine flexible und effiziente Datenabfrage und -
+manipulation.
+
+Die Dokumentation der REST API ist über die URL "/docs-api" der Back-Office Installation
+erreichbar. Über diese gut dokumentierte Schnittstelle lassen sich unter anderem Points of Interest
+(POIs), Veranstaltungen im Kalender, News sowie die Basisdaten einer Kommune verwalten.
+Dadurch wird gewährleistet, dass externe Systeme und Anwendungen nahtlos mit der Kommunal App
+interagieren können, was die Datenverwaltung und Integration erheblich vereinfacht.
+
+=== Veröffentlichung und Betrieb
+
+==== Open Source Bereitstellung
+
+Es ist vorgesehen, den Quellcode der Kommunal App unter der EUPL-Lizenz
+(European Union Public License) auf der Plattform opencode.de zu
+veröffentlichen. Diese Maßnahme steht im Einklang mit dem Grundsatz "Public
+Money, Public Code", der besagt, dass öffentlich finanzierte Software allgemein
+zugänglich sein sollte. Durch die Veröffentlichung des Quellcodes können
+Entwickler:innen und Interessierte nicht nur von der bestehenden Codebasis
+profitieren und diese weiterentwickeln, sondern auch zur Verbesserung und
+Weiterentwicklung der App beitragen. Dies fördert Transparenz, Innovation und
+kollaborative Zusammenarbeit in der öffentlichen Verwaltung und darüber hinaus.
+
+==== Betrieb
+
+In der ersten Phase der Bereitstellung der Anwendung erfolgen Betrieb, Wartung und Second Level
+Support durch das Entwicklungsunternehmen. Dies bietet folgende Vorteile:
+
+* *Expertenwissen*: Das Entwicklungsunternehmen verfügt über das tiefste Verständnis der
+technischen Architektur und Funktionalität der Anwendung.
+
+* *Minimiertes Betriebsrisiko*: Schnelle und effektive Fehlerbehebung durch die
+Entwickler:innen, die das System gebaut haben.
+
+* *Effiziente Problemlösung*: Anfängliche Herausforderungen werden zügig gelöst und
+notwendige Anpassungen und Optimierungen in Echtzeit vorgenommen.
+
+* *Entlastung der Verwaltung*: Die Verwaltung kann sich in der Einführungsphase vollständig
+auf die Implementierung und den effektiven Einsatz der Anwendung konzentrieren.
+
+* *Fundierte Wissensbasis*: Durch die enge Zusammenarbeit wird wichtiges Wissen aufgebaut
+und dokumentiert, das eine spätere reibungslose Übergabe und eigenständige Verwaltung
+durch die Kommune oder deren Dienstleister unterstützt.
+
+* *Sicherstellung eines reibungslosen Betriebs*: Professioneller Betrieb und Wartung sorgen
+für eine stabile und zuverlässige Nutzung der Anwendung.
+
+==== Zusammenfassung der Hauptvorteile
+
+Die Kommunal App und das zugehörige Back-Office bieten umfassende Vorteile
+sowohl für Bürger:innen als auch für die Verwaltung. Für die Bürger:innen
+ermöglicht die App eine intuitive und benutzerfreundliche Interaktion mit der
+Verwaltung, schnelle Bearbeitung von Anliegen und Anträgen, sowie Zugang zu
+aktuellen Informationen, Veranstaltungen und wichtigen kommunalen Diensten. Das
+Back-Office stellt sicher, dass alle Daten konsistent und standardisiert
+verwaltet werden, und bietet leistungsstarke Tools für die Datenpflege und
+-aktualisierung. Durch robuste Sicherheitsmaßnahmen wie feldweise
+Ende-zu-Ende-Verschlüsselung und flexible API-Schnittstellen für die Integration
+externer Systeme, sorgt die Lösung für höchste Effizienz, Transparenz und
+Datensicherheit.
+
+=== Anhang
+
+==== Glossar der verwendeten Begriffe
+
+Barrierefreiheit: Maßnahmen und Technologien, die Menschen mit Behinderungen den
+gleichberechtigten Zugang zu digitalen Inhalten und Funktionen ermöglichen.
+
+* *Benachrichtigung*: Eine Mitteilung an den Nutzer über den Status oder Änderungen in der
+App, die als Push-Notification oder im Profil unter "Mitteilungen" angezeigt wird.
+
+* *Bürger:innen*: Bewohner:innen einer Gemeinde oder Stadt, die die App nutzen, um
+Informationen und Dienstleistungen der kommunalen Verwaltung zu erhalten.
+
+* *Fachverfahren*: Spezialisierte Verwaltungssoftware, die in einzelnen Bereichen der
+kommunalen Verwaltung eingesetzt wird, wie beispielsweise im Bauamt oder Sozialamt.
+
+* *Filter*: Werkzeuge innerhalb der App, mit denen Nutzer spezifische Informationen und
+Einträge nach bestimmten Kriterien eingrenzen können.
+
+* *Front End*: Der Teil einer Software, der die Benutzeroberfläche umfasst und mit dem
+Nutzer:innen direkt interagieren.
+
+* *Full Stack Anwendung*: Eine Anwendung, die sowohl über ein Front End als auch ein
+Backend verfügt und alle erforderlichen Komponenten und Funktionen integriert.
+
+* *Backend*: Der Teil einer Software, der die Datenverarbeitung und Logik im Hintergrund
+umfasst und nicht direkt vom Nutzer aus sichtbar ist.
+
+* *Individualisierung*: Anpassungsmöglichkeiten innerhalb der App, durch die Nutzer:innen die
+Anzeige und Funktionen nach ihren Bedürfnissen konfigurieren können.
+
+* *Kalendereintrag*: Ein datumsgebundener Termin oder eine Veranstaltung in der App, der
+zeitbezogene Informationen enthält.
+
+* *Kommunale Verwaltung*: Die administrative Organisation und Struktur einer Gemeinde
+oder Stadt, die öffentliche Dienste und Verwaltungsaufgaben erbringt.
+
+* *Navigations-App*: Eine Applikation, die zur Wegfindung dient und die Nutzer mit GPS-
+Daten zu einem Zielort navigiert.
+
+* *Neuigkeiten*: News und Updates von der Kommune, die wichtige Informationen und
+Ankündigungen enthalten.
+
+* *Personalisierung*: Einstellungsmöglichkeiten, durch die Nutzer:innen die App individuell
+gestalten und an ihre Bedürfnisse anpassen können.
+
+* *Point of Interest (POI)*: Ein markanter Ort oder eine Einrichtung, die auf der Karte der App
+angezeigt wird, wie Schulen, öffentliche Toiletten oder E-Auto Ladestationen.
+
+* *Prozess-Designer*: Ein Tool, das es den Verwaltungsmitarbeiter:innen ermöglicht,
+Antragsprozesse und Formulare ohne Programmierkenntnisse zu gestalten und zu verwalten.
+
+* *Push-Notification*: Eine kurze Nachricht, die direkt auf dem Bildschirm des Nutzers
+erscheint, um auf wichtige Ereignisse oder Änderungen hinzuweisen.
+
+* *Statusverfolgung*: Eine Funktion, durch die Nutzer:innen den Bearbeitungsfortschritt ihrer
+Anträge in der App einsehen können.
+
+* *Schnittstelle (API)*: Eine Programmierschnittstelle, die es ermöglicht, unterschiedliche
+Softwarekomponenten miteinander zu verbinden und ihre Interoperabilität sicherzustellen.
+
+* *Veranstaltungskalender*: Eine Übersicht über alle datumsgebundenen Ereignisse und
+Termine in der Gemeinde, die innerhalb der App angezeigt werden.

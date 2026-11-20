@@ -1,0 +1,3 @@
+.react-flow__edge.selected > path {
+  @apply !stroke-primary !stroke-2;
+}

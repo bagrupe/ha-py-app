@@ -1,0 +1,8 @@
+apiVersion: v2
+name: kommunalapp
+description: A Helm chart for deployment various parts of the KommunalApp in a QA or E2E Test environment
+
+type: application
+version: 1.0.0
+
+appVersion: "1.0.0"

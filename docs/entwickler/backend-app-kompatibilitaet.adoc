@@ -1,0 +1,34 @@
+==== Kompatibilität mobiler App und Backend
+
+Die mobile App und das Backend können unabhängig voneinander ausgerollt werden.
+Damit Nutzer mit einer veralteten App-Version nicht gegen ein Backend arbeiten,
+das eine neuere App voraussetzt, prüft die Flutter-App beim **Wechsel in den
+Vordergrund** (App wird wieder aktiv), ob die installierte Version zur vom
+Server angegebenen Mindestversion passt.
+
+* **Backend:** Stellt einen öffentlichen REST-Endpunkt bereit:
+  `GET /api/app-version-compatibility`. Die Antwort ist JSON und enthält
+  unter anderem die **Backend-Version** (`backendVersion`) sowie die
+  **mindestens erforderliche App-Version** (`minimumCompatibleAppVersion`) im
+  Format `MAJOR.MINOR.PATCH` (analog zur Versionsangabe in der `pubspec.yaml`
+  der App, ohne Build-Nummer nach `+`).
+
+* **Konfiguration:** Die Mindest-App-Version wird serverseitig in der
+  Konfiguration unter `MobileApp:MinimumCompatibleAppVersion` gesetzt (z. B. in
+  `appsettings.json`). In Umgebungen mit Umgebungsvariablen kann der Wert auch
+  als `MobileApp__MinimumCompatibleAppVersion` überschrieben werden, ohne die
+  Anwendung neu zu bauen.
+
+* **Verhalten in der App:** Nach jedem Fortsetzen der App wird die
+  Kompatibilität abgefragt. Liegt die installierte Version **unter** der vom
+  Backend genannten Mindestversion, erscheint ein **Hinweisdialog** (Texte in
+  den Übersetzungsdateien der App). Schlägt die Abfrage fehl (kein Netzwerk,
+  ungültige Antwort), wird **kein** Dialog angezeigt, damit die Nutzung nicht
+  unnötig blockiert wird.
+
+* **Betrieb:** Wird ein Backend-Release eingespielt, das eine **höhere
+  Mindest-App-Version** erfordert, muss `MinimumCompatibleAppVersion` entsprechend
+  angehoben und mit dem Release/deploy mitgeführt werden. Die Angabe sollte zur
+  niedrigsten App-Version passen, die mit diesem Backend-Stand noch unterstützt
+  werden soll; ältere App-Builds erhalten dann beim nächsten Wechsel in den
+  Vordergrund den Hinweis, die App zu aktualisieren.

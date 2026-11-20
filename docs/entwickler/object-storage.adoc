@@ -1,0 +1,5 @@
+==== Object Storage
+
+Das Backend speichert Dateien in einem S3-kompatiblen Bucket. Clients laden Dateien nur über das Backend unter `/api/objects/` hoch und herunter, nie direkt im Bucket. Lokal läuft der Bucket in RustFS (`task containers:up`), auf Staging bei Wobcom.
+
+Die vollständige Dokumentation (Architektur, API, neue Consumer, Cleanup, Konfiguration, lokale Entwicklung) liegt im Wiki: https://gitlab.example.invalid/hameln-pyrmont/kommunal-app/-/wikis/features/object-storage/overview[Object Storage]

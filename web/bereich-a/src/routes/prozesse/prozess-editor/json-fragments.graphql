@@ -1,0 +1,87 @@
+fragment JsonValueWithSlotsRecursive on IJsonValueWithSlots {
+  ...JsonValueWithSlots
+  ... on JsonObject {
+    fields {
+      value {
+        ...JsonValueWithSlots
+        ... on JsonObject {
+          fields {
+            value {
+              ...JsonValueWithSlots
+              ... on JsonObject {
+                fields {
+                  value {
+                    ...JsonValueWithSlots
+                    ... on JsonObject {
+                      fields {
+                        value {
+                          ...JsonValueWithSlots
+                          ... on JsonObject {
+                            fields {
+                              value {
+                                ...JsonValueWithSlots
+                                ... on JsonObject {
+                                  fields {
+                                    value {
+                                      ...JsonValueWithSlots
+                                      ... on JsonObject {
+                                        fields {
+                                          value {
+                                            ...JsonValueWithSlots
+                                          }
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+fragment JsonValueWithSlots on IJsonValueWithSlots {
+  __typename
+
+  ... on JsonObject {
+    fields {
+      name
+      value {
+        __typename
+      }
+    }
+  }
+
+  ... on JsonStringValue {
+    __typename
+    value
+  }
+  ... on JsonSlotValue {
+    __typename
+    slotName
+  }
+}
+
+fragment JsonField on JsonField {
+  __typename
+  name
+  value {
+    ...JsonValueWithSlotsRecursive
+  }
+}
+fragment JsonPart on JsonPart {
+  __typename
+  value {
+    ...JsonValueWithSlotsRecursive
+  }
+}

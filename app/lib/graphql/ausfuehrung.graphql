@@ -1,0 +1,48 @@
+query AusfuehrungHistorie($id: UUID!) {
+  ausfuehrung(id: $id) {
+    id
+    titel: slotValue(names: ["titel", "title"]) {
+      ...ReportExecutionPlainSlotValue
+    }
+    beschreibung: slotValue(names: ["beschreibung", "description"]) {
+      ...ReportExecutionPlainSlotValue
+    }
+    adresse: slotValue(names: ["adresse", "address"]) {
+      ...ReportExecutionPlainSlotValue
+    }
+    kategorie: slotValue(names: ["_kategorie", "_wurzel", "kategorie", "category"]) {
+      ...ReportExecutionPlainSlotValue
+    }
+    bilder: slotValue(names: ["bilder", "images"]) {
+      ...ReportExecutionPlainSlotValue
+    }
+    slotValues {
+      ...ReportExecutionSlotValue
+    }
+    prozessVersion {
+      ...ProzessVersion
+    }
+    status
+    historie {
+      ...HistorieEintrag
+      nachricht
+    }
+  }
+}
+
+fragment ReportExecutionPlainSlotValue on PlainSlotValue {
+  id
+  slotName
+  value
+  slotValueCount
+}
+
+fragment ReportExecutionSlotValue on SlotValue {
+  __typename
+  id
+  slotName
+  ... on PlainSlotValue {
+    value
+    slotValueCount
+  }
+}

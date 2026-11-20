@@ -1,0 +1,13 @@
+mutation backofficeUserDelete($input: BackofficeUserDeleteInput!) {
+  backofficeUserDelete(input: $input) {
+    __typename
+    backofficeUser {
+      id
+    }
+    errors {
+      ... on Error {
+        message
+      }
+    }
+  }
+}

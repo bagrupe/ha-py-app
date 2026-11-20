@@ -1,0 +1,1065 @@
+==== BundID-Anbindung
+
+Anbindung von https://id.bund.de[BundID] (föderierte Bürger-Identität des
+Bundes) als zusätzlicher, starker Login-Weg neben dem bestehenden anonymen
+Weak-Login und der (noch gemockten) SMS-Anmeldung der Ehrenamtsbank.
+Technisch: Keycloak als Identity Broker/SAML Service Provider zwischen BundID
+(SAML 2.0) und der App (OIDC Authorization Code + PKCE).
+
+Dieses Dokument ist bewusst ausführlicher als die übrigen Feature-Dokus in
+diesem Ordner, da die Anbindung an mehreren Stellen auf externe Infrastruktur
+(Keycloak, Zertifikate, öffentliche Erreichbarkeit) angewiesen ist und die
+Fehlersuche unterwegs mehrere nicht offensichtliche Ursachen zutage gefördert
+hat, die für spätere Weiterarbeit dokumentiert werden sollten.
+
+===== Status (Stand 31.07.2026) & nächste Schritte
+
+*Fertig, lokal verifiziert UND gemerged/gepusht (MR !276, schließt #360 + #361):*
+
+NACHTRAG 2026-08-11: "lokal verifiziert" galt bislang nur für das
+Ursprungs-Setup. Ein zweiter, unabhängiger Fresh-Setup-Versuch (Reviewer
+Felix) ist an zwei nie dokumentierten Lücken gescheitert (falsches
+Zertifikat in `signingCertificate`, fehlender `configure-bundid-flow.sh`-
+Schritt – siehe Bug 12 und <<setup-skripte>>). Beide sind jetzt behoben
+bzw. dokumentiert; der Fix ist **code-/konfigurationsseitig verifiziert**
+(korrekter Zertifikatswert live reproduziert), aber noch **nicht** durch
+einen tatsächlich abgeschlossenen End-to-End-Login auf einem zweiten Rechner
+bestätigt. Erst nach Felix' Rückmeldung als endgültig reproduzierbar
+betrachten.
+
+- BundID-Login (SAML über Keycloak) funktioniert Ende-zu-Ende gegen die
+  BundID-**INT**-Umgebung (auf dem Ursprungs-Setup bestätigt, siehe
+  Nachtrag oben).
+- Erstregistrierung legt das Konto direkt mit den BundID-Daten an, **ohne**
+  dass eine Telefonnummer per SMS bestätigt werden muss.
+- Erneute Anmeldung mit einer bereits verknüpften BundID (auch auf einem
+  Gerät, dessen anonyme Identität bereits mit einer *anderen* BundID
+  verknüpft ist – "shared device") funktioniert über einen einzigen
+  Browser-Login.
+- Hartes Sicherheits-Gate: eine per Telefonnummer erkannte Kontoübernahme
+  eines BundID-verifizierten Kontos wird verweigert, bis erneut per BundID
+  angemeldet wird (Schutz vor Übernahme durch neu vergebene Rufnummern).
+- **Token-Refresh** (Tier-2-Sicherheitsarbeit, siehe <<token-refresh>>): das
+  starke BundID-JWT (15 Min gültig) wird über einen rotierenden Refresh-Token
+  still erneuert, ohne erneuten Browser-Login. End-to-end getestet
+  (`StrongTokenLifetimeMinutes=1` lokal, Server-Log
+  "BundID token refreshed for buerger ..." bestätigt, App bleibt ohne
+  Unterbrechung angemeldet).
+- **Security-Event-Logging** an allen sicherheitsrelevanten
+  Entscheidungspunkten (PII-frei, siehe <<security-logging>>).
+- Neuer, eigenständiger Bereich *„Mein Konto"* (`Profil → Mein Konto`,
+  Verzeichnis `app/lib/routes/profil/my_account/` – auf Englisch umbenannt,
+  siehe <<konventionen>>) zum Ansehen/Bearbeiten der BundID-Kontodaten, inkl.
+  echtem An-/Abmelden.
+- Mehrere grundlegende Auth-/Caching-Bugs im App-GraphQL-Stack gefunden und
+  behoben (siehe <<bekannte-bugs>>) – diese betrafen nicht nur BundID, sondern
+  potenziell jeden Kontowechsel in der App.
+- CI-Pipeline für MR !276 grün (bis auf einen vorbestehenden,
+  branch-unabhängigen `lint:backend`-Fehler in `DienstleisterMutations.cs`,
+  siehe <<ci-fixes>>).
+- Secrets/Passwörter/Deployment-Hinweise für DevSecOps zusammengestellt
+  (lokal unter `~/Downloads/BundID-Secrets-fuer-DevSecOps/`, siehe
+  <<devsecops-handover>>) – NICHT Teil des Git-Repos.
+
+*Offen / bekannte Lücken (siehe auch <<bundid-todo>>):*
+
+- Keine getrennte PROD-Realm-/IdP-Konfiguration – aktuell zeigt der einzige
+  Keycloak-Realm fest auf `https://int.id.bund.de`. PROD-Zertifikate liegen
+  bereits in `bundid-secrets/keycloak-prod/`, werden aber von nichts
+  verwendet.
+- PROD-Keystore-Passwort noch unbekannt (INT-Passwort ist verifiziert, siehe
+  <<devsecops-handover>>).
+- Der bestehende (gemockte) SMS-Login-Screen der Ehrenamtsbank
+  (`volunteer_login_notifier.dart`) ist weiterhin nicht an das echte Backend
+  angebunden – bewusst außerhalb des Scopes dieser Runde.
+- Keine Inbox/Benachrichtigungen, die an die BundID-Identität gebunden sind
+  (vom Nutzer als *„perspektivisch"* gewünscht, nicht umgesetzt).
+- Der ältere, von BundID unabhängige „Persönliche Daten"-Bereich (Antrag-
+  Vorausfüllung, `profil_personal_data.dart`) bleibt strukturell getrennt von
+  „Mein Konto" – siehe <<architektur-grenzen>>.
+- Manuelles Testen erfolgte ausschließlich im iOS-Simulator gegen zwei
+  BundID-INT-Testkonten. Kein Test auf Android, kein Test der SMS-Merge-Pfade
+  mit einer echten (nicht gemockten) SMS-Anmeldung.
+- Keine automatisierten Integrationstests gegen einen echten/simulierten
+  Keycloak; keine Flutter Unit-/Widget-Tests für den neuen BundID-Code.
+- Kein dauerhaftes „Mit BundID angemeldet"-Statuslabel außerhalb von
+  „Mein Konto".
+
+*Nächste Schritte (extern, nicht mehr code-seitig):*
+
+1. DevSecOps übernimmt DNS (`auth.example.invalid` → Server-IP)
+   und nginx-Routing zum `keycloak`-Container, siehe <<devsecops-handover>>.
+2. PROD-Keystore-Passwort klären.
+3. PROD-Realm-Strategie klären (siehe <<bundid-todo>>), bevor PROD-Zertifikate
+   genutzt werden können.
+
+[[architektur]]
+===== Architektur
+
+....
+BundID (SAML IdP, https://int.id.bund.de/idp)
+   ↕ SAML 2.0 (signiert + verschlüsselt, AKDB-Erweiterungsschema)
+Keycloak (Identity Broker + SAML Service Provider + OIDC Provider)
+   ↕ OIDC Authorization Code + PKCE (flutter_appauth, externer Browser)
+Flutter-App
+   ↕ REST (POST /api/auth/bundid/exchange bzw. /login), Bearer = Keycloak-Access-Token
+Backend (.NET) – validiert das Keycloak-Token, stellt eigenes starkes JWT aus
+....
+
+Kernprinzip: Die App tauscht **niemals** direkt mit BundID aus. Sie meldet
+sich per OIDC gegen Keycloak an (`kc_idp_hint=bundid` überspringt Keycloaks
+eigene Auswahlseite), Keycloak übernimmt die komplette SAML-Kommunikation mit
+BundID (Signatur, Verschlüsselung, Attribut-Mapping) und liefert der App am
+Ende ein normales OIDC-Access-Token mit den BundID-Attributen als Claims. Das
+Backend validiert dieses Keycloak-Token (Signatur, Issuer, Audience) und
+stellt daraufhin ein eigenes, kurzlebiges KommunalApp-JWT aus – die App
+speichert **nur** dieses eigene JWT dauerhaft, nie das Keycloak-Token.
+
+====== Zwei Backend-Endpunkte, zwei Zwecke
+
+`POST /api/auth/bundid/exchange` (`[Authorize]`, `BundIdController.Exchange`)::
+Verknüpft eine BundID-Identität einmalig mit dem aktuell eingeloggten
+(Weak-Login-)Bürger dieses Geräts. Bei Erstverknüpfung wird das Konto sofort
+mit den BundID-Daten befüllt (siehe unten).
+
+`POST /api/auth/bundid/login` (`[AllowAnonymous]`, `BundIdController.Login`)::
+Meldet eine **bereits verknüpfte** BundID direkt an, unabhängig vom aktuellen
+Gerät/Weak-Login – sucht ausschließlich über den `SubjectHash` (siehe unten).
+Wird gebraucht, sobald sich jemand auf einem Gerät anmelden will, dessen
+lokale (Weak-Login-)Identität nicht die ist, mit der diese BundID ursprünglich
+verknüpft wurde ("shared device", oder erneutes Anmelden nach Abmelden).
+
+Die App-Funktion `startBundIdLogin` (`bundid_auth.dart`) kombiniert
+beide: sie führt **einen** Browser-Login durch (ein zweiter
+`ASWebAuthenticationSession`-Aufruf direkt nach dem ersten kann auf iOS
+hängen bleiben/nicht erscheinen – siehe <<bekannte-bugs>>), versucht zuerst
+`/login`, und fragt nur bei `BUNDID_REGISTRATION_REQUIRED` nach der
+Einwilligung. Erst danach ruft `confirmBundIdRegistrationWithRetry` `/exchange`
+mit demselben bereits abgerufenen Keycloak-Token auf.
+
+====== Identität & Subject-Hashing
+
+Keycloak liefert kein OIDC-Standard-`sub`-Claim für BundID-Broker-Logins
+(Ursache nicht abschließend geklärt, vermutlich Zusammenspiel mit der
+BundID-Extension) – als Fallback dient `preferred_username`, das Keycloak aus
+dem `bPK2`-Attribut (siehe unten) ableitet.
+
+Das Backend hasht `(Issuer, Subject)` mit `IBundIdSubjectHasher`
+(`backend/API/Features/Auth/BundId/BundIdSubjectHasher.cs`) und speichert nur
+diesen Hash in `ExternalIdentities.SubjectHash` – nie das rohe Subject/`bPK2`.
+
+[[token-refresh]]
+====== Token-Refresh (stille Erneuerung des starken JWT)
+
+Das starke BundID-JWT ist bewusst kurzlebig (`AuthSession__StrongTokenLifetimeMinutes`,
+Default 15) – im Gegensatz zum bisherigen Weak-Login-Token, das faktisch nie
+abläuft. Ohne Refresh-Mechanismus würde jede abgelaufene Session einen
+erneuten Browser-Login erzwingen, was auf einem Mobilgerät als "ich wurde
+einfach ausgeloggt" wahrgenommen würde.
+
+Rotierendes Refresh-Token-Muster (OAuth-Refresh-Token-Rotation, aber auf das
+eigene, nicht-standardkonforme App-JWT-System angewendet, nicht auf OIDC
+selbst):
+
+- `RefreshToken` (`backend/API/Features/Auth/RefreshTokens/RefreshToken.cs`,
+  gilt für BundID und SMS, Logik in `RefreshTokenService`):
+  opaker Zufallstoken, nur der SHA-256-Hash wird gespeichert
+  (`TokenHash`, unique Index), `ExpiresAt` (`AuthSession__RefreshTokenLifetimeDays`,
+  Default 30), `RevokedAt`, `RevokedReason`. Bei jeder Nutzung wird der alte Token widerrufen
+  und ein neuer ausgestellt (Single-Use), Details in `authentifizierung.adoc`.
+- `POST /api/auth/session/refresh` (`AuthSessionController.Refresh`,
+  `[AllowAnonymous]`): tauscht einen gültigen Refresh-Token gegen ein neues
+  starkes JWT + neuen Refresh-Token. `401`, wenn der Token unbekannt/
+  widerrufen/abgelaufen oder unplausibel (leer, über 64 Zeichen) ist.
+- `POST /api/auth/session/revoke`: widerruft einen Refresh-Token explizit
+  (aufgerufen bei explizitem Logout, `AuthStateNotifier.signOut()`).
+  Idempotent (`204` auch bei unbekanntem Token, um keine
+  Existenz-Information zu leaken).
+- Ältere App-Versionen rufen dieselben Aktionen noch unter
+  `/api/auth/bundid/refresh` und `/revoke` auf.
+- App-seitig (`refreshStrongSession()` in `app/lib/common/auth/strong_session.dart`,
+  aufgerufen von `HttpAuthLink` in `app/lib/graphql/links/auth_link.dart`): bei einem 401
+  mit noch gesetztem starken Token wird zuerst ein Refresh versucht, **bevor** auf den
+  Weak-Login zurückgefallen wird. Unterscheidung wichtig: ein `401` vom
+  Refresh-Endpunkt selbst bedeutet eine *echte, dauerhafte* Session-Expiry
+  (Token lokal löschen, `strongSessionExpiredProvider` setzt eine
+  Nutzer-Meldung in „Mein Konto"); Netzwerkfehler, Zeitüberschreitung und alle
+  anderen Antworten sind *transient*. Dort wird der gespeicherte Refresh-Token NICHT
+  gelöscht, ein späterer Versuch kann noch klappen.
+- Test-Vorgehen für kurze Ablaufzeiten ohne 15 Minuten zu warten:
+  `AuthSession__StrongTokenLifetimeMinutes=1` als Shell-Env-Var beim lokalen
+  `dotnet run` setzen (niemals in `appsettings.json` committen).
+
+[[security-logging]]
+====== Security-Event-Logging
+
+Strukturiertes `ILogger<T>`-Logging (kein `Console.WriteLine`, keine
+Claims/Tokens/PII im Log-Text) an den sicherheitsrelevanten
+Entscheidungspunkten:
+
+- `BundIdAuthService`: abgelehnte/ungültige Keycloak-Tokens, erfolgreiche
+  Logins/Exchanges (inkl. `newRegistration`-Flag), Konflikte
+  (`AlreadyLinkedToAnotherAccount`, `AccountAlreadyHasDifferentBundId`,
+  Telefonnummer-Kollision), Refresh-Erfolg/-Ablehnung (mit Grund:
+  unbekannt/widerrufen/abgelaufen).
+- `EhrenamtsbankAuthService.ValidateSmsCode`: `LogWarning`, wenn eine per SMS
+  verifizierte Telefonnummer auf ein bereits BundID-verknüpftes Fremdkonto
+  trifft (das harte Reverifizierungs-Gate greift, siehe <<architektur>>).
+
+[[architektur-grenzen]]
+====== Verhältnis zum bestehenden Weak-Login und zur „Persönliche Daten"-Seite
+
+Jedes Gerät hat unabhängig von BundID immer eine anonyme
+*Weak-Login-Identität* (RSA-Schlüsselpaar, generiert bei erstem App-Start,
+siehe `docs/entwickler/authentifizierung.adoc`). BundID verknüpft sich
+entweder **mit dieser** Identität (`/exchange`, erste Verknüpfung auf diesem
+Gerät) oder meldet direkt als eine **andere**, bereits existierende
+BundID-verknüpfte Identität an (`/login`).
+
+Das ist architektonisch wichtig für den älteren „Persönliche
+Daten"-Bereich (`profil_personal_data.dart`, Vorausfüllung für Anträge):
+dessen Daten sind mit dem privaten Schlüssel verschlüsselt, der ausschließlich
+dem Gerät bekannt ist, das die jeweilige Weak-Login-Identität ursprünglich
+registriert hat. Meldet man sich per `/login` als eine **andere** Identität
+an, als die, die dieses Gerät ursprünglich registriert hat, kann dieser
+Bereich die (fremden) Personendaten strukturell **nicht** entschlüsseln – es
+gibt keinen Weg, an den fremden privaten Schlüssel zu kommen. Das ist kein
+Bug, sondern eine Grenze zwischen zwei unabhängigen Identitätssystemen, die
+zufällig in derselben App koexistieren. Siehe dazu auch den Fix in
+`asyncPersonalDataProvider`/`ProfilPage` unter <<bekannte-bugs>>.
+
+*„Mein Konto"* (`app/lib/routes/profil/my_account/`) ist bewusst als
+**neuer, unabhängiger** Bereich gebaut worden statt den bestehenden
+„Persönliche Daten"-Screen zu erweitern – aus genau diesem Grund, und weil
+Letzterer ohnehin ein anderes Datenmodell (client-seitig verschlüsselte
+Key/Value-Einträge fürs Vorausfüllen) als die echten `Buerger`-Spalten
+verwendet, die BundID befüllt.
+
+[[konventionen]]
+====== Konvention: Übersetzungs-Dictionary & englische Klassennamen
+
+Ursprünglich hießen Klassen/Dateien/Provider hier auf Deutsch (`MeinKontoPage`,
+`mein_konto.dart` etc.) und einzelne UI-Texte standen hartkodiert im Code statt
+in `de.json`. Beides wurde nachträglich korrigiert (Verzeichnis zu
+`my_account/` umbenannt, Übersetzungs-Namespace zu
+`application.profil.my_account` umgezogen) und gilt **projektweit als
+Konvention für die weitere Arbeit**, nicht nur für BundID:
+
+- **Alle** nutzersichtbaren Texte gehören ins Übersetzungs-Dictionary
+  (`app/assets/translations/de.json`), nie hartkodiert im Widget-Code.
+- Klassen-, Datei- und Providernamen sind **immer auf Englisch**, unabhängig
+  davon, wie der Feature-/UI-Name auf Deutsch lautet.
+
+===== Infrastruktur (lokal)
+
+[[docker-services]]
+====== Docker-Services
+
+`docker/docker-compose.local.yml` (Service `keycloak`, Build aus
+`docker/keycloak/Dockerfile`, Basis-Image `quay.io/keycloak/keycloak:26.6.3`):
+
+- Realm-Import aus `docker/keycloak/realm-kommunalapp.json` beim Start
+  (`start-dev --import-realm`).
+- Bind-Mount des BundID-Extension-JARs sowie der SP-Zertifikate/-Schlüssel
+  aus `bundid-secrets/keycloak/` (siehe <<zertifikate>>).
+- `KC_SPI_SAML_AUTHENTICATION_PREPROCESSOR_BUNDID_PROTOCOL_ONLINE_SERVICE_ID`
+  / `..._ORGANIZATION_DISPLAY_NAME`: von BundID vorgeschriebene
+  Pflichtangaben im AuthnRequest, gesetzt als Env-Var der Extension (kein
+  Secret, `ORGANIZATION_DISPLAY_NAME` sollte dem bei BundID registrierten
+  Wert entsprechen).
+- Ports: `8081` (HTTP, lokal), `9001` (Management).
+
+**Lokaler FritzBox/Caddy-Workaround (NICHT im Repo, rein persönlich):** Für
+BundID-INT-Tests von zuhause aus brauchte es eine öffentlich erreichbare
+HTTPS-Adresse als Assertion-Consumer-Service. Dafür gab es ein Caddy-Overlay
+(`docker-compose.bundid-fritzbox-poc.yml`) mit Portforwarding über die eigene
+FRITZ!Box – das war ausschließlich ein persönlicher Rechner-
+Workaround, wurde bewusst NICHT committet und aus dem Repo wieder entfernt
+(siehe Commit "chore(bundid): lokalen FritzBox/Caddy-POC-Workaround aus dem
+Repo entfernen"). Für Staging/Prod ist das komplett irrelevant – dort läuft
+DNS (`auth.example.invalid` → Server-IP, siehe
+<<devsecops-handover>>) + das bestehende nginx als Reverse-Proxy für alle
+Komponenten.
+
+WICHTIG: immer mit explizitem `-p hameln` starten – ohne Projektname leitet
+Docker Compose den Namen aus dem Verzeichnis ab (`docker`), was mit
+unabhängigen, gleichnamigen Containern kollidieren kann.
+
+[[zertifikate]]
+====== Zertifikate, Schlüssel & Extension-JAR
+
+Liegen **ausschließlich lokal** unter `bundid-secrets/` (komplett von Git
+ausgeschlossen bis auf die README-Dateien, siehe `.gitignore`):
+
+[cols="35%,~"]
+|===
+| Pfad | Zweck
+
+| `bundid-secrets/keycloak/keycloak-extension-bundid-status-detail.jar`
+| Lokal bereitgestelltes Keycloak-Extension-JAR
+  (`de.arbeitsagentur.opdt:keycloak-extension-bundid`), stellt die
+  BundID-spezifischen SAML-IdP-Mapper (`saml-bundid-session-*-idp-mapper`)
+  und den OIDC-Protocol-Mapper (`oidc-bundid-sessionnote-mapper`) bereit. Wird
+  per Bind-Mount eingehängt, nicht ins Image gebacken, damit es ohne
+  Image-Rebuild ausgetauscht werden kann.
+
+| `bundid-secrets/keycloak/bundid-saml-signing.{crt,p12}`
+| SP-Signing-Zertifikat/-Schlüsselpaar (RSA 4096) für ausgehende, signierte
+  AuthnRequests. `.p12`-Passwort in `keystore-password.clixml`.
+
+| `bundid-secrets/keycloak/bundid-saml-encryption.{crt,p12}`
+| SP-Encryption-Zertifikat/-Schlüsselpaar (RSA 4096) – BundID verschlüsselt
+  die Assertion (AES-128-GCM-Inhalt, RSA-OAEP-verschlüsselter Session-Key)
+  gegen den öffentlichen Teil dieses Zertifikats.
+
+| `bundid-secrets/keycloak-prod/*`
+| Analoges, **separates** Schlüsselpaar für die BundID-**PROD**-Umgebung
+  (`https://id.bund.de/idp`). Aktuell von nichts verwendet – siehe „Offen" im
+  Status-Abschnitt.
+|===
+
+Diese Zertifikate werden per `scripts/bundid/configure-bundid-idp.sh` in
+Keycloak eingespielt (liest `KEYCLOAK_ADMIN_PASSWORD` aus der Umgebung, PEM →
+Base64, schreibt das **komplette** IdP-Config-Objekt atomar zurück – ein
+partielles Patch einzelner Felder hat in der Vergangenheit die restliche
+verschachtelte Konfiguration gelöscht).
+
+[[keycloak-realm]]
+====== Keycloak-Realm-Konfiguration (`docker/keycloak/realm-kommunalapp.json`)
+
+*Identity Provider* `bundid` (SAML, Alias `bundid`, Anzeigename „BundID
+INT"):
+
+[cols="35%,~"]
+|===
+| Feld | Wert
+
+| `singleSignOnServiceUrl`
+| `https://int.id.bund.de/idp/profile/SAML2/POST/SSO`
+
+| `entityId`
+| `https://auth.example.invalid/bundid-sp`
+
+| `nameIDPolicyFormat`
+| `transient`
+
+| `principalType` / `principalAttribute`
+| `ATTRIBUTE` / `urn:oid:1.3.6.1.4.1.25484.494450.3` (bPK2)
+
+| Signatur/Verschlüsselung
+| `wantAuthnRequestsSigned`, `wantAssertionsSigned`, `wantAssertionsEncrypted`,
+  `validateSignature`, `signSpMetadata` alle `true`; `allowedClockSkew: 60`
+|===
+
+*Requested-Attribute / Session-Note-Mapper* (`identityProviderMappers`,
+Provider `saml-bundid-session-attribute-idp-mapper` bzw.
+`saml-bundid-session-email-idp-mapper`, alle über OID adressiert und in
+`urn:oid:`-Form angefordert):
+
+[cols="30%,25%,~"]
+|===
+| Mapper | Session-Attribute | OID
+
+| `bundid-bpk2-request` (required)
+| `bpk2`
+| `1.3.6.1.4.1.25484.494450.3`
+
+| `bundid-email`
+| `email`
+| `0.9.2342.19200300.100.1.3`
+
+| `bundid-vorname-request`
+| `vorname`
+| `2.5.4.42`
+
+| `bundid-nachname-request`
+| `nachname`
+| `2.5.4.4`
+
+| `bundid-street`
+| `street`
+| `2.5.4.16`
+
+| `bundid-postalcode`
+| `postalCode`
+| `2.5.4.17`
+
+| `bundid-city`
+| `city`
+| `2.5.4.7`
+
+| `bundid-country`
+| `country`
+| `1.2.40.0.10.2.1.1.225599`
+
+| `bundid-telephone-request`
+| `telephoneNumber`
+| `2.5.4.20`
+|===
+
+Zusätzlich zwei `saml-user-attribute-idp-mapper` (`bundid-vorname-profile`,
+`bundid-nachname-profile`), die Vor-/Nachname direkt auf die
+Keycloak-Standardfelder `firstName`/`lastName` des föderierten Nutzers
+schreiben – dadurch werden diese beiden Felder zusätzlich über Keycloaks
+eigene Standard-`given_name`/`family_name`-Claims exponiert, unabhängig vom
+BundID-eigenen Mapper-Mechanismus (siehe <<bekannte-bugs>>, warum das
+wichtig war).
+
+Alle über `saml-bundid-session-attribute-idp-mapper` gesetzten Session-Notes
+tragen intern das Präfix `ba.bundid_prop_*`. Der Client-Protocol-Mapper
+`bundid-session-attributes`
+(`oidc-bundid-sessionnote-mapper`, auf Client `kommunalapp-mobile`) exponiert
+**alle** so präfixierten Session-Notes als OIDC-Claims (Präfix entfernt) –
+**Voraussetzung dafür**: `id.token.claim` / `access.token.claim` /
+`userinfo.token.claim` / `introspection.token.claim` müssen im
+Mapper-Config auf `"true"` stehen (Standard-Keycloak-Verhalten, nicht
+BundID-spezifisch) – siehe <<bekannte-bugs>>, der zentrale, am längsten
+gesuchte Bug dieser Runde.
+
+*Client* `kommunalapp-mobile` (public, PKCE `S256`, kein
+Client-Secret): Redirect-URIs `de.landkreis.hapy.app:/oauthredirect`
+(nativ), `http://localhost:*/oauthredirect` (Web-Dev), plus die
+Keycloak-Account-Console-URL.
+
+*First-Broker-Login-Flow*: Die Execution „Review Profile"
+(`idp-review-profile`) ist auf `DISABLED` gesetzt
+(`scripts/bundid/configure-bundid-flow.sh`) – sonst zeigt Keycloak nach
+jedem BundID-Login eine eigene Zwischenseite („Update Account
+Information"), bevor die App den Nutzer zurückbekommt. Lässt sich nicht
+deklarativ im Realm-JSON abbilden, da Keycloak diesen Flow beim Import immer
+automatisch (neu) anlegt – muss nach jedem frischen Realm-Import erneut per
+Skript gesetzt werden.
+
+[[setup-skripte]]
+====== Setup-Skripte (`scripts/bundid/`)
+
+`configure-bundid-idp.sh`:: Spielt BundIDs eigenes INT-Signing-Zertifikat
+(`bundid-int-idp-signing.crt`, verifiziert BundIDs Signatur) und unser
+Encryption-Zertifikat (`bundid-saml-encryption.crt`) aus
+`bundid-secrets/keycloak/` in den laufenden Keycloak ein (siehe
+<<zertifikate>>). Erwartet `KEYCLOAK_ADMIN_PASSWORD` in der Umgebung. Bis
+2026-08-11 stand hier fälschlich das SP-eigene Signing-Zertifikat (siehe
+Bug 12) – seither korrigiert.
+
+`configure-bundid-keys.sh`:: Legt unsere eigenen SP-Schlüssel
+(`bundid-saml-signing.p12`/`bundid-saml-encryption.p12`) als
+Realm-Key-Provider an, mit denen Keycloak ausgehende AuthnRequests signiert
+bzw. eingehende verschlüsselte Assertions entschlüsselt (siehe
+"two-key-providers"-Fund weiter oben). Erwartet `KEYCLOAK_ADMIN_PASSWORD`
+und `BUNDID_KEYSTORE_PASSWORD`.
+
+`configure-bundid-flow.sh`:: Deaktiviert „Review Profile" im First-Broker-
+Login-Flow (siehe oben). Idempotent, beliebig oft ausführbar.
+
+Alle drei Skripte müssen nach jedem *frischen* Realm-Import (z.B. nach einem
+Volume-Reset der `keycloak-db`) erneut ausgeführt werden. (Stand bis
+2026-08-11 fälschlich „beide Skripte" hier – `configure-bundid-keys.sh`
+fehlte in dieser Aufzählung komplett, obwohl es seit Commit `5b12f35`
+existiert und ebenso zwingend nötig ist.)
+
+====== Backend-Konfiguration (`BundIdOptions`, Section `BundId`)
+
+[cols="35%,~"]
+|===
+| Key | Bedeutung
+
+| `Enabled`
+| Feature-Flag.
+
+| `KeycloakAuthority`
+| OIDC-Authority des Realms, z.B. `.../realms/kommunalapp`. Lokal in
+  `appsettings.json` auf `http://localhost:8081/...` gesetzt (Backend läuft
+  direkt auf dem Host, nicht im Docker-Netz).
+
+| `Audience`
+| Erwartete Audience im Access-Token (`kommunalapp-mobile`).
+
+| `IdentityProviderAlias`
+| `bundid`.
+
+| `RequireBundIdIdentityProviderClaim`
+| Ob geprüft wird, dass das Token wirklich aus einem BundID-Broker-Login
+  stammt (Default `true`).
+|===
+
+Die Laufzeiten starker Sitzungen stehen in `AuthSessionOptions` (Abschnitt `AuthSession`),
+weil sie auch für SMS gelten. `StrongTokenLifetimeMinutes` und `RefreshTokenLifetimeDays` unter
+`BundId` werden weiter gelesen, wenn `AuthSession` sie nicht setzt.
+
+`KeycloakTokenValidator`
+(`backend/API/Features/Auth/BundId/KeycloakTokenValidator.cs`) baut dafür
+einen eigenen `SocketsHttpHandler` mit `ConnectCallback`: ist die
+konfigurierte Authority selbst `localhost`, werden **alle** ausgehenden
+Verbindungen transparent auf `127.0.0.1` umgeleitet (Port erhalten) – löst
+das Problem, dass das Backend die in Keycloaks *eigenem*
+Discovery-Dokument genannte öffentliche Adresse
+(`auth.example.invalid`) sonst nicht erreichen kann, ohne
+`/etc/hosts` anzufassen. Greift ausschließlich lokal, nie in Produktion.
+Zusätzlich werden über `DerivePublicIssuerVariant` sowohl die lokale als
+auch die öffentliche Issuer-Variante als `ValidIssuers` akzeptiert, da die
+Discovery-Antwort je nach Zugriffspfad (`localhost` vs. öffentlicher
+Hostname) einen anderen `issuer` meldet.
+
+[[lokal-testen]]
+===== Lokal testen
+
+1. Zertifikate/JAR gemäß `bundid-secrets/keycloak/README.md` ablegen.
+2. Docker-Stack starten (siehe <<docker-services>>; für einen echten
+   BundID-INT-Login von einem realen/simulierten Gerät aus braucht es einen
+   eigenen öffentlich erreichbaren HTTPS-Reverse-Proxy vor Keycloak – lokal
+   nicht mehr im Repo, siehe <<docker-services>>).
+3. `scripts/bundid/configure-bundid-idp.sh` und
+   `scripts/bundid/configure-bundid-flow.sh` ausführen
+   (`KEYCLOAK_ADMIN_PASSWORD=admin ./scripts/bundid/configure-bundid-idp.sh`
+   usw., Default-Admin-Passwort siehe `docker-compose.local.yml`).
+4. Backend starten: `cd backend/API && dotnet run` (nutzt lokal
+   `http://localhost:8081/...` als Authority, siehe oben).
+5. **`web/bereich-b` starten** (`cd web/bereich-b && pnpm dev`, Port 3001,
+   braucht eigene `.env`, siehe `.env.bereich-b.example`) – das
+   Backend-GraphQL-Schema wird per Schema-Stitching mit Bereich-B kombiniert;
+   ist Bereich-B nicht erreichbar, hängen **auch von BundID unabhängige**
+   Screens wie „Profil" dauerhaft in „wird geladen", da die Stitching-Anfrage
+   nie zurückkommt.
+6. App bauen/starten mit den BundID-Dart-Defines
+   (`app/environments/config-development.json`: `BUNDID_CLIENT_ID`,
+   `BUNDID_OIDC_ISSUER`, `BUNDID_REDIRECT_URL`, `BUNDID_IDP_HINT`), z.B.
++
+[source,bash]
+----
+fvm flutter build ios --debug --simulator --flavor staging \
+  --dart-define-from-file=environments/config-development.json
+----
+
+*Für einen sauberen Test-Durchlauf (neue Erstregistrierung statt erneuter
+Anmeldung):*
+
+[source,bash]
+----
+docker exec hameln-postgres psql -U admin -d db -c \
+  "DELETE FROM \"ExternalIdentities\" WHERE \"Id\" = '<id>';"
+----
+
+*Bekannte Faustregel beim iOS-Simulator-Testen:* `xcrun simctl uninstall` +
+`install` reicht **nicht** für einen wirklich frischen Zustand – iOS-Keychain
+(`FlutterSecureStorage`) übersteht eine Deinstallation, SharedPreferences
+nicht. Siehe <<bekannte-bugs>>, Punkt „Keychain übersteht Deinstallation".
+
+[[bekannte-bugs]]
+===== Gefundene & behobene Bugs
+
+Diese Runde hat mehrere, teils sehr grundlegende Bugs im bestehenden
+Auth-/GraphQL-Stack der App aufgedeckt – nicht alle sind BundID-spezifisch,
+aber alle wurden erst durch BundIDs neue Fähigkeit sichtbar, sich als eine
+**andere** Identität anzumelden als die, mit der die App bisher immer
+implizit rechnete (Auto-Login der einzigen, geräteeigenen Weak-Login-
+Identität). Der Reihe nach, wie sie gefunden wurden – spätere Einträge
+bauen z.T. auf denselben Symptomen auf, hatten aber unterschiedliche
+Ursachen:
+
+*1. `oidc-bundid-sessionnote-mapper` ohne Token-Claim-Flags*: Straße/PLZ/
+Ort/Land kamen nie in der App an, obwohl Vorname/Nachname/E-Mail
+funktionierten. Ursache: der Client-Protocol-Mapper hatte ein leeres
+`config`-Objekt; ohne `id.token.claim`/`access.token.claim`/
+`userinfo.token.claim` = `"true"` emittiert er gar keine Claims. Vorname/
+Nachname/E-Mail funktionierten nur zufällig weiter, weil sie zusätzlich über
+einen komplett unabhängigen Mechanismus liefen (Keycloaks eigene
+`firstName`/`lastName`/`email`-Standardfelder + `context.setEmail(...)` in
+der BundID-Extension). Verifiziert durch manuelles Entschlüsseln der
+tatsächlichen SAML-Assertion (RSA-OAEP + AES-128-GCM, mit dem SP-eigenen
+privaten Encryption-Schlüssel) – die Attribute waren im SAML-Response die
+ganze Zeit vorhanden, das Problem lag ausschließlich in Keycloaks
+Claim-Exposition. Fix in `realm-kommunalapp.json` (Config des
+`bundid-session-attributes`-Mappers).
+
+*2. Zwei `ASWebAuthenticationSession`-Aufrufe direkt hintereinander*: Ein
+Login-Versuch, der erst `/login` und bei Fehlschlag sofort `/exchange`
+versuchte, führte auf iOS dazu, dass der zweite Browser-Login gar nicht
+sichtbar wurde und der Vorgang lautlos hängen blieb. Fix:
+`startBundIdLogin` führt die OIDC-Autorisierung nur **einmal**
+durch und verwendet dasselbe Keycloak-Access-Token für beide
+Backend-Aufrufe.
+
+*3. Geteilte, modul-globale `GraphQLCache`-Instanz*: `graphql_client.dart`
+hatte `final cache = GraphQLCache(...)` als Modul-Singleton, wiederverwendet
+von **jeder** neu gebauten `GraphQLClient`-Instanz. Nach einem Kontowechsel
+lieferten normalisierte Cache-Einträge weiterhin Daten der vorherigen
+Identität. Fix: pro `graphqlClientProvider`-Build eine frische
+`GraphQLCache`-Instanz.
+
+*4. iOS-Keychain übersteht App-Deinstallation*: `secureStrongTokenKey` liegt
+in `FlutterSecureStorage` (iOS Keychain), die anders als SharedPreferences
+eine Deinstallation übersteht. Nach `uninstall`+`install` blieb ein altes
+BundID-Token bestehen und authentifizierte die App weiterhin lautlos als die
+alte, fremde Identität – während die neu registrierte Weak-Login-Identität
+lokal etwas komplett anderes annahm. Analog zum bereits gelösten Fall der
+Weak-Login-ID (siehe `migrateFromSecureStorageToSharedPrefs`,
+`auth.dart`), aber für `secureStrongTokenKey` nie umgesetzt. Fix in
+`startup.dart` (`getInitialAuthToken`): fehlt die Weak-Login-ID in
+SharedPreferences (= faktische Neuinstallation), wird ein evtl. noch
+vorhandenes `secureStrongTokenKey` **vor** der ersten Token-Auflösung
+gelöscht.
+
+*5. `graphqlClientProvider` fixiert für die gesamte App-Laufzeit auf das
+Boot-Zeit-Token*: Der eigentliche, am längsten unentdeckte Bug: der
+`initialToken` von `HttpAuthLink` kam **immer** aus dem einmalig beim
+App-Start aufgelösten `initialStateProvider` – auch bei jedem späteren
+`ref.invalidate(graphqlClientProvider)` nach Login/Logout/Kontowechsel.
+`HttpAuthLink` löst sein Token nur neu auf, wenn es `null` ist oder der
+Server 401 liefert – ein noch gültiges, aber falsches Token (andere
+Identität) wird nie ersetzt. Betraf **jeden** Kontowechsel, nicht nur den
+Neuinstallations-Fall aus Punkt 4. Fix: ein einfaches Modul-Flag sorgt dafür,
+dass nur der **erste** Client-Build das vorab aufgelöste Boot-Token
+verwendet; jeder weitere Build startet mit `null` und löst dadurch beim
+nächsten Request lazy und korrekt neu auf.
+
+*6. Riverpods `skipLoadingOnRefresh`-Default*: Nach
+`ref.invalidate(myAccountProfileProvider)` zeigte `AsyncValue.when()`
+standardmäßig weiterhin den *alten* Wert an (Anti-Flicker-Verhalten von
+Riverpod), bevor der frische Wert eintraf – die „nur einmal befüllen"-Logik
+des Formulars hat dadurch den veralteten Wert dauerhaft übernommen. Fix:
+`skipLoadingOnRefresh: false` an der entsprechenden Stelle in
+`my_account.dart`.
+
+*7. `asyncPersonalDataProvider` wartet endlos auf einen strukturell
+unmöglichen ID-Abgleich*: Ist die aktive Session (per `/login`) eine andere
+Identität als die geräteeigene Weak-Login-ID, filterte der Stream jedes
+Ergebnis lautlos heraus, ohne je etwas zu liefern → „Profil wird geladen"
+für immer. Fix: bei ID-Mismatch wird explizit eine leere Liste geliefert
+statt endlos zu warten (siehe auch <<architektur-grenzen>>, warum ein
+Entschlüsseln dort ohnehin nie möglich wäre).
+
+*8. `ProfilPage`s Erstregistrierungs-Sperre blockiert „Mein Konto"
+komplett*: Ist `personalData` leer (regulärer Fall bei BundID-Konten ohne
+eigene lokale Weak-Login-Personendaten, siehe Punkt 7), zeigt `ProfilPage`
+zwingend den „Herzlich Willkommen"-Screen ohne Zurück-Button – und genau
+dort, im normalen Profil-Menü, liegt der einzige Zugang zu „Mein Konto".
+Ergebnis: Sackgasse, aus der man nur durch Tab-Wechsel wieder herausfand, nur
+um sofort wieder dort zu landen. Fix: eine aktive BundID-Session umgeht
+diese Sperre und zeigt direkt das normale Profil-Menü.
+
+Kleinere, im selben Zuge gefundene/behobene Punkte: `context.pop()` im
+„Persönliche Daten"-Screen ohne vorherigen Push (kein Effekt im
+Erstregistrierungs-Modus, jetzt mit `canPop()`-Check); rohe Backend-
+Fehlercodes (`BUNDID_ACCOUNT_ALREADY_HAS_DIFFERENT_BUNDID` u.ä.), die
+unübersetzt direkt im UI landeten (jetzt über `bundIdErrorMessage()`
+gemappt); fehlendes Logout (existierte vorher nur im Debug-Menü,
+`devOnlyLogout()` ruft jetzt dasselbe vollständige `signOut()` auf wie die
+produktive Variante).
+
+*9. Onboarding hängt bei "Die App wird eingerichtet..." nach
+Simulator-Reset*: Nach einem `xcrun simctl erase` (zur Behebung
+inkonsistenten lokalen Zustands, siehe Punkt 4) hing die App auf dem
+allerersten Onboarding-Screen, noch **vor** jedem BundID-Login. Ursache
+hatte nichts mit BundID zu tun: `AppConfigRepository.getBackendUrl()` fällt
+ohne gespeicherten `backend_url`-Override (den der Simulator-Reset ebenfalls
+gelöscht hatte) auf den Compile-Time-Default `http://localhost:3000` zurück
+– das Backend lief aber auf Port `5000`. `WeakRegister` erreichte den
+Backend dadurch nie, `AuthStateNotifier.build()` blieb in `AsyncError`
+hängen, und `authProvider` mappt Fehler still auf
+`AppAuthState.registering()` – daher keinerlei Fehlermeldung, nur ein
+endloser Spinner. Kein Code-Fix nötig, nur App mit
+`--dart-define=BACKEND_URL=http://localhost:5000` (bzw. besser gleich mit
+der vollständigen `environments/config-development.json`, siehe unten)
+neu gestartet.
+
+*10. Lokale Flutter-Version nicht mit `.fvmrc` synchron*: Ein globales
+`flutter`/`dart` (3.44.1) statt des projektgepinnten `fvm flutter`/`fvm dart`
+(3.41.2, siehe `app/.fvmrc`) wurde versehentlich für `flutter analyze`,
+`dart format` und `dart run build_runner build` verwendet. Das hat u.a.
+`pubspec.lock` mit neueren, inkompatiblen transitiven Testabhängigkeiten
+(`test`, `test_api`, `test_core`, `meta`, `matcher`) überschrieben und ließ
+den `generate:app`-CI-Job fehlschlagen (`git diff`-Check gegen einen frischen
+`build_runner`-Lauf, den die CI mit der korrekt gepinnten Version fährt).
+**Lehre: in diesem Repo IMMER `fvm flutter`/`fvm dart` statt der globalen
+Binaries verwenden**, auch für schnelle Ad-hoc-Checks.
+
+*11. `pnpm graphql` nicht nachgezogen*: Nach Schema-Änderungen im Backend
+(neue Mutation `updateMyProfile`, neue `Buerger`-Felder, neuer Enum-Wert
+`EXISTING_ACCOUNT_REQUIRES_BUND_ID_REVERIFICATION`) waren die generierten
+TypeScript-Typen unter `web/bereich-a/src/__generated__/` und
+`web/stele/src/__generated__/` veraltet – `generate:web` in der CI schlug
+mit demselben `git diff`-Muster fehl wie Punkt 10. Fix: `pnpm graphql` im
+`web/`-Ordner erneut ausgeführt und committet.
+
+*12. `configure-bundid-idp.sh` schrieb das SP-eigene statt BundIDs eigenes
+Zertifikat in `signingCertificate`*: Ein zweiter Entwickler, der die
+BundID-Anbindung zum ersten Mal frisch lokal aufsetzte (beide Setup-Skripte
+liefen fehlerfrei durch), bekam bei jedem Login-Versuch
+`org.keycloak.common.VerificationException: Invalid signature on document`
+in `SAMLEndpoint$PostBinding.verifySignature` – Keycloak konnte die von
+BundID signierte SAML-Response nicht verifizieren. Ursache:
+`configure-bundid-idp.sh` befüllte das `signingCertificate`-Feld der
+Keycloak-IdP-Config mit `bundid-saml-signing.crt` – das ist aber das
+**SP-eigene** Zertifikat (korrekt für die Realm-Keys in
+`configure-bundid-keys.sh`, mit denen wir *unsere* Requests signieren).
+`signingCertificate` verifiziert dagegen *BundIDs* Signatur auf der
+eingehenden Antwort und muss daher BundIDs eigenes INT-Zertifikat
+(`CN=idp.akdb.de`, Institut für Kommunale Datenverarbeitung Bayern – der
+technische Betreiber der BundID-SAML-Infrastruktur) enthalten. Auf dem
+Rechner, auf dem die Integration ursprünglich gebaut wurde, stand dort
+zufällig bereits der richtige Wert – vermutlich irgendwann einmalig manuell
+über die Keycloak-Admin-Console eingetragen, nie verscriptet, nie als Datei
+festgehalten. Deshalb fiel es nie auf: das Skript hat dort niemals etwas
+Falsches *hineingeschrieben* bekommen zu sehen, weil es lokal schlicht nie
+lief, nachdem der korrekte Wert schon von Hand drinstand.
+
+**Herkunft des BundID-Zertifikats zunächst nicht rekonstruierbar, später
+geklärt**. Zuerst ergebnislos geprüft: gesamte Git-Historie von
+`realm-kommunalapp.json` (nie enthalten), beide Setup-Skripte, alle
+`bundid-secrets/`-Ordner (Repo-Worktree wie
+`~/Downloads/BundID-Secrets-fuer-DevSecOps/`), die
+`PASSWOERTER_UND_HINWEISE.txt` dort (dokumentiert nur die SP-eigenen
+Zertifikate, die bei BundID/SSP für INT *hinterlegt* wurden – nicht das hier
+benötigte, das *von* BundID *kommt*), der komplette Source des
+OpenCode-Extension-Downloads (`keycloak-extension-bundid-status-detail.jar`
++ `.tmp/keycloak-extension-bundid-2.8.3/`), Keycloaks Admin-Event-Log
+(Logging war nie aktiviert, 0 Einträge) sowie die Shell-History. Der Wert
+existierte zu diesem Zeitpunkt ausschließlich live in der
+Keycloak-Postgres-DB und wurde am 2026-08-11 per Admin-REST-API extrahiert
+und als neue Datei `bundid-secrets/keycloak/bundid-int-idp-signing.crt`
+gesichert (README + Skript entsprechend ergänzt, Fix in
+`feature/bundid-integration` Commit `1be11cb`).
+
+**Quelle nachträglich zweifelsfrei gefunden:** in
+`~/Downloads/BundID_04_AuthnResponse 1 1.xml` und
+`.../BundID_04_AuthnResponse 2.xml` – beide Teil der offiziellen
+BundID-Onboarding-Unterlagen (Beispiel-`AuthnResponse`-Dokumente der
+BundID-Schnittstellendoku, am 30.07.2026 heruntergeladen und vom
+ursprünglichen Windows-Setup mit herübergezogen). Beide XML-Dateien
+enthalten BundIDs Zertifikat eingebettet in der `<ds:KeyInfo>` der
+Beispiel-Signatur – SHA-256-Fingerabdruck exakt identisch zum
+Live-Wert aus Keycloak (`56:2A:44:F4:...:7C:6E`). Vermutlich wurde das
+Zertifikat beim ursprünglichen Setup genau von dort per Hand entnommen und
+in die Admin Console eingetragen.
+
+**Lehre:** Konfiguration, die ausschließlich live in einer Admin-Console
+landet (egal ob Keycloak-IdP-Config oder Realm-Keys, siehe der ganz analoge
+Fall der zwei Key-Providers weiter oben in diesem Dokument), hinterlässt
+keine Spur und ist für einen zweiten Rechner/Entwickler nicht reproduzierbar
+– unabhängig davon, wie vollständig die Setup-Skripte und Doku sonst
+wirken. Bei jedem manuellen Admin-Console-Eingriff an dieser Integration:
+sofort als Datei/Skript/Doku-Eintrag festhalten, ideal direkt in diesem
+Dokument, nicht erst wenn ein zweiter Entwickler daran scheitert. Ebenso:
+offizielle BundID-Onboarding-Unterlagen (PDFs/XMLs im Downloads-Ordner) sind
+mehr als Referenzmaterial – sie können tatsächlich benötigte Artefakte
+(hier: das INT-Signing-Zertifikat) enthalten und sollten dauerhaft sicher
+abgelegt werden, nicht nur lose im Downloads-Ordner.
+
+**Verifikationsstatus (Stand 2026-08-11):** Der korrigierte Zertifikatswert
+wurde live gegen die Keycloak-Instanz des Ursprungs-Setups getestet und
+reproduziert dort nachweislich den bekannten korrekten Wert. Ein
+tatsächlich *abgeschlossener* BundID-Login (kompletter Browser-Redirect
+Hin- und Rückweg über den echten BundID-INT-Server) mit diesem Fix wurde
+bisher **nicht** beobachtet – weder auf dem Ursprungs-Setup erneut noch bei
+Felix. Erst nach dessen Rückmeldung als vollständig bestätigt betrachten.
+
+*13. `configure-bundid-flow.sh` fehlte komplett in Reviewer-Doku und
+DevSecOps-Hinweisen*: Existiert seit dem allerersten BundID-Commit
+(`687a68c`), deaktiviert Keycloaks „Review Profile"-Zwischenseite nach
+erfolgreichem Login (siehe <<setup-skripte>>). War nie in
+`docs/entwickler/bundid-lokales-setup-fuer-reviewer.md` oder
+`PASSWOERTER_UND_HINWEISE.txt` erwähnt, und selbst in diesem Dokument
+listete die Setup-Skripte-Sektion nur 2 von 3 nötigen Skripten (fehlte:
+`configure-bundid-keys.sh`, seit Commit `5b12f35`). Gefunden bei einem
+gezielten Vollständigkeits-Audit aller Setup-Dokumente gegen den
+tatsächlichen Inhalt von `scripts/bundid/`, ausgelöst durch Bug 12 – ohne
+diesen Fund hätte Felix nach dem Zertifikats-Fix sofort den nächsten,
+ebenso undokumentierten Blocker getroffen. Alle drei betroffenen Dokumente
+inzwischen korrigiert. **Lehre:** bei jedem gefundenen Dokumentationsfehler
+lohnt sich ein Audit auf ähnliche, benachbarte Lücken – der zweite Fund kam
+nicht durch neue Fehlermeldungen, sondern durch systematisches Abgleichen
+von Doku gegen tatsächlichen Skript-Bestand.
+
+*14. `AssuranceLevel` blieb bei jedem echten BundID-INT-Login leer*: Von
+Felix Franz im Review zu MR !276 gefunden: er hatte, anders als zunächst
+angenommen, durchgängig echte BundID-INT-Accounts über den vollständigen
+SAML-Broker-Flow verwendet, `AssuranceLevel` blieb trotzdem `null`. Ursache
+war nicht die Testumgebung, sondern dass `BundIdAuthService` ausschließlich
+Keycloaks eigenen `acr`-Claim las. Der wird von Keycloaks eingebautem
+`oidc-acr-mapper` befüllt, liest aber ausschließlich Keycloaks **internes**
+Level-of-Authentication-System (an Authentication-Flow-Schritten
+konfigurierte "Level"-Werte, Step-up-Authentication) – komplett losgelöst
+davon, was der externe SAML-IdP (BundID) an Vertrauensniveau zurückmeldet.
+Im Realm ist an keinem Flow-Schritt ein Level konfiguriert, entsprechend
+bleibt `acr` bei **jedem** Login leer, unabhängig vom Anmeldeweg. Verifiziert
+per direkter Keycloak-Admin-API-Abfrage (Client-Scopes/Protocol-Mapper von
+`kommunalapp-mobile`) und durch Fehlen jeglicher `"level"`-Angaben in
+`realm-kommunalapp.json`.
+
+Fix ohne jede Keycloak-/Realm-Änderung möglich: BundID liefert pro
+angefordertem Attribut zusätzlich ein Vertrauensniveau (`akdb:TrustLevel`),
+für das stets angeforderte `bpk2`-Attribut stellt die Keycloak-Extension das
+bereits automatisch als Claim `bpk2-verified-level` bereit (Session-Note
+`ba.bundid_prop_bpk2-verified-level` plus der schon im Realm registrierte
+`oidc-bundid-sessionnote-mapper`) – diese Daten lagen die ganze Zeit
+ungenutzt im Token. Neue Klasse `BundIdAssuranceLevel.Extract` (siehe
+`backend/API/Features/Auth/BundId/BundIdAssuranceLevel.cs`) liest `acr`
+zuerst, fällt sonst auf `bpk2-verified-level` zurück. Mit einem echten
+BundID-INT-Login im Integrationstest bestätigt: `AssuranceLevel` steht jetzt
+korrekt auf `STORK-QAA-Level-2`. Commit `b053f40`.
+
+Nebenbefund, nicht weiter verfolgt: laut öffentlicher BundID-Dokumentation
+nutzt der Bund offiziell nur die Stufen 1 ("Basisregistrierung",
+Benutzername/Passwort), 3 ("substanziell", ELSTER-Zertifikat) und 4 ("hoch",
+Online-Ausweis) – Stufe 2 sei "aktuell nicht im Einsatz". Unsere INT-Umgebung
+liefert für einen Benutzername/Passwort-Login trotzdem `STORK-QAA-Level-2`.
+Für den Fix nicht relevant (wir übertragen zuverlässig, was BundID liefert),
+aber vor einer späteren fachlichen Auswertung des Feldes (z.B. als
+Mindestanforderung) sollte das direkt mit BundID/AKDB geklärt werden, statt
+sich auf die öffentliche Nutzerdokumentation zu verlassen.
+
+[[bundid-todo]]
+===== Bekannte Einschränkungen / offene Punkte
+
+- *Keine getrennte PROD-Konfiguration.* Der Realm zeigt fest auf BundID INT.
+  PROD-Zertifikate liegen bereit (`bundid-secrets/keycloak-prod/`), aber es
+  fehlt eine Strategie für einen zweiten Realm/IdP oder eine
+  Umgebungsvariable-gesteuerte Umschaltung.
+- *Telefonnummer-Wiederverwendung ohne Auflösungsprozess.* Kollidiert die
+  von BundID gelieferte Telefonnummer bei der Registrierung mit einem
+  bestehenden Konto, wird sie einfach nicht übernommen (`phoneNumberCollision`
+  im Exchange-Response) – es gibt aktuell keinen Selbstbedienungsweg, eine
+  wirklich neu vergebene Nummer einem alten, BundID-verifizierten Konto zu
+  entziehen. Bewusst konservativ, aber ein offener Punkt für einen
+  Support-/Admin-Prozess.
+- *SMS-Login der Ehrenamtsbank bleibt gemockt* (`volunteer_login_notifier.dart`)
+  – nicht Teil dieser Runde, aber das serverseitige Merge-/Reverifizierungs-
+  Gate (siehe `EhrenamtsbankAuthService.ValidateSmsCode`) ist bereits so
+  gebaut, dass es automatisch greift, sobald dieser Screen an echte
+  Mutations angebunden wird.
+- *`AssuranceLevel` wird korrekt befüllt (siehe Bug 14), aber nirgends als
+  Mindestanforderung durchgesetzt.* Weder Backend noch App prüfen aktuell,
+  ob ein Bürger mit einem bestimmten Vertrauensniveau angemeldet war, bevor
+  ihm z.B. ein Antrag/Dienst freigegeben wird. Reiner Speicher-/Audit-Wert.
+- *Keine Inbox/Benachrichtigungen pro BundID-Identität* (vom Nutzer als
+  zukünftige Anforderung genannt, nicht umgesetzt – Datenmodell würde das
+  aber ohne größere Änderungen zulassen, da alles serverseitig an der
+  `Buerger`-Zeile hängt).
+- Nur im iOS-Simulator gegen zwei BundID-INT-Testkonten getestet; kein
+  Android-Test, keine echte SMS-Verifizierung getestet.
+- *Kein PROD-Äquivalent zu `bundid-int-idp-signing.crt` vorhanden.* Die
+  Herkunft des INT-Zertifikats ist geklärt (siehe Bug 12 – aus den offiziellen
+  BundID-Onboarding-PDFs/XMLs im Downloads-Ordner), aber für PROD (`id.bund.de`
+  statt `int.id.bund.de`) fehlt noch das entsprechende Zertifikat. Falls in
+  den PROD-Onboarding-Unterlagen (analog zu den INT-Dateien, ggf. noch nicht
+  heruntergeladen) ein Beispiel-`AuthnResponse` enthalten ist, lässt es sich
+  vermutlich genauso extrahieren; sonst bei BundID/der SSP-Kontaktstelle
+  (siehe `bundid-secrets/keycloak-prod/ssp/`) aktiv danach fragen.
+
+===== Code-Übersicht
+
+====== Backend (neu)
+
+[cols="45%,~"]
+|===
+| Datei | Zweck
+
+| `Features/Auth/BundId/BundIdAuthService.cs`
+| Kernlogik: `LoginAsync` (direkte Anmeldung per SubjectHash),
+  `ExchangeAsync` (Verknüpfung + Erstregistrierung inkl. Profil-Autobefüllung
+  und Telefonnummer-Kollisionsprüfung).
+
+| `Features/Auth/BundId/KeycloakTokenValidator.cs`
+| Validiert Keycloak-Access-Tokens (Signatur, Issuer, Audience); lokaler
+  `localhost`-Umleitungs-Workaround, siehe oben.
+
+| `Features/Auth/BundId/BundIdSubjectHasher.cs`
+| HMAC-Hashing von `(Issuer, Subject)`.
+
+| `Features/Auth/BundId/ExternalIdentity.cs`
+| Entität: `Id`, `BuergerId`, `Provider`, `Issuer`, `SubjectHash`,
+  `AssuranceLevel`, `LinkedAt`, `LastAuthenticatedAt`. Unique Index auf
+  `(Provider, Issuer, SubjectHash)`.
+
+| `Features/Auth/RefreshTokens/RefreshToken.cs`, `RefreshTokenService.cs`
+| Entität und Logik für rotierende Refresh-Tokens (BundID und SMS), siehe <<token-refresh>>.
+
+| `Features/Auth/Controller/BundIdController.cs`
+| REST-Endpunkte `/api/auth/bundid/exchange` und `/login` (siehe <<architektur>>).
+
+| `Features/Auth/Controller/AuthSessionController.cs`
+| REST-Endpunkte `/api/auth/session/refresh` und `/revoke` für BundID- und SMS-Sitzungen,
+  für ältere App-Versionen auch unter `/api/auth/bundid/refresh` und `/revoke`
+  (siehe <<token-refresh>>).
+
+| `Features/Auth/Mutations/UpdateMyProfileMutation.cs`
+| GraphQL-Mutation `updateMyProfile` – jederzeit aufrufbare Profilpflege
+  (Vorname/Nachname/E-Mail/Adresse). Telefonnummer bewusst ausgeschlossen,
+  läuft exklusiv über `requestSmsCode`/`validateSmsCode`.
+
+| `Options/BundIdOptions.cs`
+| Konfigurationsklasse, siehe oben.
+
+| `Migrations/20260730082649_AddExternalIdentities.cs`
+| Neue Tabelle `ExternalIdentities`.
+
+| `Migrations/20260730111216_AddBuergerProfileFields.cs`
+| Neue Spalten auf `Buerger`: `EmailAddress`, `Street`, `PostalCode`,
+  `City`, `Country`.
+
+| `Migrations/20260731062951_AddBuergerBundIdDatenSyncedAt.cs`
+| Neue Spalte `BundIdDatenSyncedAt` auf `Buerger`.
+
+| `Migrations/20260731100650_AddBundIdRefreshTokens.cs`
+| Neue Tabelle `BundIdRefreshTokens`, siehe <<token-refresh>>.
+
+| `UnitTests/BundIdSubjectHasherTests.cs`,
+  `UnitTests/UpdateMyProfileMutationTests.cs`
+| Unit-Tests fürs Hashing bzw. die Profil-Mutation.
+|===
+
+====== Backend (geändert)
+
+- `Features/Auth/User.cs`: `Buerger` um `EmailAddress`/`Street`/
+  `PostalCode`/`City`/`Country` erweitert; neue schreibgeschützte Computed
+  Property `PhoneNumberMasked`. Diese Felder sowie `Vorname`/`Nachname`/
+  `PhoneVerified` sind `[GraphQLIgnore]` und laufen stattdessen über eigene
+  Self-Check-Resolver in `Features/Auth/Queries/UserQueryExtensions.cs`
+  (`BuergerQueryExtensions`, gleiches Muster wie `personalPrivateKey`/
+  `personalDataKey`) – ohne diesen Self-Check wären sie über jedes andere
+  Vorkommen von `User` im Schema erreichbar (z.B. `Ausfuehrung.User`) und
+  damit für jeden Sachbearbeiter mit Zugriff auf die jeweilige Ausführung
+  sichtbar, nicht nur für den Bürger selbst.
+- `Features/Auth/Mutations/EhrenamtsbankAuthService.cs`:
+  `MoveDataToUserWithinTransaction` verschiebt jetzt auch
+  `ExternalIdentities.BuergerId` mit (sonst würde eine BundID-Verknüpfung
+  beim Zusammenführen auf dem soft-gelöschten Quell-Bürger verwaist
+  zurückbleiben); `ValidateSmsCode` hat ein neues hartes Gate
+  (`ExistingAccountRequiresBundIdReverification`), wenn das per Telefon
+  gefundene Zielkonto bereits eine BundID-Identität hat.
+- `Features/Auth/Mutations/LoginMutation.cs`: `GetToken(...)` um optionale
+  `extraChaims`/`lifetime`-Parameter erweitert (für kürzer lebende,
+  BundID-spezifische starke Tokens mit zusätzlichen Claims wie
+  `auth_provider`/`auth_level`).
+- `Features/DomainContext.cs`: neuer `DbSet<ExternalIdentity>`.
+- `Program.cs`: DI-Registrierung (`IKeycloakTokenValidator`,
+  `IBundIdSubjectHasher`, `BundIdAuthService`), `BundIdOptions`-Validierung.
+- `appsettings.json` / `.env.backend.example`: Section `BundId` (siehe oben).
+
+====== App (neu)
+
+[cols="45%,~"]
+|===
+| Datei/Verzeichnis | Zweck
+
+| `lib/common/auth/bundid_auth.dart`
+| OIDC-Login-Flow (`_authorizeBundId`), REST-Aufrufe (`_exchangeBundIdToken`,
+  `_loginBundIdToken`), öffentliche Einstiegspunkte `startBundIdLogin`,
+  `loginWithBundIdDirect`, `confirmBundIdRegistrationWithRetry`,
+  `bundIdErrorMessage()`.
+
+| `lib/routes/volunteer_database/providers/bundid_onboarding/`,
+  `lib/routes/volunteer_database/widgets/bundid_onboarding/`,
+  `lib/routes/volunteer_database/views/bundid_onboarding.dart`
+| Onboarding-Screen nach Erstregistrierung: Daten prüfen/bearbeiten,
+  optional Telefonnummer per SMS verifizieren (nicht mehr zwingend nötig,
+  siehe <<architektur>>).
+
+| `lib/routes/profil/my_account/`
+| „Mein Konto": editierbare Kontodaten, Telefonnummer ändern/verifizieren,
+  An-/Abmelden. Zeigt bei fehlender Session ausschließlich die
+  Anmelde-Optionen (BundID oder SMS). Enthält auch
+  `strongSessionExpiredProvider` (zeigt einmalig eine Meldung, wenn der
+  Token-Refresh endgültig fehlschlägt, siehe <<token-refresh>>).
+
+| `lib/graphql/bundid.graphql`
+| `RequestSmsCode`, `ValidateSmsCode`, `UpdateMyProfile`, `MyProfile`.
+|===
+
+====== App (geändert)
+
+- `lib/common/auth/auth.dart`: neues, echtes `signOut()` (vollständiger
+  Reset: starke + schwache Session, Krypto-Material, lokale Präferenzen,
+  danach Neuregistrierung); `devOnlyLogout()` ruft jetzt dasselbe `signOut()`
+  auf.
+- `lib/common/startup.dart`: Keychain-Bereinigung vor der ersten
+  Token-Auflösung (siehe Bug 4).
+- `lib/common/auth/personal_data.dart`: Fix für Bug 7 (leere Liste statt
+  endlosem Warten bei ID-Mismatch).
+- `lib/graphql/graphql_client.dart`: frische `GraphQLCache` pro Client-Build
+  (Bug 3), Token-Fixierung nur beim allerersten Build (Bug 5); verdrahtet
+  `HttpAuthLink`s `onStrongSessionExpired`-Callback mit
+  `strongSessionExpiredProvider`.
+- `lib/graphql/links/auth_link.dart` mit `lib/common/auth/strong_session.dart`:
+  Token-Refresh (siehe <<token-refresh>>), unterscheidet transiente Fehler von echter
+  Session-Expiry.
+- `lib/routes/profil/profil.dart`, `profil_detail.dart`,
+  `profil_personal_data.dart`: Route/Menüpunkt für „Mein Konto"; BundID-
+  Session umgeht die Erstregistrierungs-Sperre (Bug 8); `canPop()`-Check vorm
+  `context.pop()`.
+- `lib/routes/volunteer_database/widgets/login/volunteer_login_footer.dart`:
+  nutzt jetzt `startBundIdLogin` statt der reinen
+  Exchange-Variante, inkl. Shared-Device-Fallback (Neuregistrierung einer
+  frischen lokalen Identität, wenn das Gerät bereits an eine andere BundID
+  gebunden ist).
+- `pubspec.yaml`: neue Abhängigkeit `flutter_appauth`.
+- iOS-Projekt (`Info.plist`, `project.pbxproj`, Podfile): URL-Scheme
+  `de.landkreis.hapy.app` für den OIDC-Redirect, `IPHONEOS_DEPLOYMENT_TARGET`
+  von 13.0 auf 15.0 angehoben (von `firebase-messaging`/`firebase-core`
+  vorausgesetzt, erstmals über Swift-Package-Manager-Integration erzwungen).
+
+[[ci-fixes]]
+===== CI-Pipeline-Fixes für MR !276
+
+Nach dem initialen Push schlugen mehrere CI-Jobs fehl – alles Nachwirkungen
+davon, mit falschem lokalem Toolchain-Setup gearbeitet zu haben (siehe Bugs
+10/11 oben), nicht inhaltliche Probleme:
+
+- `generate:app` (`git diff` gegen frischen `build_runner`-Lauf) → mit
+  `fvm dart`/`fvm flutter` statt globaler Binaries neu erzeugt, dabei auch
+  `pubspec.lock` korrigiert.
+- `lint:backend` (`dotnet format --verify-no-changes`) → Whitespace/Encoding
+  in den 4 neuen Migrationsdateien korrigiert. Ein verbleibender Fehler in
+  `DienstleisterMutations.cs:143` ist branch-unabhängig (Datei byte-identisch
+  zu `main`) und nicht Teil dieser MR.
+- `generate:web` (`git diff` gegen frischen `pnpm graphql`-Lauf) →
+  TypeScript-Codegen für `bereich-a`/`stele` nachgezogen (Bug 11 oben).
+
+Alle drei als eigene `style(...)`-Commits nachgereicht, siehe Git-Historie
+von `feature/bundid-integration`.
+
+[[devsecops-handover]]
+===== Übergabe an DevSecOps (Secrets, DNS, nginx)
+
+Alles, was NICHT per Commit übertragen werden kann (private Schlüssel,
+Zertifikate, Keystore-Passwörter), liegt lokal unter
+`~/Downloads/BundID-Secrets-fuer-DevSecOps/` (inkl. `PASSWOERTER_UND_HINWEISE.txt`
+mit Erklärung jeder Datei) – **nicht Teil des Git-Repos**, muss manuell an
+DevSecOps übergeben werden. Kurzfassung des Inhalts:
+
+- `bundid-secrets/keycloak/` (INT) und `bundid-secrets/keycloak-prod/` (PROD,
+  aktuell ungenutzt, siehe <<bundid-todo>>) komplett, inkl. verifiziertem
+  Klartext-Keystore-Passwort für INT (PROD-Passwort noch offen). Seit
+  2026-08-11 zusätzlich `bundid-int-idp-signing.crt` (BundIDs eigenes
+  INT-Zertifikat, siehe Bug 12) – ohne diese Datei schlägt jeder Login mit
+  "Invalid signature on document" fehl, auch wenn alle anderen Dateien und
+  beide Setup-Skripte vorhanden/fehlerfrei sind.
+- SAML-SP Entity-ID (`https://auth.example.invalid/bundid-sp`)
+  und ACS-Endpoint
+  (`https://auth.example.invalid/realms/kommunalapp/broker/bundid/endpoint`)
+  – identisch für INT und PROD, beide über dieselbe BundID-SSP registriert
+  (siehe `bundid-secrets/keycloak-prod/ssp/` für den vollständigen SSP-
+  Vorgang). Stehen technisch bereits in `docker/keycloak/realm-kommunalapp.json`
+  (Teil des MR), aber leicht zu übersehen – deshalb zusätzlich explizit in
+  der Hinweisdatei.
+- DevSecOps-Aufgaben: DNS-A-Eintrag `auth.example.invalid` →
+  Server-IP; neuer nginx-Block vor dem `keycloak`-Container (Port 8080) mit
+  korrekt gesetzten `X-Forwarded-*`-Headern (Keycloak läuft mit
+  `KC_PROXY_HEADERS: xforwarded`) und ausreichend großen Proxy-Puffern für
+  SAML-POST-Bindings; TLS über die bestehende nginx-Zertifikatsverwaltung.
+- `app/environments/config-development.json` ist per `.gitignore` lokal
+  (Muster `config-*.json`) – wer auch immer die App für Staging/Prod baut,
+  braucht ein eigenes Äquivalent mit den echten `BUNDID_*`-Dart-Defines,
+  sonst ist `BUNDID_OIDC_ISSUER` leer und der Login schlägt fehl (siehe
+  Bug 9 oben, exakt derselbe Fehlermodus).
+- Zwei weitere Keycloak-Env-Vars müssen auch auf der PROD-Instanz gesetzt
+  werden, aktuell nur in `docker/docker-compose.local.yml` konfiguriert, da
+  es noch keine PROD-Realm-Instanz gibt (siehe <<bundid-todo>>):
+  `KC_SPI_SAML_AUTHENTICATION_PREPROCESSOR_BUNDID_PROTOCOL_ENABLED_AUTHN_METHODS=benutzername`
+  und
+  `KC_SPI_SAML_AUTHENTICATION_PREPROCESSOR_BUNDID_PROTOCOL_DISABLED_AUTHN_METHODS=eid,eidas,elster,authega,diia,fink`.
+  Schränken die von BundID angebotenen Anmeldewege bewusst auf Benutzername
+  und Passwort ein. Ohne beide Werte (nicht nur die enabled-Liste) würde
+  BundID die nicht explizit deaktivierten Methoden nach eigenem Ermessen
+  trotzdem anbieten, siehe Kommentar in `docker-compose.local.yml` und
+  `bundid-secrets/keycloak-prod/README.md`.

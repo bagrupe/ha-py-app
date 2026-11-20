@@ -1,0 +1,17 @@
+mutation UpsertProzess($input: ProzessUpsertInput!) {
+  prozessUpsert(input: $input) {
+    prozess {
+      id
+      name
+    }
+  }
+}
+
+query Prozess($kommuneId: UUID!, $id: UUID!) {
+  kommune(kommuneId: $kommuneId) {
+    prozessById(id: $id) {
+      id
+      name
+    }
+  }
+}

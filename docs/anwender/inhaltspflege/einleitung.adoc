@@ -1,0 +1,10 @@
+==== Einleitung
+
+Die Inhaltspflege bietet bereits unterschiedlichste Collections, die zum Teil
+automatisch mit Einträgen befüllt werden. In diesem Abschnitt geht es darum
+welche Collections existieren und wie sie mit dem Rest der Kommunal-App zusammenhängen - wo
+ sie verwendet werden und wie sie befüllt werden.
+
+Grob unterschieden werden aktuell drei Einsatzfelder: Inhalte für die mobile
+App, Inhalte für das Backoffice und Inhalte, die innerhalb der Inhaltspflege
+selbst verwendet werden.

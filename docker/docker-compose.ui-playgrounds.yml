@@ -1,0 +1,21 @@
+services:
+
+  storybook:
+    container_name: ha-py-storybook
+    image: ${CONTAINER_REGISTRY_IMAGE:?Set CONTAINER_REGISTRY_IMAGE}/web-storybook:latest
+    ports:
+      - "${STORYBOOK_PORT}:80"
+    networks:
+      - hameln-pyrmont
+
+  stele-storybook:
+    container_name: ha-py-stele-storybook
+    image: ${CONTAINER_REGISTRY_IMAGE:?Set CONTAINER_REGISTRY_IMAGE}/stele-storybook:latest
+    ports:
+      - "${STELE_STORYBOOK_PORT}:80"
+    networks:
+      - hameln-pyrmont
+
+networks:
+  hameln-pyrmont:
+    name: hameln-pyrmont

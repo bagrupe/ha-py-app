@@ -1,0 +1,16 @@
+name: "bereich-a"
+ingress:
+  paths:
+    - /
+  cors: true
+deployment:
+  port: 80
+  image:
+    example: true
+    name: web-bereich-a
+  resources:
+    requests:
+      cpu: 1m
+      memory: 25Mi
+    limits:
+      memory: 75Mi

@@ -1,0 +1,37 @@
+query UntereinheitByBereichAId($bereichAId: String!){
+  Untereinheits(where: {id: {equals: $bereichAId}}) {
+    docs {
+      id
+    }
+  }
+}
+
+query UntereinheitenByBereichAIds($BereichAIds: [String]!){
+  Untereinheits(where: {id: {in: $BereichAIds}}) {
+    docs {
+      ...Untereinheit
+    }
+  }
+}
+
+mutation UntereinheitCreate($input: mutationUntereinheitInput!) {
+  createUntereinheit(data: $input){
+    id
+  }
+}
+
+mutation UntereinheitUpdate($id: String!, $input: mutationUntereinheitUpdateInput!) {
+  updateUntereinheit(id: $id, data: $input){
+    id
+  }
+}
+
+mutation UntereinheitDelete($id: String!) {
+  deleteUntereinheit(id: $id){
+    id
+  }
+}
+
+fragment Untereinheit on Untereinheit {
+  id
+}

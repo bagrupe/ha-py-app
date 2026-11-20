@@ -1,0 +1,1045 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "Kommunal App API",
+    "description": "Operationen, die mit einem Schloss-Symbol versehen sind, benötigen einen API-Key zur Autorisierung.\n\nUm einen API-Key zu erstellen, öffnen Sie im Bereich B unter 'Benutzer' Ihren Account und setzen Sie den Haken bei `API-Key aktivieren`. Nach dem Speichern der Änderung können Sie den API-Key kopieren und hier nach einem Klick auf `Authorize` eintragen.\nDie Nutzerrolle, die Ihrem Account zugeordnet ist, muss jedoch ggf. über die notwendigen Berechtigungen verfügen, um die Operationen ausführen zu dürfen.\n\nEinträge in der \"GovManager\"-Kategorie benötigen einen speziellen Schlüssel, der sich nicht in der Inhaltspflege erstellen lässt.",
+    "version": "0.0.2"
+  },
+  "servers": [
+    {
+      "url": "/"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Kommune / Design",
+      "description": "Anpassungen der Daten für die Kommune, z.B. das Design in der App"
+    },
+    {
+      "name": "News - Artikel"
+    },
+    {
+      "name": "Veranstaltungskalender"
+    },
+    {
+      "name": "Veranstaltungskalender - Kategorie"
+    },
+    {
+      "name": "POIs"
+    },
+    {
+      "name": "POI - Kategorie"
+    },
+    {
+      "name": "GovManager"
+    }
+  ],
+  "paths": {
+    "/cms/api/kommunen/": {
+      "get": {
+        "tags": ["Kommune / Design"],
+        "summary": "Alle Kommune abfragen",
+        "operationId": "getKommunen",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/sort"
+          },
+          {
+            "$ref": "#/components/parameters/limit"
+          },
+          {
+            "$ref": "#/components/parameters/page"
+          },
+          {
+            "$ref": "#/components/parameters/where"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Es wurden erfolgreich alle verfügbaren Kommunen zurückgegeben",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "docs": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Kommune"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/cms/api/kommunen/{kommuneId}": {
+      "get": {
+        "tags": ["Kommune / Design"],
+        "summary": "Eine Kommune abfragen",
+        "operationId": "getKommune",
+        "parameters": [
+          {
+            "name": "kommuneId",
+            "in": "path",
+            "description": "Die ID der Kommune",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Die Kommune existiert und wurde zurückgegeben",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Kommune"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": ["Kommune / Design"],
+        "summary": "Eine Kommune bearbeiten",
+        "operationId": "updateKommune",
+        "parameters": [
+          {
+            "name": "kommuneId",
+            "in": "path",
+            "description": "Die ID der Kommune",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Die zu aktualisierenden Inhalte der Kommune",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Kommune"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Die Kommune wurde erfolgreich angelegt",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Kommune"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          }
+        ],
+        "x-codegen-request-body-name": "kommune"
+      }
+    },
+    "/cms/api/news-artikel/": {
+      "get": {
+        "tags": ["News - Artikel"],
+        "summary": "Alle News-Artikel abfragen",
+        "operationId": "getAllNewsArtikel",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/sort"
+          },
+          {
+            "$ref": "#/components/parameters/limit"
+          },
+          {
+            "$ref": "#/components/parameters/page"
+          },
+          {
+            "$ref": "#/components/parameters/where"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Es wurden erfolgreich alle verfügbaren News - Artikel zurückgegeben",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "docs": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/News-Artikel"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["News - Artikel"],
+        "summary": "Einen News-Artikel hinzufügen",
+        "operationId": "createNewsArtikel",
+        "requestBody": {
+          "description": "Der zu erstellene News-Artikel",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/News-Artikel"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Der News-Artikel wurde erfolgreich angelegt",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/News-Artikel"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          }
+        ],
+        "x-codegen-request-body-name": "newsArtikel"
+      }
+    },
+    "/cms/api/news-artikel/{newsArtikelId}": {
+      "get": {
+        "tags": ["News - Artikel"],
+        "summary": "Einen News-Artikel abfragen",
+        "operationId": "getNewsArtikel",
+        "parameters": [
+          {
+            "name": "newsArtikelId",
+            "in": "path",
+            "description": "Die ID des News-Artikels",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Der News-Artikel existiert und wurde zurückgegeben",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/News-Artikel"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": ["News - Artikel"],
+        "summary": "Einen News-Artikel bearbeiten",
+        "operationId": "updateNewsArtikel",
+        "parameters": [
+          {
+            "name": "newsArtikelId",
+            "in": "path",
+            "description": "Die ID des News-Artikels",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Die zu aktualisierenden Inhalte des News-Artikels",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/News-Artikel"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Der News-Artikel wurde erfolgreich angepasst",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/News-Artikel"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          }
+        ],
+        "x-codegen-request-body-name": "newsArtikel"
+      }
+    },
+    "/cms/api/veranstaltungskalender/": {
+      "get": {
+        "tags": ["Veranstaltungskalender"],
+        "summary": "Alle Veranstaltungen abfragen",
+        "operationId": "getAllVeranstaltungen",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/sort"
+          },
+          {
+            "$ref": "#/components/parameters/limit"
+          },
+          {
+            "$ref": "#/components/parameters/page"
+          },
+          {
+            "$ref": "#/components/parameters/where"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Es wurden erfolgreich alle verfügbaren Veranstaltungen zurückgegeben",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "docs": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Veranstaltung"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["Veranstaltungskalender"],
+        "summary": "Eine Veranstaltung hinzufügen",
+        "operationId": "createVeranstaltung",
+        "requestBody": {
+          "description": "Die zu erstellene Veranstaltung",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Veranstaltung"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Die Veranstaltung wurde erfolgreich angelegt",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Veranstaltung"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          }
+        ],
+        "x-codegen-request-body-name": "veranstaltung"
+      }
+    },
+    "/cms/api/veranstaltungskalender/{veranstaltungId}": {
+      "get": {
+        "tags": ["Veranstaltungskalender"],
+        "summary": "Eine Veranstaltung abfragen",
+        "operationId": "getVeranstaltung",
+        "parameters": [
+          {
+            "name": "veranstaltungId",
+            "in": "path",
+            "description": "Die ID der Veranstaltung",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Die Veranstaltung existiert und wurde zurückgegeben",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Veranstaltung"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": ["Veranstaltungskalender"],
+        "summary": "Eine Veranstaltung bearbeiten",
+        "operationId": "updateVeranstaltung",
+        "parameters": [
+          {
+            "name": "veranstaltungId",
+            "in": "path",
+            "description": "Die ID der Veranstaltung",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Die zu aktualisierenden Inhalte der Veranstaltung",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Veranstaltung"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Die Veranstaltung wurde erfolgreich angepasst",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/News-Artikel"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          }
+        ],
+        "x-codegen-request-body-name": "veranstaltung"
+      }
+    },
+    "/cms/api/veranstaltungskalender-kategorie/": {
+      "get": {
+        "tags": ["Veranstaltungskalender - Kategorie"],
+        "summary": "Alle Kategorien abfragen",
+        "operationId": "getAllKategorien",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/sort"
+          },
+          {
+            "$ref": "#/components/parameters/limit"
+          },
+          {
+            "$ref": "#/components/parameters/page"
+          },
+          {
+            "$ref": "#/components/parameters/where"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Es wurden erfolgreich alle verfügbaren Kategorien zurückgegeben",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "docs": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Veranstaltungs-Kategorie"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["Veranstaltungskalender - Kategorie"],
+        "summary": "Eine Kategorie hinzufügen",
+        "operationId": "createKategorie",
+        "requestBody": {
+          "description": "Die zu erstellene Kategorie",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Veranstaltungs-Kategorie"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Die Kategorie wurde erfolgreich angelegt",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Veranstaltungs-Kategorie"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          }
+        ],
+        "x-codegen-request-body-name": "kategorie"
+      }
+    },
+    "/cms/api/veranstaltungskalender-kategorie/{kategorieId}": {
+      "get": {
+        "tags": ["Veranstaltungskalender - Kategorie"],
+        "summary": "Eine Kategorie abfragen",
+        "operationId": "getKategorie",
+        "parameters": [
+          {
+            "name": "kategorieId",
+            "in": "path",
+            "description": "Die ID der Kategorie",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Die Kategorie existiert und wurde zurückgegeben",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Veranstaltungs-Kategorie"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": ["Veranstaltungskalender - Kategorie"],
+        "summary": "Eine Kategorie bearbeiten",
+        "operationId": "updateKategorie",
+        "parameters": [
+          {
+            "name": "kategorieId",
+            "in": "path",
+            "description": "Die ID der Kategorie",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Die zu aktualisierenden Inhalte der Kategorie",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Veranstaltungs-Kategorie"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Die Kategorie wurde erfolgreich angepasst",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Veranstaltungs-Kategorie"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          }
+        ],
+        "x-codegen-request-body-name": "kategorie"
+      }
+    },
+    "/cms/api/poi/": {
+      "get": {
+        "tags": ["POIs"],
+        "summary": "Alle POIs abfragen",
+        "operationId": "getAllPois",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/sort"
+          },
+          {
+            "$ref": "#/components/parameters/limit"
+          },
+          {
+            "$ref": "#/components/parameters/page"
+          },
+          {
+            "$ref": "#/components/parameters/where"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Es wurden erfolgreich alle verfügbaren POIs zurückgegeben",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "docs": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/POI"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["POIs"],
+        "summary": "Ein POI hinzufügen",
+        "operationId": "createPOI",
+        "requestBody": {
+          "description": "Der zu erstellende POI",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/POI"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Der POI wurde erfolgreich angelegt",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/POI"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          }
+        ],
+        "x-codegen-request-body-name": "poi"
+      }
+    },
+    "/cms/api/poi/{poiId}": {
+      "get": {
+        "tags": ["POIs"],
+        "summary": "Einen POI abfragen",
+        "operationId": "getPOI",
+        "parameters": [
+          {
+            "name": "poiId",
+            "in": "path",
+            "description": "Die ID des POI",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Der POI existiert und wurde zurückgegeben",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/POI"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": ["POIs"],
+        "summary": "Ein POI bearbeiten",
+        "operationId": "updatePOI",
+        "parameters": [
+          {
+            "name": "poiId",
+            "in": "path",
+            "description": "Die ID des POI",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Die zu aktualisierenden Inhalte des POI",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/POI"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Der POI wurde erfolgreich angepasst",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/POI"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          }
+        ],
+        "x-codegen-request-body-name": "poi"
+      }
+    },
+    "/cms/api/poi/upload": {
+      "post": {
+        "tags": ["POIs"],
+        "summary": "GeoJson als POIs importieren",
+        "operationId": "importPois",
+        "requestBody": {
+          "description": "Details der zu importierenden POIs, im JSON-Format. `featureCollection` ist eine FeatureCollection aus der GeoJSON Spezifikation (RFC 7946). Es sind nur Features vom Typ Point erlaubt.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/POIUpload"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Es wurden erfolgreich alle POIs importiert",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "docs": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/POI"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          }
+        ],
+        "x-codegen-request-body-name": "body"
+      }
+    },
+    "/cms/api/poi-categories/": {
+      "get": {
+        "tags": ["POI - Kategorie"],
+        "summary": "Alle Kategorien abfragen",
+        "operationId": "getAllKategorien",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/sort"
+          },
+          {
+            "$ref": "#/components/parameters/limit"
+          },
+          {
+            "$ref": "#/components/parameters/page"
+          },
+          {
+            "$ref": "#/components/parameters/where"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Es wurden erfolgreich alle verfügbaren Kategorien zurückgegeben",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "docs": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/POI-Kategorie"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["POI - Kategorie"],
+        "summary": "Eine Kategorie hinzufügen",
+        "operationId": "createKategorie",
+        "requestBody": {
+          "description": "Die zu erstellene Kategorie",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/POI-Kategorie"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Die Kategorie wurde erfolgreich angelegt",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/POI-Kategorie"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          }
+        ],
+        "x-codegen-request-body-name": "kategorie"
+      }
+    },
+    "/cms/api/poi-categories/{kategorieId}": {
+      "get": {
+        "tags": ["POI - Kategorie"],
+        "summary": "Eine Kategorie abfragen",
+        "operationId": "getKategorie",
+        "parameters": [
+          {
+            "name": "kategorieId",
+            "in": "path",
+            "description": "Die ID der Kategorie",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Die Kategorie existiert und wurde zurückgegeben",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/POI-Kategorie"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": ["POI - Kategorie"],
+        "summary": "Eine Kategorie bearbeiten",
+        "operationId": "updateKategorie",
+        "parameters": [
+          {
+            "name": "kategorieId",
+            "in": "path",
+            "description": "Die ID der Kategorie",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Die zu aktualisierenden Inhalte der Kategorie",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/POI-Kategorie"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Die Kategorie wurde erfolgreich angepasst",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/POI-Kategorie"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          }
+        ],
+        "x-codegen-request-body-name": "kategorie"
+      }
+    },
+    "/api/GovManagerResponse": {
+      "get": {
+        "tags": ["GovManager"],
+        "requestBody": {
+          "description": "Die zu verarbeitenden Daten",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Die Anfrage wurde erfolgreich bearbeitet",
+            "content": {}
+          },
+          "400": {
+            "description": "Die Anfrage konnte nicht zugeordnet werden. Überprüfen Sie den requestId Parameter.",
+            "content": {}
+          },
+          "401": {
+            "description": "Es wurde kein oder ein falscher Key übergeben",
+            "content": {}
+          }
+        },
+        "security": [
+          {
+            "govmanager_key": []
+          }
+        ],
+        "x-codegen-request-body-name": "data"
+      },
+      "post": {
+        "tags": ["GovManager"],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "requestId": {
+                    "type": "string",
+                    "description": "Die ID, die bei der ursprünglichen Anfrage zur Zuordnung mitgeschickt wurde."
+                  },
+                  "data": {
+                    "type": "object",
+                    "properties": {},
+                    "description": "Die zu verarbeitenden Daten"
+                  }
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Die Anfrage wurde erfolgreich bearbeitet",
+            "content": {}
+          },
+          "400": {
+            "description": "Die Anfrage konnte nicht zugeordnet werden. Überprüfen Sie den requestId Parameter.",
+            "content": {}
+          },
+          "401": {
+            "description": "Es wurde kein oder ein falscher Key übergeben",
+            "content": {}
+          }
+        },
+        "security": [
+          {
+            "govmanager_key": []
+          }
+        ],
+        "x-codegen-request-body-name": "data"
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "api_key": {
+        "type": "apiKey",
+        "name": "api_key",
+        "in": "header"
+      },
+      "govmanager_key": {
+        "type": "apiKey",
+        "description": "Ein im GovManager hinterlegter Key, der bei Anfragen an die relevanten Endpunkte als Bearer-Token mitgeschickt werden muss. Der Wert muss mit `Bearer ` beginnen.",
+        "name": "Authorization",
+        "in": "header"
+      }
+    }
+  },
+  "x-original-swagger-version": "2.0"
+}

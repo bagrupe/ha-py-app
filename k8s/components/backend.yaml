@@ -1,0 +1,59 @@
+name: backend
+ingress:
+  paths:
+    - /graphql
+    - /api
+  cors: true
+deployment:
+  port: 8080
+  image:
+    example: true
+    name: backend
+  resources:
+    requests:
+      cpu: 20m
+      memory: 400Mi
+  # Workaround for failing CI due to leak(?)
+  #    limits:
+  #      memory: 600Mi
+  secrets: components/backend.env
+  env:
+    - name: ConnectionStrings__Domain
+      value: "Server=postgres-{{ .root.Release.Name }};Port=5432;Database=domain;UserId=domain;Password=domain;Minimum Pool Size=10;Maximum Pool Size=90;No Reset On Close=true;Enlist=false"
+    - name: DataSeeder__Enabled
+      value: "{{ true | quote }}"
+    - name: BereichB__ApiUrl
+      value: "http://bereich-b-{{ .root.Release.Name }}/cms/api"
+    - name: Web__BaseUrl
+      value: "https://{{ .root.Release.Name }}.internal.example.invalid"
+    - name: BereichB__InternalApiUrl
+      value: "http://bereich-b-{{ .root.Release.Name }}/_internal/"
+    - name: PmPayment__NotificationUrl
+      value: "https://{{ .root.Release.Name }}.internal.example.invalid/api/PmPaymentNotification"
+    - name: EMail__Host
+      value: "mailpit-{{ .root.Release.Name }}"
+    - name: EMail__Port
+      value: "{{ 1025 | quote }}"
+    - name: EMail__From
+      value: "noreply@example.com"
+    - name: Gotenberg__Url
+      value: "http://gotenberg-{{ .root.Release.Name }}:3000"
+    - name: GovManager__ResponseKey
+      value: "qa-govmanager-key"
+    - name: Environment__Name
+      value: "{{ .root.Release.Name }}"
+  initContainers:
+    - name: check-bereich-b-ready
+      image: busybox:1.36
+      command:
+        [
+          "sh",
+          "-c",
+          "until nc -z bereich-b-{{ .root.Release.Name }} 80; do echo waiting for bereich-b; sleep 2; done;",
+        ]
+  startupProbe:
+    initialDelaySeconds: 90
+    periodSeconds: 10
+    failureThreshold: 30
+    tcpSocket:
+      port: 8080

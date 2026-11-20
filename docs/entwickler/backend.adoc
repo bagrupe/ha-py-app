@@ -1,0 +1,41 @@
+==== Aufbau des Kommunal-App Backends (Bereich-A)
+
+Das Backend der Kommunal-App ist technisch ein *.NET 8.0* Projekt auf Basis der
+Programmiersprache C#. Die Kommunikation erfolgt mit *GraphQL*, das durch die
+Verwendung der Bibliothek *HotChocolate* mit einem *Implementation-first* Ansatz
+umgesetzt ist.
+
+Neben den im Backend selbst implementierten Features wird per *GraphQL
+Schema-Stitching* die GraphQL-API von Payload CMS nach außen bereitgestellt.
+
+Die im Backend implementierten Features werden sowohl der App zur Abfrage von
+Inhalten und zum Erstellen von Anträgen bereitgestellt, als auch dem Backoffice
+zur Verwaltung der Anträge und zum Erstellen und Bearbeiten von Prozessen.
+
+Aus technischer Perspektive sind die tatsächlichen Funktionen, die die API
+bereitstellt, innerhalb der Queries bzw. Mutations implementiert.
+
+===== Features
+Die verschiedenen Dienste und API-Endpunkte sind nach Funktionsteilbereich
+in Feature-Ordner zusammengelegt. Eine **Query** im `Prozess`-Ordner beschreibt
+beispielsweise einen Lesevorgang in der Prozessverwaltung, eine **Mutation**
+einen entsprechenden Schreibvorgang. **Jobs** sind Hintergrundprozesse.
+
+===== Code-First GraphQL
+Das Backend verwendet die *Implementation-first* Variante von HotChocolate; dies
+bedeutet, dass sich die GraphQL-Typen in der Regel automatisch aus den konkreten
+Entitäten des Domänenmodells und den Parametern und Rückgabewerten der Resolver-
+Methoden ergeben, anstatt separat und explizit definiert werden zu müssen.
+
+===== Entity Framework
+Das Backend nutzt Entity Framework als ORM auf einer Postgres-Datenbank. Es
+verfolgt einen *Code-first*-Ansatz; das bedeutet, dass das Datenbankschema
+sich aus den im Code definierten Klassen ableitet, und nicht umgekehrt.
+Als IDs werden UUIDs (in C# auch GUIDs genannt) verwendet. Alle Tabellen sind
+in einem einheitlichen `DomainContext` zusammengefasst.
+
+===== Dependency Injection
+Es wird der Standard-DI-Container von ASP.NET verwendet. HotChocolate ergänzt
+dies außerdem um die Möglichkeit, Services in die GraphQL-Resolver-Methoden zu
+injecten. Diese sind mit dem `[Service]`-Attribut gekennzeichnet, um sie von
+GraphQL-Inputs zu unterscheiden.

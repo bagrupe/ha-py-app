@@ -1,0 +1,33 @@
+fragment RichTextBlock on RichTextBlock {
+  contentHtml
+}
+
+fragment ImageBlockMedien on ImageBlockMedien {
+
+  image {
+    ...MedienImage
+
+  }
+}
+
+fragment ImageBlockVeranstaltungsmedien on ImageBlockVeranstaltungsmedien {
+
+  image {
+    ...VeranstaltungsmedienImage
+
+  }
+}
+
+fragment MedienImage on Medien {
+  url
+}
+
+fragment VeranstaltungsmedienImage on Veranstaltungsmedien {
+  url
+  sourceUrl
+  sizes {
+    thumbnail {
+      url
+    }
+  }
+}

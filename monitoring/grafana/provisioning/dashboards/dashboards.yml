@@ -1,0 +1,11 @@
+apiVersion: 1
+
+providers:
+  - name: kommunal-app
+    orgId: 1
+    folder: Kommunal App
+    type: file
+    disableDeletion: false
+    editable: true
+    options:
+      path: /etc/grafana/provisioning/dashboards

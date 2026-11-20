@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE ikiss SYSTEM "https://www.hameln-pyrmont.de/ikiss.dtd">
+<ikiss>
+    <result>
+            <tevents_list>
+                <tevents>
+                    <object_id>3767.3898.1</object_id>
+                    <title>WasserVision - Wasser ist Leben</title>
+                    <datetime_from>2025-09-15 00:00:00</datetime_from>
+                    <datetime_to>2025-09-15 00:00:00</datetime_to>
+                    <location>Oberschule Hessisch Oldendorf</location>
+                    <region></region>
+                    <release>0</release>
+                    <area>3</area>
+                    <update_date>2025-09-15 23:01:36</update_date>
+                    <image>3767_2588_1_m</image>
+                    <organizer_object_id>0</organizer_object_id>
+                    <location_id>2</location_id>
+                    <pattern>0</pattern>
+                </tevents>
+                <tevents>
+                    <object_id>3767.3950.1</object_id>
+                    <title>Coffee & Talk for HEALTH</title>
+                    <datetime_from>2026-03-10 08:00:00</datetime_from>
+                    <datetime_to>2026-03-10 13:00:00</datetime_to>
+                    <location>Zedita, Bahnhofspl. 19/1. Etage, 31785 Hameln</location>
+                    <region></region>
+                    <release>0</release>
+                    <area>3</area>
+                    <update_date>2026-03-11 00:00:23</update_date>
+                    <image>3767_3053_1_m</image>
+                    <organizer_object_id>0</organizer_object_id>
+                    <location_id>0</location_id>
+                    <pattern>0</pattern>
+                </tevents>
+            </tevents_list>
+    </result>
+</ikiss>

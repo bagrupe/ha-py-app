@@ -1,0 +1,374 @@
+==== Monitoring und Observability
+
+Die Kommunal-App verfügt über einen eigenen Monitoring-Stack zur Überwachung der
+Verfügbarkeit, Systemressourcen und Datenbanken in den Umgebungen Staging,
+Pre-Production und Produktion. Der Stack läuft auf einer dedizierten
+Monitoring-VM; auf jeder App-VM werden zusätzlich Monitoring-Agenten
+(Exporter) betrieben.
+
+Ausführliche Betriebs- und Entwickleranleitungen liegen im Repository unter
+`monitoring/README.md` und `monitoring/agents/README.md`.
+
+===== Architektur
+
+[cols="~,~,~"]
+|===
+| Komponente | Image | Aufgabe
+
+| Prometheus
+| `prom/prometheus:v3.2.1`
+| Metrikspeicher; scrapt Blackbox Exporter, Pushgateway, App-VM-Agenten und sich selbst
+
+| Pushgateway
+| `prom/pushgateway:v1.11.1`
+| Empfängt gepushte Cron-Job-Metriken von den App-VMs
+
+| Blackbox Exporter
+| `prom/blackbox-exporter:v0.26.0`
+| HTTP/HTTPS-Probes für Health-Endpunkte und öffentliche URLs
+
+| Grafana
+| `grafana/grafana:11.6.0`
+| Dashboards, Alert-Regeln (provisioniert), E-Mail-Benachrichtigungen über Brevo SMTP
+
+| Nginx + Certbot
+| TLS-Profil
+| TLS-Reverse-Proxy für Grafana in Produktion (`monitoring.example.invalid`)
+|===
+
+**Monitoring-Agenten auf App-VMs** (separates Compose-Projekt
+`hameln-monitoring-agents`):
+
+[cols="~,~,~"]
+|===
+| Agent | Port | Metriken
+
+| Node Exporter (Host, vorinstalliert)
+| `9100`
+| CPU, Speicher, Festplatte, Netzwerk des Hosts
+
+| cAdvisor
+| `8081`
+| Docker-Container-Ressourcen
+
+| Postgres Exporter
+| `9187`
+| PostgreSQL-Metriken
+
+| MongoDB Exporter
+| `9216`
+| MongoDB-Metriken
+|===
+
+Prometheus auf der Monitoring-VM erreicht die App-VMs über die VPC-Private-IP.
+Blackbox-Probes für interne Health-Endpunkte nutzen HTTP direkt auf die
+veröffentlichten Container-Ports; öffentliche Verfügbarkeit wird per HTTPS über
+den App-Reverse-Proxy geprüft.
+
+===== Was wird überwacht?
+
+[cols="~,~,~,~"]
+|===
+| Komponente | Abhängigkeiten (Readiness) | Container | Öffentliche Verfügbarkeit
+
+| Backend
+| `GET /health/ready` — Postgres + Gotenberg
+| cAdvisor
+| —
+
+| CMS (bereich-b)
+| `GET /cms/health/ready` — MongoDB-Ping
+| cAdvisor
+| —
+
+| bereich-a
+| `GET /health/ready` — Erreichbarkeit Backend + CMS
+| cAdvisor
+| Blackbox `public_app`
+
+| Stele
+| `GET /health/ready` — Erreichbarkeit Backend
+| cAdvisor
+| Blackbox `public_stele`
+|===
+
+Es gibt **keine** `/health/live`-Endpunkte. Container-Liveness wird über
+cAdvisor abgedeckt, nicht über zusätzliche HTTP-Stubs.
+
+===== Health-Endpunkte
+
+Alle Readiness-Endpunkte liefern JSON im folgenden Format:
+
+```json
+{ "status": "Healthy", "checks": { "postgres": "Healthy" } }
+```
+
+[cols="~,~"]
+|===
+| HTTP-Status | Bedeutung
+
+| `200`
+| Alle Checks bestanden
+
+| `503`
+| Mindestens ein Check fehlgeschlagen
+|===
+
+Blackbox-Modul `http_2xx` akzeptiert nur `200` — ein ungesunder Endpunkt
+ergibt korrekt `probe_success 0`.
+
+[cols="~,~,~"]
+|===
+| Komponente | Endpunkt | Prüfungen
+
+| .NET-Backend
+| `/health/ready`
+| Postgres-Verbindung + Gotenberg `/health`
+
+| CMS (bereich-b)
+| `/cms/health/ready`
+| MongoDB `ping`
+
+| bereich-a
+| `/health/ready`
+| Erreichbarkeit Backend + CMS (`checks.backend`, `checks.cms`)
+
+| Stele
+| `/health/ready`
+| Erreichbarkeit Backend (`checks.backend`)
+|===
+
+bereich-a und Stele führen ein CGI-Health-Skript im Nginx-Container aus, das die
+Upstream-`/health/ready`-Endpunkte per `curl` prüft.
+
+**Ports (Deploy-Umgebungen, aus `monitoring/.env.example`):**
+
+[cols="~,~"]
+|===
+| Dienst | Port
+
+| Backend
+| `8080` (`BACKEND_PORT`)
+
+| CMS
+| `3001` (`BEREICH_B_PORT`)
+
+| bereich-a (VPC-Health)
+| `3000` (`BEREICH_A_PORT`)
+
+| Stele
+| `8080` (`STELE_PORT`)
+|===
+
+Im nativen Entwicklungsmodus (`task backend` / `task cms`) gelten typisch
+Backend `5000` und CMS `3001`. `/health/ready` auf bereich-a und Stele existiert
+nur in den **Docker-Images**, nicht in lokalen Vite-Dev-Servern.
+
+===== Blackbox-Probe-Matrix
+
+Pro Umgebung (`local`, `staging`, `preprod`, `production`):
+
+[cols="~,~,~"]
+|===
+| `probe_type` | Protokoll | Ziel
+
+| `backend_ready`
+| HTTP (VPC)
+| `http://<ip>:<backend-port>/health/ready`
+
+| `bereich_b_ready`
+| HTTP (VPC)
+| `http://<ip>:<bereich-b-port>/cms/health/ready`
+
+| `bereich_a_ready`
+| HTTP (VPC)
+| `http://<ip>:<bereich-a-port>/health/ready`
+
+| `stele_ready`
+| HTTP (VPC)
+| `http://<ip>:<stele-port>/health/ready`
+
+| `public_app`
+| HTTPS
+| `https://<app-domain>/`
+
+| `public_stele`
+| HTTPS
+| `https://<stele-domain>/`
+|===
+
+Öffentliche HTTPS-Probes nutzen das Blackbox-Modul `https_2xx` mit
+TLS-Verifikation. Metriken: `probe_ssl_earliest_cert_expiry` (Ablaufzeitpunkt),
+`probe_failed_due_to_ssl` (ungültiges Zertifikat).
+
+Probe-Ziele werden beim Prometheus-Start aus Umgebungsvariablen in
+`prometheus/entrypoint.sh` generiert. Nach Änderungen an `.env` muss Prometheus
+neu gestartet werden.
+
+===== Alerting
+
+Grafana-verwaltete Alert-Regeln werden aus Code provisioniert
+(`monitoring/grafana/provisioning/alerting/rules.json`) und per Brevo SMTP
+versendet. **Contact Points und Notification Policies** werden nur in der
+Grafana-UI konfiguriert.
+
+Provisionierte Regeln (je Umgebung: staging, preprod, production):
+
+[cols="~,~,~"]
+|===
+| Alert | Bedingung | Dauer
+
+| Disk
+| Root-Filesystem > 80 %
+| 1 min
+
+| CPU
+| Durchschnittsauslastung > 95 %
+| 2 min
+
+| RAM
+| Auslastung > 95 %
+| 2 min
+
+| Infrastruktur
+| Eine Blackbox-Probe ist über das ganze 3-Minuten-Fenster down (ein Alert pro Probe)
+| 2 min
+
+| Cron Job fehlgeschlagen
+| Letzter Lauf eines Backend- oder Bereich-B-Cron-Jobs ist fehlgeschlagen
+| 5 min
+
+| SSL ungültig
+| Ungültiges oder nicht vertrauenswürdiges Zertifikat auf öffentlicher Domain
+| 5 min
+
+| SSL läuft ab
+| Zertifikat läuft in < 29 Tagen (Warning; Certbot erneuert bei 30) / < 7 Tagen (Critical) ab
+| 1 h / 15 min
+|===
+
+Einmalige Einrichtung in Produktion:
+
+1. `GF_SMTP_*` in `monitoring/.env` setzen (siehe `monitoring/.env.example`)
+2. Grafana neu starten
+3. In Grafana: *Alerting → Contact points* — E-Mail-Contact Point anlegen und testen
+4. *Alerting → Notification policies* — Standard-Policy auf den Contact Point setzen
+
+===== Lokale Entwicklung
+
+App und Monitoring laufen als **separate** Docker-Compose-Projekte. Blackbox
+erreicht App-Prozesse auf dem Host über `host.docker.internal`.
+
+1. App-Abhängigkeiten starten (Repository-Root):
+
+```
+task containers:up
+task backend
+task cms
+```
+
+2. `monitoring/.env` aus `monitoring/.env.example` anlegen und lokale Ports setzen:
+
+```
+LOCAL_APP_HOST=host.docker.internal
+LOCAL_BACKEND_PORT=5000
+LOCAL_BEREICH_B_PORT=3001
+```
+
+3. Monitoring-Stack starten:
+
+```
+docker compose -f monitoring/docker-compose.yml \
+  -f monitoring/docker-compose.local.yml \
+  -p hameln-monitoring up -d
+```
+
+[cols="~,~,~"]
+|===
+| Dienst | URL (lokal) | Zugangsdaten
+
+| Grafana
+| `http://localhost:3000`
+| `admin` / `admin` (Standard aus `.env.example`)
+
+| Prometheus
+| `http://localhost:9090`
+| —
+
+| Blackbox Exporter
+| `http://localhost:9115`
+| —
+|===
+
+===== Betrieb und Deployment
+
+Das Deployment erfolgt über GitLab CI (Details und CI-Variablen siehe
+<<Continuous Integration / Continuous Deployment (CI/CD),CI/CD>>).
+
+[cols="~,~"]
+|===
+| CI-Job | Ziel
+
+| `monitoring:deploy`
+| Monitoring-Stack auf der Monitoring-VM (`environment: monitoring`)
+
+| `monitoring:stop`
+| Monitoring-Stack stoppen
+
+| `monitoring-agents-deploy`
+| Agenten auf App-VM (Staging / Preprod / Produktion, `environment: $TARGET_ENV`)
+
+| `monitoring-agents-stop`
+| Agenten stoppen
+|===
+
+`monitoring:deploy` läuft auf `main` automatisch, sobald sich Dateien unter
+`monitoring/**/*` ändern. `monitoring:stop` bleibt manuell und erscheint in
+Staging-, Preprod- und Production-Pipelines, wenn sich `monitoring/**/*`
+ändert. Die Agenten-Jobs bleiben manuell und werden bei Änderungen unter
+`monitoring/agents/**/*` angeboten. Nach einem Agenten-Deploy sollte der
+Monitoring-Stack erneut deployed werden, damit Prometheus neue Scrape-Targets
+übernimmt.
+
+**Voraussetzungen Monitoring-VM:**
+
+- DNS A-Record: `monitoring.example.invalid` → Monitoring-VM-IP
+- Ports 80 und 443 auf der Monitoring-VM offen
+- GitLab-Umgebung `monitoring` mit `SERVER_IP`
+- GitLab-File-Variable `MONITORING_ENV_FILE` (siehe `monitoring/.env.example`)
+
+**Voraussetzungen App-VMs:**
+
+- Firewall: Monitoring-VM → App-VM auf `${BACKEND_PORT}`, `${BEREICH_B_PORT}`,
+  `${BEREICH_A_PORT}`, `${STELE_PORT}` und `9100` (Node Exporter) — TCP, VPC
+- Host-`node_exporter` auf Port `9100` erreichbar
+- Read-only Monitoring-DB-Nutzer (`monitoring`) in Postgres und MongoDB
+- App-Stack (`hameln-pyrmont` Docker-Netzwerk) läuft vor Start der DB-Exporter
+
+Monitoring-Passwörter in `DEPLOYMENT_ENV_FILE` pro Umgebung:
+
+```
+POSTGRES_MONITORING_PASSWORD=REPLACE_ME
+MONGO_MONITORING_PASSWORD=REPLACE_ME
+```
+
+Exporter-Verbindungsstrings in `MONITORING_ENV_FILE` (scoped pro App-Umgebung):
+
+```
+POSTGRES_EXPORTER_DATA_SOURCE_NAME=postgresql://monitoring:...@postgres:5432/domain?sslmode=disable
+MONGODB_EXPORTER_URI=mongodb://monitoring:...@mongodb:27017/admin?authSource=admin
+```
+
+===== Verifikation
+
+**Lokal:**
+
+- Grafana: Prometheus-Datasource-Status *green*
+- `probe_success{job="blackbox"}` = `1` für interne Targets, wenn Apps laufen
+- Nach Cron-Job mit `PUSHGATEWAY_URL`: Metriken unter Pushgateway `:9091`
+
+**Produktion:**
+
+- `https://monitoring.example.invalid` — Grafana mit gültigem TLS
+- Prometheus ist **nicht** öffentlich erreichbar
+- `/health/ready` und `/cms/health/ready` nur über VPC, nicht öffentlich

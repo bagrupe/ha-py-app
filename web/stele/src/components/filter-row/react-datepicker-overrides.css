@@ -1,0 +1,76 @@
+/* Stretch the library's inline-block trigger wrappers to fill FilterRowBaseField. */
+.react-datepicker-wrapper,
+.react-datepicker__input-container {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* Popover: lift above the carousel underneath, drop the default triangle. */
+.react-datepicker-popper {
+  z-index: 30;
+}
+.react-datepicker__triangle {
+  display: none;
+}
+
+/* Calendar shell: match FilterRowBaseField's border/radius/typography. */
+.react-datepicker {
+  @apply rounded-md border border-gray-500 bg-white font-sans text-base shadow-md;
+}
+
+.react-datepicker__header {
+  @apply rounded-t-md border-b border-b-gray-300 bg-gray-50 pt-3;
+}
+
+.react-datepicker__current-month {
+  @apply pb-2 text-base font-bold text-gray-900;
+}
+
+.react-datepicker__day-name {
+  @apply text-sm font-normal text-gray-700;
+}
+
+.react-datepicker__navigation {
+  @apply top-3;
+}
+.react-datepicker__navigation-icon::before {
+  @apply border-gray-700;
+}
+.react-datepicker__navigation:hover .react-datepicker__navigation-icon::before {
+  @apply border-primary;
+}
+
+/* Day cells. */
+.react-datepicker__day {
+  @apply rounded text-gray-900;
+}
+.react-datepicker__day:not(.react-datepicker__day--disabled):hover {
+  @apply bg-primary/20;
+}
+.react-datepicker__day--today {
+  @apply font-bold text-primary;
+}
+.react-datepicker__day--selected,
+.react-datepicker__day--selected:hover {
+  @apply bg-primary text-white;
+}
+/* Suppress the library's pre-selection highlight on days that aren't the actually-selected one. */
+.react-datepicker__day--keyboard-selected:not(.react-datepicker__day--selected),
+.react-datepicker__day--keyboard-selected:not(
+    .react-datepicker__day--selected
+  ):hover {
+  @apply bg-transparent text-gray-900;
+}
+.react-datepicker__day--keyboard-selected:not(
+    .react-datepicker__day--selected
+  ):not(.react-datepicker__day--disabled):hover {
+  @apply bg-primary/20;
+}
+.react-datepicker__day--disabled,
+.react-datepicker__day--disabled:hover {
+  @apply cursor-default bg-transparent text-gray-300;
+}
+.react-datepicker__day--outside-month {
+  @apply text-gray-300;
+}

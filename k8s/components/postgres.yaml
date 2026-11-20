@@ -1,0 +1,24 @@
+name: postgres
+deployment:
+  port:
+    name: postgres
+    number: 5432
+  image:
+    tag: postgres:15
+  resources:
+    requests:
+      cpu: 10m
+      memory: 50Mi
+    limits:
+      memory: 512Mi
+  env:
+    - name: POSTGRES_USER
+      value: domain
+    - name: POSTGRES_PASSWORD
+      value: domain
+    - name: POSTGRES_DB
+      value: domain
+  volume:
+    mountPath: /var/lib/postgresql/data
+    size: 1Gi
+    subPath: postgres

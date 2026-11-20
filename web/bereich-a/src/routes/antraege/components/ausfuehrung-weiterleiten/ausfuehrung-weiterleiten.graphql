@@ -1,0 +1,50 @@
+query Mitarbeitende($groupId: UUID, $search: String, $skip: Int, $take: Int) {
+  my {
+    ... on BackofficeUser {
+      kommune {
+        mitarbeiter(
+          groupId: $groupId
+          search: $search
+          skip: $skip
+          take: $take
+        ) {
+          items {
+            id
+            vorname
+            nachname
+            eMail
+            gruppen {
+              id
+              name
+            }
+          }
+          pageInfo {
+            hasNextPage
+          }
+        }
+      }
+    }
+  }
+}
+
+fragment AusfuehrungWeiterleitenError on AusfuehrungWeiterleitenError {
+  __typename
+}
+
+mutation AusfuehrungWeiterleiten($input: AusfuehrungWeiterleitenInput!) {
+  ausfuehrungWeiterleiten(input: $input) {
+    ausfuehrung {
+      istZustaendigkeit {
+        zugewiesenePerson {
+          vorname
+          nachname
+        }
+      }
+    }
+    errors {
+      ... on Error {
+        message
+      }
+    }
+  }
+}

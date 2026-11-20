@@ -1,0 +1,63 @@
+query GeloeschteAntraege($search: String, $skip: Int, $take: Int) {
+  geloeschteAntraege(search: $search, skip: $skip, take: $take) {
+    totalCount
+    items {
+      id
+      prozessBezeichnung
+      status
+      geloeschtAm
+      loeschgrund
+      geloeschtVon
+      endgueltigGeloeschtAm
+    }
+  }
+}
+
+query GeloeschterAntrag($id: UUID!) {
+  geloeschterAntrag(id: $id) {
+    antrag {
+      id
+      prozessBezeichnung
+      status
+      createdAt
+      geloeschtAm
+      loeschgrund
+      geloeschtVon
+      endgueltigGeloeschtAm
+    }
+    sharedKeyEncryptedForKommune
+    slotWerte {
+      slotName
+      istFreigegeben
+      encrypted
+      encryptedValue {
+        cipher
+        nonce
+        tag
+      }
+      plainValue
+    }
+    verlauf {
+      id
+      createdAt
+      statusAenderung
+      statusAenderungBeschreibung
+      benutzer
+      ziel
+      nachricht
+    }
+  }
+}
+
+mutation AntragWiederherstellen($input: AntragWiederherstellenInput!) {
+  antragWiederherstellen(input: $input) {
+    ausfuehrung {
+      id
+    }
+    errors {
+      ... on Error {
+        message
+      }
+    }
+  }
+}

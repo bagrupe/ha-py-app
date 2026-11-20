@@ -1,0 +1,53 @@
+fragment EncryptedValue on EncryptedValue {
+  cipher
+  nonce
+  tag
+}
+
+fragment SlotValue on SlotValue {
+  id
+  slotName
+  istFreigegeben
+  
+  ... on PlainSlotValue {
+    plainValue: value
+  }
+
+  ... on EncryptedSlotValue {
+    encryptedValue: value {
+      ... EncryptedValue
+    }
+  }
+}
+
+fragment AktuelleAusfuehrung on Ausfuehrung {
+  __typename
+  id
+  userId
+  slotValues {
+    ...SlotValue
+  }
+  status
+}
+
+fragment PoiIcon on PoiIcon {
+  id
+  url
+}
+
+fragment HistorieEintrag on Historie {
+  id
+  createdAt
+  statusAenderung
+  statusAenderungBeschreibung
+}
+
+fragment Adresse on Adresse {
+  name
+  plz
+  ort
+  strasse
+  telefon
+  email
+  url
+}

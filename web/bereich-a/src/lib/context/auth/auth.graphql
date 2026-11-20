@@ -1,0 +1,66 @@
+mutation Login($input: LoginInput!) {
+  login(input: $input) {
+    result
+    token
+  }
+}
+
+fragment EncryptedValue on EncryptedValue {
+  cipher
+  nonce
+  tag
+}
+
+fragment User on User {
+  __typename
+  id
+  publicKey
+
+  ... on Buerger {
+    personalPrivateKey {
+      ...EncryptedValue
+    }
+    personalPrivateKeySalt
+  }
+
+  ... on Mitarbeiter {
+    eMail
+    vorname
+    nachname
+
+    organisationPrivateKey
+    kommune {
+      id
+      name
+      privateKey {
+        ...EncryptedValue
+      }
+    }
+    organisationPrivateKey
+    gruppen {
+      id
+    }
+  }
+  ... on BackofficeUser {
+    art
+    isKommuneAdmin
+    personalPrivateKey {
+      ...EncryptedValue
+    }
+    personalPrivateKeySalt
+    organisationseinheiten {
+      id: organisationseinheitId
+      meta: organisationseinheit {
+        name
+      }
+      funktionsberechtigungen: alleFunktionsberechtigungen
+    }
+    funktionsberechtigungen
+  }
+}
+
+query My {
+  my @export(exportName: "User") {
+    ...User
+  }
+}

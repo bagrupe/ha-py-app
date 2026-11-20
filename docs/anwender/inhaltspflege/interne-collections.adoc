@@ -1,0 +1,43 @@
+===== Untereinheiten
+Die Collection `Untereinheiten` enthält die unterschiedlichen
+`Organisationseinheiten`, die im Backoffice angelegt werden. Dieser Collection
+sollten keine Einträge über die Inhaltspflege hinzugefügt oder entfernt werden,
+da das Backoffice die Einträge verwaltet.
+
+Die Einträge sind über die Inhaltspflege zugreifbar, da es zwei Informationen
+gibt, die bei jedem Eintrag verändert werden dürfen und müssen: die Information,
+ob es sich bei der Untereinheit/Organisationseinheit um eine Gemeinde handelt
+und infolge dessen der *amtliche Regionalschlüssel*.
+
+===== Kommunen
+Die `Kommunen` repäsentieren den Mandanten innerhalb der Inhaltspflege. Diese
+Collection sollte nicht verändert werden.
+
+===== Benutzer
+Die Collection `Benutzer` enthält alle über das Backoffice angelegten Benutzer.
+Diese Collection sollte ausschließlich über das Backoffice verändert werden.
+
+Der Grund dafür, dass es diese Collection auch in der Inhaltspflege gibt, ist,
+dass die Berechtigungen, die über die `Nutzendenverwaltung` vergeben werden, in
+der Inhaltspflege respektiert werden müssen. Das beinhaltet den Zugang zu den
+gewählten Collections und auch die Berechtigungen hinsichtlich der Zugehörigkeit
+von Organisationseinheiten.
+
+[[integrationen]]
+===== Integrationen
+Die `Integrationen` enthalten die Quellen für die Abfrage von News-Artikeln in
+Form von `RSS-Feeds` und `NOLIS-Tokens`.
+
+Hier können weitere RSS-Feeds oder NOLIS-Tokens hinterlegt werden, falls es
+weitere Quellen gibt. Wichtig ist, dass bei jedem Eintrag die
+`Untereinheit`/`Organisationseinheit` gesetzt ist, um die News der richtigen
+Gemeinde zuzuordnen.
+
+===== Medien
+Die Collection `Medien` beinhaltet Medien, wie Bilder, die innerhalb der App
+verwendet werden.
+
+===== Veranstaltungsmedien
+`Veranstaltungsmedien` sind solche Medien, die durch den Import von News oder
+Veranstaltungen aus Dritt-Systemen anfallen. Diese Medien, zum Beispiel Bilder,
+werden in der Inhaltspflege abgelegt und darüber der App zugänglich gemacht.

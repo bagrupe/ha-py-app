@@ -1,0 +1,164 @@
+# Rendered at deploy time from DEPLOYMENT_ENV_FILE (see .gitlab/scripts/render_reverse_proxy.sh).
+# Do not edit reverse-proxy.config on the server manually — change this template and redeploy.
+# Optional parts live in separate fragments (e.g. reverse-proxy.keycloak.conf.template) and are only
+# appended when enabled for the environment (KEYCLOAK_PROXY_ENABLED).
+
+server {
+    server_name ${APP_DOMAIN};
+
+    # Increase upload size if needed
+    client_max_body_size 100M;
+
+    location /.well-known/acme-challenge/ {
+        root /var/www/certbot;
+    }
+
+    add_header 'Content-Security-Policy' 'upgrade-insecure-requests';
+    # Mailpit Web UI - /mailpit
+    #location /mailpit/ {
+    #    proxy_pass http://mailpit:8025/mailpit/;
+    #    proxy_http_version 1.1;
+    #
+    #    proxy_set_header Host $host;
+    #    proxy_set_header X-Real-IP $remote_addr;
+    #    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    #    proxy_set_header X-Forwarded-Proto $scheme;
+    #    proxy_set_header Upgrade $http_upgrade;
+    #    proxy_set_header Connection "upgrade";
+    #
+    #    # Remove /mailpit prefix when proxying
+    #    #rewrite ^/mailpit/(.*) /$1 break;
+    #}
+
+    # GraphQL endpoint
+    location /graphql {
+        proxy_pass http://backend:8080/graphql;
+        proxy_http_version 1.1;
+
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+
+        # GraphQL might need longer timeouts
+        proxy_read_timeout 300;
+        proxy_connect_timeout 300;
+        proxy_send_timeout 300;
+    }
+
+    # Backend API - /api
+    location /api/ {
+        proxy_pass http://backend:8080;
+        proxy_http_version 1.1;
+
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+
+        # API timeouts
+        proxy_read_timeout 300;
+        proxy_connect_timeout 300;
+        proxy_send_timeout 300;
+
+        # Streams bodies instead of spooling them to proxy disk, so the backend's 401/413/415 answer before the
+        # whole upload has arrived. Inherits the headers and timeouts above.
+        location /api/objects/ {
+            proxy_pass http://backend:8080;
+            proxy_request_buffering off;
+            proxy_buffering off;
+        }
+    }
+
+    # CMS (bereich-b) - /cms
+    location /cms {
+        proxy_pass http://bereich-b:3000/cms;
+        proxy_http_version 1.1;
+
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+    }
+
+    # Frontend (bereich-a) - Root / (must be last!)
+    location / {
+        proxy_pass http://bereich-a:80;
+        proxy_http_version 1.1;
+
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+    }
+
+    listen [::]:443 ssl; # managed by Certbot
+    listen 443 ssl; # managed by Certbot
+    ssl_certificate /etc/letsencrypt/live/${APP_DOMAIN}/fullchain.pem; # managed by Certbot
+    ssl_certificate_key /etc/letsencrypt/live/${APP_DOMAIN}/privkey.pem; # managed by Certbot
+    # include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
+    # ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
+}
+
+server {
+    listen 80;
+    listen [::]:80;
+    server_name ${APP_DOMAIN};
+
+    location /.well-known/acme-challenge/ {
+        root /var/www/certbot;
+    }
+
+    location / {
+        return 301 https://$host$request_uri;
+    }
+
+    add_header 'Content-Security-Policy' 'upgrade-insecure-requests';
+}
+
+# --- Stele (SPA + same-origin /graphql via Stele container) ---
+server {
+    listen 443 ssl;
+    listen [::]:443 ssl;
+    server_name ${STELE_DOMAIN};
+
+    ssl_certificate /etc/letsencrypt/live/${STELE_DOMAIN}/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/${STELE_DOMAIN}/privkey.pem;
+
+    add_header 'Content-Security-Policy' 'upgrade-insecure-requests';
+
+    location / {
+        proxy_pass http://stele:80;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+    }
+}
+
+server {
+    listen 80;
+    listen [::]:80;
+    server_name ${STELE_DOMAIN};
+
+    location /.well-known/acme-challenge/ {
+        root /var/www/certbot;
+    }
+
+    location / {
+        return 301 https://$host$request_uri;
+    }
+
+    add_header 'Content-Security-Policy' 'upgrade-insecure-requests';
+}

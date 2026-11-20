@@ -1,0 +1,112 @@
+query SteleAktuelles(
+  $aufrufeWhere: Aufrufe_where!
+  $topThemaWhere: NewsArtikel_where!
+  $newsWhere: NewsArtikel_where!
+  $newsLimit: Int
+) {
+  aufrufeList(where: $aufrufeWhere, sort: "-startDatum") {
+    docs {
+      ...SteleAufrufInfo
+    }
+  }
+
+  topThemaNewsArtikelList: newsArtikelList(
+    where: $topThemaWhere
+    sort: "-datum"
+    limit: 1
+  ) {
+    docs {
+      ...SteleNewsArtikelInfo
+    }
+  }
+
+  newsArtikelList(where: $newsWhere, sort: "-datum", limit: $newsLimit) {
+    docs {
+      ...SteleNewsArtikelInfo
+    }
+  }
+}
+
+fragment SteleAufrufInfo on Aufrufe {
+  id
+  titel
+  teaser
+  aufrufende
+  startDatum
+  beschreibungText
+  fallbackBildUrl
+  qrCodeUrl
+  qrCode {
+    type
+  }
+  bild {
+    external
+    url
+    internal {
+      id
+      url
+      sizes {
+        thumbnail {
+          url
+        }
+      }
+    }
+  }
+  untereinheit {
+    id
+    name
+  }
+  kommune {
+    id
+    name
+    design {
+      fallbackImage {
+        url
+        sizes {
+          thumbnail {
+            url
+          }
+        }
+      }
+    }
+  }
+}
+
+fragment SteleNewsArtikelInfo on NewsArtikel {
+  id
+  titel
+  teaser
+  datum
+  ordinal
+  untereinheit {
+    id
+    name
+  }
+  kommune {
+    id
+    name
+    design {
+      fallbackImage {
+        url
+        sizes {
+          thumbnail {
+            url
+          }
+        }
+      }
+    }
+  }
+  titelbilder {
+    id
+    bild {
+      id
+      url
+      sizes {
+        thumbnail {
+          url
+        }
+      }
+    }
+  }
+  bodyPlaintext
+}

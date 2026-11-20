@@ -1,0 +1,2121 @@
+{
+  "my": {
+    "kommune": {
+      "prozessById": {
+        "id": "d41d5923-b0b5-5403-b536-00b6d98ca9cc",
+        "name": "Führerschein verlängern",
+        "istOeffentlich": false,
+        "tags": [],
+        "latestVersion": {
+          "id": "0f44d48f-f45a-4cbe-be1b-e968c9fff821",
+          "publishedAt": "2024-04-09T16:22:19.005477Z",
+          "start": {
+            "id": "b84ee8be-d5e6-4e40-8598-e4a34d5ae3cb"
+          },
+          "rollen": [],
+          "alleSchritte": [
+            {
+              "__typename": "FormularSchritt",
+              "id": "0074194d-d80d-4bcb-a304-0df6b1f48078",
+              "titel": "Weiter Angaben",
+              "anweisung": "Die Angabe Ihrer E-Mail-Adresse und Telefonnummer ist freiwillig. Diese Angaben helfen aber, dass Sie bei Rückfragen oder fehlenden Informationen schneller kontaktiert werden können.",
+              "erledigungDurchBuerger": true,
+              "sollZustaendigkeit": {
+                "art": "BUERGER",
+                "organisationseinheitId": null,
+                "mitarbeiterGruppeId": null,
+                "dienstleisterId": null,
+                "mitarbeiterGruppe": null,
+                "dynamischeArten": [],
+                "liestRolleId": null,
+                "liestRolle": null
+              },
+              "schreibtRolle": null,
+              "schreibtRolleId": null,
+              "versendeEMailAnMitarbeiterGruppe": null,
+              "verbindungen": [
+                {
+                  "id": "06e87050-d13f-4bc4-95d4-f6745ce01e34",
+                  "name": null,
+                  "vonId": "0074194d-d80d-4bcb-a304-0df6b1f48078",
+                  "nachId": "06a209f0-ec02-442c-b084-655cfed81c00",
+                  "statusAenderung": null,
+                  "statusAenderungBeschreibung": null,
+                  "istRelevant": "true"
+                }
+              ],
+              "nodePosition": {
+                "x": 2307,
+                "y": 282.25
+              },
+              "slots": [
+                {
+                  "name": "e-mail",
+                  "encrypted": true,
+                  "valueType": "STRING",
+                  "optional": false,
+                  "brauchtFreigabe": false
+                },
+                {
+                  "name": "weitere",
+                  "encrypted": true,
+                  "valueType": "STRING",
+                  "optional": false,
+                  "brauchtFreigabe": false
+                },
+                {
+                  "name": "telefonnummer",
+                  "encrypted": true,
+                  "valueType": "STRING",
+                  "optional": false,
+                  "brauchtFreigabe": false
+                }
+              ],
+              "felder": [
+                {
+                  "__typename": "StringFormularFeld",
+                  "id": "cd06f2ce-4263-4d09-8be1-eab2ce5dd85b",
+                  "slotName": "e-mail",
+                  "angezeigterName": "E-Mail-Adresse",
+                  "anweisung": "Bitte geben Sie Ihre E-Mail-Adresse an",
+                  "order": 0,
+                  "encrypted": true,
+                  "inhaltsTag": null,
+                  "istRelevant": "true",
+                  "pflichtfeld": true,
+                  "oeffentlichSichtbar": false,
+                  "multiline": false,
+                  "options": []
+                },
+                {
+                  "__typename": "StringFormularFeld",
+                  "id": "8f469ca0-b04a-453e-8729-d0db7f4871e9",
+                  "slotName": "telefonnummer",
+                  "angezeigterName": "Telefonnummer",
+                  "anweisung": "Bitte geben Sie Ihre Telefonnummer an",
+                  "order": 1,
+                  "encrypted": true,
+                  "inhaltsTag": null,
+                  "istRelevant": "true",
+                  "pflichtfeld": true,
+                  "oeffentlichSichtbar": false,
+                  "multiline": false,
+                  "options": []
+                },
+                {
+                  "__typename": "StringFormularFeld",
+                  "id": "0a233886-d312-481e-bc67-411f50e13f92",
+                  "slotName": "weitere",
+                  "angezeigterName": "Weitere Bemerkungen",
+                  "anweisung": null,
+                  "order": 3,
+                  "encrypted": true,
+                  "inhaltsTag": null,
+                  "istRelevant": "true",
+                  "pflichtfeld": true,
+                  "oeffentlichSichtbar": false,
+                  "multiline": false,
+                  "options": []
+                }
+              ]
+            },
+            {
+              "__typename": "BezahlenSchritt",
+              "id": "06a209f0-ec02-442c-b084-655cfed81c00",
+              "titel": "Bezahlen",
+              "anweisung": null,
+              "erledigungDurchBuerger": true,
+              "sollZustaendigkeit": {
+                "art": "BUERGER",
+                "organisationseinheitId": null,
+                "mitarbeiterGruppeId": null,
+                "dienstleisterId": null,
+                "mitarbeiterGruppe": null,
+                "dynamischeArten": [],
+                "liestRolleId": null,
+                "liestRolle": null
+              },
+              "schreibtRolle": null,
+              "schreibtRolleId": null,
+              "versendeEMailAnMitarbeiterGruppe": null,
+              "verbindungen": [
+                {
+                  "id": "17ff10f0-6e97-4283-a5d0-db66124e0547",
+                  "name": "Nicht Erfolgreich",
+                  "vonId": "06a209f0-ec02-442c-b084-655cfed81c00",
+                  "nachId": "06a209f0-ec02-442c-b084-655cfed81c00",
+                  "statusAenderung": null,
+                  "statusAenderungBeschreibung": null,
+                  "istRelevant": "true"
+                },
+                {
+                  "id": "9890bd3d-8e4c-4e53-b11e-b865c9ad8976",
+                  "name": "Erfolgreich",
+                  "vonId": "06a209f0-ec02-442c-b084-655cfed81c00",
+                  "nachId": "99e607f4-5b28-40c7-981f-e51b8fbcc0ba",
+                  "statusAenderung": null,
+                  "statusAenderungBeschreibung": null,
+                  "istRelevant": "true"
+                }
+              ],
+              "nodePosition": {
+                "x": 2770,
+                "y": 326.75
+              },
+              "slots": [
+                {
+                  "name": "txId",
+                  "encrypted": false,
+                  "valueType": "STRING",
+                  "optional": false,
+                  "brauchtFreigabe": false,
+                  "__typename": "Slot"
+                },
+                {
+                  "name": "paymentMethod",
+                  "encrypted": false,
+                  "valueType": "STRING",
+                  "optional": false,
+                  "brauchtFreigabe": false,
+                  "__typename": "Slot"
+                }
+              ],
+              "betrag": 42.5
+            },
+            {
+              "__typename": "FormularSchritt",
+              "id": "2808775d-f2b7-4536-8d89-1b371be3599f",
+              "titel": "Prüfung der Unterlagen",
+              "anweisung": null,
+              "erledigungDurchBuerger": false,
+              "sollZustaendigkeit": {
+                "art": "ORGANISATIONSEINHEIT",
+                "organisationseinheitId": "0195c8a5-023d-7a9a-8481-c5730fab04a2",
+                "mitarbeiterGruppeId": "b0f29e39-a09c-5de4-b0f1-b0d2d50db0d7",
+                "dienstleisterId": null,
+                "mitarbeiterGruppe": {
+                  "id": "b0f29e39-a09c-5de4-b0f1-b0d2d50db0d7",
+                  "name": "LK Sachbearbeiter (Landkreis HaPy)",
+                  "eMailAdressen": []
+                },
+                "dynamischeArten": [],
+                "liestRolleId": null,
+                "liestRolle": null
+              },
+              "schreibtRolle": null,
+              "schreibtRolleId": null,
+              "versendeEMailAnMitarbeiterGruppe": null,
+              "verbindungen": [
+                {
+                  "id": "22ead4d9-a546-47b5-9279-42c86ce4180f",
+                  "name": "Prüfung nicht erfolgreich",
+                  "vonId": "2808775d-f2b7-4536-8d89-1b371be3599f",
+                  "nachId": "5b425101-f556-420d-8621-eee83124144c",
+                  "statusAenderung": null,
+                  "statusAenderungBeschreibung": null,
+                  "istRelevant": "true"
+                },
+                {
+                  "id": "32a5a853-70f4-4e3c-8dec-3e5d8da46dae",
+                  "name": "Weitergeben an Teamleitung",
+                  "vonId": "2808775d-f2b7-4536-8d89-1b371be3599f",
+                  "nachId": "77bf9e01-8f13-4abf-8c61-8e8c86976279",
+                  "statusAenderung": null,
+                  "statusAenderungBeschreibung": null,
+                  "istRelevant": "true"
+                },
+                {
+                  "id": "7db4d6fc-83d2-4fd7-8183-56b26d2ceea6",
+                  "name": "Prüfung erfolgreich",
+                  "vonId": "2808775d-f2b7-4536-8d89-1b371be3599f",
+                  "nachId": "ed988a26-9977-4041-a263-9e574ba6cf5d",
+                  "statusAenderung": "Prüfung erfolgreich",
+                  "statusAenderungBeschreibung": null,
+                  "istRelevant": "true"
+                },
+                {
+                  "id": "e0627bc0-8439-498a-9b76-071c95730e5a",
+                  "name": "Termin vereinbaren",
+                  "vonId": "2808775d-f2b7-4536-8d89-1b371be3599f",
+                  "nachId": "47e4874f-467d-423e-8eff-a878a5d875c0",
+                  "statusAenderung": null,
+                  "statusAenderungBeschreibung": null,
+                  "istRelevant": "true"
+                }
+              ],
+              "nodePosition": {
+                "x": 3702,
+                "y": 219.75
+              },
+              "slots": [],
+              "felder": []
+            },
+            {
+              "__typename": "FormularSchritt",
+              "id": "3c7f3be7-ac8b-4818-a7c1-e701680dd6ff",
+              "titel": "Angaben zum Führerschein",
+              "anweisung": "Bitte fühlen Sie die Angaben zu Ihrem aktuellen Führerschein aus",
+              "erledigungDurchBuerger": true,
+              "sollZustaendigkeit": {
+                "art": "BUERGER",
+                "organisationseinheitId": null,
+                "mitarbeiterGruppeId": null,
+                "dienstleisterId": null,
+                "mitarbeiterGruppe": null,
+                "dynamischeArten": [],
+                "liestRolleId": null,
+                "liestRolle": null
+              },
+              "schreibtRolle": null,
+              "schreibtRolleId": null,
+              "versendeEMailAnMitarbeiterGruppe": null,
+              "verbindungen": [
+                {
+                  "id": "45f50ef2-ae46-4fb8-9670-151aa7c2e72d",
+                  "name": null,
+                  "vonId": "3c7f3be7-ac8b-4818-a7c1-e701680dd6ff",
+                  "nachId": "f3b5b10e-75a4-43d3-8e78-93c900a5722a",
+                  "statusAenderung": null,
+                  "statusAenderungBeschreibung": null,
+                  "istRelevant": "true"
+                }
+              ],
+              "nodePosition": {
+                "x": 737,
+                "y": 270.25
+              },
+              "slots": [
+                {
+                  "name": "ausstellende_behoerde",
+                  "encrypted": true,
+                  "valueType": "STRING",
+                  "optional": false,
+                  "brauchtFreigabe": false
+                },
+                {
+                  "name": "abweichender_name_frage",
+                  "encrypted": true,
+                  "valueType": "STRING",
+                  "optional": false,
+                  "brauchtFreigabe": false
+                },
+                {
+                  "name": "abweichender_name",
+                  "encrypted": true,
+                  "valueType": "STRING",
+                  "optional": true,
+                  "brauchtFreigabe": false
+                },
+                {
+                  "name": "ausstellung",
+                  "encrypted": true,
+                  "valueType": "STRING",
+                  "optional": false,
+                  "brauchtFreigabe": false
+                }
+              ],
+              "felder": [
+                {
+                  "__typename": "StringFormularFeld",
+                  "id": "dc5e84d9-c6dc-4950-8094-5029fc2bc1a2",
+                  "slotName": "ausstellung",
+                  "angezeigterName": "Ausstellende Republik",
+                  "anweisung": "Bitte wählen Sie aus",
+                  "order": 0,
+                  "encrypted": true,
+                  "inhaltsTag": "Führerschein Ausstellung",
+                  "istRelevant": "true",
+                  "pflichtfeld": true,
+                  "oeffentlichSichtbar": false,
+                  "multiline": false,
+                  "options": [
+                    {
+                      "key": "Bundesrepublik Deutschland",
+                      "value": "Bundesrepublik Deutschland"
+                    },
+                    {
+                      "key": "Deutsche Demokratische Republik",
+                      "value": "Deutsche Demokratische Republik"
+                    }
+                  ]
+                },
+                {
+                  "__typename": "StringFormularFeld",
+                  "id": "9fc662d4-9174-47b7-b9e8-42ccfa63cd7a",
+                  "slotName": "ausstellende_behoerde",
+                  "angezeigterName": "Ausstellende Behörde",
+                  "anweisung": "Bitte geben Sie die letzte ausstellende Behörde an",
+                  "order": 1,
+                  "encrypted": true,
+                  "inhaltsTag": "Ausstellende Behörde",
+                  "istRelevant": "true",
+                  "pflichtfeld": true,
+                  "oeffentlichSichtbar": false,
+                  "multiline": false,
+                  "options": []
+                },
+                {
+                  "__typename": "StringFormularFeld",
+                  "id": "628dc826-9523-435c-b2bd-3605b9c76062",
+                  "slotName": "abweichender_name_frage",
+                  "angezeigterName": "Weicht Ihr aktueller Name vom Namen auf dem Führerschein ab?",
+                  "anweisung": "Bitte wählen Sie aus",
+                  "order": 2,
+                  "encrypted": true,
+                  "inhaltsTag": null,
+                  "istRelevant": "true",
+                  "pflichtfeld": true,
+                  "oeffentlichSichtbar": false,
+                  "multiline": false,
+                  "options": [
+                    {
+                      "key": "Ja",
+                      "value": "Ja"
+                    },
+                    {
+                      "key": "Nein",
+                      "value": "Nein"
+                    }
+                  ]
+                },
+                {
+                  "__typename": "StringFormularFeld",
+                  "id": "d18aeff8-dba0-4b56-a9ef-9d2550a8c8e8",
+                  "slotName": "abweichender_name",
+                  "angezeigterName": "Abweichender Name",
+                  "anweisung": "Bitte geben Sie den Namen anf der auf dem Führerschein gedruckt ist",
+                  "order": 3,
+                  "encrypted": true,
+                  "inhaltsTag": null,
+                  "istRelevant": "slot('abweichender_name_frage') == 'Ja'",
+                  "pflichtfeld": true,
+                  "oeffentlichSichtbar": false,
+                  "multiline": false,
+                  "options": []
+                }
+              ]
+            },
+            {
+              "__typename": "FormularSchritt",
+              "id": "42c3c3b5-d0e3-4345-8488-233867efda98",
+              "titel": "Ausweisupload",
+              "anweisung": "Bitte laden Sie Ihr Ausweis-Dokument hoch. Fotografieren Sie bitte jede Seite",
+              "erledigungDurchBuerger": true,
+              "sollZustaendigkeit": {
+                "art": "BUERGER",
+                "organisationseinheitId": null,
+                "mitarbeiterGruppeId": null,
+                "dienstleisterId": null,
+                "mitarbeiterGruppe": null,
+                "dynamischeArten": [],
+                "liestRolleId": null,
+                "liestRolle": null
+              },
+              "schreibtRolle": null,
+              "schreibtRolleId": null,
+              "versendeEMailAnMitarbeiterGruppe": null,
+              "verbindungen": [
+                {
+                  "id": "1754a05c-db43-4fdb-837c-ac31078813fd",
+                  "name": null,
+                  "vonId": "42c3c3b5-d0e3-4345-8488-233867efda98",
+                  "nachId": "50486620-6c70-4b78-9bda-f66a78ed73af",
+                  "statusAenderung": null,
+                  "statusAenderungBeschreibung": null,
+                  "istRelevant": "true"
+                }
+              ],
+              "nodePosition": {
+                "x": 1595,
+                "y": 294.25
+              },
+              "slots": [
+                {
+                  "name": "ausweis",
+                  "encrypted": true,
+                  "valueType": "UPLOAD",
+                  "optional": false,
+                  "brauchtFreigabe": false
+                }
+              ],
+              "felder": [
+                {
+                  "__typename": "UploadFormularFeld",
+                  "id": "e5fecc74-22fc-4038-bf63-11e2da47ec2c",
+                  "slotName": "ausweis",
+                  "angezeigterName": "Ausweis",
+                  "anweisung": "Bitte laden Sie Ihr Ausweis-Dokument hoch",
+                  "order": 1,
+                  "encrypted": true,
+                  "inhaltsTag": "Ausweis-Dokument",
+                  "istRelevant": "true",
+                  "pflichtfeld": true,
+                  "oeffentlichSichtbar": false,
+                  "multi": true,
+                  "document": false,
+                  "brauchtFreigabe": false
+                }
+              ]
+            },
+            {
+              "__typename": "FormularSchritt",
+              "id": "47e4874f-467d-423e-8eff-a878a5d875c0",
+              "titel": "Prüfung der Unterlagen",
+              "anweisung": null,
+              "erledigungDurchBuerger": false,
+              "sollZustaendigkeit": {
+                "art": "ORGANISATIONSEINHEIT",
+                "organisationseinheitId": "0195c8a5-023d-7a9a-8481-c5730fab04a2",
+                "mitarbeiterGruppeId": "b0f29e39-a09c-5de4-b0f1-b0d2d50db0d7",
+                "dienstleisterId": null,
+                "mitarbeiterGruppe": {
+                  "id": "b0f29e39-a09c-5de4-b0f1-b0d2d50db0d7",
+                  "name": "LK Sachbearbeiter (Landkreis HaPy)",
+                  "eMailAdressen": []
+                },
+                "dynamischeArten": [],
+                "liestRolleId": null,
+                "liestRolle": null
+              },
+              "schreibtRolle": null,
+              "schreibtRolleId": null,
+              "versendeEMailAnMitarbeiterGruppe": null,
+              "verbindungen": [],
+              "nodePosition": {
+                "x": 4244,
+                "y": 352.75
+              },
+              "slots": [
+                {
+                  "name": "betreff",
+                  "encrypted": true,
+                  "valueType": "STRING",
+                  "optional": false,
+                  "brauchtFreigabe": false
+                },
+                {
+                  "name": "inhalt",
+                  "encrypted": true,
+                  "valueType": "STRING",
+                  "optional": false,
+                  "brauchtFreigabe": false
+                }
+              ],
+              "felder": [
+                {
+                  "__typename": "StringFormularFeld",
+                  "id": "fc76582d-7e5c-4981-b8b4-1941cdd87176",
+                  "slotName": "betreff",
+                  "angezeigterName": "Betreff",
+                  "anweisung": null,
+                  "order": 0,
+                  "encrypted": true,
+                  "inhaltsTag": null,
+                  "istRelevant": "true",
+                  "pflichtfeld": true,
+                  "oeffentlichSichtbar": false,
+                  "multiline": false,
+                  "options": []
+                },
+                {
+                  "__typename": "StringFormularFeld",
+                  "id": "4a6ab2ff-3395-4ee6-b559-c0b548c77d02",
+                  "slotName": "inhalt",
+                  "angezeigterName": "Bemerkung",
+                  "anweisung": null,
+                  "order": 1,
+                  "encrypted": true,
+                  "inhaltsTag": null,
+                  "istRelevant": "true",
+                  "pflichtfeld": true,
+                  "oeffentlichSichtbar": false,
+                  "multiline": true,
+                  "options": []
+                }
+              ]
+            },
+            {
+              "__typename": "FormularSchritt",
+              "id": "50486620-6c70-4b78-9bda-f66a78ed73af",
+              "titel": "Fotoupload",
+              "anweisung": "Bitte laden Sie ein aktuelles biometrisches Foto hoch.",
+              "erledigungDurchBuerger": true,
+              "sollZustaendigkeit": {
+                "art": "BUERGER",
+                "organisationseinheitId": null,
+                "mitarbeiterGruppeId": null,
+                "dienstleisterId": null,
+                "mitarbeiterGruppe": null,
+                "dynamischeArten": [],
+                "liestRolleId": null,
+                "liestRolle": null
+              },
+              "schreibtRolle": null,
+              "schreibtRolleId": null,
+              "versendeEMailAnMitarbeiterGruppe": null,
+              "verbindungen": [
+                {
+                  "id": "5f9f9690-90bf-4b66-8c11-0c9fbf23cacc",
+                  "name": null,
+                  "vonId": "50486620-6c70-4b78-9bda-f66a78ed73af",
+                  "nachId": "722bd9c9-be83-433a-9733-53fdd76d4c40",
+                  "statusAenderung": null,
+                  "statusAenderungBeschreibung": null,
+                  "istRelevant": "true"
+                }
+              ],
+              "nodePosition": {
+                "x": 1819,
+                "y": 294.25
+              },
+              "slots": [
+                {
+                  "name": "foto",
+                  "encrypted": true,
+                  "valueType": "UPLOAD",
+                  "optional": false,
+                  "brauchtFreigabe": false
+                }
+              ],
+              "felder": [
+                {
+                  "__typename": "UploadFormularFeld",
+                  "id": "871520e1-4273-4abb-9e71-1b0bbacf82cd",
+                  "slotName": "foto",
+                  "angezeigterName": null,
+                  "anweisung": null,
+                  "order": 0,
+                  "encrypted": true,
+                  "inhaltsTag": "Biometrisches Foto",
+                  "istRelevant": "true",
+                  "pflichtfeld": true,
+                  "oeffentlichSichtbar": false,
+                  "multi": false,
+                  "document": false,
+                  "brauchtFreigabe": false
+                }
+              ]
+            },
+            {
+              "__typename": "FormularSchritt",
+              "id": "5b425101-f556-420d-8621-eee83124144c",
+              "titel": "Persönliche Daten",
+              "anweisung": "Bitte geben Sie Ihre Daten gewissenhaft an, diese Daten erscheinen später auf Ihrem Führerschein",
+              "erledigungDurchBuerger": true,
+              "sollZustaendigkeit": {
+                "art": "BUERGER",
+                "organisationseinheitId": null,
+                "mitarbeiterGruppeId": null,
+                "dienstleisterId": null,
+                "mitarbeiterGruppe": null,
+                "dynamischeArten": [],
+                "liestRolleId": null,
+                "liestRolle": null
+              },
+              "schreibtRolle": null,
+              "schreibtRolleId": null,
+              "versendeEMailAnMitarbeiterGruppe": null,
+              "verbindungen": [
+                {
+                  "id": "cd49b611-ad64-489e-8b38-e23060fce727",
+                  "name": null,
+                  "vonId": "5b425101-f556-420d-8621-eee83124144c",
+                  "nachId": "3c7f3be7-ac8b-4818-a7c1-e701680dd6ff",
+                  "statusAenderung": null,
+                  "statusAenderungBeschreibung": null,
+                  "istRelevant": "true"
+                }
+              ],
+              "nodePosition": {
+                "x": 422,
+                "y": 12
+              },
+              "slots": [
+                {
+                  "name": "geschlecht",
+                  "encrypted": true,
+                  "valueType": "STRING",
+                  "optional": false,
+                  "brauchtFreigabe": false
+                },
+                {
+                  "name": "anrede",
+                  "encrypted": true,
+                  "valueType": "STRING",
+                  "optional": false,
+                  "brauchtFreigabe": false
+                },
+                {
+                  "name": "doktorgrad",
+                  "encrypted": true,
+                  "valueType": "STRING",
+                  "optional": false,
+                  "brauchtFreigabe": false
+                },
+                {
+                  "name": "geburtsname",
+                  "encrypted": true,
+                  "valueType": "STRING",
+                  "optional": false,
+                  "brauchtFreigabe": false
+                },
+                {
+                  "name": "postleitzahl",
+                  "encrypted": true,
+                  "valueType": "STRING",
+                  "optional": false,
+                  "brauchtFreigabe": false
+                },
+                {
+                  "name": "vorname",
+                  "encrypted": true,
+                  "valueType": "STRING",
+                  "optional": false,
+                  "brauchtFreigabe": false
+                },
+                {
+                  "name": "ort",
+                  "encrypted": true,
+                  "valueType": "STRING",
+                  "optional": false,
+                  "brauchtFreigabe": false
+                },
+                {
+                  "name": "nachname",
+                  "encrypted": true,
+                  "valueType": "STRING",
+                  "optional": false,
+                  "brauchtFreigabe": false
+                },
+                {
+                  "name": "strasse",
+                  "encrypted": true,
+                  "valueType": "STRING",
+                  "optional": false,
+                  "brauchtFreigabe": false
+                },
+                {
+                  "name": "hausnummer",
+                  "encrypted": true,
+                  "valueType": "STRING",
+                  "optional": false,
+                  "brauchtFreigabe": false
+                },
+                {
+                  "name": "geburtsdatum",
+                  "encrypted": true,
+                  "valueType": "STRING",
+                  "optional": false,
+                  "brauchtFreigabe": false
+                },
+                {
+                  "name": "geburtsort",
+                  "encrypted": true,
+                  "valueType": "STRING",
+                  "optional": false,
+                  "brauchtFreigabe": false
+                },
+                {
+                  "name": "zusatz",
+                  "encrypted": true,
+                  "valueType": "STRING",
+                  "optional": false,
+                  "brauchtFreigabe": false
+                }
+              ],
+              "felder": [
+                {
+                  "__typename": "StringFormularFeld",
+                  "id": "32bd2df4-3f05-4a42-abaa-f41f7f01ef07",
+                  "slotName": "anrede",
+                  "angezeigterName": "Anrede",
+                  "anweisung": "Bitte wählen Sie Ihre Anrede aus.",
+                  "order": 0,
+                  "encrypted": true,
+                  "inhaltsTag": "Anrede",
+                  "istRelevant": "true",
+                  "pflichtfeld": true,
+                  "oeffentlichSichtbar": false,
+                  "multiline": false,
+                  "options": [
+                    {
+                      "key": "Mit geschlechtsneutraler Anrede",
+                      "value": "Mit geschlechtsneutraler Anrede"
+                    },
+                    {
+                      "key": "Frau",
+                      "value": "Frau"
+                    },
+                    {
+                      "key": "Herr",
+                      "value": "Herr"
+                    }
+                  ]
+                },
+                {
+                  "__typename": "StringFormularFeld",
+                  "id": "7fec44ca-8fa1-4716-a3b5-164c6c20c2d1",
+                  "slotName": "vorname",
+                  "angezeigterName": "Vorname",
+                  "anweisung": "Bitte geben Sie Ihren Vornamen ein.",
+                  "order": 1,
+                  "encrypted": true,
+                  "inhaltsTag": "Vorname",
+                  "istRelevant": "true",
+                  "pflichtfeld": true,
+                  "oeffentlichSichtbar": false,
+                  "multiline": false,
+                  "options": []
+                },
+                {
+                  "__typename": "StringFormularFeld",
+                  "id": "9816152d-b547-493c-a3e0-2ce9cbafc58d",
+                  "slotName": "nachname",
+                  "angezeigterName": "Nachname",
+                  "anweisung": "Bitte geben Sie Ihren Nachnamen ein.",
+                  "order": 2,
+                  "encrypted": true,
+                  "inhaltsTag": "Nachname",
+                  "istRelevant": "true",
+                  "pflichtfeld": true,
+                  "oeffentlichSichtbar": false,
+                  "multiline": false,
+                  "options": []
+                },
+                {
+                  "__typename": "StringFormularFeld",
+                  "id": "022d0f4e-1032-4995-8013-a1831e296dbc",
+                  "slotName": "doktorgrad",
+                  "angezeigterName": "Doktorgrad",
+                  "anweisung": "Bitte geben Sie Ihren Doktorgrad ein.",
+                  "order": 3,
+                  "encrypted": true,
+                  "inhaltsTag": "Doktorgrad",
+                  "istRelevant": "true",
+                  "pflichtfeld": true,
+                  "oeffentlichSichtbar": false,
+                  "multiline": false,
+                  "options": []
+                },
+                {
+                  "__typename": "StringFormularFeld",
+                  "id": "c63879f4-66ef-4614-aeeb-c0652ea08e53",
+                  "slotName": "geschlecht",
+                  "angezeigterName": "Geschlecht",
+                  "anweisung": "Bitte geben Sie Ihr Geschlecht ein.",
+                  "order": 4,
+                  "encrypted": true,
+                  "inhaltsTag": "Geschlecht",
+                  "istRelevant": "true",
+                  "pflichtfeld": true,
+                  "oeffentlichSichtbar": false,
+                  "multiline": false,
+                  "options": [
+                    {
+                      "key": "Weiblich",
+                      "value": "Weiblich"
+                    },
+                    {
+                      "key": "Männlich",
+                      "value": "Männlich"
+                    },
+                    {
+                      "key": "Divers",
+                      "value": "Divers"
+                    }
+                  ]
+                },
+                {
+                  "__typename": "StringFormularFeld",
+                  "id": "c06656f8-4821-4a41-bb45-08d2f8799aba",
+                  "slotName": "geburtsdatum",
+                  "angezeigterName": "Geburtsdatum",
+                  "anweisung": "Bitte geben Sie Ihr Geburtsdatum ein.",
+                  "order": 5,
+                  "encrypted": true,
+                  "inhaltsTag": "Geburtsdatum",
+                  "istRelevant": "true",
+                  "pflichtfeld": true,
+                  "oeffentlichSichtbar": false,
+                  "multiline": false,
+                  "options": []
+                },
+                {
+                  "__typename": "StringFormularFeld",
+                  "id": "c4c9772d-78e2-438b-943f-3974591a7fc5",
+                  "slotName": "geburtsort",
+                  "angezeigterName": "Geburtsort",
+                  "anweisung": "Bitte geben Sie Ihren Geburtsort ein.",
+                  "order": 6,
+                  "encrypted": true,
+                  "inhaltsTag": "Geburtsort",
+                  "istRelevant": "true",
+                  "pflichtfeld": true,
+                  "oeffentlichSichtbar": false,
+                  "multiline": false,
+                  "options": []
+                },
+                {
+                  "__typename": "StringFormularFeld",
+                  "id": "4330dae1-546c-4128-8849-1ee6257e9c97",
+                  "slotName": "geburtsname",
+                  "angezeigterName": "Geburtsname",
+                  "anweisung": "Bitte geben Sie Ihren Geburtsnamen ein.",
+                  "order": 7,
+                  "encrypted": true,
+                  "inhaltsTag": "Geburtsname",
+                  "istRelevant": "true",
+                  "pflichtfeld": true,
+                  "oeffentlichSichtbar": false,
+                  "multiline": false,
+                  "options": []
+                },
+                {
+                  "__typename": "StringFormularFeld",
+                  "id": "ad7f4c57-cec0-4490-aeed-c585b0edc466",
+                  "slotName": "strasse",
+                  "angezeigterName": "Straße",
+                  "anweisung": "In welcher Straße wohnen Sie?",
+                  "order": 8,
+                  "encrypted": true,
+                  "inhaltsTag": "Straße",
+                  "istRelevant": "true",
+                  "pflichtfeld": true,
+                  "oeffentlichSichtbar": false,
+                  "multiline": false,
+                  "options": []
+                },
+                {
+                  "__typename": "StringFormularFeld",
+                  "id": "b6eb580c-420b-4f2e-b53d-e5a089385130",
+                  "slotName": "hausnummer",
+                  "angezeigterName": "Hausnummer",
+                  "anweisung": "Wie ist Ihre Hausnummer?",
+                  "order": 9,
+                  "encrypted": true,
+                  "inhaltsTag": "Hausnummer",
+                  "istRelevant": "true",
+                  "pflichtfeld": true,
+                  "oeffentlichSichtbar": false,
+                  "multiline": false,
+                  "options": []
+                },
+                {
+                  "__typename": "StringFormularFeld",
+                  "id": "7df84990-9805-40fc-a172-50a053597bd7",
+                  "slotName": "postleitzahl",
+                  "angezeigterName": "Postleitzahl",
+                  "anweisung": "Wie lautet Ihre Postleitzahl?",
+                  "order": 10,
+                  "encrypted": true,
+                  "inhaltsTag": "Postleitzahl",
+                  "istRelevant": "true",
+                  "pflichtfeld": true,
+                  "oeffentlichSichtbar": false,
+                  "multiline": false,
+                  "options": []
+                },
+                {
+                  "__typename": "StringFormularFeld",
+                  "id": "84192565-74d4-4b01-9f49-24867ef21804",
+                  "slotName": "ort",
+                  "angezeigterName": "Ort",
+                  "anweisung": "In welchem Ort wohnen Sie?",
+                  "order": 11,
+                  "encrypted": true,
+                  "inhaltsTag": "Ort",
+                  "istRelevant": "true",
+                  "pflichtfeld": true,
+                  "oeffentlichSichtbar": false,
+                  "multiline": false,
+                  "options": []
+                },
+                {
+                  "__typename": "StringFormularFeld",
+                  "id": "625f2673-9990-4e81-a456-f329c2e54ce9",
+                  "slotName": "zusatz",
+                  "angezeigterName": "Zusatz",
+                  "anweisung": "Zusätzliche Angaben zur Adresse",
+                  "order": 12,
+                  "encrypted": true,
+                  "inhaltsTag": "Adresszusatz",
+                  "istRelevant": "true",
+                  "pflichtfeld": true,
+                  "oeffentlichSichtbar": false,
+                  "multiline": false,
+                  "options": []
+                }
+              ]
+            },
+            {
+              "__typename": "FormularSchritt",
+              "id": "722bd9c9-be83-433a-9733-53fdd76d4c40",
+              "titel": "Unterschrift hinzufügen",
+              "anweisung": "Bitte legen Sie eine Unterschrift an.",
+              "erledigungDurchBuerger": true,
+              "sollZustaendigkeit": {
+                "art": "BUERGER",
+                "organisationseinheitId": null,
+                "mitarbeiterGruppeId": null,
+                "dienstleisterId": null,
+                "mitarbeiterGruppe": null,
+                "dynamischeArten": [],
+                "liestRolleId": null,
+                "liestRolle": null
+              },
+              "schreibtRolle": null,
+              "schreibtRolleId": null,
+              "versendeEMailAnMitarbeiterGruppe": null,
+              "verbindungen": [
+                {
+                  "id": "054e3012-40e8-41b0-a52d-6984f37d9d93",
+                  "name": null,
+                  "vonId": "722bd9c9-be83-433a-9733-53fdd76d4c40",
+                  "nachId": "0074194d-d80d-4bcb-a304-0df6b1f48078",
+                  "statusAenderung": null,
+                  "statusAenderungBeschreibung": null,
+                  "istRelevant": "true"
+                }
+              ],
+              "nodePosition": {
+                "x": 2041,
+                "y": 294.25
+              },
+              "slots": [
+                {
+                  "name": "unterschrift",
+                  "encrypted": true,
+                  "valueType": "UPLOAD",
+                  "optional": false,
+                  "brauchtFreigabe": false
+                }
+              ],
+              "felder": [
+                {
+                  "__typename": "UploadFormularFeld",
+                  "id": "cf7ef073-477e-4364-a878-821b8a38d26c",
+                  "slotName": "unterschrift",
+                  "angezeigterName": null,
+                  "anweisung": null,
+                  "order": 0,
+                  "encrypted": true,
+                  "inhaltsTag": null,
+                  "istRelevant": "true",
+                  "pflichtfeld": true,
+                  "oeffentlichSichtbar": false,
+                  "multi": false,
+                  "document": false,
+                  "brauchtFreigabe": false
+                }
+              ]
+            },
+            {
+              "__typename": "FormularSchritt",
+              "id": "77bf9e01-8f13-4abf-8c61-8e8c86976279",
+              "titel": "Prüfung durch Teamleitung",
+              "anweisung": null,
+              "erledigungDurchBuerger": false,
+              "sollZustaendigkeit": {
+                "art": "ORGANISATIONSEINHEIT",
+                "organisationseinheitId": "0195c8a5-023d-7a9a-8481-c5730fab04a2",
+                "mitarbeiterGruppeId": "2e7b2faf-eddb-555c-8d40-262f368747b0",
+                "dienstleisterId": null,
+                "mitarbeiterGruppe": {
+                  "id": "2e7b2faf-eddb-555c-8d40-262f368747b0",
+                  "name": "LK Teamleitung (Landkreis HaPy)",
+                  "eMailAdressen": []
+                },
+                "dynamischeArten": [],
+                "liestRolleId": null,
+                "liestRolle": null
+              },
+              "schreibtRolle": null,
+              "schreibtRolleId": null,
+              "versendeEMailAnMitarbeiterGruppe": null,
+              "verbindungen": [
+                {
+                  "id": "2dc1a267-6b7f-4f58-959c-c134d3e4b9f4",
+                  "name": "Prüfung erfolgreich",
+                  "vonId": "77bf9e01-8f13-4abf-8c61-8e8c86976279",
+                  "nachId": "ed988a26-9977-4041-a263-9e574ba6cf5d",
+                  "statusAenderung": null,
+                  "statusAenderungBeschreibung": null,
+                  "istRelevant": "true"
+                },
+                {
+                  "id": "8abb1e8f-3ef5-4f6a-b494-7a497da3a3bd",
+                  "name": "Prüfung nicht erfolgreich",
+                  "vonId": "77bf9e01-8f13-4abf-8c61-8e8c86976279",
+                  "nachId": "5b425101-f556-420d-8621-eee83124144c",
+                  "statusAenderung": null,
+                  "statusAenderungBeschreibung": null,
+                  "istRelevant": "true"
+                }
+              ],
+              "nodePosition": {
+                "x": 4226,
+                "y": 116.5
+              },
+              "slots": [],
+              "felder": []
+            },
+            {
+              "__typename": "WarteAufBezahlungAbgeschlossenSchritt",
+              "id": "99e607f4-5b28-40c7-981f-e51b8fbcc0ba",
+              "titel": "Bezahlen",
+              "anweisung": null,
+              "erledigungDurchBuerger": false,
+              "sollZustaendigkeit": {
+                "art": "BUERGER",
+                "organisationseinheitId": null,
+                "mitarbeiterGruppeId": null,
+                "dienstleisterId": null,
+                "mitarbeiterGruppe": null,
+                "dynamischeArten": [],
+                "liestRolleId": null,
+                "liestRolle": null
+              },
+              "schreibtRolle": null,
+              "schreibtRolleId": null,
+              "versendeEMailAnMitarbeiterGruppe": null,
+              "verbindungen": [
+                {
+                  "id": "30da55ca-a581-431a-9ffb-43c60ed2c57d",
+                  "name": "Erfolgreich",
+                  "vonId": "99e607f4-5b28-40c7-981f-e51b8fbcc0ba",
+                  "nachId": "2808775d-f2b7-4536-8d89-1b371be3599f",
+                  "statusAenderung": null,
+                  "statusAenderungBeschreibung": null,
+                  "istRelevant": "true"
+                },
+                {
+                  "id": "802852da-c714-4e6e-b0ab-54807c3f8c3f",
+                  "name": "Nicht Erfolgreich",
+                  "vonId": "99e607f4-5b28-40c7-981f-e51b8fbcc0ba",
+                  "nachId": "06a209f0-ec02-442c-b084-655cfed81c00",
+                  "statusAenderung": null,
+                  "statusAenderungBeschreibung": null,
+                  "istRelevant": "true"
+                }
+              ],
+              "nodePosition": {
+                "x": 3254,
+                "y": 326.75
+              },
+              "slots": [
+                {
+                  "name": "txId",
+                  "encrypted": false,
+                  "valueType": "STRING",
+                  "optional": false,
+                  "brauchtFreigabe": false
+                },
+                {
+                  "name": "paymentMethod",
+                  "encrypted": false,
+                  "valueType": "STRING",
+                  "optional": false,
+                  "brauchtFreigabe": false
+                }
+              ],
+              "bezahlenSchrittId": "06a209f0-ec02-442c-b084-655cfed81c00"
+            },
+            {
+              "__typename": "FormularSchritt",
+              "id": "b84ee8be-d5e6-4e40-8598-e4a34d5ae3cb",
+              "titel": "Staatsangehörigkeit und Ausweisart",
+              "anweisung": "Bitte geben Sie Ihre Staatsangehörigkeit und die Art des Ausweisdokumentes an, mit welchem Sie die Beantragung durchführen.",
+              "erledigungDurchBuerger": true,
+              "sollZustaendigkeit": {
+                "art": "BUERGER",
+                "organisationseinheitId": null,
+                "mitarbeiterGruppeId": null,
+                "dienstleisterId": null,
+                "mitarbeiterGruppe": null,
+                "dynamischeArten": [],
+                "liestRolleId": null,
+                "liestRolle": null
+              },
+              "schreibtRolle": null,
+              "schreibtRolleId": null,
+              "versendeEMailAnMitarbeiterGruppe": null,
+              "verbindungen": [
+                {
+                  "id": "689fc4ea-6b35-44b4-969e-24a6fdfe23bc",
+                  "name": null,
+                  "vonId": "b84ee8be-d5e6-4e40-8598-e4a34d5ae3cb",
+                  "nachId": "5b425101-f556-420d-8621-eee83124144c",
+                  "statusAenderung": null,
+                  "statusAenderungBeschreibung": null,
+                  "istRelevant": "true"
+                }
+              ],
+              "nodePosition": {
+                "x": 12,
+                "y": 84
+              },
+              "slots": [
+                {
+                  "name": "staatsangehörigkeit",
+                  "encrypted": true,
+                  "valueType": "STRING",
+                  "optional": false,
+                  "brauchtFreigabe": false
+                },
+                {
+                  "name": "ausweisart",
+                  "encrypted": true,
+                  "valueType": "STRING",
+                  "optional": false,
+                  "brauchtFreigabe": false
+                }
+              ],
+              "felder": [
+                {
+                  "__typename": "StringFormularFeld",
+                  "id": "cb441cd2-06e2-4d2e-8039-e36b08a22181",
+                  "slotName": "staatsangehörigkeit",
+                  "angezeigterName": "Staatsangehörigkeit1",
+                  "anweisung": "Bitte geben Sie das Land an.",
+                  "order": 0,
+                  "encrypted": true,
+                  "inhaltsTag": "Staatsangehörigkeit",
+                  "istRelevant": "true",
+                  "pflichtfeld": true,
+                  "oeffentlichSichtbar": false,
+                  "multiline": false,
+                  "options": [
+                    {
+                      "key": "afghanisch",
+                      "value": "afghanisch"
+                    },
+                    {
+                      "key": "ägyptisch",
+                      "value": "ägyptisch"
+                    },
+                    {
+                      "key": "albanisch",
+                      "value": "albanisch"
+                    },
+                    {
+                      "key": "algerisch",
+                      "value": "algerisch"
+                    },
+                    {
+                      "key": "andorranisch",
+                      "value": "andorranisch"
+                    },
+                    {
+                      "key": "angolanisch",
+                      "value": "angolanisch"
+                    },
+                    {
+                      "key": "antiguanisch",
+                      "value": "antiguanisch"
+                    },
+                    {
+                      "key": "äquatorialguineisch",
+                      "value": "äquatorialguineisch"
+                    },
+                    {
+                      "key": "argentinisch",
+                      "value": "argentinisch"
+                    },
+                    {
+                      "key": "armenisch",
+                      "value": "armenisch"
+                    },
+                    {
+                      "key": "aserbaidschanisch",
+                      "value": "aserbaidschanisch"
+                    },
+                    {
+                      "key": "äthiopisch",
+                      "value": "äthiopisch"
+                    },
+                    {
+                      "key": "australisch",
+                      "value": "australisch"
+                    },
+                    {
+                      "key": "bahamaisch",
+                      "value": "bahamaisch"
+                    },
+                    {
+                      "key": "bahrainisch",
+                      "value": "bahrainisch"
+                    },
+                    {
+                      "key": "bangladeschisch",
+                      "value": "bangladeschisch"
+                    },
+                    {
+                      "key": "barbadisch",
+                      "value": "barbadisch"
+                    },
+                    {
+                      "key": "belgisch",
+                      "value": "belgisch"
+                    },
+                    {
+                      "key": "belizisch",
+                      "value": "belizisch"
+                    },
+                    {
+                      "key": "beninisch",
+                      "value": "beninisch"
+                    },
+                    {
+                      "key": "bhutanisch",
+                      "value": "bhutanisch"
+                    },
+                    {
+                      "key": "bolivianisch",
+                      "value": "bolivianisch"
+                    },
+                    {
+                      "key": "bosnisch-herzegowinisch",
+                      "value": "bosnisch-herzegowinisch"
+                    },
+                    {
+                      "key": "botsuanisch",
+                      "value": "botsuanisch"
+                    },
+                    {
+                      "key": "brasilianisch",
+                      "value": "brasilianisch"
+                    },
+                    {
+                      "key": "bruneiisch",
+                      "value": "bruneiisch"
+                    },
+                    {
+                      "key": "bulgarisch",
+                      "value": "bulgarisch"
+                    },
+                    {
+                      "key": "burkinisch",
+                      "value": "burkinisch"
+                    },
+                    {
+                      "key": "burundisch",
+                      "value": "burundisch"
+                    },
+                    {
+                      "key": "cabo-verdisch",
+                      "value": "cabo-verdisch"
+                    },
+                    {
+                      "key": "chilenisch",
+                      "value": "chilenisch"
+                    },
+                    {
+                      "key": "chinesisch",
+                      "value": "chinesisch"
+                    },
+                    {
+                      "key": "neuseeländisch",
+                      "value": "neuseeländisch"
+                    },
+                    {
+                      "key": "costa-ricanisch",
+                      "value": "costa-ricanisch"
+                    },
+                    {
+                      "key": "ivorisch",
+                      "value": "ivorisch"
+                    },
+                    {
+                      "key": "dänisch",
+                      "value": "dänisch"
+                    },
+                    {
+                      "key": "deutsch",
+                      "value": "deutsch"
+                    },
+                    {
+                      "key": "dominicanisch",
+                      "value": "dominicanisch"
+                    },
+                    {
+                      "key": "dominikanisch",
+                      "value": "dominikanisch"
+                    },
+                    {
+                      "key": "dschibutisch",
+                      "value": "dschibutisch"
+                    },
+                    {
+                      "key": "ecuadorianisch",
+                      "value": "ecuadorianisch"
+                    },
+                    {
+                      "key": "salvadorianisch",
+                      "value": "salvadorianisch"
+                    },
+                    {
+                      "key": "eritreisch",
+                      "value": "eritreisch"
+                    },
+                    {
+                      "key": "estnisch",
+                      "value": "estnisch"
+                    },
+                    {
+                      "key": "eswatinisch",
+                      "value": "eswatinisch"
+                    },
+                    {
+                      "key": "fidschianisch",
+                      "value": "fidschianisch"
+                    },
+                    {
+                      "key": "finnisch",
+                      "value": "finnisch"
+                    },
+                    {
+                      "key": "französisch",
+                      "value": "französisch"
+                    },
+                    {
+                      "key": "gabunisch",
+                      "value": "gabunisch"
+                    },
+                    {
+                      "key": "gambisch",
+                      "value": "gambisch"
+                    },
+                    {
+                      "key": "georgisch",
+                      "value": "georgisch"
+                    },
+                    {
+                      "key": "ghanaisch",
+                      "value": "ghanaisch"
+                    },
+                    {
+                      "key": "grenadisch",
+                      "value": "grenadisch"
+                    },
+                    {
+                      "key": "griechisch",
+                      "value": "griechisch"
+                    },
+                    {
+                      "key": "guatemaltekisch",
+                      "value": "guatemaltekisch"
+                    },
+                    {
+                      "key": "guineisch",
+                      "value": "guineisch"
+                    },
+                    {
+                      "key": "guinea-bissauisch",
+                      "value": "guinea-bissauisch"
+                    },
+                    {
+                      "key": "guyanisch",
+                      "value": "guyanisch"
+                    },
+                    {
+                      "key": "haitianisch",
+                      "value": "haitianisch"
+                    },
+                    {
+                      "key": "honduranisch",
+                      "value": "honduranisch"
+                    },
+                    {
+                      "key": "indisch",
+                      "value": "indisch"
+                    },
+                    {
+                      "key": "indonesisch",
+                      "value": "indonesisch"
+                    },
+                    {
+                      "key": "irakisch",
+                      "value": "irakisch"
+                    },
+                    {
+                      "key": "iranisch",
+                      "value": "iranisch"
+                    },
+                    {
+                      "key": "irisch",
+                      "value": "irisch"
+                    },
+                    {
+                      "key": "isländisch",
+                      "value": "isländisch"
+                    },
+                    {
+                      "key": "israelisch",
+                      "value": "israelisch"
+                    },
+                    {
+                      "key": "italienisch",
+                      "value": "italienisch"
+                    },
+                    {
+                      "key": "jamaikanisch",
+                      "value": "jamaikanisch"
+                    },
+                    {
+                      "key": "japanisch",
+                      "value": "japanisch"
+                    },
+                    {
+                      "key": "jemenitisch",
+                      "value": "jemenitisch"
+                    },
+                    {
+                      "key": "jordanisch",
+                      "value": "jordanisch"
+                    },
+                    {
+                      "key": "kambodschanisch",
+                      "value": "kambodschanisch"
+                    },
+                    {
+                      "key": "kamerunisch",
+                      "value": "kamerunisch"
+                    },
+                    {
+                      "key": "kanadisch",
+                      "value": "kanadisch"
+                    },
+                    {
+                      "key": "kasachisch",
+                      "value": "kasachisch"
+                    },
+                    {
+                      "key": "katarisch",
+                      "value": "katarisch"
+                    },
+                    {
+                      "key": "kenianisch",
+                      "value": "kenianisch"
+                    },
+                    {
+                      "key": "kirgisisch",
+                      "value": "kirgisisch"
+                    },
+                    {
+                      "key": "kiribatisch",
+                      "value": "kiribatisch"
+                    },
+                    {
+                      "key": "kolumbianisch",
+                      "value": "kolumbianisch"
+                    },
+                    {
+                      "key": "komorisch",
+                      "value": "komorisch"
+                    },
+                    {
+                      "key": "kongolesisch",
+                      "value": "kongolesisch"
+                    },
+                    {
+                      "key": "der Demokratischen Republik Kongo",
+                      "value": "der Demokratischen Republik Kongo"
+                    },
+                    {
+                      "key": "der Demokratischen Volksrepublik Korea",
+                      "value": "der Demokratischen Volksrepublik Korea"
+                    },
+                    {
+                      "key": "der Republik Korea",
+                      "value": "der Republik Korea"
+                    },
+                    {
+                      "key": "kosovarisch",
+                      "value": "kosovarisch"
+                    },
+                    {
+                      "key": "kroatisch",
+                      "value": "kroatisch"
+                    },
+                    {
+                      "key": "kubanisch",
+                      "value": "kubanisch"
+                    },
+                    {
+                      "key": "kuwaitisch",
+                      "value": "kuwaitisch"
+                    },
+                    {
+                      "key": "laotisch",
+                      "value": "laotisch"
+                    },
+                    {
+                      "key": "lesothisch",
+                      "value": "lesothisch"
+                    },
+                    {
+                      "key": "lettisch",
+                      "value": "lettisch"
+                    },
+                    {
+                      "key": "libanesisch",
+                      "value": "libanesisch"
+                    },
+                    {
+                      "key": "liberianisch",
+                      "value": "liberianisch"
+                    },
+                    {
+                      "key": "libysch",
+                      "value": "libysch"
+                    },
+                    {
+                      "key": "liechtensteinisch",
+                      "value": "liechtensteinisch"
+                    },
+                    {
+                      "key": "litauisch",
+                      "value": "litauisch"
+                    },
+                    {
+                      "key": "luxemburgisch",
+                      "value": "luxemburgisch"
+                    },
+                    {
+                      "key": "madagassisch",
+                      "value": "madagassisch"
+                    },
+                    {
+                      "key": "malawisch",
+                      "value": "malawisch"
+                    },
+                    {
+                      "key": "malaysisch",
+                      "value": "malaysisch"
+                    },
+                    {
+                      "key": "maledivisch",
+                      "value": "maledivisch"
+                    },
+                    {
+                      "key": "malisch",
+                      "value": "malisch"
+                    },
+                    {
+                      "key": "maltesisch",
+                      "value": "maltesisch"
+                    },
+                    {
+                      "key": "marokkanisch",
+                      "value": "marokkanisch"
+                    },
+                    {
+                      "key": "marshallisch",
+                      "value": "marshallisch"
+                    },
+                    {
+                      "key": "mauretanisch",
+                      "value": "mauretanisch"
+                    },
+                    {
+                      "key": "mauritsch",
+                      "value": "mauritsch"
+                    },
+                    {
+                      "key": "mexikanisch",
+                      "value": "mexikanisch"
+                    },
+                    {
+                      "key": "mikronesisch",
+                      "value": "mikronesisch"
+                    },
+                    {
+                      "key": "moldauisch",
+                      "value": "moldauisch"
+                    },
+                    {
+                      "key": "monegassisch",
+                      "value": "monegassisch"
+                    },
+                    {
+                      "key": "mongolisch",
+                      "value": "mongolisch"
+                    },
+                    {
+                      "key": "montenegrinisch",
+                      "value": "montenegrinisch"
+                    },
+                    {
+                      "key": "mosambikanisch",
+                      "value": "mosambikanisch"
+                    },
+                    {
+                      "key": "myanmarisch",
+                      "value": "myanmarisch"
+                    },
+                    {
+                      "key": "namibisch",
+                      "value": "namibisch"
+                    },
+                    {
+                      "key": "nauruisch",
+                      "value": "nauruisch"
+                    },
+                    {
+                      "key": "nepalesisch",
+                      "value": "nepalesisch"
+                    },
+                    {
+                      "key": "neuseeländisch",
+                      "value": "neuseeländisch"
+                    },
+                    {
+                      "key": "nicaraguanisch",
+                      "value": "nicaraguanisch"
+                    },
+                    {
+                      "key": "niederländisch",
+                      "value": "niederländisch"
+                    },
+                    {
+                      "key": "nigrisch",
+                      "value": "nigrisch"
+                    },
+                    {
+                      "key": "nigerianisch",
+                      "value": "nigerianisch"
+                    },
+                    {
+                      "key": "neuseeländisch",
+                      "value": "neuseeländisch"
+                    },
+                    {
+                      "key": "mazedonisch/der Republik Nordmazedonien",
+                      "value": "mazedonisch/der Republik Nordmazedonien"
+                    },
+                    {
+                      "key": "norwegisch",
+                      "value": "norwegisch"
+                    },
+                    {
+                      "key": "omanisch",
+                      "value": "omanisch"
+                    },
+                    {
+                      "key": "österreichisch",
+                      "value": "österreichisch"
+                    },
+                    {
+                      "key": "pakistanisch",
+                      "value": "pakistanisch"
+                    },
+                    {
+                      "key": "palauisch",
+                      "value": "palauisch"
+                    },
+                    {
+                      "key": "panamaisch",
+                      "value": "panamaisch"
+                    },
+                    {
+                      "key": "papua-neuguineisch",
+                      "value": "papua-neuguineisch"
+                    },
+                    {
+                      "key": "paraguayisch",
+                      "value": "paraguayisch"
+                    },
+                    {
+                      "key": "peruanisch",
+                      "value": "peruanisch"
+                    },
+                    {
+                      "key": "philippinisch",
+                      "value": "philippinisch"
+                    },
+                    {
+                      "key": "polnisch",
+                      "value": "polnisch"
+                    },
+                    {
+                      "key": "portugiesisch",
+                      "value": "portugiesisch"
+                    },
+                    {
+                      "key": "ruandisch",
+                      "value": "ruandisch"
+                    },
+                    {
+                      "key": "rumänisch",
+                      "value": "rumänisch"
+                    },
+                    {
+                      "key": "russisch",
+                      "value": "russisch"
+                    },
+                    {
+                      "key": "salomonisch",
+                      "value": "salomonisch"
+                    },
+                    {
+                      "key": "sambisch",
+                      "value": "sambisch"
+                    },
+                    {
+                      "key": "samoanisch",
+                      "value": "samoanisch"
+                    },
+                    {
+                      "key": "san-marinesisch",
+                      "value": "san-marinesisch"
+                    },
+                    {
+                      "key": "são-toméisch",
+                      "value": "são-toméisch"
+                    },
+                    {
+                      "key": "saudi-araisch",
+                      "value": "saudi-araisch"
+                    },
+                    {
+                      "key": "schwedisch",
+                      "value": "schwedisch"
+                    },
+                    {
+                      "key": "schweizerisch",
+                      "value": "schweizerisch"
+                    },
+                    {
+                      "key": "senegalesisch",
+                      "value": "senegalesisch"
+                    },
+                    {
+                      "key": "serbisch",
+                      "value": "serbisch"
+                    },
+                    {
+                      "key": "seychellisch",
+                      "value": "seychellisch"
+                    },
+                    {
+                      "key": "sierra-leonisch",
+                      "value": "sierra-leonisch"
+                    },
+                    {
+                      "key": "simbabwisch",
+                      "value": "simbabwisch"
+                    },
+                    {
+                      "key": "singapurisch",
+                      "value": "singapurisch"
+                    },
+                    {
+                      "key": "slowakisch",
+                      "value": "slowakisch"
+                    },
+                    {
+                      "key": "slowenisch",
+                      "value": "slowenisch"
+                    },
+                    {
+                      "key": "somalisch",
+                      "value": "somalisch"
+                    },
+                    {
+                      "key": "spanisch",
+                      "value": "spanisch"
+                    },
+                    {
+                      "key": "sri-lankisch",
+                      "value": "sri-lankisch"
+                    },
+                    {
+                      "key": "von St. Kitts und Nevis",
+                      "value": "von St. Kitts und Nevis"
+                    },
+                    {
+                      "key": "lucianisch",
+                      "value": "lucianisch"
+                    },
+                    {
+                      "key": "vincentisch",
+                      "value": "vincentisch"
+                    },
+                    {
+                      "key": "südafrikanisch",
+                      "value": "südafrikanisch"
+                    },
+                    {
+                      "key": "sudanesisch",
+                      "value": "sudanesisch"
+                    },
+                    {
+                      "key": "südsudanesisch",
+                      "value": "südsudanesisch"
+                    },
+                    {
+                      "key": "surinamisch",
+                      "value": "surinamisch"
+                    },
+                    {
+                      "key": "syrisch",
+                      "value": "syrisch"
+                    },
+                    {
+                      "key": "tadschikisch",
+                      "value": "tadschikisch"
+                    },
+                    {
+                      "key": "tansanisch",
+                      "value": "tansanisch"
+                    },
+                    {
+                      "key": "thailändisch",
+                      "value": "thailändisch"
+                    },
+                    {
+                      "key": "von Timor-Leste",
+                      "value": "von Timor-Leste"
+                    },
+                    {
+                      "key": "togoisch",
+                      "value": "togoisch"
+                    },
+                    {
+                      "key": "tongaisch",
+                      "value": "tongaisch"
+                    },
+                    {
+                      "key": "von Trinidad und Tobago",
+                      "value": "von Trinidad und Tobago"
+                    },
+                    {
+                      "key": "tschadisch",
+                      "value": "tschadisch"
+                    },
+                    {
+                      "key": "tschechisch",
+                      "value": "tschechisch"
+                    },
+                    {
+                      "key": "tunesisch",
+                      "value": "tunesisch"
+                    },
+                    {
+                      "key": "türkisch",
+                      "value": "türkisch"
+                    },
+                    {
+                      "key": "turkmenisch",
+                      "value": "turkmenisch"
+                    },
+                    {
+                      "key": "tuvaluisch",
+                      "value": "tuvaluisch"
+                    },
+                    {
+                      "key": "ugandisch",
+                      "value": "ugandisch"
+                    },
+                    {
+                      "key": "ukrainisch",
+                      "value": "ukrainisch"
+                    },
+                    {
+                      "key": "ungarisch",
+                      "value": "ungarisch"
+                    },
+                    {
+                      "key": "uruguayisch",
+                      "value": "uruguayisch"
+                    },
+                    {
+                      "key": "usbekisch",
+                      "value": "usbekisch"
+                    },
+                    {
+                      "key": "vanuatuisch",
+                      "value": "vanuatuisch"
+                    },
+                    {
+                      "key": "vatikanisch",
+                      "value": "vatikanisch"
+                    },
+                    {
+                      "key": "venezolanisch",
+                      "value": "venezolanisch"
+                    },
+                    {
+                      "key": "der Vereinigten Arabischen Emirate",
+                      "value": "der Vereinigten Arabischen Emirate"
+                    },
+                    {
+                      "key": "amerikanisch",
+                      "value": "amerikanisch"
+                    },
+                    {
+                      "key": "britisch",
+                      "value": "britisch"
+                    },
+                    {
+                      "key": "vietnamesisch",
+                      "value": "vietnamesisch"
+                    },
+                    {
+                      "key": "weißrussisch",
+                      "value": "weißrussisch"
+                    },
+                    {
+                      "key": "zentralafrikanisch",
+                      "value": "zentralafrikanisch"
+                    },
+                    {
+                      "key": "zyprisch",
+                      "value": "zyprisch"
+                    },
+                    {
+                      "key": "staatenlos",
+                      "value": "staatenlos"
+                    }
+                  ]
+                },
+                {
+                  "__typename": "StringFormularFeld",
+                  "id": "331aae42-64f9-40a3-9c66-0ce90a87269e",
+                  "slotName": "ausweisart",
+                  "angezeigterName": "Ausweisart",
+                  "anweisung": "Bitte wählen Sie Ihre Ausweisart aus.",
+                  "order": 1,
+                  "encrypted": true,
+                  "inhaltsTag": "Ausweisart",
+                  "istRelevant": "true",
+                  "pflichtfeld": true,
+                  "oeffentlichSichtbar": false,
+                  "multiline": false,
+                  "options": [
+                    {
+                      "key": "Duldung",
+                      "value": "Duldung"
+                    },
+                    {
+                      "key": "Ankunftsnachweis",
+                      "value": "Ankunftsnachweis"
+                    },
+                    {
+                      "key": "Personalausweis",
+                      "value": "Personalausweis"
+                    },
+                    {
+                      "key": "Reisepass",
+                      "value": "Reisepass"
+                    },
+                    {
+                      "key": "Reiseausweis",
+                      "value": "Reiseausweis"
+                    },
+                    {
+                      "key": "Ausweisersatz",
+                      "value": "Ausweisersatz"
+                    },
+                    {
+                      "key": "Gestattung",
+                      "value": "Gestattung"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "__typename": "EndeSchritt",
+              "id": "ed988a26-9977-4041-a263-9e574ba6cf5d",
+              "titel": null,
+              "anweisung": null,
+              "erledigungDurchBuerger": false,
+              "sollZustaendigkeit": {
+                "art": "BUERGER",
+                "organisationseinheitId": null,
+                "mitarbeiterGruppeId": null,
+                "dienstleisterId": null,
+                "mitarbeiterGruppe": null,
+                "dynamischeArten": [],
+                "liestRolleId": null,
+                "liestRolle": null
+              },
+              "schreibtRolle": null,
+              "schreibtRolleId": null,
+              "versendeEMailAnMitarbeiterGruppe": null,
+              "verbindungen": [],
+              "nodePosition": {
+                "x": 4776,
+                "y": 143.25
+              },
+              "slots": []
+            },
+            {
+              "__typename": "FormularSchritt",
+              "id": "f3b5b10e-75a4-43d3-8e78-93c900a5722a",
+              "titel": "Führerscheinupload",
+              "anweisung": "Bitte laden Sie Ihren aktuellen Führerschein hoch. Fotografieren Sie bitte jede Seite",
+              "erledigungDurchBuerger": true,
+              "sollZustaendigkeit": {
+                "art": "BUERGER",
+                "organisationseinheitId": null,
+                "mitarbeiterGruppeId": null,
+                "dienstleisterId": null,
+                "mitarbeiterGruppe": null,
+                "dynamischeArten": [],
+                "liestRolleId": null,
+                "liestRolle": null
+              },
+              "schreibtRolle": null,
+              "schreibtRolleId": null,
+              "versendeEMailAnMitarbeiterGruppe": null,
+              "verbindungen": [
+                {
+                  "id": "f3aad6cb-0866-4cb0-badd-ed1e339c3aa2",
+                  "name": null,
+                  "vonId": "f3b5b10e-75a4-43d3-8e78-93c900a5722a",
+                  "nachId": "42c3c3b5-d0e3-4345-8488-233867efda98",
+                  "statusAenderung": null,
+                  "statusAenderungBeschreibung": null,
+                  "istRelevant": "true"
+                }
+              ],
+              "nodePosition": {
+                "x": 1300,
+                "y": 294.25
+              },
+              "slots": [
+                {
+                  "name": "fuehrerschein",
+                  "encrypted": true,
+                  "valueType": "UPLOAD",
+                  "optional": false,
+                  "brauchtFreigabe": false
+                }
+              ],
+              "felder": [
+                {
+                  "__typename": "UploadFormularFeld",
+                  "id": "5ee5e278-426c-4c95-b924-73074e5949ec",
+                  "slotName": "fuehrerschein",
+                  "angezeigterName": "Führerschein",
+                  "anweisung": "Bitte laden Sie Ihren Führerschein hoch",
+                  "order": 0,
+                  "encrypted": true,
+                  "inhaltsTag": "Führerschein",
+                  "istRelevant": "true",
+                  "pflichtfeld": true,
+                  "oeffentlichSichtbar": false,
+                  "multi": true,
+                  "document": false,
+                  "brauchtFreigabe": false
+                }
+              ]
+            }
+          ]
+        }
+      }
+    }
+  }
+}

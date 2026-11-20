@@ -1,0 +1,32 @@
+== Einleitung
+
+Die Kommunal-App ist die kommunale App für den Landkreis Hameln-Pyrmont. Sie bietet Zugang zu kommunalen Informationen, wie aktuellen
+Nachrichten oder Veranstaltungen, zeigt die individuellen Abfuhrkalender für
+Müll an und bietet eine übersichtliche Karte mit Points of Interets (POIs) aller
+Art: von kulturellen Einrichtungen, über Ärzte bis hin zu behördlichen
+Liegenschaften.
+
+Darüber hinaus bietet die App standortbasierte digitale Anträge für Bürgerinnen
+und Bürger an. So können über den *Mängelmelder* unterschiedliche Arten von
+Mängeln gemeldet werden, die automatisch der zuständigen Abteilung in der
+Gemeinde, in der der Mangel gemeldet wurde, zur Bearbeitung zugesandt werden.
+
+Neben der App für Android und iOS bietet die umfangreiche Backoffice-Anwendung
+für Mitarbeitende der unterschiedlichen Gemeinden eine Anwendung, mit der
+eingehende Anträge bearbeitet und im Bedarfsfall an Dienstleister
+weitergeleitet werden können.
+
+Die angeknüpfte *Inhaltspflege*, ein *Content Management System*, ermöglicht es
+den Gemeinden selbst News und Veranstaltungen, sowie POIs in die App
+einzupflegen und den Bürgerinnen und Bürgern unkompliziert und niederschwellig
+zur Verfügung zu stellen.
+
+Diese Dokumentation richtet sich primär an die Anwender des *Backoffice* und der
+*Inhaltspflege*, sowie technische Nutzende, die für die Administration und die
+Weiterentwicklung der App zuständig sind.
+
+Die Dokumentation gliedert sich demnach im wesentlichen in die Bereiche:
+
+- Installation und Inbetriebnahme der Anwendung
+- das Anwenderhandbuch, in dem das Backoffice und die Inhaltspflege erklärt werden
+- die Entwicklerdokumentation, die den Aufbau der Anwendung beschreibt

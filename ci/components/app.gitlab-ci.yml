@@ -1,0 +1,123 @@
+################################################
+# LINTING STAGE
+################################################
+
+lint:app:
+  extends: [.flutter]
+  stage: lint
+  allow_failure: true
+  needs: []
+  variables:
+    SOURCE_DIR: app
+  script:
+    - fvm dart format -o none --set-exit-if-changed lib
+    - fvm flutter analyze
+
+################################################
+# GENERATE STAGE
+################################################
+
+generate:app:
+  extends: [.flutter]
+  stage: generate
+  needs: []
+  variables:
+    SOURCE_DIR: app
+  script:
+    - fvm dart run build_runner build --delete-conflicting-outputs
+    - fvm dart format lib
+    - |
+      # Switch to this command if we encounter non-deterministic ordering in `widgetbook.directories.g.dart`.
+      # if git diff --exit-code "$CI_PROJECT_DIR/app" ":^$CI_PROJECT_DIR/app/lib/widgetbook.directories.g.dart"; then
+      if git diff --exit-code "$CI_PROJECT_DIR/app"; then
+        echo "✅ Generated files are up to date."
+      else
+        echo "❌ Generated files have changed. Please re-run "derry gen" before committing."
+        exit 1
+      fi
+
+################################################
+# TEST STAGE
+################################################
+
+test:app:
+  extends: [.flutter]
+  stage: test
+  needs: []
+  variables:
+    SOURCE_DIR: app
+  script:
+    - fvm flutter test --coverage
+  artifacts:
+    when: always
+    expire_in: 15 mins
+    paths:
+      - app/coverage/lcov.info
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "schedule"
+      when: never
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event" && $CI_DEFAULT_BRANCH == $CI_MERGE_REQUEST_TARGET_BRANCH_NAME
+      changes:
+        - "app/**/*"
+    - !reference [.sonar-analysis-rules, rules]
+
+################################################
+# BUILD STAGE
+################################################
+
+build:app-android:
+  extends: [.flutter-build]
+  stage: build
+  tags:
+    - flutter-ha-py
+  needs: []
+  variables:
+    SOURCE_DIR: app/android
+    FLAVOR: $TARGET_ENV
+  script:
+    # Deserialize upload key from environment variable
+    - echo "$PLAY_STORE_UPLOAD_KEY" | base64 --decode > upload-keystore.jks
+    # Copy key properties to read from keystore
+    - cp $PLAY_STORE_UPLOAD_KEY_PROPERTIES key.properties
+    - fvm flutter clean
+    - >
+      fvm flutter build appbundle
+      --flavor "$FLAVOR"
+      --dart-define=SENTRY_RELEASE=$CI_COMMIT_REF_SLUG
+      --no-tree-shake-icons
+      --dart-define-from-file=$APP_ENV_FILE
+    - rm key.properties upload-keystore.jks
+  artifacts:
+    paths:
+      - app/build/app/outputs/bundle/${FLAVOR}Release/*.aab
+    expire_in: 1 hr
+  environment:
+    name: $TARGET_ENV
+  rules:
+    - if: $CI_COMMIT_TAG =~ /^app-.*$/
+      when: on_success
+
+build:app-ios:
+  extends: [.flutter-build]
+  stage: build
+  tags:
+    - flutter-ha-py
+  needs: []
+  variables:
+    SOURCE_DIR: app
+    FLAVOR: $TARGET_ENV
+  script:
+    - fvm flutter clean
+    # Compile check only; publish job builds, signs, and uploads via Fastlane.
+    - >
+      fvm flutter build ios --release --no-codesign
+      --no-tree-shake-icons
+      --flavor "$FLAVOR"
+      --dart-define=SENTRY_RELEASE=$CI_COMMIT_REF_SLUG
+      --dart-define-from-file=$APP_ENV_FILE
+  environment:
+    name: $TARGET_ENV
+  rules:
+    - if: $CI_COMMIT_TAG =~ /^app-.*$/
+      when: on_success

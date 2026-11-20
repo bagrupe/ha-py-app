@@ -1,0 +1,75 @@
+default_platform(:ios)
+
+platform :ios do
+
+  lane :generate_profile do
+
+    # Load the API Key first to avoid login via the user account
+    app_store_connect_api_key(
+      key_id: ENV["APPSTORE_CONNECT_API_KEY_ID"],
+      issuer_id: ENV["APPSTORE_CONNECT_ISSUER_ID"],
+      key_content: ENV["APPSTORE_CONNECT_API_KEY"],
+      duration: 1200,
+      in_house: false
+    )
+
+    match( # Retrieve certificates
+      type: "appstore",
+      readonly: false,
+    )
+  end
+
+  lane :publish_testflight do
+      desc "Builds, signs, and submits the app to TestFlight. Credentials are set via CI environment."
+
+      app_identifier = ENV["APP_IDENTIFIER"]
+      scheme = ENV.fetch("APP_SCHEME")
+      team_id = ENV["TEAM_ID"]
+      git_branch = ENV["MATCH_GIT_BRANCH"]
+
+      app_store_connect_api_key(
+        issuer_id: ENV["APPSTORE_CONNECT_ISSUER_ID"], #issuer id of HaPy client account
+        duration: 1200,
+        in_house: false,
+        key_id: ENV["APPSTORE_CONNECT_API_KEY_ID"], #set in the ci variables
+        key_content: ENV["APPSTORE_CONNECT_API_KEY"] #set in the ci variables
+      )
+
+
+      match( # Retrieve certificates
+        type: "appstore",
+        storage_mode: "git",
+        git_url: ENV.fetch("MATCH_GIT_URL"),
+        git_branch: git_branch,
+        readonly: true,
+        team_id: team_id,
+        app_identifier: app_identifier
+      )
+
+      update_code_signing_settings(
+        use_automatic_signing: false,
+        code_sign_identity: "iPhone Distribution",
+        path: "Runner.xcodeproj",
+        profile_name: "match AppStore #{app_identifier}",
+        team_id: team_id
+      )
+
+      build_app(
+        workspace: "Runner.xcworkspace",
+        scheme: scheme,
+        configuration: "Release-#{scheme}",
+        output_directory: "fastlane/build/",
+        export_method: "app-store",
+        export_team_id: team_id
+      )
+
+
+
+      upload_to_testflight(
+         app_identifier: app_identifier,
+        changelog: ENV['CI_COMMIT_TAG_MESSAGE'],
+        skip_waiting_for_build_processing: true
+      )
+
+    end
+end

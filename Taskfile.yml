@@ -1,0 +1,259 @@
+# https://taskfile.dev
+
+version: "3"
+
+vars:
+  LAGEHELFER_SEED_DIR: backend/API/Seeders/LageHelfer/Data/krl
+  GITLAB_API_URL: https://gitlab.ergosign-projects.com/api/v4
+  GITLAB_HOST: gitlab.ergosign-projects.com
+  GITLAB_PROJECT_ID: 1244
+
+tasks:
+  containers:up:
+    desc: "Start containers"
+    aliases:
+      - up
+    dir: "."
+    cmds:
+      - docker compose -f docker/docker-compose.local.yml up -d
+
+  containers:down:
+    desc: "Stop containers"
+    aliases:
+      - cd
+    dir: "."
+    cmds:
+      - docker compose -f docker/docker-compose.local.yml down
+
+  env:setup:
+    desc: "Creates the needed env files to start developing"
+    cmds:
+      - cp web/bereich-b/.env.example web/bereich-b/.env
+
+  db:update:
+    desc: "Importes a database dump"
+    cmds:
+      - bash scripts/use-database-dump.sh
+
+  backend:seed-secrets:
+    desc: "Add development seed secrets (once) to backend/API/.env"
+    dir: "./backend/API"
+    status:
+      - grep -qs SEED_KOMMUNE_RSA_XML .env
+    cmds:
+      - dotnet fsi ../../scripts/generate-seed-secrets.fsx >> .env
+
+  backend:
+    desc: "Start backend"
+    prefix: "[BACKEND]"
+    aliases:
+      - b
+    dir: "./backend/API"
+    dotenv: ["{{.TASKFILE_DIR}}/backend/API/.env"]
+    env:
+      BereichB__SuperAdminApiKey:
+        sh: sed -n 's/^PAYLOAD_API_KEY=//p' "{{.TASKFILE_DIR}}/web/bereich-b/.env" | tail -n 1
+      BereichB__InternalApiSecret:
+        sh: sed -n 's/^INTERNAL_API_SECRET=//p' "{{.TASKFILE_DIR}}/web/bereich-b/.env" | tail -n 1
+    cmds:
+      - dotnet run
+
+  backend:reset-test-db:
+    desc: "Resets the Test DB (used for integration Tests)"
+    dir: "."
+    cmds:
+      - docker compose -f docker/docker-compose-testing.local.yml -p hameln-test down -v
+      - docker compose -f docker/docker-compose-testing.local.yml -p hameln-test up -d --wait
+
+  backend:lagehelfer-seed:download:
+    desc: "Lädt KRL-LageHelfer-Seed (Generic Package krl-seeding-data) aus der GitLab Package Registry"
+    aliases:
+      - lagehelfer:seed:download
+    dir: "."
+    preconditions:
+      - sh: >-
+          test -n "${API_TOKEN:-}" ||
+          (command -v glab >/dev/null 2>&1 &&
+          { glab config get token --host {{.GITLAB_HOST}} 2>/dev/null ||
+          glab config get token 2>/dev/null; } | grep -q .)
+        msg: >-
+          API_TOKEN setzen (read_api) oder glab für {{.GITLAB_HOST}} einrichten
+          (glab auth login --hostname {{.GITLAB_HOST}})
+    cmds:
+      - rm -rf "{{.LAGEHELFER_SEED_DIR}}"
+      - mkdir -p "{{.LAGEHELFER_SEED_DIR}}"
+      - >-
+        CI_API_V4_URL={{.GITLAB_API_URL}}
+        CI_PROJECT_ID={{.GITLAB_PROJECT_ID}}
+        bash .gitlab/scripts/download_generic_package.sh "{{.LAGEHELFER_SEED_DIR}}"
+
+  web:install:
+    desc: "Install packages"
+    dir: "./web"
+    cmds:
+      - pnpm install
+
+  web:lint:
+    desc: "Lint web"
+    dir: "./web"
+    cmds:
+      - pnpm lint
+
+  web:bereich-b:seed:
+    desc: "Seed Payload data"
+    dir: "./web/bereich-b"
+    cmds:
+      - pnpm seed all
+
+  web:generate:
+    aliases:
+      - web:gen
+    desc: "Run codegen"
+    dir: "./web/bereich-a"
+    cmds:
+      - pnpm graphql
+
+  web:
+    desc: "Start web"
+    aliases:
+      - w
+    dir: "./web"
+    cmds:
+      - task: web:install
+      # - task: web:bereich-b:seed
+      - task: web:generate
+      - pnpm dev
+
+  backoffice:
+    desc: "Start backoffice"
+    prefix: "[BACKOFFICE]"
+    aliases:
+      - back
+    dir: "./web/bereich-a"
+    cmds:
+      - task: web:install
+      - task: web:generate
+      - pnpm dev
+
+  cms:
+    desc: "Start payload cms"
+    prefix: "[CMS]"
+    dir: "./web/bereich-b"
+    cmds:
+      - node -v
+      - pnpm install
+      - task: web:bereich-b:seed
+      - pnpm dev
+
+  start:
+    desc: "Start all services except the flutter app"
+    cmds:
+      - task: containers:up
+      - task: start:services
+
+  stop:
+    desc: "Stop all services which are started with task start"
+    cmds:
+      - docker compose -f docker/docker-compose.local.yml down --remove-orphans | true
+      - kill -9 $(lsof -ti:3000,3001,3002,3003,5000) 2>/dev/null | true
+
+  start:services:
+    desc: "Internal task to run services in parallel"
+    deps:
+      - task: backend
+      - task: web
+
+  app:dev:
+    desc: "Start app in development environmont on simulator"
+    aliases:
+      - a
+    dir: "./app"
+    cmds:
+      - fvm flutter pub get
+      - fvm flutter run {{.CLI_ARGS}} --dart-define-from-file=./environments/config-development.json
+
+  app:stag:
+    desc: "Start app in staging environmont on simulator"
+    aliases:
+      - a
+    dir: "./app"
+    cmds:
+      - fvm flutter pub get
+      - fvm flutter run {{.CLI_ARGS}} --flavor staging --dart-define-from-file=./environments/config-staging.json
+
+  app:preprod:
+    desc: "Start app in preprod environmont on simulator"
+    aliases:
+      - a
+    dir: "./app"
+    cmds:
+      - fvm flutter pub get
+      - fvm flutter run {{.CLI_ARGS}} --flavor preprod --dart-define-from-file=./environments/config-preprod.json
+
+  app:prod:
+    desc: "Start app in production environmont on simulator"
+    aliases:
+      - a
+    dir: "./app"
+    cmds:
+      - fvm flutter pub get
+      - fvm flutter run {{.CLI_ARGS}} --flavor production --dart-define-from-file=./environments/config-production.json
+
+  app:generate:
+    aliases:
+      - app:gen
+    desc: Generate GraphQL files
+    cmds:
+      - fvm flutter pub get
+      - fvm dart run build_runner build
+    dir: "app"
+
+  widgetbook:
+    aliases:
+      - book
+    desc: Start widgebook
+    dir: ./app
+    cmds:
+      - fvm dart run build_runner build
+      - fvm flutter run -t lib/widgetbook.dart -d chrome
+
+  app:lint:
+    desc: Lints and formats app
+    cmds:
+      - fvm flutter fix --apply
+      - fvm flutter format lib
+      - fvm flutter analyze
+    dir: "app"
+
+  proxy:
+    desc: Redirect phone port to computers's port
+    cmds:
+      - adb -d reverse tcp:3000 tcp:3000
+    dir: "app"
+
+  copy-from-prod:
+    desc: Copy data from prod
+    cmds:
+      - bash copy-from-prod.sh
+    dir: "scripts"
+
+  docs:build:
+    desc: "Compile AsciiDoc docs to HTML and PDF"
+    dir: "./docs"
+    cmds:
+      - >-
+        docker run --rm
+        -v $(pwd):/documents
+        asciidoctor/docker-asciidoctor:1.106
+        sh -c "asciidoctor doku.adoc doku-anwender.adoc && asciidoctor-pdf doku-anwender.adoc"
+
+  commit:
+    desc: Commit files with auto formatting them.
+    aliases:
+      - c
+    cmds:
+      - pnpm commit
+
+  dev:setup:
+    cmds:
+      - pnpm install

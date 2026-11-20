@@ -1,0 +1,56 @@
+==== Dritt-Services
+
+Die Kommunal-App bindet eine Vielzahl von Diensten an, um ihre Funktionen
+bereitzustellen. Die folgende Liste führt abschließend auf, welche Dienste
+angebunden (und konfigueriert) werden müssen und welchen Zweck sie innerhalb der
+Anwendung erfüllen.
+
+Die Auflistung ist gruppiert nach dem Ort der Anwendung, also welcher
+Bestandteil der Anwendung den Service benötigt.
+
+Die angebundenen Dienste sind an dieser Stelle als Anforderungen für den Betrieb
+der Anwendung zu verstehen. Wie der jeweilige Dienst innerhalb der Kommunal-App
+verwendet wird, wird jeweils im Zusammenhang mit den Use-Cases erklärt, in dem
+sie eingesetzt werden.
+
+===== Inhaltspflege / Payload CMS
+
+**Destination One**
+Quelle für den Import von Veranstaltungen aus den unterschiedlichen Gemeinden.
+
+**Niedersachsen Hub**
+Quelle für den Import von Veranstaltungen aus den unterschiedlichen Gemeinden.
+
+**Influx DB**
+Quelle für den Import von Sensoren und Sensordaten.
+
+**OpenWeather API**
+Schnittstelle für den Abruf von Wetterdaten.
+
+**Mail-Server**
+Für den Versand unterschiedlicher E-Mails.
+
+===== Backend-Server
+
+**Firebase**
+Dienst zum Versenden von Push-Benachrichtigungen zu den mobilen Geräten der
+Nutzer.
+
+**GovManager**
+WAS MACHST DAS EIGENTLICH?
+
+**Gotenberg**
+Dienst zur Erzeugung von PDF-Dokumenten.
+
+**KAW-Hameln**
+Schnittstelle zur Abfrage des Abfuhrkalenders - wann welcher Müll wo abgeholt
+wird.
+
+**Mail-Server**
+Für den Versand unterschiedlicher E-Mails, bspw. Nutzereinladungen,
+Passwort-Reset-Hinweise oder auch Benachrichtigungen neu eingegangener Anträge.
+
+===== Datenbanken
+
+In Bereich-A und Bereich-B verwendete Datenbanken sind in
+<<Datenbanken,Datenbanken>> beschrieben.

@@ -1,0 +1,49 @@
+query Dienstleister {
+  dienstleister {
+    items {
+      ...Dienstleister
+    }
+  }
+}
+
+mutation DienstleisterCreate($input: DienstleisterCreateInput!) {
+  dienstleisterCreate(input: $input) {
+    dienstleister {
+      id
+    }
+    errors {
+      ... on Error {
+        message
+      }
+    }
+  }
+}
+
+mutation DienstleisterUpdate($input: DienstleisterUpdateInput!) {
+  dienstleisterUpdate(input: $input) {
+    errors {
+      ... on Error {
+        message
+      }
+    }
+  }
+}
+
+mutation DienstleisterDelete($id: UUID!) {
+  dienstleisterDelete(input: {dienstleisterId: $id}) {
+    errors {
+      ... on Error {
+        message
+      }
+    }
+  }
+}
+
+fragment Dienstleister on Dienstleister {
+  id
+  name
+  eMailAdressen
+  organisationseinheiten {
+    id
+  }
+}

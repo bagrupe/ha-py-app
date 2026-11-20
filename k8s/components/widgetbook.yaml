@@ -1,0 +1,16 @@
+name: widgetbook
+ingress:
+  hostPrefix: widgetbook
+  paths:
+    - /
+deployment:
+  port: 80
+  image:
+    example: true
+    name: widgetbook
+  resources:
+    requests:
+      cpu: 1m
+      memory: 25Mi
+    limits:
+      memory: 75Mi

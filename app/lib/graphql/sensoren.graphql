@@ -1,0 +1,102 @@
+fragment SensorWithIcon on Sensoren {
+  icon {
+    ...PoiIcon
+  }
+
+  felder {
+    id
+    werteart {
+      id
+      icon {
+        ...PoiIcon
+      }
+    }
+  }
+}
+
+fragment SensorDangerLevels on Sensoren {
+  grenzwertInfo1
+  grenzwertInfo2
+  grenzwertInfo3
+  grenzwertInfo4
+  pegelGefahrenstufe
+  glaetteAlarmLevel
+}
+
+fragment SensorFieldReading on Sensoren_Felder {
+  id
+  currentValue
+  werteart {
+    id
+    name
+    einheit
+    warnstufeText1 {
+      kurzlabel
+      titel
+      beschreibung
+    }
+    warnstufeText2 {
+      kurzlabel
+      titel
+      beschreibung
+    }
+    warnstufeText3 {
+      kurzlabel
+      titel
+      beschreibung
+    }
+    warnstufeText4 {
+      kurzlabel
+      titel
+      beschreibung
+    }
+  }
+  trendHistorie: historie(duration: LAST_DAY) {
+    time
+    value
+  }
+}
+
+query Sensoren($kommuneId: JSON!) {
+  sensoren(where: {kommune: {equals: $kommuneId}, shownInApp: {equals: true}}, limit:200) {
+    docs {
+      id
+      position
+      ...SensorWithIcon
+    }
+  }
+}
+
+query Sensor($sensorId: String!, $duration: HistoryMode!) {
+  sensor(id: $sensorId) {
+    id
+    name
+    titel
+    position
+    letzteMessungZeitpunkt
+    ...SensorDangerLevels
+    felder {
+      ...SensorFieldReading
+      historie(duration: $duration) {
+        time
+        value
+      }
+    }
+  }
+}
+
+query ListSensoren($sensorIds: [String!]!) {
+  sensoren(where: {id: {in: $sensorIds}}, sort: "titel") {
+    docs {
+      id
+      name
+      titel
+      position
+      ...SensorWithIcon
+      ...SensorDangerLevels
+      felder {
+        ...SensorFieldReading
+      }
+    }
+  }
+}

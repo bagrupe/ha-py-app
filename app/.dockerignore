@@ -1,0 +1,9 @@
+.dart_tool
+.fvm
+.idea
+android
+ios
+linux
+macos
+test
+windows

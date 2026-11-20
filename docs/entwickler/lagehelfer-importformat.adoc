@@ -1,0 +1,56 @@
+==== LageHelfer-Importformat (`seed.json` / `flaechen.geojson`)
+
+Der LageHelfer-Mandant wird aus zwei Dateien im selben Verzeichnis gesät.
+Siehe auch xref:entwickler/lagehelfer-seeding.adoc[LageHelfer-Demomandant].
+
+===== `seed.json`
+
+* `version` — muss `1` sein
+* `idNamespace` — GUID; Basis für alle abgeleiteten IDs (`GuidHelpers.CreateFromName`)
+* `kommune` — `{ id, name }`; `id` entspricht der `bereichAId` in der Inhaltspflege
+* `organisationseinheiten[]` — Landkreise mit `key`, `name`, `bereiche[]`, `abteilungen[]`
+** `bereiche[]` — `{ key, name, einsatzleitung? }`; gesetzte `einsatzleitung` wird als Abteilung (Mitarbeitergruppe) angelegt und dem Gebiet zugeordnet
+** `abteilungen[]` — optional zusätzliche `{ key, name }` (ohne Gebietszuordnung)
+* `demo` (optional) — `{ passwort, nutzer[] }` für Demo-Logins (nur außerhalb Production)
+
+Nutzer-Einträge:
+
+* `art` — `Superadmin`, `Admin` oder `Nutzer`
+* `organisationseinheit`, `einsatzleitungBereich` — optional, für Rechte-Zuordnung
+* `rechte[]` — Berechtigungen je Organisationseinheit/Einsatzleitung, z. B. `BackofficeAntraege`
+* `globaleRechte[]` — globale Funktionsberechtigungen am Nutzer, z. B. `LageHelfer`
+
+===== ID-Ableitung
+
+[cols="40%,60%"]
+|===
+| Quelle in der Datei | Abgeleitete ID
+| `landkreis:{organisationseinheit.key}` | Organisationseinheit
+| `einsatzleitung:{bereich.key}` | Einsatzleitung (Abteilung / Mitarbeitergruppe)
+| `gebiet:{bereich.key}` | Gebiet
+| `abteilung:{abteilung.key}` | Abteilung (Mitarbeitergruppe)
+| `nutzer:{nutzer.key}` | Backoffice-Nutzer
+|===
+
+Die Schlüssel in der KRL-Datei entsprechen den bisherigen Namen, damit der erste Lauf auf Staging keine Duplikate erzeugt.
+
+===== `flaechen.geojson`
+
+GeoJSON-`FeatureCollection`. Jedes Feature:
+
+* `properties.bereich` — Schlüssel des Bereichs aus `seed.json`
+* `geometry` — `Polygon` oder `MultiPolygon`
+
+Fehlt ein Feature für einen Bereich, wird das Gebiet ohne Geometrie angelegt (`Geometry` nullable).
+
+===== Verzeichnisse im Backend
+
+* `backend/API/Seeders/LageHelfer/Data/example/` — fiktive Daten für Tests und lokale Instanzen
+* `backend/API/Seeders/LageHelfer/Data/krl/` — echte KRL-Daten (übergangsweise, wird in Teil 2 entfernt)
+
+Konfiguration:
+
+* `DataSeeder__LageHelferSeedPath` — Verzeichnis im Container (lokal: z. B. `Seeders/LageHelfer/Data/example`; Deploy: `/opt/lagehelfer-seed` aus Generic Package `krl-seeding-data`)
+* `DataSeeder__LageHelferKeyEncryptionKey` — Base64-AES-Schlüssel für den privaten Kommunen-Schlüssel
+
+Eigene Kommune einspielen: Verzeichnis mit beiden Dateien anlegen, Pfad und Schlüssel setzen, `DataSeeder__LageHelferEnabled=true`. Inhaltspflege: `LAGEHELFER_KOMMUNE_*` auf dieselbe `kommune.id` und den Namen setzen (`ENABLE_LAGEHELFER_SEED=true`).

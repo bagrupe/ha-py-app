@@ -1,0 +1,45 @@
+fragment ProzessEditorFormularFeldBase on FormularFeld {
+  __typename
+  id
+  slotName
+  angezeigterName
+  anweisung
+  order
+  encrypted
+  inhaltsTag
+  istRelevant
+  pflichtfeld
+  oeffentlichSichtbar
+}
+
+fragment ProzessEditorFormularFeld on FormularFeld {
+  ...ProzessEditorFormularFeldBase
+  ... on CheckboxListFormularFeld {
+    options {
+      key
+      label
+      order
+      defaultChecked
+    }
+  }
+
+  ... on AnzeigeTextBlockFeld {
+    text
+  }
+
+  ... on StringFormularFeld {
+    multiline
+    durchsuchbar
+    options {
+      key
+      value
+      istRelevant
+    }
+  }
+
+  ... on UploadFormularFeld {
+    multi
+    document
+    brauchtFreigabe
+  }
+}

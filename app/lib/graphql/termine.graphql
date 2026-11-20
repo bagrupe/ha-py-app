@@ -1,0 +1,269 @@
+query TermineList(
+  $kommuneIdBereichA: UUID!
+  $standortId: String!
+  $von: DateTime!
+  $bis: DateTime!
+  $includeVeranstaltungen: Boolean!
+  $includeAbfallkalender: Boolean!
+  $page: Int
+  $limit: Int
+  $search: String
+  $categoryIds: [String]
+  $untereinheiten: [String]
+  $abfallkalenderFilter: TerminFilterInput
+  $vonString: String
+  $bisString: String
+  $kommuneString: String
+) {
+  veranstaltungsTermine(
+    kommune: $kommuneString
+    untereinheiten: $untereinheiten
+    von: $vonString
+    bis: $bisString
+    categoryIds: $categoryIds
+    search: $search
+    limit: $limit
+    page: $page
+    visible: true
+  ) @include(if: $includeVeranstaltungen) {
+    totalDocs
+    totalPages
+    hasNextPage
+    page
+    limit
+    docs {
+      id
+      titel
+      subtitle
+      teaser
+      buchungsUrl
+      ticketUrl
+      anbieterUrl
+      locationName
+      address
+      coordinates
+      start
+      end
+      dates {
+        start
+        end
+      }
+      titelbild {
+        external
+        url
+        internal {
+          url
+        }
+      }
+      category {
+        id
+        label
+      }
+    }
+  }
+  kommune(kommuneId: $kommuneIdBereichA) @include(if: $includeAbfallkalender) {
+    abfallkalender(
+      standortId: $standortId
+      von: $von
+      bis: $bis
+      where: $abfallkalenderFilter
+    ) {
+      ...AbfallkalenderTermin
+    }
+  }
+}
+
+query Abfalltermine(
+  $kommuneIdBereichA: UUID!
+  $standortId: String!
+  $von: DateTime!
+  $bis: DateTime!
+  $fraktionen: [String]
+) {
+  kommune(kommuneId: $kommuneIdBereichA) {
+    abfallkalender(
+      standortId: $standortId
+      von: $von
+      bis: $bis
+      where: { fraktionId: { in: $fraktionen } }
+    ) {
+      ...AbfallkalenderTermin
+    }
+  }
+}
+
+query AbfallkalenderOrte($kommuneId: UUID!) {
+  kommune(kommuneId: $kommuneId) {
+    orte {
+      id
+      name
+      __typename
+    }
+  }
+}
+query AbfallkalenderStrassen($kommuneId: UUID!, $ortId: String!) {
+  kommune(kommuneId: $kommuneId) {
+    strassen(ortId: $ortId) {
+      id
+      name
+      __typename
+    }
+  }
+}
+query AbfallkalenderStandorte($kommuneId: UUID!, $strassenId: String!) {
+  kommune(kommuneId: $kommuneId) {
+    standorte(strassenId: $strassenId) {
+      id
+      nr
+      zusatz
+      __typename
+    }
+  }
+}
+query AbfallkalenderFraktionen($kommuneId: UUID!, $standortId: String!) {
+  kommune(kommuneId: $kommuneId) {
+    fraktionen(standortId: $standortId) {
+      id
+      name
+      col
+      __typename
+    }
+  }
+}
+fragment AbfallkalenderTermin on Termin {
+  datum
+  fraktionId
+  fraktion
+  verschoben
+  turnus
+  bemerkung
+  __typename
+}
+
+query VeranstaltungsTermineList(
+  $kommune: String
+  $untereinheiten: [String]
+  $von: String
+  $bis: String
+  $categoryIds: [String]
+  $search: String
+  $visible: Boolean
+  $limit: Int
+  $page: Int
+  $sortDirection: String
+) {
+  veranstaltungsTermine(
+    kommune: $kommune
+    untereinheiten: $untereinheiten
+    von: $von
+    bis: $bis
+    categoryIds: $categoryIds
+    search: $search
+    visible: $visible
+    limit: $limit
+    page: $page
+    sortDirection: $sortDirection
+  ) {
+    totalDocs
+    totalPages
+    hasNextPage
+    page
+    limit
+    docs {
+      id
+      titel
+      subtitle
+      teaser
+      buchungsUrl
+      ticketUrl
+      anbieterUrl
+      locationName
+      address
+      coordinates
+      start
+      end
+      dates {
+        start
+        end
+      }
+      titelbild {
+        external
+        url
+        internal {
+          url
+        }
+      }
+      category {
+        id
+        label
+      }
+    }
+  }
+}
+
+query Veranstaltung($id: String!) {
+  veranstaltungskalender(id: $id) {
+    ...Veranstaltung
+  }
+}
+
+fragment VeranstaltungInfo on Veranstaltungskalender {
+  id
+  titel
+  subtitle
+  teaser
+  buchungsUrl
+  ticketUrl
+  titelbild {
+    external
+    url
+    internal {
+      ...VeranstaltungsmedienImage
+    }
+  }
+  untereinheit {
+    id
+  }
+  ...TimeAndLocation
+  category {
+    id
+    label
+  }
+  source {
+    id
+    name
+    logo {
+      external
+      url
+      internal {
+        ...VeranstaltungsmedienImage
+      }
+    }
+  }
+}
+
+fragment TimeAndLocation on Veranstaltungskalender {
+  timeAndLocation {
+    locationName
+    address
+    coordinates
+    dates {
+      id
+      end
+      start
+    }
+  }
+}
+
+fragment Veranstaltung on Veranstaltungskalender {
+  ...VeranstaltungInfo
+  veranstalterAdresse {
+    ...Adresse
+  }
+  buchungsUrl
+  anbieterUrl
+  inhalte {
+    ...RichTextBlock
+    ...ImageBlockVeranstaltungsmedien
+  }
+}

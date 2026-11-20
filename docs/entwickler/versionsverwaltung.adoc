@@ -1,0 +1,89 @@
+==== Versionsverwaltung
+
+Die Quellcodeverwaltung erfolgt mit dem VCS `git` und wird in einem
+Mono-Repository in GitLab verwaltet. D.h. der Code für die mobile App, das
+Backoffice und alle im Rahmen des Projekts entwickelten Backend-Services sind im
+gleichen Repository zusammengefasst.
+
+Für die Entwicklung und das spätere Deployment kommen drei wesentliche git-Branches
+zum Einesatz: `develop`, `main` und pro Entwicklungs-Ticket eine `Feature
+Branch`.
+
+Diese Trennung sorgt dafür, dass Entwicklungs- und Produktionsstände voneinander
+getrennt sind und neue Versionsstände aktiv in Produktion gebracht werden.
+
+Die Branches stellen darüber hinaus eine mehrstufige Branching-Strategie dar,
+die sich in zwei Prozesse gliedern lassen:
+
+* Feature Entwicklung: `Feature-Branch -> develop`
+* Release: `develop -> Rebase -> main (Release-Zeitpunkt)`
+
+Features werden somit auf ihren eigenen git-Branches entwickelt und nach
+Abschluss auf `develop` gemerged. `main` wird zum Release-Zeitpunkt auf
+`develop` gerebased und so mit dem jeweils aktuellsten Stand ausgestattet.
+
+Die einzelnen Branches werden wie folgt verwendet:
+
+===== Feature-Branches
+Für jede neue Funktionalität oder Korrektur wird ein separater Branch erstellt.
+Dabei wird folgendes Namensschema verwendet:
+
+`<TICKETNUMMER>-<TICKET-TITEL>`
+
+.Beispiel
+====
+Es gibt ein Ticket mit der Nummer 123 und dem Titel "Wetterdaten in der App". Für
+dieses Ticket wird die Branch `123-wetterdaten-in-der-app` erstellt.
+====
+
+Nach Abschluss des Tickets erfolgt der Merge auf die Branch `develop` mittels
+Squash-Merge, um unvollständige (Work in Progress) Commits im
+Integrations-Branch zu vermeiden.
+
+===== `develop`
+Die `develop`-Branch dient als Integrations-Branch für alle neuen Features und
+Bugfixes.  Änderungen an `develop` erfolgen ausschließlich über Merge Requests
+mit dem dazugehörigen `Feature Branch`, mit aktivierter Review- und
+Test-Pipeline. Auch `develop` sollte als geschützt betrachtet werden.
+
+===== `main`
+Die `main`-Branch enthält den jeweils produktiven Stand des Codes. Änderungen
+auf `main` erfolgen ausschließlich über Rebase von `develop` im Rahmen eines
+Releases. Der Branch ist als geschützt konzipiert und direkte Commits sind nicht
+zulässig. `main` wird nicht automatisch aktualisiert bzw. auf den Stand von
+`develop` gebracht, sondern aktiv durch einen Entwickler, wenn ein neuer Release
+eingeplant wird.
+
+
+
+==== Versionierung & Tagging
+
+In dem Projekt werden Versionen für Produktions-Releases gesetzt und
+entsprechend als git-Tag manuell auf dem `main`-Branch-Commit gesetzt und folgen
+dem Format:
+
+`v<MAJOR>.<MINOR>.<PATCH>`
+
+Beispiel: `v1.2.3`
+
+Die Tags dienen der eindeutigen Referenzierung von Release-Ständen: der git-Tag
+entspricht dem Tag der Docker Images im Deployment.
+
+Obwohl das Schema an Semantic Versioning (SemVer) angelehnt ist, erfolgt
+aktuell keine strikte Einhaltung – es wird lediglich sequentiell hochgezählt.
+
+==== Schutzregeln der Branches
+
+Es wird empfohlen, folgende Schutzmaßnahmen im GitLab-Repository zu aktivieren:
+
+`main`:
+
+- Keine direkten Commits
+- Nur Merge via Rebase
+- Verpflichtende Pipelines
+
+`develop`:
+
+- Keine direkten Commits
+- Nur über Merge Requests (Squash)
+- Verpflichtende Pipelines und Code Reviews

@@ -1,0 +1,38 @@
+mutation InviteBackofficeUser($input: InviteBackofficeUserInput!) {
+  result: inviteBackofficeUser(input: $input) {
+    success
+    errors {
+      ... on Error {
+        message
+      }
+    }
+  }
+}
+
+query NutzendenEinladenPage {
+  my {
+    ... on BackofficeUser {
+      art
+      abteilungen: gruppen {
+        id
+        name
+      }
+      organisationseinheiten: untereinheitPermissions {
+        untereinheitId
+        untereinheit {
+          name
+        }
+      }
+      mandant: kommune {
+        organisationseinheiten: untereinheiten {
+          id
+          name
+        }
+        abteilungen: mitarbeiterGruppen {
+          id
+          name
+        }
+      }
+    }
+  }
+}

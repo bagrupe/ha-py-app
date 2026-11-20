@@ -1,0 +1,5 @@
+mutation CreateGeoflaeche($input: mutationGeoFlaechenInput!) {
+  createGeoFlaechen(data: $input) {
+    id
+  }
+}

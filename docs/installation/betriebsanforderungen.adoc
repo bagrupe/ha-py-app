@@ -1,0 +1,27 @@
+=== Betriebsanforderungen
+
+Zur Inbetriebnahme der Kommunal-App Backend-Systeme in _Produktion_ oder
+_Staging_ wird eine Maschine mit mindestens folgenden Hardwareanforderungen
+benötigt:
+
+- 8 GB RAM
+- 4 CPUs / vCPUs
+- 160 GB Festplattenspeicher
+
+Der Festplattenspeicher sollte über die Zeit erweiterbar sein, sodass die
+aufkommenden Daten abgelegt werden können, sofern die Datenbanken mit auf dem
+Zielsystem laufen.
+
+Darüber hinaus wird auf dem Produktionssystem
+https://docs.docker.com/engine/install/[Docker] und `Docker Compose` benötigt,
+um die Anwendung zu starten. Da die Anwendung über `Docker` Container gestartet
+wird kann im Prinzip jedes Betriebssystem, auf dem `Docker` installiert werden
+kann, als Host eingesetzt werden, empfohlen wird ein Linux Host.
+
+===== Monitoring-VM (optional, empfohlen)
+
+Für Observability in Staging, Pre-Production und Produktion wird eine zusätzliche
+VM für den Monitoring-Stack (Prometheus, Grafana, Blackbox Exporter) betrieben.
+Die App-VMs hosten zusätzlich Monitoring-Agenten (cAdvisor, DB-Exporter; Node
+Exporter auf dem Host). Mindestanforderungen analog zur App-VM (8 GB RAM, 4
+vCPUs, erweiterbarer Speicher). Details: <<Monitoring und Observability,Monitoring>>.

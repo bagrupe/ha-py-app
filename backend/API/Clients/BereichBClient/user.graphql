@@ -1,0 +1,23 @@
+query BackofficeByBereichAId($bereichAId: String!){
+  Benutzers(where: {bereichAId: {equals: $bereichAId}}) {
+    docs {
+      id
+    }
+  }
+}
+
+mutation BackofficeUserUpdate($userId: String!, $input: mutationBenutzerUpdateInput!){
+  updateBenutzer(id: $userId, data: $input) {
+    id
+  }
+}
+mutation BackofficeUserCreate($input: mutationBenutzerInput!){
+  createBenutzer(data: $input) {
+    id
+  }
+}
+mutation BackofficeUserDelete($userId: String!){
+  deleteBenutzer(id: $userId) {
+    id
+  }
+}

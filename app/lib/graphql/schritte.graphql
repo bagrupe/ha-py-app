@@ -1,0 +1,120 @@
+# import './prozess.graphql'
+
+query ErsteSchritte($kommuneId: UUID!, $skip: Int, $take: Int) {
+  kommune(kommuneId: $kommuneId) {
+    id
+    name
+    prozessGroups {
+      name
+      id
+    }
+    prozesseUndLeistungen(skip: $skip, take: $take) {
+      items {
+        __typename
+        id
+        name
+        group {
+          id
+          name
+        }
+        ...Prozess
+        ... on ServicePortalLink {
+          url
+        }
+      }
+      pageInfo {
+        hasNextPage
+      }
+    }
+  }
+}
+
+mutation AusfuehrungErstellen($input: AusfuehrungCreateInput!) {
+  ausfuehrungCreate(input: $input) {
+    ausfuehrungResult {
+      ausfuehrung {
+        id
+        prozessVersion {
+          prozess {
+            kommune {
+              maengelAusfuehrungen {
+                id
+              }
+            }
+          }
+        }
+      }
+
+      shouldContinue
+    }
+  }
+}
+
+mutation AusfuehrungFortsetzen($input: AusfuehrungContinueInput!) {
+  ausfuehrungContinue(input: $input) {
+    ausfuehrungResult {
+      shouldContinue
+      ausfuehrung {
+        id
+      }
+    }
+  }
+}
+
+query Ausfuehrungen {
+  my {
+    ... on Buerger {
+      id
+      ausfuehrungen {
+        id
+        createdAt
+        sharedKeyEncryptedForBuerger
+        slotValues {
+          __typename
+          id
+          slotName
+          ... on PlainSlotValue {
+            value
+            slotValueCount
+          }
+        }
+        prozessVersion {
+          ...ProzessVersion
+        }
+        status
+        updatedAt
+      }
+    }
+  }
+}
+
+query AusfuehrungFortsetzung($id: UUID!) {
+  ausfuehrung(id: $id) {
+    id
+    sharedKeyEncryptedForBuerger
+    currentSchritt {
+      ...Schritt
+    }
+
+    prozessVersion {
+      ...ProzessVersionOwnData
+      prozess {
+        ...ProzessOwnData
+        kommune {
+          ...KommuneCrypto
+        }
+      }
+    }
+  }
+}
+
+mutation BezahlenSchrittUrl($ausfuehrungId: UUID!, $bezahlenSchrittId: UUID!) {
+  bezahlenSchrittUrl(
+    input: {
+      ausfuehrungId: $ausfuehrungId
+      bezahlenSchrittId: $bezahlenSchrittId
+    }
+  ) {
+    string
+  }
+}

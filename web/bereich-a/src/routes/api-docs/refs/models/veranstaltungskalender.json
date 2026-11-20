@@ -1,0 +1,50 @@
+{
+  "Veranstaltungs-Kategorie": {
+    "type": "object",
+    "properties": {
+      "id": {
+        "type": "string"
+      },
+      "label": {
+        "type": "string"
+      }
+    }
+  },
+  "Veranstaltung": {
+    "type": "object",
+    "properties": {
+      "id": {
+        "type": "string"
+      },
+      "titel": {
+        "type": "string"
+      },
+      "subtitle": {
+        "type": "string"
+      },
+      "category": {
+        "oneOf": [
+          {"type": "string"},
+          {"$ref": "#/definitions/Veranstaltungs-Kategorie"}
+        ]
+      },
+      "location": {
+        "type": "array",
+        "items": {
+          "type": "number"
+        },
+        "minItems": 2,
+        "maxItems": 2
+      },
+      "date": {
+        "type": "string"
+      },
+      "text": {
+        "type": "string"
+      },
+      "kommune": {
+        "oneOf": [{"type": "string"}, {"$ref": "#/definitions/Kommune"}]
+      }
+    }
+  }
+}

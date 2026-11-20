@@ -1,0 +1,144 @@
+query KategoriebaumOptionen {
+  my {
+    id
+    ... on BackofficeUser {
+      art
+      kommune {
+        untereinheiten {
+          id
+          name
+          mitarbeiterGruppen(includeDeleted: false) {
+            id
+            name
+          }
+        }
+        dienstleister {
+          id
+          name
+          organisationseinheiten {
+            id
+          }
+        }
+      }
+    }
+  }
+}
+
+query KategorieBaum($untereinheitId: UUID!) {
+  kategorieBaum(untereinheitId: $untereinheitId) {
+    ...Kategorie
+  }
+}
+
+query AusgeblendeteKategorien($untereinheitId: UUID!) {
+  ausgeblendeteKategorien(untereinheitId: $untereinheitId) {
+    ...Kategorie
+  }
+}
+
+query KategorieLoeschVorschau($id: UUID!) {
+  kategorieLoeschVorschau(id: $id) {
+    anzahlUnterkategorien
+    istGeteilt
+    betroffeneUntereinheiten {
+      untereinheitName
+      anzahlEigeneUnterkategorien
+    }
+  }
+}
+
+mutation KategorieCreate($input: KategorieCreateInput!) {
+  kategorieCreate(input: $input) {
+    kategorie {
+      ...Kategorie
+    }
+    errors {
+      __typename
+      ... on Error {
+        message
+      }
+    }
+  }
+}
+
+mutation KategorieRename($input: KategorieRenameInput!) {
+  kategorieRename(input: $input) {
+    kategorie {
+      ...Kategorie
+    }
+    errors {
+      __typename
+      ... on Error {
+        message
+      }
+    }
+  }
+}
+
+mutation KategorieZustaendigkeitSetzen(
+  $input: KategorieZustaendigkeitSetzenInput!
+) {
+  kategorieZustaendigkeitSetzen(input: $input) {
+    kategorie {
+      ...Kategorie
+    }
+    errors {
+      __typename
+      ... on Error {
+        message
+      }
+    }
+  }
+}
+
+mutation KategorieDelete($input: KategorieDeleteInput!) {
+  kategorieDelete(input: $input) {
+    success
+    errors {
+      __typename
+      ... on Error {
+        message
+      }
+    }
+  }
+}
+
+mutation KategorieAusblendungSetzen($input: KategorieAusblendungSetzenInput!) {
+  kategorieAusblendungSetzen(input: $input) {
+    success
+    errors {
+      __typename
+      ... on Error {
+        message
+      }
+    }
+  }
+}
+
+mutation KategorieAusblendungAufheben(
+  $input: KategorieAusblendungAufhebenInput!
+) {
+  kategorieAusblendungAufheben(input: $input) {
+    success
+    errors {
+      __typename
+      ... on Error {
+        message
+      }
+    }
+  }
+}
+
+fragment Kategorie on Kategorie {
+  id
+  parentId
+  untereinheitId
+  istWurzel
+  name
+  ziel {
+    art
+    organisationseinheitId
+    mitarbeiterGruppeId
+    dienstleisterId
+  }
+}

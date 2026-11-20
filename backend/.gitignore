@@ -1,0 +1,10 @@
+bin/
+obj/
+out/
+.idea/
+
+API/kommunalapp-service-account.json
+
+API/*.pdf
+
+*.DotSettings.user

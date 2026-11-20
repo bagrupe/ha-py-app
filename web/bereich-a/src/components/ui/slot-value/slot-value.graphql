@@ -1,0 +1,14 @@
+fragment SlotValue on SlotValue {
+  id
+  slotName
+  istFreigegeben
+  ... on EncryptedSlotValue {
+    encryptedValue: value {
+      ...EncryptedValue
+    }
+  }
+
+  ... on PlainSlotValue {
+    plainValue: value
+  }
+}

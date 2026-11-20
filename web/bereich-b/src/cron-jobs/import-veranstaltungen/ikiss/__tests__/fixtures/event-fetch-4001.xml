@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE ikiss SYSTEM "https://www.hameln-pyrmont.de/ikiss.dtd">
+<ikiss>
+    <result>
+            <tevents>
+                <object_full_id>3767.4001.1</object_full_id>
+                <server_id>3767</server_id>
+                <object_id>4001</object_id>
+                <language>de</language>
+                <organizer_server_id>0</organizer_server_id>
+                <organizer_object_id>0</organizer_object_id>
+                <organizer_language></organizer_language>
+                <userfieldtempl_svr_id>0</userfieldtempl_svr_id>
+                <userfieldtempl_id>0</userfieldtempl_id>
+                <location_id>0.0</location_id>
+                <datetime_from>2026-11-19 16:00:00</datetime_from>
+                <datetime_to>2026-11-19 17:00:00</datetime_to>
+                <title><![CDATA[Was bietet gemeinsamSTARK?]]></title>
+                <data_short_content><![CDATA[Unterstützung für Alleinerziehende - freiwillig, persönlich und nah.
+Kostenfrei, vertraulich und unkompliziert.
+]]></data_short_content>
+                <data_content><![CDATA[<p><strong>Was bietet gemeinsamSTARK?</strong><br> Unterst&uuml;tzung f&uuml;r Alleinerziehende &ndash; freiwillig, pers&ouml;nlich und nah.<br> Kostenfrei, vertraulich und unkompliziert.</p>
+<ul class=" ikiss-unordered-list">
+<li><strong>Freiwillig:</strong> Sie entscheiden, ob und wann Sie Hilfe nutzen.</li>
+<li><strong>Individuelle Beratung:</strong> Pers&ouml;nlich und auf Ihre Situation abgestimmt.</li>
+<li><strong>Sprechstunden vor Ort:</strong> Einfach vorbeikommen &ndash; wir nehmen uns Zeit.</li>
+<li><strong>Begleitung:</strong> Auf Wunsch unterst&uuml;tzen wir Sie bei Terminen mit Beh&ouml;rden oder Beratungsstellen.</li>
+<li><strong>Gut vernetzt:</strong> Zusammenarbeit mit Einrichtungen in Hameln und im Landkreis.</li>
+<li><strong>Weitervermittlung:</strong> Wir helfen Ihnen, passende Angebote und Ansprechpersonen zu finden.</li>
+</ul>
+<p align="center"><strong>Unkompliziert. Verl&auml;sslich. An Ihrer Seite.</strong></p>
+<p><strong>Unsere n&auml;chste Sprechstunde findet am 19.11.2026 von 16.00 bis 17.00 Uhr im FiZ, Osterstrasse 46 in Hameln statt.</strong></p>
+<p><strong>Melden Sie sich auch gern telefonisch 05151 9821- 40 oder per Mail </strong><ikiss i_ma="geste@impuls-hamelnpyrmont.de" i_ms="" i_tp="3" i_lt="geste@impuls-hamelnpyrmont.de" /></p>
+<p>Das Projekt &bdquo;Geste - gemeinsamSTARK&ldquo; wird im Rahmen des Programms <ikiss i_url="3767.1190.1" i_lt="&quot;Akti(F) Plus-Aktiv f&uuml;r Familien und ihre Kinder&quot;" i_ta="_blank" i_autowidth="0" i_tp="4" /> durch das Bundesministerium f&uuml;r Arbeit und Soziales und die Europ&auml;ische Union &uuml;ber den Europ&auml;ischen Sozialfonds Plus <ikiss i_url="3767.1191.1" i_lt="(ESF Plus)" i_ta="_blank" i_autowidth="0" i_tp="4" /> gef&ouml;rdert.&nbsp;<ikiss i_url="3767.1190.1" i_tp="4" i_ta="_blank" i_lt="<br>" /></p>]]></data_content>
+                <location>FIZ (Familie im Zentrum), Osterstraße 46, Hameln</location>
+                <region></region>
+                <priceinfo></priceinfo>
+                <price>0.00</price>
+                <contact>Melden Sie sich auch gern telefonisch 05151 9821- 40 oder per Mail geste@impuls-hamelnpyrmont.de
+</contact>
+                <fulltext_index_off>false</fulltext_index_off>
+                <pattern>false</pattern>
+                <update_date>2026-11-10 10:33:36</update_date>
+                <create_date>2026-11-10 09:44:42</create_date>
+                <properties>1</properties>
+                <release>true</release>
+                <area>internet</area>
+                <map_id>0</map_id>
+                <map_x>0</map_x>
+                <map_y>0</map_y>
+                <image>/media/custom/3767_3593_1_m.PNG</image>
+                <tUserFields>
+                </tUserFields>
+                <booking></booking>
+                <ResultPic.data></ResultPic.data>
+                <categories></categories>
+                <synonyms></synonyms>
+                <tusers_list>
+                    <tusers>
+                        <user_id>3</user_id>
+                        <nickname>Administrator</nickname>
+                    </tusers>
+                </tusers_list>
+                <remote_identifier_list></remote_identifier_list>
+                <RefKey></RefKey>
+                <ttimer_list>
+                    <ttimer>
+                        <execution_time>2026-11-19 23:59:00</execution_time>
+                        <action_id>2</action_id>
+                        <execution_value>0</execution_value>
+                    </ttimer>
+                </ttimer_list>
+            </tevents>
+    </result>
+</ikiss>

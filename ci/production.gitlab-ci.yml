@@ -1,0 +1,34 @@
+##############################################
+# This file is unused in the original deployment pipeline
+##############################################
+
+.production-job:
+  rules:
+    - if: $CI_COMMIT_TAG
+      when: manual
+    - when: never
+
+release:production:
+  extends: [.release-web, .production-job]
+  tags:
+    - production
+  variables:
+    COMPOSE_INFIX: production
+  before_script:
+    - cp $PROD_BACKEND_ENV ~/deployments/kommunalapp/.backend.env
+    - cp $PROD_BEREICH_B_ENV ~/deployments/kommunalapp/.bereich-b.env
+    - cp $PROD_MONGO_ENV ~/deployments/kommunalapp/.mongo.env
+    - cp $PROD_POSTGRES_ENV ~/deployments/kommunalapp/.postgres.env
+  environment:
+    name: production
+    url: https://app.example.invalid
+
+release:app-android:production:
+  extends: [.release-android, .production-job]
+  script:
+    - fastlane production
+
+release:app-ios:production:
+  extends: [.release-ios, .production-job]
+  script:
+    - fastlane production

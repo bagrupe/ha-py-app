@@ -1,0 +1,28 @@
+{
+  "name": "@kommunalapp/graphql-client",
+  "type": "module",
+  "main": "./src/index.ts",
+  "scripts": {
+    "lint:check": "eslint . --report-unused-disable-directives --max-warnings 0",
+    "lint:fix": "eslint . --fix --report-unused-disable-directives --max-warnings 0",
+    "prettier:check": "prettier . --check",
+    "prettier:fix": "prettier . --write",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@kommunalapp/expressions": "workspace:^",
+    "@urql/exchange-auth": "2.1.6",
+    "graphql": "16.13.0",
+    "urql": "4.0.5",
+    "urql-custom-scalars-exchange": "1.0.1",
+    "wonka": "6.3.5"
+  },
+  "devDependencies": {
+    "@kommunal/linting": "workspace:^",
+    "@kommunal/tsconfig": "workspace:*",
+    "eslint": "9.39.3",
+    "prettier": "3.0.0",
+    "typescript": "5.9.3"
+  },
+  "prettier": "@kommunal/linting/prettier"
+}

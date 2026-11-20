@@ -1,0 +1,108 @@
+include:
+  - local: "/ci/colors.yml"
+  - local: ci/template.gitlab-ci.yml
+
+################################################
+# Monitoring agents deployment
+################################################
+
+monitoring-agents-deploy:
+  stage: deploy
+  extends:
+    - .ssh-connection
+  tags:
+    - docker
+  when: manual
+  rules:
+    - if: $TARGET_ENV == "staging" || $TARGET_ENV == "preprod" || $TARGET_ENV == "production"
+      when: manual
+      changes:
+        - monitoring/agents/**/*
+        - scripts/ensure-monitoring-db-users.sh
+  script: |
+
+    echo -e "${BLUE}--------------------------------------------------------------------------------------------------------------------------"
+    echo -e "💾 Get monitoring agent environment variables from GitLab"
+    echo -e "--------------------------------------------------------------------------------------------------------------------------${RESET}"
+
+    cat "$DEPLOYMENT_ENV_FILE" >> ./.env
+
+    echo -e "${BLUE}--------------------------------------------------------------------------------------------------------------------------"
+    echo -e "🚛 Copy monitoring agents to remote server"
+    echo -e "--------------------------------------------------------------------------------------------------------------------------${RESET}"
+
+    ssh deploy_user@${SERVER_IP} "mkdir -p /home/deploy_user/monitoring-agents"
+    ssh deploy_user@${SERVER_IP} "mkdir -p /home/deploy_user/monitoring-agents/postgres/"
+    ssh deploy_user@${SERVER_IP} "mkdir -p /home/deploy_user/monitoring-agents/mongodb/"
+
+    scp -qr monitoring/agents/. deploy_user@${SERVER_IP}:/home/deploy_user/monitoring-agents/
+    scp -q scripts/ensure-monitoring-db-users.sh deploy_user@${SERVER_IP}:/home/deploy_user/monitoring-agents/ensure-monitoring-db-users.sh
+    scp -q ./.env deploy_user@${SERVER_IP}:/home/deploy_user/monitoring-agents/.env
+
+    ssh deploy_user@${SERVER_IP} << ENDSSH
+    set -e
+    cd /home/deploy_user/monitoring-agents/
+
+    echo -e "${BLUE}--------------------------------------------------------------------------------------------------------------------------"
+    echo -e "📊 Ensure monitoring database users"
+    echo -e "--------------------------------------------------------------------------------------------------------------------------${RESET}"
+
+    set -a
+    source ./.env
+    set +a
+    bash ./ensure-monitoring-db-users.sh
+
+    echo -e "${BLUE}--------------------------------------------------------------------------------------------------------------------------"
+    echo -e "🚀 Start monitoring agents"
+    echo -e "--------------------------------------------------------------------------------------------------------------------------${RESET}"
+
+    docker compose -f docker-compose.yml -p hameln-monitoring-agents --env-file .env pull
+    docker compose -f docker-compose.yml -p hameln-monitoring-agents --env-file .env up -d
+
+    echo -e "${GREEN}--------------------------------------------------------------------------------------------------------------------------"
+    echo -e "✅ Monitoring agents deployment completed"
+    echo -e "--------------------------------------------------------------------------------------------------------------------------${RESET}"
+
+    echo -e "${BLUE}--------------------------------------------------------------------------------------------------------------------------"
+    echo -e "🧹 Clean up"
+    echo -e "--------------------------------------------------------------------------------------------------------------------------${RESET}"
+
+    rm -f ./.env
+    ENDSSH
+  environment:
+    name: $TARGET_ENV
+
+monitoring-agents-stop:
+  stage: deploy
+  extends:
+    - .ssh-connection
+  tags:
+    - docker
+  when: manual
+  rules:
+    - if: $TARGET_ENV == "staging" || $TARGET_ENV == "preprod" || $TARGET_ENV == "production"
+      when: manual
+      changes:
+        - monitoring/agents/**/*
+  script: |
+
+    ssh deploy_user@${SERVER_IP} << ENDSSH
+    set -e
+    cd /home/deploy_user/monitoring-agents/
+
+    echo -e "${BLUE}--------------------------------------------------------------------------------------------------------------------------"
+    echo -e "🛑 Stop monitoring agents"
+    echo -e "--------------------------------------------------------------------------------------------------------------------------${RESET}"
+
+    docker compose -f docker-compose.yml -p hameln-monitoring-agents down --remove-orphans || true
+
+    echo -e "${GREEN}--------------------------------------------------------------------------------------------------------------------------"
+    echo -e "✅ Monitoring agents stopped"
+    echo -e "--------------------------------------------------------------------------------------------------------------------------${RESET}"
+    ENDSSH
+  allow_failure: true
+  environment:
+    name: $TARGET_ENV
+
+
+

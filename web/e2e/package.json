@@ -1,0 +1,32 @@
+{
+  "name": "e2e",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "test": "playwright test --project=chromium --workers=1",
+    "typecheck": "tsc --noEmit",
+    "lint": "pnpm run lint:fix && pnpm run prettier:fix",
+    "lint:check": "eslint . --report-unused-disable-directives --max-warnings 0",
+    "lint:fix": "eslint . --fix --report-unused-disable-directives --max-warnings 0",
+    "prettier:check": "prettier . --check",
+    "prettier:fix": "prettier . --write"
+  },
+  "devDependencies": {
+    "@kommunal/linting": "workspace:^",
+    "@kommunal/tsconfig": "workspace:*",
+    "@playwright/test": "1.58.2",
+    "@types/eslint": "8.44.0",
+    "@types/lodash": "4.14.196",
+    "@types/node": "20.4.7",
+    "dotenv": "16.3.1",
+    "eslint": "9.39.3",
+    "prettier": "3.0.0",
+    "typescript": "5.9.3"
+  },
+  "packageManager": "pnpm@9.15.9",
+  "prettier": "@kommunal/linting/prettier",
+  "dependencies": {
+    "lodash": "4.18.0"
+  }
+}

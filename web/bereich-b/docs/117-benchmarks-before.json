@@ -1,0 +1,86 @@
+{
+  "branch": "main",
+  "description": "Before optimization — no custom indexes, blind upserts (N+1 queries per import)",
+  "timestamp": "2026-03-30T08:40:00Z",
+  "dumpFile": "20260330-mongo-db.dump",
+  "serverMetrics": {
+    "scanned": 743764,
+    "scannedObjects": 21435766,
+    "collectionScansTotal": 8387,
+    "collectionScansNonTailable": 8387
+  },
+  "profileSummary": {
+    "totalOps": 524,
+    "slowQueries_gt50ms": 0,
+    "slowQueries_gt10ms": 0,
+    "collscans": 101,
+    "inserts": 23,
+    "updates": 23,
+    "queries": 356,
+    "commands": 103
+  },
+  "collscanBreakdown": [
+    {
+      "ns": "bereich-b.veranstaltungsmediens",
+      "count": 46,
+      "totalMillis": 110,
+      "avgMillis": 2.39,
+      "maxMillis": 4,
+      "totalDocsExamined": 145728
+    },
+    {
+      "ns": "bereich-b.news-artikels",
+      "count": 48,
+      "totalMillis": 82,
+      "avgMillis": 1.71,
+      "maxMillis": 5,
+      "totalDocsExamined": 83184
+    },
+    {
+      "ns": "bereich-b.benutzers",
+      "count": 4,
+      "totalMillis": 1,
+      "avgMillis": 0.25,
+      "maxMillis": 1,
+      "totalDocsExamined": 308
+    }
+  ],
+  "collectionStats": {
+    "news-artikels": {
+      "count": 1733,
+      "size": 4953655,
+      "avgObjSize": 2858,
+      "totalIndexSize": 77824,
+      "nindexes": 1
+    },
+    "_news-artikel_versions": {
+      "count": 34021,
+      "size": 100026842,
+      "avgObjSize": 2940,
+      "totalIndexSize": 2867200,
+      "nindexes": 6
+    },
+    "veranstaltungsmediens": {
+      "count": 3168,
+      "size": 1466972,
+      "avgObjSize": 463,
+      "totalIndexSize": 315392,
+      "nindexes": 3
+    },
+    "integrations": {
+      "count": 10,
+      "size": 4584,
+      "avgObjSize": 458,
+      "totalIndexSize": 20480,
+      "nindexes": 1
+    }
+  },
+  "keyObservations": [
+    "101 COLLSCANs across 524 profiled operations (19.3%)",
+    "veranstaltungsmediens: 46 COLLSCANs examining 145,728 docs total (3,168 docs/scan)",
+    "news-artikels: 48 COLLSCANs examining 83,184 docs total (1,733 docs/scan)",
+    "Every upsert triggers a full collection scan for lookup (importId+kommune, sourceUrl+kommune)",
+    "news-artikels has only _id index — zero compound indexes for import queries",
+    "8,387 total collection scans accumulated in server metrics"
+  ]
+}

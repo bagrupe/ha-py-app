@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE ikiss SYSTEM "https://www.hameln-pyrmont.de/ikiss.dtd">
+<ikiss>
+    <result>
+            <tmedia>
+                <object_full_id>3767.2566.1</object_full_id>
+                <server_id>3767</server_id>
+                <object_id>2566</object_id>
+                <language>de</language>
+                <shortname><![CDATA[Baustellenschild]]></shortname>
+                <category_server_id>1</category_server_id>
+                <category_id>1</category_id>
+                <title><![CDATA[PM Baustelle/Sanierung]]></title>
+                <author>Administrator</author>
+                <copyright></copyright>
+                <fulltext_index_off>true</fulltext_index_off>
+                <properties>8</properties>
+                <media_link><![CDATA[]]></media_link>
+                <forcedoc>0</forcedoc>
+                <description><![CDATA[]]></description>
+                <date>0000-00-00 00:00:00</date>
+                <userfieldtempl_svr_id>0</userfieldtempl_svr_id>
+                <userfieldtempl_id>0</userfieldtempl_id>
+                <pattern>false</pattern>
+                <update_date>2026-06-26 09:58:16</update_date>
+                <create_date>2025-05-27 15:27:10</create_date>
+                <release>true</release>
+                <area>internet</area>
+                <tUserFields>
+                </tUserFields>
+                <tdata_list>
+                    <tdata>
+                        <media_path><![CDATA[/media/custom/3767_2566_1_t.PNG?1748352431]]></media_path>
+                        <width>200</width>
+                        <height>200</height>
+                        <media_stream></media_stream>
+                    </tdata>
+                    <tdata>
+                        <media_path><![CDATA[/media/custom/3767_2566_1_k.PNG?1748352431]]></media_path>
+                        <width>200</width>
+                        <height>200</height>
+                        <media_stream></media_stream>
+                    </tdata>
+                    <tdata>
+                        <media_path><![CDATA[/media/custom/3767_2566_1_m.PNG?1748352431]]></media_path>
+                        <width>400</width>
+                        <height>400</height>
+                        <media_stream></media_stream>
+                    </tdata>
+                    <tdata>
+                        <media_path><![CDATA[/media/custom/3767_2566_1_g.PNG?1748352431]]></media_path>
+                        <width>800</width>
+                        <height>800</height>
+                        <media_stream></media_stream>
+                    </tdata>
+                    <tdata>
+                        <media_path><![CDATA[/media/custom/3767_2566_1_r.PNG?1748352444]]></media_path>
+                        <width>1920</width>
+                        <height>1080</height>
+                        <media_stream></media_stream>
+                    </tdata>
+                </tdata_list>
+                <tcategories_list>
+                    <tcategories>
+                        <object_full_id>1.1</object_full_id>
+                        <data_content><![CDATA[Bilder]]></data_content>
+                        <category_server_id>1</category_server_id>
+                        <category_id>1</category_id>
+                        <release>true</release>
+                        <area>internet</area>
+                        <description><![CDATA[]]></description>
+                        <language>de</language>
+                    </tcategories>
+                </tcategories_list>
+                <synonyms></synonyms>
+                <tusers_list>
+                    <tusers>
+                        <user_id>3</user_id>
+                        <nickname>Administrator</nickname>
+                    </tusers>
+                </tusers_list>
+                <remote_identifier_list></remote_identifier_list>
+                <RefKey></RefKey>
+                <timer></timer>
+            </tmedia>
+    </result>
+</ikiss>

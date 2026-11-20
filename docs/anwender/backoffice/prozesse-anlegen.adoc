@@ -1,0 +1,27 @@
+==== Anlegen neuer Prozesse
+Ausgehend von der Übersichts-Ansicht für Prozesse, der `Prozessverwaltung`,
+können neue Prozess angelegt werden.
+
+
+Es gibt zwei Arten von Prozesse: `Prozesse` und `Service-Portal Links`.
+`Service-Portal Links` sind Links auf Websites, die innerhalb der App als Antrag
+aufgeführt werden, selbst aber auf ein bestehendes Service-Portal verweisen. Das
+ist zum Beispiel dann hilfreich, wenn es bereits einen digitalen Antrag gibt,
+der nicht über den Prozesseditor nachgebildet werden muss oder soll.
+
+`Prozesse` sind dementsprechend solche Prozesse, die über den Editor erstellt
+werden und ihre eigene Logik beinhalten bzw. darstellen.
+
+`Prozesse` (und `Service-Portal Links`) können von allen
+<<veraendern_von_funktionsberechtigungen, berechtigten>> Nutzern angelegt und
+verwaltet werden.
+
+Über den Button `Neuen Prozess anlegen` in der `Prozessverwaltung` kann zunächst
+gewählt werden, welche Art von Prozess angelegt werden soll. `Service-Portal
+Links` bekommen einen Namen und die URL des Links. `Prozesse` bekommen an dieser
+Stelle nur einen Namen. Mit einem Klick auf `Speichern` wird der `Prozess` bzw.
+`Link` angelegt. Möchte man das Anlegen abbrechen kann der Dialog über das
+kleine X einfach wieder geschlossen werden.
+
+.Prozess anlegen
+image::assets/anwender/Prozessverwaltung_Prozess_anlegen.png[Prozess anlegen]

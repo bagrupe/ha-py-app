@@ -1,0 +1,20 @@
+query KioskVeranstaltungenFilterOptions($kommuneId: JSON!) {
+  veranstaltungskalenderKategories(
+    where: {kommune: {equals: $kommuneId}, filterkategorie: {equals: true}}
+    limit: 200
+  ) {
+    docs {
+      id
+      label
+    }
+  }
+  untereinheitList(
+    where: {kommune: {equals: $kommuneId}, isGemeinde: {equals: true}}
+    limit: 200
+  ) {
+    docs {
+      id
+      name
+    }
+  }
+}

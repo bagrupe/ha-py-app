@@ -1,0 +1,148 @@
+{
+  "branch": "117-mongo-db-performance-issues",
+  "description": "After optimization — 7 custom indexes, prefetch caching, two-tier change detection",
+  "timestamp": "2026-03-30T08:45:00Z",
+  "dumpFile": "20260330-mongo-db.dump",
+  "serverMetrics": {
+    "scanned": 1172565,
+    "scannedObjects": 24877283,
+    "collectionScansTotal": 9658,
+    "collectionScansNonTailable": 9658
+  },
+  "profileSummary": {
+    "totalOps": 592,
+    "slowQueries_gt50ms": 0,
+    "slowQueries_gt10ms": 0,
+    "collscans": 3,
+    "indexScans": 539,
+    "inserts": 1,
+    "updates": 1,
+    "queries": 536,
+    "commands": 58
+  },
+  "collscanBreakdown": [
+    {
+      "ns": "bereich-b.system.profile",
+      "count": 9,
+      "totalMillis": 0,
+      "avgMillis": 0,
+      "maxMillis": 0,
+      "totalDocsExamined": 5348,
+      "note": "Only system.profile itself — zero COLLSCANs on application collections"
+    }
+  ],
+  "ixscanBreakdown": [
+    {
+      "ns": "bereich-b.veranstaltungsmediens",
+      "count": 380,
+      "totalMillis": 0,
+      "avgMillis": 0,
+      "maxMillis": 0,
+      "totalDocsExamined": 1,
+      "totalKeysExamined": 1
+    },
+    {
+      "ns": "bereich-b.kommunens",
+      "count": 51,
+      "totalMillis": 0,
+      "avgMillis": 0,
+      "maxMillis": 0,
+      "totalDocsExamined": 51,
+      "totalKeysExamined": 51
+    },
+    {
+      "ns": "bereich-b.integrations",
+      "count": 50,
+      "totalMillis": 0,
+      "avgMillis": 0,
+      "maxMillis": 0,
+      "totalDocsExamined": 50,
+      "totalKeysExamined": 50
+    },
+    {
+      "ns": "bereich-b.mediens",
+      "count": 50,
+      "totalMillis": 0,
+      "avgMillis": 0,
+      "maxMillis": 0,
+      "totalDocsExamined": 100,
+      "totalKeysExamined": 200
+    },
+    {
+      "ns": "bereich-b._news-artikel_versions",
+      "count": 4,
+      "totalMillis": 0,
+      "avgMillis": 0,
+      "maxMillis": 0,
+      "totalDocsExamined": 62,
+      "totalKeysExamined": 62
+    },
+    {
+      "ns": "bereich-b.news-artikels",
+      "count": 1,
+      "totalMillis": 0,
+      "avgMillis": 0,
+      "maxMillis": 0,
+      "totalDocsExamined": 1,
+      "totalKeysExamined": 1
+    }
+  ],
+  "collectionStats": {
+    "news-artikels": {
+      "count": 1729,
+      "size": 4940513,
+      "avgObjSize": 2857,
+      "totalIndexSize": 356352,
+      "nindexes": 4
+    },
+    "_news-artikel_versions": {
+      "count": 34002,
+      "size": 99977083,
+      "avgObjSize": 2940,
+      "totalIndexSize": 2977792,
+      "nindexes": 7
+    },
+    "veranstaltungsmediens": {
+      "count": 3168,
+      "size": 1466972,
+      "avgObjSize": 463,
+      "totalIndexSize": 696320,
+      "nindexes": 5
+    },
+    "integrations": {
+      "count": 10,
+      "size": 4231,
+      "avgObjSize": 423,
+      "totalIndexSize": 20480,
+      "nindexes": 1
+    }
+  },
+  "indexes": {
+    "news-artikels": ["_id_", "datum_1_notified_1", "importId_1_kommune_1", "kommune_1"],
+    "_news-artikel_versions": [
+      "_id_",
+      "version._status_1",
+      "parent_1",
+      "createdAt_1",
+      "updatedAt_1",
+      "latest_1",
+      "parent_1_latest_1"
+    ],
+    "veranstaltungsmediens": [
+      "_id_",
+      "filename_1",
+      "sizes.thumbnail.filename_1",
+      "sourceUrl_1_kommune_1",
+      "kommune_1"
+    ],
+    "benutzers": ["_id_", "email_1", "bereichAId_1", "apiKeyIndex_1"]
+  },
+  "keyObservations": [
+    "0 COLLSCANs on application collections (only system.profile itself)",
+    "539 IXSCAN operations — all queries use indexes",
+    "veranstaltungsmediens: 380 IXSCAN ops examining only 1 doc total (vs 145,728 before)",
+    "news-artikels: 1 IXSCAN op examining 1 doc (vs 83,184 docs scanned before)",
+    "Max query time: 0ms on all application queries (vs 5ms max before)",
+    "Prefetch cache eliminates N+1 lookups — bulk load then Map.get()"
+  ]
+}

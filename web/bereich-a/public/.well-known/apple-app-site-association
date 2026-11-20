@@ -1,0 +1,28 @@
+{
+  "applinks": {
+    "apps": [],
+    "details": [
+      {
+        "appID": "REPLACE_ME.de.landkreis.hapy.app",
+        "paths": [
+          "/deeplinks*",
+          "NOT /*"
+        ]
+      },
+      {
+        "appID": "REPLACE_ME.de.landkreis.hapy.app.preprod",
+        "paths": [
+          "/deeplinks*",
+          "NOT /*"
+        ]
+      },
+      {
+        "appID": "REPLACE_ME.de.landkreis.hapy.app.staging",
+        "paths": [
+          "/deeplinks*",
+          "NOT /*"
+        ]
+      }
+    ]
+  }
+}

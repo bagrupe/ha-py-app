@@ -1,0 +1,1369 @@
+{
+  "my": {
+    "kommune": {
+      "prozessById": {
+        "id": "78965ab6-ec86-5f24-acfd-b8a4932f3bc7",
+        "name": "Bildungs- und Teilhabeleistungen Erstantrag",
+        "istOeffentlich": false,
+        "tags": [],
+        "latestVersion": {
+          "id": "019d85b9-4cde-7352-9e7b-29ca9e490025",
+          "publishedAt": null,
+          "start": {
+            "id": "cbed2b2f-487c-4aa5-9d8a-5e7470edbaa4"
+          },
+          "rollen": [],
+          "alleSchritte": [
+            {
+              "__typename": "FormularSchritt",
+              "id": "04192373-8dcb-470c-8167-33f91303ce36",
+              "titel": "Aktenzeichen eintragen",
+              "anweisung": "Bitte geben Sie das Aktenzeichen an",
+              "erledigungDurchBuerger": false,
+              "sollZustaendigkeit": {
+                "art": "ORGANISATIONSEINHEIT",
+                "organisationseinheitId": "0195c8a5-023d-7a9a-8481-c5730fab04a2",
+                "mitarbeiterGruppeId": "01956a7f-6e8d-72e4-a6a7-6551e4070310",
+                "dienstleisterId": null,
+                "mitarbeiterGruppe": {
+                  "id": "01956a7f-6e8d-72e4-a6a7-6551e4070310",
+                  "name": "Wohngeldstelle",
+                  "eMailAdressen": ["wohngeldstelle@example.com"]
+                },
+                "dynamischeArten": [],
+                "liestRolleId": null,
+                "liestRolle": null
+              },
+              "schreibtRolle": null,
+              "schreibtRolleId": null,
+              "versendeEMailAnMitarbeiterGruppe": null,
+              "verbindungen": [
+                {
+                  "id": "ceb3d7b5-234d-4d82-8a3a-dad2a032ef46",
+                  "name": "Aktenzeichen gespeichert",
+                  "vonId": "04192373-8dcb-470c-8167-33f91303ce36",
+                  "nachId": "53af92e8-b648-42d3-8d50-06d10189bdb0",
+                  "statusAenderung": "Antrag abgeschlossen",
+                  "statusAenderungBeschreibung": "Für die Beantragung von Bildungs- und Teilhabeleistungen wurde Ihnen das Aktenzeichen XY-12 zugewiesen.",
+                  "istRelevant": "true"
+                }
+              ],
+              "nodePosition": {
+                "x": 3230,
+                "y": 40
+              },
+              "slots": [
+                {
+                  "name": "Aktenzeichen",
+                  "encrypted": false,
+                  "valueType": "STRING",
+                  "optional": false,
+                  "brauchtFreigabe": false
+                }
+              ],
+              "felder": [
+                {
+                  "__typename": "StringFormularFeld",
+                  "id": "019d85b9-4cdd-7206-be02-14abc9126568",
+                  "slotName": "Aktenzeichen",
+                  "angezeigterName": "Aktenzeichen",
+                  "anweisung": "Bitte geben Sie das Aktenzeichen an",
+                  "order": 0,
+                  "encrypted": false,
+                  "inhaltsTag": null,
+                  "istRelevant": "true",
+                  "pflichtfeld": true,
+                  "oeffentlichSichtbar": false,
+                  "multiline": false,
+                  "options": []
+                }
+              ]
+            },
+            {
+              "__typename": "FormularSchritt",
+              "id": "08a36600-e4d7-46e1-b1cc-54b59bf74c90",
+              "titel": "Lernförderung",
+              "anweisung": null,
+              "erledigungDurchBuerger": true,
+              "sollZustaendigkeit": {
+                "art": "BUERGER",
+                "organisationseinheitId": null,
+                "mitarbeiterGruppeId": null,
+                "dienstleisterId": null,
+                "mitarbeiterGruppe": null,
+                "dynamischeArten": [],
+                "liestRolleId": null,
+                "liestRolle": null
+              },
+              "schreibtRolle": null,
+              "schreibtRolleId": null,
+              "versendeEMailAnMitarbeiterGruppe": null,
+              "verbindungen": [
+                {
+                  "id": "e5b3a76a-c10b-422c-956e-9257ee26a7fc",
+                  "name": "Absenden",
+                  "vonId": "08a36600-e4d7-46e1-b1cc-54b59bf74c90",
+                  "nachId": "12114f8b-18f2-4f8b-841f-493c58c1e36e",
+                  "statusAenderung": "Antrag eingegangen",
+                  "statusAenderungBeschreibung": "Ihr Antrag ist erfolgreich eingegangen und wird nun von uns bearbeitet.",
+                  "istRelevant": "true"
+                }
+              ],
+              "nodePosition": {
+                "x": 2070,
+                "y": 270
+              },
+              "slots": [
+                {
+                  "name": "anbieter",
+                  "encrypted": false,
+                  "valueType": "STRING",
+                  "optional": true,
+                  "brauchtFreigabe": false
+                },
+                {
+                  "name": "kosten",
+                  "encrypted": false,
+                  "valueType": "STRING",
+                  "optional": true,
+                  "brauchtFreigabe": false
+                },
+                {
+                  "name": "artDerLernfoerderung",
+                  "encrypted": false,
+                  "valueType": "STRING",
+                  "optional": true,
+                  "brauchtFreigabe": false
+                },
+                {
+                  "name": "bescheinigung_2",
+                  "encrypted": false,
+                  "valueType": "UPLOAD",
+                  "optional": true,
+                  "brauchtFreigabe": false
+                }
+              ],
+              "felder": [
+                {
+                  "__typename": "StringFormularFeld",
+                  "id": "019d85b9-4cdd-7537-bf92-c238ea019f17",
+                  "slotName": "anbieter",
+                  "angezeigterName": "Anbieter",
+                  "anweisung": "",
+                  "order": 0,
+                  "encrypted": false,
+                  "inhaltsTag": null,
+                  "istRelevant": "true",
+                  "pflichtfeld": false,
+                  "oeffentlichSichtbar": false,
+                  "multiline": false,
+                  "options": []
+                },
+                {
+                  "__typename": "CheckboxListFormularFeld",
+                  "id": "019d85b9-4cdd-7b6b-9c08-9de7d5d35619",
+                  "slotName": "artDerLernfoerderung",
+                  "angezeigterName": "Art der Lernförderung",
+                  "anweisung": "",
+                  "order": 1,
+                  "encrypted": false,
+                  "inhaltsTag": null,
+                  "istRelevant": "true",
+                  "pflichtfeld": false,
+                  "oeffentlichSichtbar": false,
+                  "options": []
+                },
+                {
+                  "__typename": "StringFormularFeld",
+                  "id": "019d85b9-4cdd-75f4-9452-7e5a991855db",
+                  "slotName": "kosten",
+                  "angezeigterName": "Monatl. Kosten",
+                  "anweisung": "",
+                  "order": 2,
+                  "encrypted": false,
+                  "inhaltsTag": null,
+                  "istRelevant": "true",
+                  "pflichtfeld": false,
+                  "oeffentlichSichtbar": false,
+                  "multiline": false,
+                  "options": []
+                },
+                {
+                  "__typename": "UploadFormularFeld",
+                  "id": "019d85b9-4cdd-7563-9846-6643a7a7d701",
+                  "slotName": "bescheinigung_2",
+                  "angezeigterName": "Bescheinigung: Notwendigkeitserklärung der Schule",
+                  "anweisung": "",
+                  "order": 3,
+                  "encrypted": false,
+                  "inhaltsTag": null,
+                  "istRelevant": "true",
+                  "pflichtfeld": false,
+                  "oeffentlichSichtbar": false,
+                  "multi": true,
+                  "document": false,
+                  "brauchtFreigabe": false
+                }
+              ]
+            },
+            {
+              "__typename": "GovManagerRestExportSchritt",
+              "id": "12114f8b-18f2-4f8b-841f-493c58c1e36e",
+              "titel": "Neuer GovManager-Export-Schritt",
+              "anweisung": null,
+              "erledigungDurchBuerger": false,
+              "sollZustaendigkeit": {
+                "art": "ORGANISATIONSEINHEIT",
+                "organisationseinheitId": "0195c8a5-023d-7a9a-8481-c5730fab04a2",
+                "mitarbeiterGruppeId": "01956a7f-6e8d-72e4-a6a7-6551e4070310",
+                "dienstleisterId": null,
+                "mitarbeiterGruppe": {
+                  "id": "01956a7f-6e8d-72e4-a6a7-6551e4070310",
+                  "name": "Wohngeldstelle",
+                  "eMailAdressen": ["wohngeldstelle@example.com"]
+                },
+                "dynamischeArten": [],
+                "liestRolleId": null,
+                "liestRolle": null
+              },
+              "schreibtRolle": null,
+              "schreibtRolleId": null,
+              "versendeEMailAnMitarbeiterGruppe": false,
+              "verbindungen": [
+                {
+                  "id": "c9af0ba0-5ed9-4142-9bfe-dc50ea9d92b5",
+                  "name": null,
+                  "vonId": "12114f8b-18f2-4f8b-841f-493c58c1e36e",
+                  "nachId": "ed7e179f-d5dd-41d7-87fb-8b38f0600066",
+                  "statusAenderung": null,
+                  "statusAenderungBeschreibung": null,
+                  "istRelevant": "true"
+                }
+              ],
+              "nodePosition": {
+                "x": 2550,
+                "y": 160
+              },
+              "slots": [
+                {
+                  "name": "id",
+                  "encrypted": false,
+                  "valueType": "STRING",
+                  "optional": false,
+                  "brauchtFreigabe": false
+                },
+                {
+                  "name": "requestId",
+                  "encrypted": false,
+                  "valueType": "STRING",
+                  "optional": false,
+                  "brauchtFreigabe": false
+                },
+                {
+                  "name": "uploadStatus",
+                  "encrypted": false,
+                  "valueType": "STRING",
+                  "optional": false,
+                  "brauchtFreigabe": false
+                }
+              ],
+              "exportFilePartsAsPdf": true,
+              "exportParts": [
+                {
+                  "__typename": "FilePart",
+                  "slotName": "bescheinigung_1"
+                },
+                {
+                  "__typename": "FilePart",
+                  "slotName": "bescheinigung_2"
+                },
+                {
+                  "__typename": "FilePart",
+                  "slotName": "bescheideNachweise"
+                },
+                {
+                  "__typename": "JsonPart",
+                  "value": {
+                    "__typename": "JsonObject",
+                    "fields": [
+                      {
+                        "name": "iban",
+                        "value": {
+                          "__typename": "JsonSlotValue",
+                          "slotName": "iban"
+                        }
+                      },
+                      {
+                        "name": "kreditinstitut",
+                        "value": {
+                          "__typename": "JsonSlotValue",
+                          "slotName": "kreditinstitut"
+                        }
+                      },
+                      {
+                        "name": "kontoinhaber",
+                        "value": {
+                          "__typename": "JsonSlotValue",
+                          "slotName": "kontoinhaber"
+                        }
+                      },
+                      {
+                        "name": "Hinweis",
+                        "value": {
+                          "__typename": "JsonSlotValue",
+                          "slotName": "0ba8a601-afd9-4440-a5bf-fbca3774dfcc"
+                        }
+                      },
+                      {
+                        "name": "vorname",
+                        "value": {
+                          "__typename": "JsonSlotValue",
+                          "slotName": "vorname"
+                        }
+                      },
+                      {
+                        "name": "nachname",
+                        "value": {
+                          "__typename": "JsonSlotValue",
+                          "slotName": "nachname"
+                        }
+                      },
+                      {
+                        "name": "strasse",
+                        "value": {
+                          "__typename": "JsonSlotValue",
+                          "slotName": "strasse"
+                        }
+                      },
+                      {
+                        "name": "hausnummer",
+                        "value": {
+                          "__typename": "JsonSlotValue",
+                          "slotName": "hausnummer"
+                        }
+                      },
+                      {
+                        "name": "postleitzahl",
+                        "value": {
+                          "__typename": "JsonSlotValue",
+                          "slotName": "postleitzahl"
+                        }
+                      },
+                      {
+                        "name": "ort",
+                        "value": {
+                          "__typename": "JsonSlotValue",
+                          "slotName": "ort"
+                        }
+                      },
+                      {
+                        "name": "telefonnummer",
+                        "value": {
+                          "__typename": "JsonSlotValue",
+                          "slotName": "telefonnummer"
+                        }
+                      },
+                      {
+                        "name": "aktivitaet",
+                        "value": {
+                          "__typename": "JsonSlotValue",
+                          "slotName": "aktivitaet"
+                        }
+                      },
+                      {
+                        "name": "kosten_2",
+                        "value": {
+                          "__typename": "JsonSlotValue",
+                          "slotName": "kosten_1"
+                        }
+                      },
+                      {
+                        "name": "anbieter",
+                        "value": {
+                          "__typename": "JsonSlotValue",
+                          "slotName": "anbieter"
+                        }
+                      },
+                      {
+                        "name": "artDerLernfoerderung",
+                        "value": {
+                          "__typename": "JsonSlotValue",
+                          "slotName": "artDerLernfoerderung"
+                        }
+                      },
+                      {
+                        "name": "kosten_2",
+                        "value": {
+                          "__typename": "JsonSlotValue",
+                          "slotName": "kosten_1"
+                        }
+                      },
+                      {
+                        "name": "vornameDesKindes",
+                        "value": {
+                          "__typename": "JsonSlotValue",
+                          "slotName": "vornameKind"
+                        }
+                      },
+                      {
+                        "name": "nachnameKind",
+                        "value": {
+                          "__typename": "JsonSlotValue",
+                          "slotName": "nachnameKind"
+                        }
+                      },
+                      {
+                        "name": "geburtsdatumKind",
+                        "value": {
+                          "__typename": "JsonSlotValue",
+                          "slotName": "geburtsdatumKind"
+                        }
+                      },
+                      {
+                        "name": "kindergartenOderSchule",
+                        "value": {
+                          "__typename": "JsonSlotValue",
+                          "slotName": "kindergartenOderSchule"
+                        }
+                      },
+                      {
+                        "name": "leistungsart",
+                        "value": {
+                          "__typename": "JsonSlotValue",
+                          "slotName": "leistungsart"
+                        }
+                      },
+                      {
+                        "name": "Hinweis!",
+                        "value": {
+                          "__typename": "JsonSlotValue",
+                          "slotName": "136dc525-ff62-41dc-b912-7e2ace820389"
+                        }
+                      },
+                      {
+                        "name": "Leistungen",
+                        "value": {
+                          "__typename": "JsonSlotValue",
+                          "slotName": "bezogeneLeistungen"
+                        }
+                      }
+                    ]
+                  }
+                }
+              ],
+              "vorgangsTyp": "govman_upload",
+              "mandantenSchluessel": "03252",
+              "vorgangsSchluessel": "ECM"
+            },
+            {
+              "__typename": "FormularSchritt",
+              "id": "200804e4-8271-4ebd-a8a6-d89487f731bb",
+              "titel": "Leistungsbescheide",
+              "anweisung": "Bitte laden Sie hier die Bescheide zu den bezogenen Leistungen hoch",
+              "erledigungDurchBuerger": true,
+              "sollZustaendigkeit": {
+                "art": "BUERGER",
+                "organisationseinheitId": null,
+                "mitarbeiterGruppeId": null,
+                "dienstleisterId": null,
+                "mitarbeiterGruppe": null,
+                "dynamischeArten": [],
+                "liestRolleId": null,
+                "liestRolle": null
+              },
+              "schreibtRolle": null,
+              "schreibtRolleId": null,
+              "versendeEMailAnMitarbeiterGruppe": null,
+              "verbindungen": [
+                {
+                  "id": "420162c7-a03d-4cc0-9c32-2d4fc3f4d47e",
+                  "name": null,
+                  "vonId": "200804e4-8271-4ebd-a8a6-d89487f731bb",
+                  "nachId": "6a75a257-059c-4783-98ab-ee5e88d4af53",
+                  "statusAenderung": null,
+                  "statusAenderungBeschreibung": null,
+                  "istRelevant": "true"
+                },
+                {
+                  "id": "e0ad04ef-b440-44dc-926f-1188992d5b03",
+                  "name": null,
+                  "vonId": "200804e4-8271-4ebd-a8a6-d89487f731bb",
+                  "nachId": "6a75a257-059c-4783-98ab-ee5e88d4af53",
+                  "statusAenderung": null,
+                  "statusAenderungBeschreibung": null,
+                  "istRelevant": "true"
+                }
+              ],
+              "nodePosition": {
+                "x": -450,
+                "y": 0
+              },
+              "slots": [
+                {
+                  "name": "bescheideNachweise",
+                  "encrypted": false,
+                  "valueType": "UPLOAD",
+                  "optional": false,
+                  "brauchtFreigabe": false
+                }
+              ],
+              "felder": [
+                {
+                  "__typename": "UploadFormularFeld",
+                  "id": "019d85b9-4cdd-792d-bc81-00d2cb15f4c2",
+                  "slotName": "bescheideNachweise",
+                  "angezeigterName": "Bescheide / Nachweise",
+                  "anweisung": "Bitte laden Sie die Bescheide hoch.",
+                  "order": 0,
+                  "encrypted": false,
+                  "inhaltsTag": null,
+                  "istRelevant": "true",
+                  "pflichtfeld": true,
+                  "oeffentlichSichtbar": false,
+                  "multi": true,
+                  "document": false,
+                  "brauchtFreigabe": false
+                }
+              ]
+            },
+            {
+              "__typename": "EndeSchritt",
+              "id": "53af92e8-b648-42d3-8d50-06d10189bdb0",
+              "titel": null,
+              "anweisung": null,
+              "erledigungDurchBuerger": false,
+              "sollZustaendigkeit": {
+                "art": "BUERGER",
+                "organisationseinheitId": null,
+                "mitarbeiterGruppeId": null,
+                "dienstleisterId": null,
+                "mitarbeiterGruppe": null,
+                "dynamischeArten": [],
+                "liestRolleId": null,
+                "liestRolle": null
+              },
+              "schreibtRolle": null,
+              "schreibtRolleId": null,
+              "versendeEMailAnMitarbeiterGruppe": null,
+              "verbindungen": [],
+              "nodePosition": {
+                "x": 3740,
+                "y": 100
+              },
+              "slots": []
+            },
+            {
+              "__typename": "FormularSchritt",
+              "id": "6a75a257-059c-4783-98ab-ee5e88d4af53",
+              "titel": "Persönliche Daten",
+              "anweisung": null,
+              "erledigungDurchBuerger": true,
+              "sollZustaendigkeit": {
+                "art": "BUERGER",
+                "organisationseinheitId": null,
+                "mitarbeiterGruppeId": null,
+                "dienstleisterId": null,
+                "mitarbeiterGruppe": null,
+                "dynamischeArten": [],
+                "liestRolleId": null,
+                "liestRolle": null
+              },
+              "schreibtRolle": null,
+              "schreibtRolleId": null,
+              "versendeEMailAnMitarbeiterGruppe": null,
+              "verbindungen": [
+                {
+                  "id": "b1aeddc2-5645-4f7f-9e0d-1d225832e761",
+                  "name": "",
+                  "vonId": "6a75a257-059c-4783-98ab-ee5e88d4af53",
+                  "nachId": "d98bf9f1-d7d3-4d9f-9fd8-864f039fafa7",
+                  "statusAenderung": null,
+                  "statusAenderungBeschreibung": null,
+                  "istRelevant": "true"
+                }
+              ],
+              "nodePosition": {
+                "x": 200,
+                "y": 0
+              },
+              "slots": [
+                {
+                  "name": "postleitzahl",
+                  "encrypted": false,
+                  "valueType": "STRING",
+                  "optional": false,
+                  "brauchtFreigabe": false
+                },
+                {
+                  "name": "hausnummer",
+                  "encrypted": false,
+                  "valueType": "STRING",
+                  "optional": false,
+                  "brauchtFreigabe": false
+                },
+                {
+                  "name": "ort",
+                  "encrypted": false,
+                  "valueType": "STRING",
+                  "optional": false,
+                  "brauchtFreigabe": false
+                },
+                {
+                  "name": "0ba8a601-afd9-4440-a5bf-fbca3774dfcc",
+                  "encrypted": false,
+                  "valueType": "READ_ONLY",
+                  "optional": true,
+                  "brauchtFreigabe": false
+                },
+                {
+                  "name": "strasse",
+                  "encrypted": false,
+                  "valueType": "STRING",
+                  "optional": false,
+                  "brauchtFreigabe": false
+                },
+                {
+                  "name": "telefonnummer",
+                  "encrypted": false,
+                  "valueType": "STRING",
+                  "optional": false,
+                  "brauchtFreigabe": false
+                },
+                {
+                  "name": "nachname",
+                  "encrypted": false,
+                  "valueType": "STRING",
+                  "optional": false,
+                  "brauchtFreigabe": false
+                },
+                {
+                  "name": "vorname",
+                  "encrypted": false,
+                  "valueType": "STRING",
+                  "optional": false,
+                  "brauchtFreigabe": false
+                }
+              ],
+              "felder": [
+                {
+                  "__typename": "AnzeigeTextBlockFeld",
+                  "id": "019d85b9-4cdd-7cdc-a4fc-96db6df3a39a",
+                  "slotName": "0ba8a601-afd9-4440-a5bf-fbca3774dfcc",
+                  "angezeigterName": "Hinweis",
+                  "anweisung": "",
+                  "order": 0,
+                  "encrypted": false,
+                  "inhaltsTag": null,
+                  "istRelevant": "true",
+                  "pflichtfeld": true,
+                  "oeffentlichSichtbar": false,
+                  "text": "Bitte geben Sie Ihre Daten an. Die Daten zum berechtigten Kind werden im nächsten Schritt abgefragt."
+                },
+                {
+                  "__typename": "StringFormularFeld",
+                  "id": "019d85b9-4cdd-7620-9f9c-64742643052e",
+                  "slotName": "vorname",
+                  "angezeigterName": "Vorname",
+                  "anweisung": "Bitten geben Sie Ihren Vornamen ein.",
+                  "order": 1,
+                  "encrypted": false,
+                  "inhaltsTag": null,
+                  "istRelevant": "true",
+                  "pflichtfeld": true,
+                  "oeffentlichSichtbar": false,
+                  "multiline": false,
+                  "options": []
+                },
+                {
+                  "__typename": "StringFormularFeld",
+                  "id": "019d85b9-4cdd-7784-b7b1-50f3a59ed216",
+                  "slotName": "nachname",
+                  "angezeigterName": "Nachname",
+                  "anweisung": "Bitte geben Sie Ihren Nachname ein.",
+                  "order": 2,
+                  "encrypted": false,
+                  "inhaltsTag": null,
+                  "istRelevant": "true",
+                  "pflichtfeld": true,
+                  "oeffentlichSichtbar": false,
+                  "multiline": false,
+                  "options": []
+                },
+                {
+                  "__typename": "StringFormularFeld",
+                  "id": "019d85b9-4cdd-762f-a4c6-753ad3670ba7",
+                  "slotName": "strasse",
+                  "angezeigterName": "Straße",
+                  "anweisung": "In welcher Straße wohnen Sie?",
+                  "order": 3,
+                  "encrypted": false,
+                  "inhaltsTag": null,
+                  "istRelevant": "true",
+                  "pflichtfeld": true,
+                  "oeffentlichSichtbar": false,
+                  "multiline": false,
+                  "options": []
+                },
+                {
+                  "__typename": "StringFormularFeld",
+                  "id": "019d85b9-4cdd-7c73-92e1-715a2937811e",
+                  "slotName": "hausnummer",
+                  "angezeigterName": "Hausnummer",
+                  "anweisung": "Wie ist Ihre Hausnummer?",
+                  "order": 4,
+                  "encrypted": false,
+                  "inhaltsTag": null,
+                  "istRelevant": "true",
+                  "pflichtfeld": true,
+                  "oeffentlichSichtbar": false,
+                  "multiline": false,
+                  "options": []
+                },
+                {
+                  "__typename": "StringFormularFeld",
+                  "id": "019d85b9-4cdd-7c6d-8fb6-76a433e619a1",
+                  "slotName": "postleitzahl",
+                  "angezeigterName": "Postlelitzahl",
+                  "anweisung": "Wie lautet Ihre Postleitzahl?",
+                  "order": 5,
+                  "encrypted": false,
+                  "inhaltsTag": null,
+                  "istRelevant": "true",
+                  "pflichtfeld": true,
+                  "oeffentlichSichtbar": false,
+                  "multiline": false,
+                  "options": []
+                },
+                {
+                  "__typename": "StringFormularFeld",
+                  "id": "019d85b9-4cdd-7b2a-a713-3634b0d3a9ce",
+                  "slotName": "ort",
+                  "angezeigterName": "Ort",
+                  "anweisung": "In welchem Ort wohnen Sie?",
+                  "order": 6,
+                  "encrypted": false,
+                  "inhaltsTag": null,
+                  "istRelevant": "true",
+                  "pflichtfeld": true,
+                  "oeffentlichSichtbar": false,
+                  "multiline": false,
+                  "options": []
+                },
+                {
+                  "__typename": "StringFormularFeld",
+                  "id": "019d85b9-4cdd-777d-b64c-3986a09af342",
+                  "slotName": "telefonnummer",
+                  "angezeigterName": "Telefonnummer",
+                  "anweisung": "Unter welcher Telefonnummer können wir Sie für eventuelle Rückfragen erreichen?",
+                  "order": 7,
+                  "encrypted": false,
+                  "inhaltsTag": null,
+                  "istRelevant": "true",
+                  "pflichtfeld": true,
+                  "oeffentlichSichtbar": false,
+                  "multiline": false,
+                  "options": []
+                }
+              ]
+            },
+            {
+              "__typename": "FormularSchritt",
+              "id": "91973f3b-7bea-4b4b-8d53-49828c68ff13",
+              "titel": "Daten des Kindes für das Leistungen beantragt werden",
+              "anweisung": "Bitte geben Sie Daten zum berechtigten Kind ein. Für jedes Kind ist ein eigener Antrag notwendig.",
+              "erledigungDurchBuerger": true,
+              "sollZustaendigkeit": {
+                "art": "BUERGER",
+                "organisationseinheitId": null,
+                "mitarbeiterGruppeId": null,
+                "dienstleisterId": null,
+                "mitarbeiterGruppe": null,
+                "dynamischeArten": [],
+                "liestRolleId": null,
+                "liestRolle": null
+              },
+              "schreibtRolle": null,
+              "schreibtRolleId": null,
+              "versendeEMailAnMitarbeiterGruppe": null,
+              "verbindungen": [
+                {
+                  "id": "37dc938e-0b90-4582-a164-335ec91edf4c",
+                  "name": null,
+                  "vonId": "91973f3b-7bea-4b4b-8d53-49828c68ff13",
+                  "nachId": "d323a93e-11c7-48a0-846b-b2b65e9b566a",
+                  "statusAenderung": null,
+                  "statusAenderungBeschreibung": null,
+                  "istRelevant": "true"
+                }
+              ],
+              "nodePosition": {
+                "x": 910,
+                "y": -10
+              },
+              "slots": [
+                {
+                  "name": "geburtsdatumKind",
+                  "encrypted": false,
+                  "valueType": "DATE",
+                  "optional": false,
+                  "brauchtFreigabe": false
+                },
+                {
+                  "name": "vornameKind",
+                  "encrypted": false,
+                  "valueType": "STRING",
+                  "optional": false,
+                  "brauchtFreigabe": false
+                },
+                {
+                  "name": "kindergartenOderSchule",
+                  "encrypted": false,
+                  "valueType": "STRING",
+                  "optional": false,
+                  "brauchtFreigabe": false
+                },
+                {
+                  "name": "nachnameKind",
+                  "encrypted": false,
+                  "valueType": "STRING",
+                  "optional": false,
+                  "brauchtFreigabe": false
+                }
+              ],
+              "felder": [
+                {
+                  "__typename": "StringFormularFeld",
+                  "id": "019d85b9-4cdd-70f4-9eff-b11fa4377827",
+                  "slotName": "vornameKind",
+                  "angezeigterName": "Vorname des Kindes",
+                  "anweisung": "Bitte geben Sie den Vornamen des Kindes ein.",
+                  "order": 0,
+                  "encrypted": false,
+                  "inhaltsTag": null,
+                  "istRelevant": "true",
+                  "pflichtfeld": true,
+                  "oeffentlichSichtbar": false,
+                  "multiline": false,
+                  "options": []
+                },
+                {
+                  "__typename": "StringFormularFeld",
+                  "id": "019d85b9-4cdd-7cb4-a50b-5ebb13f13f15",
+                  "slotName": "nachnameKind",
+                  "angezeigterName": "Nachname des Kindes",
+                  "anweisung": "Bitte geben Sie den Nachnamen des Kindes ein.",
+                  "order": 1,
+                  "encrypted": false,
+                  "inhaltsTag": null,
+                  "istRelevant": "true",
+                  "pflichtfeld": true,
+                  "oeffentlichSichtbar": false,
+                  "multiline": false,
+                  "options": []
+                },
+                {
+                  "__typename": "DateFormularFeld",
+                  "id": "019d85b9-4cdd-7b8b-ad54-24c381f8e625",
+                  "slotName": "geburtsdatumKind",
+                  "angezeigterName": "Geburtsdatum des Kindes",
+                  "anweisung": "Bitte geben Sie das Geburtsdatum des Kindes ein.",
+                  "order": 2,
+                  "encrypted": false,
+                  "inhaltsTag": null,
+                  "istRelevant": "true",
+                  "pflichtfeld": true,
+                  "oeffentlichSichtbar": false
+                },
+                {
+                  "__typename": "StringFormularFeld",
+                  "id": "019d85b9-4cdd-7887-ab97-058aeca85ffe",
+                  "slotName": "kindergartenOderSchule",
+                  "angezeigterName": "Kindergarten / Schule",
+                  "anweisung": "Bezeichnung des besuchten Kindergartens bzw. der besuchten Schule einschließlich der Klasse / der Jahrgangsstufe / des Ausbildungsgangs",
+                  "order": 3,
+                  "encrypted": false,
+                  "inhaltsTag": null,
+                  "istRelevant": "true",
+                  "pflichtfeld": true,
+                  "oeffentlichSichtbar": false,
+                  "multiline": false,
+                  "options": []
+                }
+              ]
+            },
+            {
+              "__typename": "FormularSchritt",
+              "id": "c2f1da7c-9ec6-48f7-a14c-b3620ee75297",
+              "titel": "Teilhabe: nur bis 18 Jahre möglich",
+              "anweisung": null,
+              "erledigungDurchBuerger": true,
+              "sollZustaendigkeit": {
+                "art": "BUERGER",
+                "organisationseinheitId": null,
+                "mitarbeiterGruppeId": null,
+                "dienstleisterId": null,
+                "mitarbeiterGruppe": null,
+                "dynamischeArten": [],
+                "liestRolleId": null,
+                "liestRolle": null
+              },
+              "schreibtRolle": null,
+              "schreibtRolleId": null,
+              "versendeEMailAnMitarbeiterGruppe": null,
+              "verbindungen": [
+                {
+                  "id": "0726e27b-bc80-46d3-9b01-6def16c6d153",
+                  "name": "Absenden",
+                  "vonId": "c2f1da7c-9ec6-48f7-a14c-b3620ee75297",
+                  "nachId": "12114f8b-18f2-4f8b-841f-493c58c1e36e",
+                  "statusAenderung": "Antrag eingegangen",
+                  "statusAenderungBeschreibung": "Ihr Antrag ist erfolgreich eingegangen und wird nun von uns bearbeitet.",
+                  "istRelevant": "true"
+                }
+              ],
+              "nodePosition": {
+                "x": 1970,
+                "y": 10
+              },
+              "slots": [
+                {
+                  "name": "kosten",
+                  "encrypted": false,
+                  "valueType": "STRING",
+                  "optional": false,
+                  "brauchtFreigabe": false
+                },
+                {
+                  "name": "aktivitaet",
+                  "encrypted": false,
+                  "valueType": "STRING",
+                  "optional": false,
+                  "brauchtFreigabe": false
+                },
+                {
+                  "name": "bescheinigung_1",
+                  "encrypted": false,
+                  "valueType": "UPLOAD",
+                  "optional": false,
+                  "brauchtFreigabe": false
+                }
+              ],
+              "felder": [
+                {
+                  "__typename": "StringFormularFeld",
+                  "id": "019d85b9-4cdd-71a5-8346-8fc0f51290d4",
+                  "slotName": "aktivitaet",
+                  "angezeigterName": "Aktivität:",
+                  "anweisung": "",
+                  "order": 0,
+                  "encrypted": false,
+                  "inhaltsTag": null,
+                  "istRelevant": "true",
+                  "pflichtfeld": true,
+                  "oeffentlichSichtbar": false,
+                  "multiline": false,
+                  "options": []
+                },
+                {
+                  "__typename": "StringFormularFeld",
+                  "id": "019d85b9-4cdd-7aa6-8c49-102f65865a69",
+                  "slotName": "kosten",
+                  "angezeigterName": "Monatl. Kosten",
+                  "anweisung": "",
+                  "order": 1,
+                  "encrypted": false,
+                  "inhaltsTag": null,
+                  "istRelevant": "true",
+                  "pflichtfeld": true,
+                  "oeffentlichSichtbar": false,
+                  "multiline": false,
+                  "options": []
+                },
+                {
+                  "__typename": "UploadFormularFeld",
+                  "id": "019d85b9-4cdd-74a3-888e-9abb26b4e8b9",
+                  "slotName": "bescheinigung_1",
+                  "angezeigterName": "Bescheinigung/ Nachweise",
+                  "anweisung": "Für jede ausgewählte Leistungsart ist eine separate Bescheinigung hochzuladen",
+                  "order": 2,
+                  "encrypted": false,
+                  "inhaltsTag": null,
+                  "istRelevant": "true",
+                  "pflichtfeld": true,
+                  "oeffentlichSichtbar": false,
+                  "multi": true,
+                  "document": false,
+                  "brauchtFreigabe": false
+                }
+              ]
+            },
+            {
+              "__typename": "FormularSchritt",
+              "id": "cbed2b2f-487c-4aa5-9d8a-5e7470edbaa4",
+              "titel": "Bezogene Leistungen",
+              "anweisung": "Bitte geben Sie Ihre Daten an. Die Daten zum berechtigten Kind werden im nächsten Schritt abgefragt.",
+              "erledigungDurchBuerger": true,
+              "sollZustaendigkeit": {
+                "art": "BUERGER",
+                "organisationseinheitId": null,
+                "mitarbeiterGruppeId": null,
+                "dienstleisterId": null,
+                "mitarbeiterGruppe": null,
+                "dynamischeArten": [],
+                "liestRolleId": null,
+                "liestRolle": null
+              },
+              "schreibtRolle": null,
+              "schreibtRolleId": null,
+              "versendeEMailAnMitarbeiterGruppe": null,
+              "verbindungen": [
+                {
+                  "id": "ac0557db-2464-4030-ae22-ee011fb1ab3c",
+                  "name": "",
+                  "vonId": "cbed2b2f-487c-4aa5-9d8a-5e7470edbaa4",
+                  "nachId": "200804e4-8271-4ebd-a8a6-d89487f731bb",
+                  "statusAenderung": null,
+                  "statusAenderungBeschreibung": null,
+                  "istRelevant": "true"
+                }
+              ],
+              "nodePosition": {
+                "x": -830,
+                "y": 10
+              },
+              "slots": [
+                {
+                  "name": "bezogeneLeistungen",
+                  "encrypted": false,
+                  "valueType": "STRING",
+                  "optional": false,
+                  "brauchtFreigabe": false
+                },
+                {
+                  "name": "136dc525-ff62-41dc-b912-7e2ace820389",
+                  "encrypted": false,
+                  "valueType": "READ_ONLY",
+                  "optional": true,
+                  "brauchtFreigabe": false
+                }
+              ],
+              "felder": [
+                {
+                  "__typename": "AnzeigeTextBlockFeld",
+                  "id": "019d85b9-4cdc-7e3a-9191-0e93afdba296",
+                  "slotName": "136dc525-ff62-41dc-b912-7e2ace820389",
+                  "angezeigterName": "Hinweis!",
+                  "anweisung": "",
+                  "order": 0,
+                  "encrypted": false,
+                  "inhaltsTag": null,
+                  "istRelevant": "true",
+                  "pflichtfeld": true,
+                  "oeffentlichSichtbar": false,
+                  "text": "Bitte geben Sie an, welche Leistungen Sie beziehen."
+                },
+                {
+                  "__typename": "CheckboxListFormularFeld",
+                  "id": "019d85b9-4cdd-7dba-bb47-307300c17c14",
+                  "slotName": "bezogeneLeistungen",
+                  "angezeigterName": "Leistungen",
+                  "anweisung": "",
+                  "order": 1,
+                  "encrypted": false,
+                  "inhaltsTag": null,
+                  "istRelevant": "true",
+                  "pflichtfeld": true,
+                  "oeffentlichSichtbar": false,
+                  "options": [
+                    {
+                      "key": "option-0",
+                      "label": "Hilfe zum Lebensunterhalt / Grundsicherung",
+                      "order": 0,
+                      "defaultChecked": false
+                    },
+                    {
+                      "key": "option-1",
+                      "label": "Leistungen nach dem Asylbewerberleistungsgesetzt",
+                      "order": 1,
+                      "defaultChecked": false
+                    },
+                    {
+                      "key": "option-2",
+                      "label": "Kindergeld und Wohngeld",
+                      "order": 2,
+                      "defaultChecked": false
+                    },
+                    {
+                      "key": "option-3",
+                      "label": "Kindergeld und Kinderzuschlag",
+                      "order": 3,
+                      "defaultChecked": false
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "__typename": "FormularSchritt",
+              "id": "d323a93e-11c7-48a0-846b-b2b65e9b566a",
+              "titel": "Leistungsart",
+              "anweisung": null,
+              "erledigungDurchBuerger": true,
+              "sollZustaendigkeit": {
+                "art": "BUERGER",
+                "organisationseinheitId": null,
+                "mitarbeiterGruppeId": null,
+                "dienstleisterId": null,
+                "mitarbeiterGruppe": null,
+                "dynamischeArten": [],
+                "liestRolleId": null,
+                "liestRolle": null
+              },
+              "schreibtRolle": null,
+              "schreibtRolleId": null,
+              "versendeEMailAnMitarbeiterGruppe": null,
+              "verbindungen": [
+                {
+                  "id": "48aec4f5-65d9-4380-a5df-7ca886d698e2",
+                  "name": "Weiter",
+                  "vonId": "d323a93e-11c7-48a0-846b-b2b65e9b566a",
+                  "nachId": "c2f1da7c-9ec6-48f7-a14c-b3620ee75297",
+                  "statusAenderung": "",
+                  "statusAenderungBeschreibung": "",
+                  "istRelevant": "slot('leistungsart') == 'Teilhabe (Nur bis 18 Jahre möglich)'"
+                },
+                {
+                  "id": "bbf6b3ab-17d2-4106-bc14-3e715e32cc84",
+                  "name": "weiter",
+                  "vonId": "d323a93e-11c7-48a0-846b-b2b65e9b566a",
+                  "nachId": "08a36600-e4d7-46e1-b1cc-54b59bf74c90",
+                  "statusAenderung": "",
+                  "statusAenderungBeschreibung": null,
+                  "istRelevant": "slot('leistungsart') == 'Lernfoerderung'"
+                }
+              ],
+              "nodePosition": {
+                "x": 1470,
+                "y": 20
+              },
+              "slots": [
+                {
+                  "name": "leistungsart",
+                  "encrypted": false,
+                  "valueType": "STRING",
+                  "optional": false,
+                  "brauchtFreigabe": false
+                }
+              ],
+              "felder": [
+                {
+                  "__typename": "CheckboxListFormularFeld",
+                  "id": "019d85b9-4cdd-7a92-9a7d-a745bc2c2d64",
+                  "slotName": "leistungsart",
+                  "angezeigterName": "Leistungsart",
+                  "anweisung": "Welche Leistungen möchten Sie für das Kind beantragen?",
+                  "order": 0,
+                  "encrypted": false,
+                  "inhaltsTag": null,
+                  "istRelevant": "true",
+                  "pflichtfeld": true,
+                  "oeffentlichSichtbar": false,
+                  "options": [
+                    {
+                      "key": "option-0",
+                      "label": "Mittagsverpflegung",
+                      "order": 0,
+                      "defaultChecked": false
+                    },
+                    {
+                      "key": "option-1",
+                      "label": "Ausflug",
+                      "order": 1,
+                      "defaultChecked": false
+                    },
+                    {
+                      "key": "option-2",
+                      "label": "Klassenfahrt",
+                      "order": 2,
+                      "defaultChecked": false
+                    },
+                    {
+                      "key": "option-3",
+                      "label": "Lernfoerderung",
+                      "order": 3,
+                      "defaultChecked": false
+                    },
+                    {
+                      "key": "option-4",
+                      "label": "Teilhabe (Nur bis 18 Jahre möglich)",
+                      "order": 4,
+                      "defaultChecked": false
+                    },
+                    {
+                      "key": "option-5",
+                      "label": "Schülerbeförderung",
+                      "order": 5,
+                      "defaultChecked": false
+                    },
+                    {
+                      "key": "option-6",
+                      "label": "Schulbasispaket",
+                      "order": 6,
+                      "defaultChecked": false
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "__typename": "FormularSchritt",
+              "id": "d98bf9f1-d7d3-4d9f-9fd8-864f039fafa7",
+              "titel": "Bankverbindung",
+              "anweisung": "Bitte geben Sie Ihre Bankverbindung an.",
+              "erledigungDurchBuerger": true,
+              "sollZustaendigkeit": {
+                "art": "BUERGER",
+                "organisationseinheitId": null,
+                "mitarbeiterGruppeId": null,
+                "dienstleisterId": null,
+                "mitarbeiterGruppe": null,
+                "dynamischeArten": [],
+                "liestRolleId": null,
+                "liestRolle": null
+              },
+              "schreibtRolle": null,
+              "schreibtRolleId": null,
+              "versendeEMailAnMitarbeiterGruppe": null,
+              "verbindungen": [
+                {
+                  "id": "b449fb00-974e-40df-94b2-86bef934f5ce",
+                  "name": "",
+                  "vonId": "d98bf9f1-d7d3-4d9f-9fd8-864f039fafa7",
+                  "nachId": "91973f3b-7bea-4b4b-8d53-49828c68ff13",
+                  "statusAenderung": null,
+                  "statusAenderungBeschreibung": null,
+                  "istRelevant": "true"
+                }
+              ],
+              "nodePosition": {
+                "x": 640,
+                "y": 10
+              },
+              "slots": [
+                {
+                  "name": "kreditinstitut",
+                  "encrypted": false,
+                  "valueType": "STRING",
+                  "optional": false,
+                  "brauchtFreigabe": false
+                },
+                {
+                  "name": "kontoinhaber",
+                  "encrypted": false,
+                  "valueType": "STRING",
+                  "optional": false,
+                  "brauchtFreigabe": false
+                },
+                {
+                  "name": "iban",
+                  "encrypted": false,
+                  "valueType": "STRING",
+                  "optional": false,
+                  "brauchtFreigabe": false
+                }
+              ],
+              "felder": [
+                {
+                  "__typename": "StringFormularFeld",
+                  "id": "019d85b9-4cdc-7fe9-bfd2-10b17e89cdea",
+                  "slotName": "iban",
+                  "angezeigterName": "IBAN",
+                  "anweisung": "Auf welche IBAN sollen wir die Leistung überweisen?",
+                  "order": 0,
+                  "encrypted": false,
+                  "inhaltsTag": "IBAN",
+                  "istRelevant": "true",
+                  "pflichtfeld": true,
+                  "oeffentlichSichtbar": false,
+                  "multiline": false,
+                  "options": []
+                },
+                {
+                  "__typename": "StringFormularFeld",
+                  "id": "019d85b9-4cdc-7996-8391-f9a44c965c9a",
+                  "slotName": "kreditinstitut",
+                  "angezeigterName": "Kreditinstitut",
+                  "anweisung": "Wie lautet das dazugehörige Kreditinstitut?",
+                  "order": 1,
+                  "encrypted": false,
+                  "inhaltsTag": "Kreditinstitut",
+                  "istRelevant": "true",
+                  "pflichtfeld": true,
+                  "oeffentlichSichtbar": false,
+                  "multiline": false,
+                  "options": []
+                },
+                {
+                  "__typename": "StringFormularFeld",
+                  "id": "019d85b9-4cdc-7fd0-b2ea-e2c1517f431a",
+                  "slotName": "kontoinhaber",
+                  "angezeigterName": "Kontoinhaber",
+                  "anweisung": "Bitte geben Sie den Kontoinhaber ein.",
+                  "order": 2,
+                  "encrypted": false,
+                  "inhaltsTag": "Kontoinhaber",
+                  "istRelevant": "true",
+                  "pflichtfeld": true,
+                  "oeffentlichSichtbar": false,
+                  "multiline": false,
+                  "options": []
+                }
+              ]
+            },
+            {
+              "__typename": "FormularSchritt",
+              "id": "ed7e179f-d5dd-41d7-87fb-8b38f0600066",
+              "titel": "Prüfung der Unterlagen",
+              "anweisung": null,
+              "erledigungDurchBuerger": false,
+              "sollZustaendigkeit": {
+                "art": "ORGANISATIONSEINHEIT",
+                "organisationseinheitId": "0195c8a5-023d-7a9a-8481-c5730fab04a2",
+                "mitarbeiterGruppeId": "2e7b2faf-eddb-555c-8d40-262f368747b0",
+                "dienstleisterId": null,
+                "mitarbeiterGruppe": {
+                  "id": "2e7b2faf-eddb-555c-8d40-262f368747b0",
+                  "name": "LK Teamleitung (Landkreis HaPy)",
+                  "eMailAdressen": []
+                },
+                "dynamischeArten": [],
+                "liestRolleId": null,
+                "liestRolle": null
+              },
+              "schreibtRolle": null,
+              "schreibtRolleId": null,
+              "versendeEMailAnMitarbeiterGruppe": null,
+              "verbindungen": [
+                {
+                  "id": "930f8252-b402-4af7-8b8c-a4968b38e6ea",
+                  "name": "Prüfung erfolgreich",
+                  "vonId": "ed7e179f-d5dd-41d7-87fb-8b38f0600066",
+                  "nachId": "04192373-8dcb-470c-8167-33f91303ce36",
+                  "statusAenderung": null,
+                  "statusAenderungBeschreibung": null,
+                  "istRelevant": "true"
+                }
+              ],
+              "nodePosition": {
+                "x": 2760,
+                "y": 30
+              },
+              "slots": [],
+              "felder": []
+            }
+          ]
+        }
+      }
+    }
+  }
+}

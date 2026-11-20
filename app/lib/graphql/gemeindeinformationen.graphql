@@ -1,0 +1,9 @@
+query Gemeindeinformationen($kommuneId: UUID!) {
+  kommune(kommuneId: $kommuneId) {
+    untereinheiten(where: {isGemeinde: {eq: true}}) {
+      id
+      name
+      newsNotificationsEnabled
+    }
+  }
+}

@@ -1,0 +1,28 @@
+==== Push Notifications
+
+Um Push Notifications an die in der App zu versenden nutzen wir Firebase Cloud Messaging (FCM).
+https://firebase.google.com/[Firebase] ist eine von Google bereitgestellte Entwicklungsplattform,
+die verschiedenene Backend Services bereitstellt.
+Firebase Cloud Messaging (FCM) ist ein Service, der es ermöglicht, Benachrichtigungen an mobile Geräte zu senden.
+
+===== FCM in .NET
+Um den FCM Service in .NET  verwenden zu können, wird das https://www.nuget.org/packages/FirebaseAdmin[FirebaseAdmin] nuget Paket  benutzt,
+welches das Firebase Admin SDK für .NET bereitstellt.
+
+Die Firebase App wird in der `Program.cs` initialisiert und bedient nutzt die in
+der `kommunalapp-service-account.json` hinterlegten Zugangsdaten. Nachdem ein
+Firebase Projekt in der https://console.firebase.google.com/[Firebase Console] angelegt wurde können die Zugansdaten unter den
+Einstellungen in der Firebase Console generiert werden.
+https://firebase.google.com/docs/cloud-messaging/auth-server#provide-credentials-manually[(Provide Credentials manually)]
+
+Der Bürger kann in der App einstellen, für welche Gemeinden er Push Notifications bekommen möchte.
+Dazu wird in der App eine Firebase Cloud Messaging (FCM) Token generiert, welches sowohl in der Datenbank an der Buerger Entität gespeichert wird als auch im FCM Service registriert wird.
+(`RegisterNotificationToken.cs`)
+
+Der Bürger hat die Möglichkeit in der App die Notifications für verschiedenen Gemeinden zu aktivieren oder deaktivieren.
+In der `NewsNotificationsMutation.cs` werden entsprechend die von Firebase bereitgestellten Methoden
+`SubscribeToTopicAsync` und `UnsubscribeFromTopicAsync` aufgerufen,
+um den Bürger für die entsprechenden `Topics` zu registrieren oder abzumelden.
+News Artikel, die einer Gemeinde zugehörig sind, werden mit dem gleichen
+`Topic`-Namen versendet. Nur die Bürger, die für dieses `Topic` registriert sind, erhalten die Benachrichtigung.
+

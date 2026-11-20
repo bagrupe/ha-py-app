@@ -1,0 +1,48 @@
+mutation RequestSmsCode($input: RequestSmsCodeInput!) {
+  requestSmsCode(input: $input) {
+    requestSmsResult
+  }
+}
+
+mutation ValidateSmsCode($input: ValidateSmsCodeInput!) {
+  validateSmsCode(input: $input) {
+    result
+    token
+    refreshToken
+    isNewRegistration
+    remainingAttempts
+    retryAfterSeconds
+  }
+}
+
+mutation UpdateMyProfile($input: UpdateMyProfileInput!) {
+  updateMyProfile(input: $input) {
+    boolean
+  }
+}
+
+query MyProfile {
+  my {
+    id
+    __typename
+
+    ... on Buerger {
+      vorname
+      nachname
+      emailAddress
+      street
+      postalCode
+      city
+      country
+      phoneVerified
+      phoneNumberMasked
+      hasBundId
+    }
+  }
+}
+
+mutation LogoutAllDevices {
+  logoutAllDevices {
+    logoutAllDevicesResult
+  }
+}

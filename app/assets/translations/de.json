@@ -1,0 +1,1017 @@
+{
+  "application": {
+    "image_picker": {
+      "add": "Foto hinzufügen",
+      "required": "Bitte füge mindestens ein Foto hinzu.",
+      "max_size": "Die Gesamtgröße aller Fotos darf 5 MB nicht überschreiten.",
+      "too_large": "Das Foto ist zu groß und kann nicht verwendet werden. Bitte wählen Sie ein kleineres Foto.",
+      "compressing": {
+        "title": "Ihre Fotos werden optimiert",
+        "subtitle": "Einen Moment bitte."
+      }
+    },
+    "data_transfer": {
+      "title": "Wollen Sie Ihre vorhandenen Daten übernehmen?",
+      "description": "Für Sie liegen bereits persönliche Daten im Profil vor. Möchten Sie diese in den Antrag übernehmen?",
+      "accept": "Daten übernehmen",
+      "decline": "Nicht übernehmen"
+    },
+    "common": {
+      "today": "Heute",
+      "yesterday": "Gestern",
+      "time_suffix": "Uhr",
+      "show_all": "Alle anzeigen",
+      "searchbar_hint": "Suchbegriff eingeben...",
+      "wait_time": {
+        "seconds": {
+          "one": "{} Sekunde",
+          "other": "{} Sekunden"
+        },
+        "minutes": {
+          "one": "{} Minute",
+          "other": "{} Minuten"
+        }
+      },
+      "bundid": {
+        "account_created": "Konto erstellt.",
+        "welcome_back": "Willkommen zurück!",
+        "consent": {
+          "title": "Konto mit BundID erstellen",
+          "intro": "Wir haben folgende Daten von deinem BundID-Konto erhalten. Wenn du zustimmst, wird damit ein Konto in dieser App erstellt und diese Daten werden gespeichert.",
+          "confirm": "Zustimmen und Konto erstellen",
+          "cancel": "Abbrechen",
+          "first_name": "Vorname",
+          "last_name": "Nachname",
+          "email": "E-Mail",
+          "street": "Straße und Hausnummer",
+          "postal_code": "Postleitzahl",
+          "city": "Ort",
+          "country": "Land"
+        },
+        "errors": {
+          "no_access_token": "Kein Access Token von Keycloak erhalten.",
+          "no_weak_login": "Kein bestehender App-Login vorhanden.",
+          "unexpected_status": "Unerwartete Antwort vom Server.",
+          "no_token_in_response": "Kein Token in der Server-Antwort enthalten.",
+          "already_linked_to_another_account": "Diese BundID ist bereits mit einem anderen Konto verknüpft.",
+          "account_already_has_different_bundid": "Dieses Gerät ist bereits mit einer anderen BundID verknüpft.",
+          "phone_login_required": "Auf diesem Gerät ist bereits ein Konto angelegt. Bitte melde dich mit deiner Telefonnummer an.",
+          "registration_required": "Diese BundID ist mit keinem bestehenden Konto verknüpft.",
+          "generic": "Die Anmeldung mit BundID ist fehlgeschlagen."
+        }
+      }
+    },
+    "onboarding": {
+      "setup": {
+        "loading": "Die App wird eingerichtet …",
+        "offline_title": "Einrichtung nicht möglich",
+        "offline_message": "Die App konnte nicht eingerichtet werden. Bitte prüfen Sie Ihre Internetverbindung und versuchen Sie es erneut."
+      }
+    },
+    "notifications": {
+      "message_semantics": "Nachricht zur Prozessbearbeitung"
+    },
+    "profile": {
+      "title": "Profil",
+      "volunteer_interests": {
+        "menu": "Interesse und Anfragen",
+        "title": "Interesse und Anfragen",
+        "sent": "Gesendete Anfrage",
+        "received": "Empfangene Anfrage",
+        "empty": "Für diesen Filter sind keine Anfragen vorhanden.",
+        "error": "Interessen und Anfragen konnten nicht geladen werden.",
+        "offline": "Interessen und Anfragen sind offline derzeit nicht verfügbar.",
+        "retry": "Erneut versuchen",
+        "card_semantics": "Anfrage von {person} zum Gesuch {title}, Status {status}",
+        "actions": {
+          "reject": "Verwerfen",
+          "withdraw": "Zurückziehen",
+          "contact": "Kontaktieren",
+          "confirm_agreement": "Vereinbarung bestätigt",
+          "privacy_hint": "Mit der Kontaktaufnahme wird deine Mobilnummer für die Gegenpartei sichtbar. Die Kommunikation erfolgt über WhatsApp und unterliegt den Nutzungsbedingungen von WhatsApp.",
+          "consent": {
+            "title": "Kontaktdaten freigeben",
+            "checkbox": "Ich stimme der Freigabe meiner Mobilnummer zu.",
+            "confirm": "Zustimmen und Nummer freigeben",
+            "cancel": "Abbrechen",
+            "close": "Dialog schließen"
+          },
+          "whatsapp_message": "Hallo, ich melde mich wegen des Gesuchs '{title}' über die Ehrenamtsbank.",
+          "errors": {
+            "generic": "Die Anfrage konnte nicht aktualisiert werden.",
+            "offline": "Die Anfrage kann offline nicht aktualisiert werden.",
+            "phone_unavailable": "Die Mobilnummer der Gegenpartei ist noch nicht freigegeben.",
+            "whatsapp_unavailable": "WhatsApp konnte nicht geöffnet werden."
+          }
+        },
+        "time": {
+          "now": "gerade eben",
+          "minutes": "vor {count} Min.",
+          "hours": "vor {count} Std.",
+          "days": "vor {count} T."
+        },
+        "filters": {
+          "semantics": "Anfragen filtern",
+          "all": "Alle",
+          "received": "Empfangene Anfragen",
+          "sent": "Gesendete Anfragen"
+        },
+        "status": {
+          "OFFEN": "Angefragt",
+          "AKZEPTIERT": "Angefragt",
+          "VEREINBART": "Zugesagt",
+          "ERLEDIGT": "Abgeschlossen",
+          "ABGELEHNT": "Abgelehnt",
+          "ZURUECKGEZOGEN": "Zurückgezogen",
+          "in_progress": "In Durchführung",
+          "assigned": "Vergeben",
+          "$unknown": "Unbekannt"
+        },
+        "status_label": "Status: {status}",
+        "agreement_confirmed_at": "Vereinbart am {date}",
+        "completion": {
+          "title": "Einsatz abschließen",
+          "introduction": "Ihr habt den Einsatz durchgeführt? Trage hier die tatsächliche Dauer und das Datum ein.",
+          "counterproposal_introduction": "Passe Dauer, Datum oder Kommentar an und sende einen Gegenvorschlag.",
+          "proposal_title": "Abschlussvorschlag",
+          "proposal_semantics": "Abschlussvorschlag: Dauer {duration}, Datum {date}, Kommentar {note}",
+          "duration_value": "{duration} Std.",
+          "no_note": "Kein Kommentar",
+          "waiting": "Dein Vorschlag ist bestätigt. Die Gegenpartei muss ihn noch bestätigen.",
+          "confirmation_hint": "Die Gegenseite muss die eingetragene Zeit ebenfalls bestätigen.",
+          "support_hint": "Ihr kommt nicht zusammen? Kontaktiere den Support.",
+          "success_debit": "Vorgang abgeschlossen: {duration} Stunden wurden von Deinem Zeitkonto abgezogen.",
+          "success_credit": "Vorgang abgeschlossen: {duration} Stunden wurden Deinem Zeitkonto gutgeschrieben.",
+          "success_debit_without_duration": "Vorgang abgeschlossen: Die Zeit wurde von Deinem Zeitkonto abgezogen.",
+          "success_credit_without_duration": "Vorgang abgeschlossen: Die Zeit wurde Deinem Zeitkonto gutgeschrieben.",
+          "fields": {
+            "duration": "Tatsächliche Dauer",
+            "duration_suffix": " Std.",
+            "duration_semantics": "Tatsächliche Dauer {duration} Stunden",
+            "decrease_duration": "Tatsächliche Dauer verringern",
+            "increase_duration": "Tatsächliche Dauer erhöhen",
+            "duration_hint": "Dieser Zeitwert wird dem Helfer nach Abschluss auf sein Konto gutgeschrieben.",
+            "date": "Datum des Einsatzes",
+            "date_semantics": "Datum des Einsatzes: {date}. Zum Ändern öffnen.",
+            "note": "Kommentar (optional)",
+            "note_summary": "Kommentar"
+          },
+          "actions": {
+            "propose": "Einsatz abschließen und Zeit buchen",
+            "confirm": "Bestätigen und abschließen",
+            "adjust": "Anpassen",
+            "counterproposal": "Gegenvorschlag senden",
+            "cancel_adjustment": "Anpassung abbrechen"
+          },
+          "errors": {
+            "generic": "Der Abschluss konnte nicht aktualisiert werden.",
+            "offline": "Der Abschluss kann offline nicht aktualisiert werden. Prüfe deine Verbindung und versuche es erneut.",
+            "duration_invalid": "Die eingegebene Dauer ist nicht zulässig.",
+            "date_in_future": "Das Datum des Einsatzes darf nicht in der Zukunft liegen.",
+            "note_too_long": "Der Kommentar ist zu lang.",
+            "self_confirmation": "Du kannst deinen eigenen Vorschlag nicht erneut bestätigen.",
+            "already_completed": "Dieser Vorgang wurde bereits abgeschlossen.",
+            "proposal_changed": "Der Abschlussvorschlag hat sich geändert. Aktualisiere die Ansicht und versuche es erneut.",
+            "unauthenticated": "Deine Sitzung ist abgelaufen. Melde dich erneut an.",
+            "not_allowed": "Du darfst diesen Abschluss nicht bearbeiten."
+          }
+        }
+      }
+    },
+    "error": {
+      "offline_no_cache": "Keine Internetverbindung und keine Offline-Daten verfügbar.",
+      "network_unavailable": "Keine Internetverbindung.",
+      "error_loading": "Inhalt konnte nicht geladen werden.",
+      "retry": "Erneut versuchen"
+    },
+    "data_save": {
+      "title": "Wollen Sie Ihre Daten ins Profil übernehmen?",
+      "description": "Sie haben im Antrag persönliche Daten eingegeben oder geändert. Sollen diese in Ihr Profil übernommen werden?",
+      "accept": "Ins Profil übernehmen",
+      "decline": "Nicht übernehmen"
+    },
+    "news": {
+      "title": "Aktuelles",
+      "default_commune": "Kommune",
+      "overview_title": "Aktuelles aus dem {commune}",
+      "latest": "Neuigkeiten",
+      "more_articles": "Weitere Artikel",
+      "original_article": "Originalartikel öffnen",
+      "photo_credit": "Foto: {name}",
+      "show_caption": "Bildunterschrift anzeigen",
+      "actions": {
+        "ideenmelder": "Ideenmelder",
+        "maengelmelder": "Mängelmelder",
+        "waste_calendar": "Abfuhrkalender",
+        "sensors": "Sensoren"
+      }
+    },
+    "version_compatibility": {
+      "title": "App-Update erforderlich",
+      "message": "Die installierte App-Version ist mit dem aktuellen Server nicht kompatibel. Bitte aktualisieren Sie die App.\n\nIhre Version: {current_version}\nErforderlich: {required_version}",
+      "update": "Jetzt aktualisieren"
+    },
+    "legal": {
+      "impressum_title": "Impressum",
+      "datenschutz_title": "Datenschutz",
+      "error_loading": "Inhalt konnte nicht geladen werden.",
+      "retry": "Erneut versuchen",
+      "next": "Weiter"
+    },
+    "map": {
+      "loading": "Karte wird geladen …",
+      "search": {
+        "no_results": "Keine Ergebnisse gefunden",
+        "no_results_description": "Versuchen Sie es mit einem anderen Suchbegriff."
+      },
+      "ideenmelder": "Ideenmelder",
+      "categories": {
+        "defects": "Mängel",
+        "idea_reporter": "Ideenmelder"
+      },
+      "actions": {
+        "ideenmelder": {
+          "label": "Ideenmelder öffnen",
+          "tooltip": "Ideenmelder öffnen"
+        },
+        "maengelmelder": {
+          "label": "Mängelmelder öffnen",
+          "tooltip": "Mängelmelder öffnen"
+        }
+      }
+    },
+    "melder": {
+      "back_to_overview": "Zurück zur Übersicht",
+      "item_semantics": "{title} öffnen",
+      "detail_semantics": "{title}, Status {status}",
+      "detail_information_title": "Weitere Informationen",
+      "detail_field_semantics": "{label}: {value}",
+      "history_title": "Historie",
+      "history_entry": "Status aktualisiert",
+      "user_data_error": "Nutzerdaten konnten nicht geladen werden.",
+      "follow_error": "Benachrichtigungen konnten nicht aktiviert werden. Bitte versuche es später erneut.",
+      "status": {
+        "editing": "In Bearbeitung",
+        "submitted": "Eingereicht",
+        "completed": "Abgeschlossen",
+        "unknown": "Unbekannt"
+      },
+      "maengel": {
+        "title": "Mängelmelder",
+        "completed": "Erfolgreich gemeldet!",
+        "submit": "Mangel melden",
+        "add": "+ Neuen Mangel melden",
+        "reported_title": "Gemeldete Mängel",
+        "followed_title": "Gefolgte Mängel",
+        "empty": "Keine Einträge vorhanden. Melden Sie einen neuen Mangel oder folgen Sie einem bestehenden Mangel, um ihn hier zu sehen.",
+        "error": "Fehler beim Laden Ihrer Mängel.",
+        "detail_error": "Fehler beim Laden dieses Mangels.",
+        "not_found": "Dieser Mangel ist nicht mehr verfügbar.",
+        "follow": "Diesem Mangel folgen",
+        "unfollow": "Mangel nicht mehr folgen",
+        "follow_gone": "Dieser Mangel ist nicht mehr verfügbar.",
+        "follow_failed": "Die Aktion konnte nicht ausgeführt werden. Bitte versuche es später erneut."
+      },
+      "ideas": {
+        "title": "Ideenmelder",
+        "completed": "Idee erfolgreich gemeldet!",
+        "submit": "Idee melden",
+        "add": "+ Neue Idee melden",
+        "reported_title": "Gemeldete Ideen",
+        "followed_title": "Gefolgte Ideen",
+        "empty": "Keine Einträge vorhanden. Melden Sie eine neue Idee, um sie hier zu sehen.",
+        "error": "Fehler beim Laden Ihrer Ideen.",
+        "not_found": "Diese Idee ist nicht mehr verfügbar.",
+        "follow_gone": "Diese Idee ist nicht mehr verfügbar.",
+        "follow_failed": "Die Aktion konnte nicht ausgeführt werden. Bitte versuche es später erneut.",
+        "no_description": "Keine Beschreibung vorhanden.",
+        "follow": "Dieser Idee folgen",
+        "unfollow": "Idee nicht mehr folgen",
+        "fields": {
+          "category": "Kategorie",
+          "email": "E-Mail",
+          "phone_number": "Telefonnummer",
+          "location": "Ort"
+        }
+      }
+    },
+    "sensor": {
+      "last_measured": "Zuletzt gemessen: {time}",
+      "current_values": "Aktuelle Werte",
+      "past_values": "Vergangene Werte",
+      "name_in_unit": "{name} in {unit}",
+      "no_data_available": "Keine Sensordaten verfügbar",
+      "status_unknown_pill": "Unbekannt",
+      "status_unknown_title": "Status unbekannt",
+      "status_unknown_description": "Der Sensor liefert aktuell keinen auswertbaren Zustand.",
+      "title": "Sensor",
+      "older_than_30_days": "Älter als 30 Tage",
+      "locality_placeholder": "Ortsname",
+      "mode_24h": "24h",
+      "mode_week": "Woche",
+      "semantics": {
+        "gauge_value": "Messwert: {value} {unit}",
+        "gauge_value_with_level": "Messwert: {value} {unit}, Stufe: {level}"
+      },
+      "favorite_card": {
+        "trend_rising": "Steigend",
+        "trend_falling": "Fallend",
+        "trend_stable": "Gleichbleibend",
+        "to_detail_page": "Zur Sensordetailseite"
+      }
+    },
+    "weather": {
+      "sunny": "Sonnig",
+      "partly_cloudy": "Leicht bewölkt",
+      "mostly_cloudy": "Teils bewölkt",
+      "cloudy": "Bewölkt",
+      "rain_showers": "Regenschauer",
+      "rain": "Regen",
+      "thunderstorm": "Gewitter",
+      "snow": "Schnee",
+      "fog": "Nebel",
+      "unknown": "Unbekannt"
+    },
+    "detail_page": {
+      "further_dates_title": "Weitere Termine",
+      "open_navigation": "Navigation öffnen",
+      "semantics": {
+        "carousel_for": "Bilderkarussell für {title}",
+        "title_image_for": "Titelbild für {title}",
+        "category": "Kategorie: {category}",
+        "adjust_text_size": "Textgröße anpassen",
+        "share_content": "Inhalt teilen",
+        "date": "Datum: {date}",
+        "further_dates": "Weitere Termine:\n{dates}"
+      }
+    },
+    "news_location_tag": {
+      "semantics": {
+        "location_source": "Standortquelle: {source}"
+      }
+    },
+    "bottom_navigation": {
+      "news": "Aktuelles",
+      "map": "Karte",
+      "service": "Service",
+      "events": "Termine",
+      "profile": "Profil",
+      "volunteer_database": "Ehrenamt"
+    },
+    "volunteer_database": {
+      "title": "Ehrenamtsbank",
+      "coming_soon": "Hier entsteht die Ehrenamtsdatenbank",
+      "description": "In Kürze finden Sie hier Angebote und Informationen rund um das Ehrenamt in Ihrer Kommune.",
+      "join_community_title": "Werde Teil der Gemeinschaft",
+      "join_community_description": "Schenke Zeit, sammle Guthaben und finde Unterstützung genau dann, wenn Du sie brauchst.",
+      "register_now": "Jetzt kostenlos registrieren",
+      "offer_help": "Ich biete Hilfe",
+      "seek_help": "Ich suche Hilfe",
+      "login": "Anmelden",
+      "search_hint_offer": "Wobei möchtest Du helfen?",
+      "search_hint_seek": "Wobei brauchst Du Hilfe?",
+      "result_not_found": "Keine Gesuche für diese Kategorie gefunden.",
+      "requests_error": "Die Gesuche konnten nicht geladen werden.",
+      "loading_more": "Weitere Gesuche werden geladen",
+      "load_more_error": "Weitere Gesuche konnten nicht geladen werden.",
+      "browse_categories": "Kategorien durchstöbern",
+      "category_all": "Alles",
+      "categories_loading": "Kategorien werden geladen",
+      "categories_error": "Die Kategorien konnten nicht geladen werden",
+      "suggested_requests": "Für dich vorgeschlagene Gesuche",
+      "suggested_offers": "Für dich vorgeschlagene Angebote",
+      "hours": "{hours} Std.",
+      "distance": "{distance} km entfernt",
+      "dummy_title": "Hecken schneiden",
+      "dummy_text": "Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt...",
+      "details": {
+        "created_at": "Erstellt am {date}",
+        "own_description": "Deine Beschreibung",
+        "metadata": "Weitere Angaben",
+        "error": "Die Details konnten nicht geladen werden.",
+        "interest": {
+          "button": "Interesse bekunden",
+          "title": "Interesse bekunden",
+          "description": "Teile der suchenden Person mit, dass du gerne helfen möchtest.",
+          "message_label": "Optionale Nachricht",
+          "privacy_hint": "Deine Kontaktdaten werden erst nach Zusage der suchenden Person freigegeben.",
+          "submit": "Übermitteln",
+          "confirmation": "Dein Interesse wurde übermittelt",
+          "load_errors": {
+            "offline": "Dein Anfragestatus kann offline nicht geladen werden. Prüfe deine Verbindung und versuche es erneut.",
+            "generic": "Dein Anfragestatus konnte nicht geladen werden.",
+            "retry": "Erneut versuchen"
+          },
+          "requested": {
+            "title": "Interesse erfolgreich übermittelt",
+            "description": "Du hast für dieses Gesuch Interesse bekundet. Der Suchende hat deine Anfrage bereits vorliegen.",
+            "semantics": "Interesse erfolgreich übermittelt. Der Suchende hat deine Anfrage bereits vorliegen."
+          },
+          "semantics": {
+            "open": "Dialog zum Bekunden von Interesse öffnen",
+            "sheet": "Interesse an diesem Gesuch bekunden",
+            "close": "Dialog Interesse bekunden schließen",
+            "message": "Optionale Nachricht an die suchende Person",
+            "submit": "Interesse und optionale Nachricht übermitteln"
+          },
+          "errors": {
+            "offline": "Dein Interesse konnte offline nicht übermittelt werden. Prüfe deine Verbindung und versuche es erneut.",
+            "generic": "Dein Interesse konnte nicht übermittelt werden. Versuche es erneut.",
+            "own_entry": "Du kannst für dein eigenes Gesuch kein Interesse bekunden.",
+            "duplicate": "Du hast für dieses Gesuch bereits Interesse bekundet.",
+            "inactive": "Dieses Gesuch ist nicht mehr aktiv.",
+            "not_found": "Dieses Gesuch wurde nicht gefunden.",
+            "unauthenticated": "Bitte melde dich erneut an und versuche es noch einmal.",
+            "not_allowed": "Du darfst für dieses Gesuch derzeit kein Interesse bekunden."
+          }
+        }
+      },
+      "auth_modal": {
+        "title": "Anmeldung erforderlich",
+        "description": "Für diesen Bereich benötigst du ein Profil. Registriere dich in wenigen Sekunden neu oder melde dich mit deinen bestehenden Daten an, um fortzufahren.",
+        "login_now": "Anmelden",
+        "register_free_now": "Jetzt kostenlos registrieren",
+        "close_semantics": "Schließen"
+      },
+      "access_denied": {
+        "title": "Zugriff aktuell nicht möglich",
+        "description": "Dein Account bei der Ehrenamtsbank wurde vorübergehend deaktiviert. Dies kann verschiedene Gründe haben, wie zum Beispiel Unstimmigkeiten bei der Zeitabrechnung, Probleme mit dem Führungszeugnis oder ein Verstoß gegen unsere Gemeinschaftsrichtlinien. Um Dein Konto wieder freizuschalten, ist eine manuelle Prüfung durch unsere Koordinationshilfe erforderlich.",
+        "close": "Schließen",
+        "contact_support": "Support kontaktieren",
+        "support_placeholder": "Der Support-Kontakt wird noch angebunden.",
+        "semantics": {
+          "page": "Zugriff auf die Ehrenamtsbank aktuell nicht möglich"
+        }
+      },
+      "marketplace": {
+        "title": "Marktplatz",
+        "my_requests": "Meine Gesuche",
+        "placeholder": "Uneingeschränkter Mode der Ehrenamtsbank",
+        "create_entry": "Gesuch einstellen",
+        "semantics": {
+          "page": "Marktplatz der Ehrenamtsbank"
+        }
+      },
+      "my_requests": {
+        "title": "Meine Gesuche",
+        "create": "Neues Gesuch einstellen",
+        "loading": "Gesuche werden geladen",
+        "empty": "Du hast noch keine eigenen Gesuche.",
+        "error": "Deine Gesuche konnten nicht geladen werden.",
+        "page_semantics": "Liste meiner Gesuche",
+        "card_semantics": "Gesuch {title} öffnen",
+        "lifecycle": {
+          "assigned_title": "Hilfe ist zugesagt",
+          "assigned_description": "Du hast die Zusage von {name} angenommen. Sprecht die Einzelheiten per WhatsApp ab.",
+          "completed_title": "Einsatz abgeschlossen",
+          "completed_description": "Vielen Dank! Dieser Einsatz ist abgeschlossen.",
+          "performed_on": "Fand am {date} statt",
+          "duration": "Dauer: {minutes} Minuten",
+          "pending_review_title": "Wird geprüft",
+          "pending_review_description": "Wir prüfen Dein Gesuch, bevor es veröffentlicht wird. Sobald es online ist, siehst Du es hier.",
+          "assigned_fallback_description": "Du hast eine Zusage angenommen. Sprecht die Einzelheiten per WhatsApp ab.",
+          "waiting_title": "Bestätigung offen",
+          "waiting_description": "Du hast {minutes} Min. bestätigt. Sobald {name} ebenfalls bestätigt, wird die Zeit verbucht.",
+          "review_title": "Bitte prüfen",
+          "review_description": "{name} hat {minutes} Min. gemeldet. Bestätige die Zeit oder schlage eine andere vor.",
+          "review_action": "Prüfen"
+        },
+        "inbox": {
+          "title": "Es gibt Interessenten",
+          "count": {
+            "one": "{} Anfrage",
+            "other": "{} Anfragen"
+          },
+          "description": {
+            "one": "{count} Person möchte Dir helfen. Verschaffe Dir einen Überblick im Postfach und tritt mit den Helfenden in Kontakt.",
+            "other": "{count} Personen möchten Dir helfen. Verschaffe Dir einen Überblick im Postfach und tritt mit den Helfenden in Kontakt."
+          },
+          "empty_title": "Dein Gesuch ist online",
+          "empty_description": "Dein Gesuch ist für andere sichtbar. Sobald sich jemand meldet, erfährst Du es hier.",
+          "error": "Anfragen konnten nicht geladen werden. Bitte erneut versuchen.",
+          "open": "Zum Postfach"
+        },
+        "status": {
+          "draft": "Entwurf",
+          "pending_review": "In Prüfung",
+          "active": "Online",
+          "assigned": "Vergeben",
+          "in_progress": "In Durchführung",
+          "paused": "Pausiert",
+          "completed": "Abgeschlossen",
+          "closed": "Geschlossen",
+          "unknown": "Unbekannt"
+        }
+      },
+      "create_request": {
+        "title": "Neues Gesuch anlegen",
+        "continue": "Speichern und weiter",
+        "back": "Schritt zurück",
+        "submit": "Gesuch einreichen",
+        "success": "Dein Gesuch wurde eingereicht.",
+        "error": "Das Gesuch konnte nicht eingereicht werden. Dein Foto bleibt ausgewählt. Bitte versuche es erneut.",
+        "submitting": "Gesuch wird eingereicht …",
+        "upload_errors": {
+          "too_large": "Das Foto ist zu groß. Bitte wähle ein Foto mit maximal 5 MiB aus.",
+          "format": "Dieses Fotoformat wird nicht unterstützt. Bitte wähle JPEG, PNG, HEIC oder WebP aus.",
+          "network": "Die Verbindung ist unterbrochen. Dein Foto bleibt ausgewählt. Bitte prüfe Deine Internetverbindung und versuche es erneut.",
+          "unauthorized": "Deine Anmeldung ist abgelaufen. Bitte melde Dich erneut an und reiche Dein Gesuch nochmals ein.",
+          "forbidden": "Für den Foto-Upload benötigst Du eine abgeschlossene Registrierung.",
+          "unavailable": "Der Foto-Upload ist derzeit nicht verfügbar. Bitte versuche es später erneut.",
+          "file": "Das ausgewählte Foto kann nicht mehr gelesen werden. Bitte wähle es erneut aus."
+        },
+        "steps": {
+          "help": "Wobei benötigst Du Hilfe?",
+          "details": "Was ist zu tun?",
+          "location": "Wo und wann? (optional)",
+          "photo": "Foto (optional)"
+        },
+        "fields": {
+          "title": "Titel Deines Gesuchs",
+          "category": "Kategorie",
+          "description": "Beschreibung",
+          "duration": "Geschätzte Dauer",
+          "additional_information": "Weitere Informationen (optional)",
+          "municipality": "Ort",
+          "address": "Straße und Hausnummer"
+        },
+        "hints": {
+          "title": "Dieser Text erscheint als Schlagzeile in der Übersicht für alle Helfer.",
+          "description": "Ergänze hier Details wie benötigtes Werkzeug, Parkmöglichkeiten oder Treppenstufen.",
+          "duration": "Dieser Zeitwert wird dem Helfer nach Abschluss auf sein Konto gutgeschrieben. Bis zur Durchführung wird er vom System einbehalten.",
+          "location": "Bitte wähle den Ort Deines Gesuchs. Deine genaue Adresse bleibt privat.",
+          "address": "Öffentlich wird nur Deine Entfernung zum Suchenden angezeigt. Deine Adresse bleibt bis zur Bestätigung privat.",
+          "photo": "Ein Schnappschuss von der Aufgabe (es muss kein perfektes Foto sein) hilft deinen Nachbarn, sich ein Bild zu machen und wirkt werblicher in der Übersicht."
+        },
+        "options": {
+          "barrier_free": "Barrierefreie Zugänge vorhanden",
+          "remote": "Remote möglich (von Zuhause)",
+          "pet_free": "Tierfreier Haushalt",
+          "time_heading": "Bitte wähle die passende Zeit",
+          "whatsapp_arrangement": "Absprache erfolgt per WhatsApp"
+        },
+        "tags": {
+          "barrier_free": "Barrierefreier Zugang",
+          "remote": "Remote möglich",
+          "pet_free": "Tierfreier Haushalt"
+        },
+        "duration_value": " Std.",
+        "semantics": {
+          "page": "Neues Gesuch anlegen",
+          "step": "Schritt {number}: {title}",
+          "duration": "Geschätzte Dauer {duration} Stunden",
+          "decrease_duration": "Geschätzte Dauer verringern",
+          "increase_duration": "Geschätzte Dauer erhöhen",
+          "photo_picker": "Optionales Foto zum Gesuch hinzufügen"
+        }
+      },
+      "time_credit": {
+        "title": "Mein Zeitguthaben",
+        "help_provided": "Hilfe Geleistet (+)",
+        "help_received": "Hilfe Erhalten (-)",
+        "time_blocked": "Für laufende Gesuche einbehalten",
+        "hint": {
+          "positive": "Dein Konto ist gefüllt! Erstelle gerne ein eigenes Gesuch und lass dir von der Nachbarschaft helfen.",
+          "warning": "Dein Guthaben ist bald aufgebraucht. Schau gerne in die Gesuche und hilf jemandem, um dein Konto wieder aufzuladen!",
+          "negative": "Du bist aktuell im Minus. Gleiche dein Konto bitte vor Erreichen der -4:00 Std. Grenze durch eigene Hilfe wieder aus. Weitere Gesuche müssen ansonsten erst von einem Sachbearbeiter geprüft werden."
+        },
+        "error": "Zeitguthaben konnte nicht geladen werden.",
+        "offline": "Zeitguthaben ist offline nicht verfügbar. Prüfe deine Verbindung und versuche es erneut.",
+        "retry": "Erneut versuchen"
+      },
+      "login_page": {
+        "title": "Anmelden",
+        "description": "Hier entsteht die Anmeldung für die Ehrenamtsbank.",
+        "welcome": "Willkommen zurück",
+        "close": "Schließen",
+        "introduction": "Schön, dass du wieder da bist. Melde dich kurz an, um direkt zu deinem Zeitkonto zu gelangen.",
+        "phone_label": "Mobilnummer",
+        "sms_notice": "Wir senden dir in Kürze einen Bestätigungscode per SMS.",
+        "continue": "Weiter",
+        "login": "Anmelden",
+        "no_account": "Du hast noch keinen Account?",
+        "register_now": "Jetzt registrieren",
+        "bundid_divider": "oder",
+        "bundid_login": "Mit BundID anmelden",
+        "bundid_reverify": "Mit BundID anmelden",
+        "steps": {
+          "phone": "Telefonnummer-Eingabe",
+          "sms": "SMS-Verifizierung"
+        },
+        "sms": {
+          "confirm_code": "Code bestätigen",
+          "sent_notice": "Wir haben einen 6-stelligen Code an die Nummer [{phone}] gesendet.",
+          "resend_available": "Code erneut senden",
+          "resend_waiting": "Code erneut senden ({duration})",
+          "no_code": "Keinen Code erhalten?",
+          "check_phone": "Telefonnummer überprüfen"
+        },
+        "errors": {
+          "form": "Bitte korrigiere deine Angaben.",
+          "invalid_phone": "Bitte gib eine gültige Mobilnummer ein, z. B. 1511 2345678.",
+          "same_phone_number": "Das ist bereits deine aktuelle, verifizierte Nummer. Ein neuer Code ist nicht nötig.",
+          "bundid_login_required": "Dein Konto ist mit BundID verknüpft. Bitte melde dich mit BundID an.",
+          "invalid_code": "Bitte gib den 6-stelligen Code ein.",
+          "code_wrong": "Der Code ist nicht korrekt. Verbleibende Versuche: {attempts}.",
+          "code_wrong_generic": "Der Code ist nicht korrekt. Bitte prüfe deine Eingabe.",
+          "code_locked": "Zu viele falsche Eingaben. Du kannst es in {wait} erneut versuchen.",
+          "code_locked_generic": "Zu viele falsche Eingaben. Bitte versuche es später erneut.",
+          "code_check_failed": "Der Code konnte nicht geprüft werden. Bitte versuche es erneut.",
+          "rate_limit_wait": "Bitte warte noch {wait}, bevor du es erneut versuchst.",
+          "code_expired": "Der Code ist abgelaufen. Bitte fordere einen neuen an.",
+          "no_code_requested": "Es wurde noch kein Code angefordert. Bitte fordere zuerst einen Code an.",
+          "sms_delivery_failed": "SMS konnte nicht versendet werden. Bitte versuche es erneut.",
+          "rate_limit": "Du hast zu oft einen Code angefordert. Bitte warte einige Minuten und versuche es erneut.",
+          "bundid": "Die Anmeldung mit BundID hat nicht funktioniert. Bitte versuche es erneut.",
+          "requires_bundid_reverification": "Diese Telefonnummer ist bereits mit einem anderen, per BundID verifizierten Konto verknüpft. Melde dich mit BundID an, um darauf zuzugreifen."
+        },
+        "semantics": {
+          "page": "Anmeldung für die Ehrenamtsbank",
+          "step": "Schritt {number}: {title}",
+          "sms_code": "Sechsstelliger SMS-Bestätigungscode",
+          "continue": "Weiter zum nächsten Anmeldeschritt",
+          "bundid_login": "Mit BundID anmelden"
+        }
+      },
+      "register_page": {
+        "title": "Registrieren",
+        "description": "Hier entsteht die Registrierung für die Ehrenamtsbank.",
+        "welcome": "Willkommen",
+        "close": "Schließen",
+        "introduction": "Schön dass Du Teil der Ehrenamtsbank werden möchtest.",
+        "phone_label": "Mobilnummer",
+        "sms_notice": "Wir senden dir in Kürze einen Bestätigungscode per SMS.",
+        "continue": "Weiter",
+        "start": "Los geht’s",
+        "bundid_divider": "oder",
+        "bundid_register": "Mit BundID registrieren",
+        "bundid_reverify": "Mit BundID anmelden",
+        "account_hint": "Egal ob per SMS oder BundID: Du landest immer im selben Konto – auch wenn du dich später mit der jeweils anderen Methode anmeldest.",
+        "steps": {
+          "phone": "Telefonnummer-Eingabe",
+          "sms": "SMS-Verifizierung",
+          "identity": "Identität"
+        },
+        "sms": {
+          "confirm_code": "Code bestätigen",
+          "sent_notice": "Wir haben einen 6-stelligen Code an die Nummer [{phone}] gesendet.",
+          "resend_available": "Code erneut senden",
+          "resend_waiting": "Code erneut senden ({duration})",
+          "no_code": "Keinen Code erhalten?",
+          "check_phone": "Telefonnummer überprüfen"
+        },
+        "identity": {
+          "description": "Wir benötigen Deinen Namen und Dein Alter. Adresse und E-Mail sind optional, helfen uns aber, Dich besser zu erreichen.",
+          "first_name": "Vorname",
+          "last_name": "Nachname",
+          "email": "E-Mail",
+          "street": "Straße und Hausnummer",
+          "postal_code": "Postleitzahl",
+          "city": "Ort",
+          "country": "Land",
+          "age_confirmation": "Bitte bestätige, dass Du mindestens 14 Jahre alt bist, um teilzunehmen."
+        },
+        "errors": {
+          "form": "Bitte korrigiere deine Angaben.",
+          "invalid_phone": "Bitte gib eine gültige Mobilnummer ein, z. B. 1511 2345678.",
+          "same_phone_number": "Das ist bereits deine aktuelle, verifizierte Nummer. Ein neuer Code ist nicht nötig.",
+          "bundid_login_required": "Dein Konto ist mit BundID verknüpft. Bitte melde dich mit BundID an.",
+          "invalid_code": "Bitte gib den 6-stelligen Code ein.",
+          "code_wrong": "Der Code ist nicht korrekt. Verbleibende Versuche: {attempts}.",
+          "code_wrong_generic": "Der Code ist nicht korrekt. Bitte prüfe deine Eingabe.",
+          "code_locked": "Zu viele falsche Eingaben. Du kannst es in {wait} erneut versuchen.",
+          "code_locked_generic": "Zu viele falsche Eingaben. Bitte versuche es später erneut.",
+          "code_check_failed": "Der Code konnte nicht geprüft werden. Bitte versuche es erneut.",
+          "rate_limit_wait": "Bitte warte noch {wait}, bevor du es erneut versuchst.",
+          "code_expired": "Der Code ist abgelaufen. Bitte fordere einen neuen an.",
+          "no_code_requested": "Es wurde noch kein Code angefordert. Bitte fordere zuerst einen Code an.",
+          "sms_delivery_failed": "SMS konnte nicht versendet werden. Bitte versuche es erneut.",
+          "rate_limit": "Du hast zu oft einen Code angefordert. Bitte warte einige Minuten und versuche es erneut.",
+          "invalid_first_name": "Bitte gib eine gültigen Vornamen ein.",
+          "invalid_last_name": "Bitte gib eine gültigen Nachnamen ein.",
+          "missing_age_confirmation": "Bitte bestätige dein Alter.",
+          "bundid": "Die Registrierung mit BundID hat nicht funktioniert. Bitte versuche es erneut.",
+          "requires_bundid_reverification": "Diese Telefonnummer ist bereits mit einem anderen, per BundID verifizierten Konto verknüpft. Melde dich mit BundID an, um darauf zuzugreifen."
+        },
+        "semantics": {
+          "page": "Registrierung für die Ehrenamtsbank",
+          "step": "Schritt {number}: {title}",
+          "sms_code": "Sechsstelliger SMS-Bestätigungscode",
+          "continue": "Weiter zum nächsten Registrierungsschritt",
+          "bundid_register": "Mit BundID registrieren"
+        }
+      },
+      "bundid_onboarding_page": {
+        "title": "Profil vervollständigen",
+        "introduction": "Wir haben folgende Daten von deinem BundID-Konto übernommen. Bitte bestätige zusätzlich deine Mobilnummer per SMS-Code.",
+        "phone_label": "Mobilnummer",
+        "sms_notice": "Wir senden dir in Kürze einen Bestätigungscode per SMS.",
+        "phone_collision_notice": "Deine BundID-Mobilnummer gehört bereits zu einem anderen Konto bei uns. Verifiziere sie hier per SMS-Code, um Zugriff auf dieses bestehende Konto zu erhalten – ohne Verifizierung bleiben beide Konten getrennt.",
+        "send_code": "Code senden",
+        "confirm": "Bestätigen",
+        "skip_phone_verification": "Ohne Telefonnummer fortfahren",
+        "bundid_reverify": "Mit BundID anmelden",
+        "profile": {
+          "description": "Von BundID übernommene Angaben. Änderungen bitte direkt in deinem BundID-Konto vornehmen – sie werden bei der nächsten Anmeldung automatisch übernommen.",
+          "first_name": "Vorname",
+          "last_name": "Nachname",
+          "email": "E-Mail",
+          "street": "Straße und Hausnummer",
+          "postal_code": "Postleitzahl",
+          "city": "Ort",
+          "country": "Land"
+        },
+        "sms": {
+          "confirm_code": "Code bestätigen",
+          "sent_notice": "Wir haben einen 6-stelligen Code an die Nummer [{phone}] gesendet.",
+          "resend_available": "Code erneut senden",
+          "resend_waiting": "Code erneut senden ({duration})",
+          "check_phone": "Telefonnummer überprüfen"
+        },
+        "errors": {
+          "form": "Bitte korrigiere deine Angaben.",
+          "invalid_phone": "Bitte gib eine gültige Mobilnummer ein, z. B. 1511 2345678.",
+          "same_phone_number": "Das ist bereits deine aktuelle, verifizierte Nummer. Ein neuer Code ist nicht nötig.",
+          "bundid_login_required": "Dein Konto ist mit BundID verknüpft. Bitte melde dich mit BundID an.",
+          "invalid_code": "Bitte gib den 6-stelligen Code ein.",
+          "code_wrong": "Der Code ist nicht korrekt. Verbleibende Versuche: {attempts}.",
+          "code_wrong_generic": "Der Code ist nicht korrekt. Bitte prüfe deine Eingabe.",
+          "code_locked": "Zu viele falsche Eingaben. Du kannst es in {wait} erneut versuchen.",
+          "code_locked_generic": "Zu viele falsche Eingaben. Bitte versuche es später erneut.",
+          "code_check_failed": "Der Code konnte nicht geprüft werden. Bitte versuche es erneut.",
+          "rate_limit_wait": "Bitte warte noch {wait}, bevor du es erneut versuchst.",
+          "code_expired": "Der Code ist abgelaufen. Bitte fordere einen neuen an.",
+          "no_code_requested": "Es wurde noch kein Code angefordert. Bitte fordere zuerst einen Code an.",
+          "sms_delivery_failed": "SMS konnte nicht versendet werden. Bitte versuche es erneut.",
+          "rate_limit": "Du hast zu oft einen Code angefordert. Bitte warte einige Minuten und versuche es erneut.",
+          "requires_bundid_reverification": "Diese Telefonnummer ist bereits mit einem anderen, per BundID verifizierten Konto verknüpft. Melde dich mit BundID an, um darauf zuzugreifen."
+        },
+        "semantics": {
+          "page": "Profil vervollständigen nach BundID-Registrierung",
+          "sms_code": "Sechsstelliger SMS-Bestätigungscode"
+        }
+      }
+    },
+    "not_found_error": {
+      "title": "Inhalt nicht gefunden",
+      "description": "Der aufgerufene Link ist leider nicht mehr gültig oder existiert nicht.",
+      "back_button": "Zurück zu Aktuelles"
+    },
+    "antraege": {
+      "key_mismatch": {
+        "title": "Dieser Antrag kann nicht fortgesetzt werden",
+        "description": "Dieser Antrag wurde mit einem anderen Konto begonnen und kann deshalb hier nicht geöffnet werden. Bitte stelle ihn neu."
+      },
+      "key_unavailable": {
+        "title": "Das Absenden ist hier nicht möglich",
+        "description": "Dein Konto konnte gerade nicht geprüft werden. Bitte starte die App neu und versuche es erneut."
+      },
+      "location": {
+        "required": "Diese Angabe ist zwingend notwendig.",
+        "outside_district": "Die ausgewählte Adresse liegt außerhalb des Landkreises Hameln-Pyrmont.",
+        "boundary_unavailable": "Die Adresse kann derzeit nicht gegen die Landkreisgrenze geprüft werden. Bitte versuchen Sie es erneut.",
+        "loading_boundary": "Die Landkreisgrenze wird geladen.",
+        "resolving_address": "Adresse wird ermittelt …",
+        "use_current": "Aktuellen Standort als Adresse verwenden"
+      },
+      "submitting": {
+        "title": "Ihr Anliegen wird übermittelt",
+        "subtitle": "Bitte warten, dies kann bis zu einer Minute dauern.",
+        "message_encrypting": "Fotos werden verschlüsselt …",
+        "message_transferring": "Daten werden sicher übertragen …",
+        "message_processing": "Ihr Anliegen wird verarbeitet …",
+        "message_finishing": "Fast geschafft …",
+        "semantics": {
+          "progress": "Ihr Anliegen wird verarbeitet, bitte warten."
+        }
+      },
+      "bestaetigen": {
+        "summary": "Zusammenfassung",
+        "correct_data_now": "Jetzt Daten korrigieren",
+        "confirm_data": "Daten bestätigen",
+        "confirm_and_pay": "Daten bestätigen und zur Bezahlung",
+        "incomplete_warning": "Sie können Ihren Antrag noch nicht abschicken. Bitte vervollständigen oder korrigieren Sie dafür Ihre Angaben.",
+        "auto_fill_future": "Diese Information bei zukünftigen Anträgen automatisch ausfüllen"
+      },
+      "unvollstaendig_sheet": {
+        "title": "Sie haben nicht alle Daten korrekt ausgefüllt!",
+        "description": "Kein Problem. Sie können mit den aktuellen Daten fortfahren und diese Angaben jederzeit vor dem endgültigen Absenden noch korrigieren.\n\nBeachten Sie jedoch, dass Sie den Antrag nicht an Ihre Kommune übertragen können, solange noch notwendige Daten fehlen oder diese inkorrekt sind.",
+        "dont_show_again": "Diese Information nicht mehr anzeigen",
+        "continue_button": "Mit den aktuellen Daten fortfahren",
+        "correct_button": "Daten korrigieren"
+      },
+      "formular_schritt": {
+        "load_error": "Das Formular konnte nicht geladen werden.",
+        "category_adjusted_title": "Kategorie nicht verfügbar",
+        "category_adjusted": "Die ausgewählte Kategorie ist in der von Ihnen gewählten Gemeinde/Kommune nicht verfügbar. Bitte wählen Sie eine andere Kategorie.",
+        "category_adjusted_confirm": "OK",
+        "clear_category": "Kategorieauswahl entfernen",
+        "search_hint": "Nach Stichwort suchen",
+        "search_no_results": "Kein passender Eintrag gefunden. Bitte wählen Sie direkt aus der Liste.",
+        "edit_category": "Kategorieauswahl bearbeiten",
+        "select_to_continue": "Auswählen, um die nächste Kategorieebene anzuzeigen.",
+        "step_skipped": "Aufgrund Ihrer gemachten Angaben kann dieser Schritt übersprungen werden."
+      },
+      "document_field": {
+        "scan_action": "Mit Kamera scannen",
+        "pdf_upload_action": "PDF-Dokument hochladen",
+        "required": "Das Anhängen von Dokumenten ist zwingend notwendig",
+        "error": "Fehler"
+      }
+    },
+    "profil": {
+      "logout_backup": {
+        "title": "Daten nicht gesichert",
+        "description": "Deine Daten konnten gerade nicht gesichert werden. Wenn du dich jetzt abmeldest, sind deine Profildaten und begonnene Anträge nach der nächsten Anmeldung eventuell nicht mehr verfügbar. Prüfe deine Internetverbindung und versuche es später erneut.",
+        "cancel": "Abbrechen",
+        "confirm": "Trotzdem abmelden"
+      },
+      "logout_everywhere": {
+        "title": "Auf allen Geräten abmelden?",
+        "description": "Deine Anmeldung wird auf allen Geräten sofort beendet, auch auf diesem. Danach musst du dich auf jedem Gerät neu anmelden. Wenn du ein Gerät weitergibst, lösche dort vorher die App.",
+        "cancel": "Abbrechen",
+        "confirm": "Überall abmelden"
+      },
+      "device_login_kept": {
+        "title": "Dein erstes Gerät behält deine Daten",
+        "description": "Du bist jetzt auf allen Geräten abgemeldet. Auf deinem ersten Gerät kann die App deine Daten aber weiter öffnen. Das ist das Gerät, auf dem du dich zum ersten Mal mit deiner Telefonnummer oder mit BundID angemeldet hast. Deine Daten sind bisher nur dort gespeichert und wären sonst verloren.\n\nSo sicherst du sie: Öffne die App auf deinem ersten Gerät einmal mit Internetverbindung. Melde dich danach noch einmal auf allen Geräten ab, dann gilt das auch für dieses Gerät.",
+        "confirm": "Verstanden"
+      },
+      "key_unavailable": "Deine gespeicherten Profildaten können gerade nicht angezeigt werden. Meldungen und Anträge kannst du trotzdem wie gewohnt absenden.",
+      "title": "Profil",
+      "welcome": "Herzlich Willkommen, {name}",
+      "welcome_anonymous": "Herzlich Willkommen",
+      "menu": {
+        "personal_data": "Persönliche Daten",
+        "feedback": "Feedback",
+        "feedback_sent": "Feedback verschickt!",
+        "feedback_submit": "Feedback abschicken",
+        "sensors": "Meine Sensoren",
+        "content_notifications": "Inhalte & \nBenachrichtigungen",
+        "privacy": "Datenschutz",
+        "imprint": "Impressum"
+      },
+      "mitteilungen": {
+        "title": "Mitteilungen",
+        "empty": "Keine Mitteilungen",
+        "not_found": "Diese Mitteilung ist nicht mehr verfügbar."
+      },
+      "loading": "Profil wird geladen",
+      "my_account": {
+        "pilot_project": {
+          "title": "Mein Pilotprojekt",
+          "description_title": "Das Pilotprojekt",
+          "description": "Sie sind Teil eines Pilotprojekts? Dann haben Sie von uns einen persönlichen Code erhalten. Geben Sie ihn hier ein, um zusätzliche Funktionen für sich freizuschalten.",
+          "code": "Code",
+          "redeem": "Code einlösen",
+          "unlocked": "Freigeschaltet ✓",
+          "success": "Vielen Dank! Die Ehrenamtsbank ist jetzt für Sie freigeschaltet.",
+          "invalid": "Der Code ist leider nicht gültig. Bitte prüfen Sie Ihre Eingabe.",
+          "save_error": "Die Freischaltung konnte nicht gespeichert werden. Bitte versuchen Sie es erneut.",
+          "loading": "Code wird eingelöst"
+        },
+        "title": "Mein Konto",
+        "bundid_managed_note": "Diese Daten werden von deinem BundID-Konto verwaltet. Um sie zu ändern, aktualisiere sie bitte direkt bei BundID – Änderungen werden bei deiner nächsten Anmeldung automatisch übernommen.",
+        "first_name": "Vorname",
+        "last_name": "Nachname",
+        "email": "E-Mail",
+        "street": "Straße und Hausnummer",
+        "postal_code": "Postleitzahl",
+        "city": "Ort",
+        "country": "Land",
+        "save": "Speichern",
+        "saved": "Deine Angaben wurden gespeichert.",
+        "edit": "Ändern",
+        "phone_number": "Telefonnummer",
+        "no_phone_number": "Keine Telefonnummer hinterlegt",
+        "phone_verified": "verifiziert",
+        "phone_unverified": "nicht verifiziert",
+        "change_phone": "Ändern",
+        "verify_phone_now": "Jetzt verifizieren",
+        "cancel": "Abbrechen",
+        "login": "Mit BundID anmelden",
+        "logout": "Abmelden",
+        "logout_everywhere": "Auf allen Geräten abmelden",
+        "logged_out": "Du wurdest abgemeldet.",
+        "logged_out_everywhere": "Du wurdest auf allen Geräten abgemeldet.",
+        "phone_registration_success": "Willkommen! Wir haben ein neues Konto für dich angelegt. Bitte ergänze unten deine Daten.",
+        "logged_out_intro": "Für bestimmte Funktionen dieser App ist eine Anmeldung erforderlich. Melde dich mit BundID oder per SMS an, um sie zu nutzen.",
+        "session_expired": "Deine Anmeldung ist abgelaufen. Bitte melde dich erneut an.",
+        "errors": {
+          "load": "Deine Kontodaten konnten nicht geladen werden.",
+          "save": "Deine Angaben konnten nicht gespeichert werden.",
+          "logout_everywhere": "Das Abmelden auf allen Geräten hat nicht geklappt. Bitte versuche es erneut.",
+          "invalid_phone": "Bitte gib eine gültige Mobilnummer ein, z. B. 1511 2345678.",
+          "same_phone_number": "Das ist bereits deine aktuelle, verifizierte Nummer. Ein neuer Code ist nicht nötig.",
+          "bundid_login_required": "Dein Konto ist mit BundID verknüpft. Bitte melde dich mit BundID an.",
+          "invalid_code": "Bitte gib den 6-stelligen Code ein.",
+          "code_wrong": "Der Code ist nicht korrekt. Verbleibende Versuche: {attempts}.",
+          "code_wrong_generic": "Der Code ist nicht korrekt. Bitte prüfe deine Eingabe.",
+          "code_locked": "Zu viele falsche Eingaben. Du kannst es in {wait} erneut versuchen.",
+          "code_locked_generic": "Zu viele falsche Eingaben. Bitte versuche es später erneut.",
+          "code_check_failed": "Der Code konnte nicht geprüft werden. Bitte versuche es erneut.",
+          "rate_limit_wait": "Bitte warte noch {wait}, bevor du es erneut versuchst.",
+          "code_expired": "Der Code ist abgelaufen. Bitte fordere einen neuen an.",
+          "no_code_requested": "Es wurde noch kein Code angefordert. Bitte fordere zuerst einen Code an.",
+          "sms_delivery_failed": "SMS konnte nicht versendet werden. Bitte versuche es erneut.",
+          "rate_limit": "Du hast zu oft einen Code angefordert. Bitte warte einige Minuten und versuche es erneut."
+        }
+      },
+      "personal_data": {
+        "welcome": "Herzlich Willkommen",
+        "intro": "Bitte geben Sie zunächst Ihren Namen ein. Sie können diese Angaben später vervollständigen oder bearbeiten.",
+        "save": "Übernehmen",
+        "fields": {
+          "salutation": {
+            "label": "Anrede",
+            "hint": "Was ist Ihre Anrede?"
+          },
+          "academic_title": {
+            "label": "Doktorgrad",
+            "hint": "Falls zutreffend, welchen Doktorgrad haben Sie?"
+          },
+          "first_name": {
+            "label": "Vorname",
+            "hint": "Wie lautet Ihr Vorname?"
+          },
+          "last_name": {
+            "label": "Nachname",
+            "hint": "Wie lautet Ihr Nachname?"
+          },
+          "gender": {
+            "label": "Geschlecht",
+            "hint": "Welches Geschlecht haben Sie?"
+          },
+          "birth_date": {
+            "label": "Geburtsdatum",
+            "hint": "Wann sind Sie geboren?"
+          },
+          "postal_code": {
+            "label": "Postleitzahl",
+            "hint": "Wie lautet Ihre Postleitzahl?"
+          },
+          "municipality": {
+            "label": "Gemeinde",
+            "hint": "Bitte wählen Sie Ihre Gemeinde aus."
+          },
+          "city": {
+            "label": "Ort",
+            "hint": "In welchem Ort wohnen Sie?"
+          },
+          "street": {
+            "label": "Straße",
+            "hint": "In welcher Straße wohnen Sie?"
+          },
+          "house_number": {
+            "label": "Hausnummer",
+            "hint": "Wie lautet Ihre Hausnummer?"
+          },
+          "address_extra": {
+            "label": "Adresszusatz",
+            "hint": "Falls zutreffend, wie lautet Ihr Adresszusatz?"
+          }
+        },
+        "options": {
+          "mr": "Herr",
+          "mrs": "Frau",
+          "diverse": "Divers",
+          "male": "Männlich",
+          "female": "Weiblich"
+        }
+      }
+    },
+    "open_source": {
+      "title": "Open Source",
+      "sdk": "Im Flutter SDK enthalten",
+      "intro": "Diese App wird durch Open-Source-Software möglich. Hier findest du die verwendeten Pakete und ihre vollständigen Lizenztexte.",
+      "search": "Pakete durchsuchen",
+      "count": "{} Pakete · A–Z",
+      "version": "Version {}",
+      "empty": "Keine passenden Pakete gefunden.",
+      "license": "Lizenz",
+      "missing": "Für dieses Paket wurde kein Lizenztext mitgeliefert.",
+      "error": "Die lokal gespeicherten Lizenzen konnten nicht geladen werden. Bitte versuche es erneut.",
+      "retry": "Erneut versuchen"
+    },
+    "events": {
+      "title": "Veranstaltungen",
+      "loading": "Veranstaltung wird geladen …",
+      "unavailable": "Diese Veranstaltung ist nicht mehr verfügbar.",
+      "location": "Veranstaltungsort",
+      "organizer": "Veranstalter",
+      "provider": "Anbieter",
+      "booking": "Zum Ticketanbieter",
+      "tickets": "Hier Tickets sichern!",
+      "provider_link": "Zum Anbieter",
+      "link_open_failed": "Der Link konnte nicht geöffnet werden."
+    },
+    "attachments": {
+      "missing": "Einige gespeicherte Bilder oder Dokumente sind nicht mehr auf diesem Gerät verfügbar. Bitte wählen Sie die fehlenden Dateien erneut aus.",
+      "processing_error": "Die Datei konnte nicht verarbeitet werden. Bitte wählen Sie das Bild erneut oder eine andere Datei aus.",
+      "required": "Diese Angabe ist zwingend notwendig",
+      "max_file_size": "Die Datei überschreitet die maximale Größe von {size} MB.",
+      "max_total_size": "Die Gesamtgröße aller Dateien darf {size} MB nicht überschreiten.",
+      "remove": "Datei entfernen"
+    }
+  }
+}

@@ -1,0 +1,93 @@
+query NewsArtikelList($filter: NewsArtikel_where!, $page: Int, $limit: Int) {
+  newsArtikelList(where: $filter, sort: "-datum", page: $page, limit: $limit) {
+    docs {
+      ...NewsArtikelInfo
+    }
+    hasNextPage
+    page
+  }
+}
+
+query NewsArtikelFrontpage(
+  $untereinheitenIds: [JSON]
+  $kommuneId: JSON!
+  $ordinal: Float!
+  $page: Int
+  $limit: Int
+) {
+  # Payload v3 drops null entries from relationship `in` lists, so articles
+  # without untereinheit need an explicit OR branch (exists: false).
+  topThemaNewsArtikelList: newsArtikelList(
+    where: {
+      kommune: { equals: $kommuneId }
+      ordinal: { equals: $ordinal }
+      OR: [
+        { untereinheit: { in: $untereinheitenIds } }
+        { untereinheit: { exists: false } }
+      ]
+    }
+    sort: "-datum"
+    page: $page
+    limit: 1
+  ) {
+    docs {
+      ...NewsArtikelInfo
+    }
+    hasNextPage
+    page
+  }
+
+  newsArtikelList(
+    where: {
+      kommune: { equals: $kommuneId }
+      ordinal: { not_equals: $ordinal }
+      OR: [
+        { untereinheit: { in: $untereinheitenIds } }
+        { untereinheit: { exists: false } }
+      ]
+    }
+    sort: "-datum"
+    page: $page
+    limit: $limit
+  ) {
+    docs {
+      ...NewsArtikelInfo
+    }
+    hasNextPage
+    page
+  }
+}
+
+query NewsArtikel($id: String!) {
+  newsArtikel(id: $id) {
+    ...NewsArtikel
+  }
+}
+
+fragment NewsArtikelInfo on NewsArtikel {
+  id
+  titel
+  teaser
+  datum
+  ordinal
+  untereinheit {
+    id
+    name
+  }
+  titelbilder {
+    id
+    bildunterschrift
+    bild {
+    ...VeranstaltungsmedienImage
+    }
+  }
+}
+
+fragment NewsArtikel on NewsArtikel {
+  ...NewsArtikelInfo
+  originalUrl
+  inhalte {
+    ...RichTextBlock
+    ...ImageBlockVeranstaltungsmedien
+  }
+}

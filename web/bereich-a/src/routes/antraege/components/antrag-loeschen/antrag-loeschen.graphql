@@ -1,0 +1,13 @@
+mutation AntragSoftLoeschen($input: AntragSoftLoeschenInput!) {
+  antragSoftLoeschen(input: $input) {
+    ausfuehrung {
+      id
+      geloeschtAm
+    }
+    errors {
+      ... on Error {
+        message
+      }
+    }
+  }
+}

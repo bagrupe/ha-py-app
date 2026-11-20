@@ -1,0 +1,148 @@
+query Nutzende(
+  $groupId: UUID
+  $nurDienstleister: Boolean
+  $art: BackofficeNutzerArt
+  $search: String
+  $skip: Int
+  $take: Int
+) {
+  my {
+    ... on BackofficeUser {
+      kommune {
+        mitarbeiter(
+          groupId: $groupId
+          nurDienstleister: $nurDienstleister
+          art: $art
+          search: $search
+          skip: $skip
+          take: $take
+        ) {
+          items {
+            ...NutzendeListItem
+          }
+          totalCount
+        }
+
+        mitarbeiterGruppen {
+          ...MitarbeiterGruppe
+        }
+        untereinheiten {
+          ...Untereinheit
+        }
+      }
+      dienstleister {
+        name
+      }
+    }
+  }
+  availableFunktionsberechtigungen: funktionsberechtigungen {
+    ...FunktionsberechtigungenMetadata
+  }
+}
+
+fragment NutzendeListItem on Mitarbeiter {
+  id
+  vorname
+  nachname
+  eMail
+  isDeleted
+  gruppen {
+    id
+    name
+  }
+  pendingConfirmation
+  ... on BackofficeUser {
+    publicKey
+    organisationseinheiten {
+      ...BackofficeUserOrganisationseinheit
+    }
+    art
+    status
+    canBeDeleted
+    canBeUpdated
+    funktionsberechtigungen
+    dienstleister {
+      name
+    }
+  }
+}
+
+fragment BackofficeUserOrganisationseinheit on ResolvedBackofficeUserOrganisationseinheit {
+  organisationseinheitId
+  organisationseinheit {
+    name
+  }
+  zugehoerig
+  nutzerspezifischeFunktionsberechtigungen
+  geerbteFunktionsberechtigungen
+  alleFunktionsberechtigungen
+}
+
+fragment Untereinheit on Untereinheit {
+  id
+  name
+  eMailAdressen
+}
+
+mutation addGroupToMitarbeiter($groupId: UUID!, $mitarbeiterId: UUID!) {
+  addGroupToMitarbeiter(
+    input: {groupId: $groupId, mitarbeiterId: $mitarbeiterId}
+  ) {
+    mitarbeiter {
+      id
+      vorname
+      nachname
+    }
+  }
+}
+mutation backofficeUserUpdate($input: BackofficeUserUpdateInput!) {
+  backofficeUserUpdate(input: $input) {
+    __typename
+    backofficeUser {
+      id
+    }
+    errors {
+      ... on Error {
+        message
+      }
+    }
+  }
+}
+
+mutation removeGroupFromMitarbeiter($groupId: UUID!, $mitarbeiterId: UUID!) {
+  removeGroupFromMitarbeiter(
+    input: {groupId: $groupId, mitarbeiterId: $mitarbeiterId}
+  ) {
+    mitarbeiter {
+      id
+      vorname
+      nachname
+    }
+  }
+}
+
+fragment MitarbeiterGruppe on MitarbeiterGruppe {
+  id
+  name
+  eMailAdressen
+  organisationseinheiten {
+    id
+  }
+}
+
+fragment FunktionsberechtigungenMetadata on FunktionsberechtigungenMetadata {
+  global {
+    name
+    value
+    description
+    groupName
+  }
+  inOrganisationseinheit {
+    name
+    value
+    description
+    groupName
+    nutzerArtMindestens
+    implizit
+  }
+}

@@ -1,0 +1,286 @@
+include:
+  - local: "ci/template.gitlab-ci.yml"
+
+variables:
+  NODE_VERSION: 22.14.0
+
+################################################
+# LINTING STAGE
+################################################
+
+.audit-pnpm:
+  extends: [.pnpm]
+  stage: lint
+  needs: []
+  variables:
+    SOURCE_DIR: web
+    PNPM_INSTALL: none
+  script:
+    - pnpm audit $AUDIT_SCOPE --json > $AUDIT_REPORT || true
+    - cat $AUDIT_REPORT
+    - pnpm audit $AUDIT_SCOPE --audit-level $AUDIT_LEVEL
+  artifacts:
+    when: always
+    expire_in: 1 week
+    paths:
+      - web/$AUDIT_REPORT
+
+audit:web:
+  extends: [.audit-pnpm]
+  variables:
+    AUDIT_SCOPE: "--prod"
+    AUDIT_LEVEL: critical
+    AUDIT_REPORT: web-audit-prod.json
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "schedule" && $DEPENDENCY_AUDIT == "TRUE"
+    - if: $TARGET_ENV == "feature" || $TARGET_ENV == "development"
+      changes:
+        - "web/**/*"
+        - "ci/components/web.gitlab-ci.yml"
+
+audit:web:dev:
+  extends: [.audit-pnpm]
+  allow_failure: true
+  variables:
+    AUDIT_SCOPE: "--dev"
+    AUDIT_LEVEL: low
+    AUDIT_REPORT: web-audit-dev.json
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "schedule" && $DEPENDENCY_AUDIT == "TRUE"
+    - if: $TARGET_ENV == "feature" || $TARGET_ENV == "development"
+      changes:
+        - "web/**/*"
+        - "ci/components/web.gitlab-ci.yml"
+
+lint:web:
+  extends: [.pnpm]
+  stage: lint
+  allow_failure: true
+  needs: []
+  variables:
+    SOURCE_DIR: web
+  script:
+    - pnpm install
+    - pnpm lint:check
+  rules:
+    - if: $TARGET_ENV == "feature"
+      changes:
+        - "web/**/*"
+
+prettier:web:
+  extends: [.pnpm]
+  stage: lint
+  needs: []
+  variables:
+    SOURCE_DIR: web
+  script:
+    - pnpm prettier:check
+  rules:
+    - if: $TARGET_ENV == "feature"
+      changes:
+        - "web/**/*"
+
+typecheck:web:
+  extends: [.pnpm]
+  stage: lint
+  needs: []
+  variables:
+    SOURCE_DIR: web
+  script:
+    - pnpm install
+    - pnpm --filter bereich-b typecheck
+  rules:
+    - if: $TARGET_ENV == "feature"
+      changes:
+        - "web/**/*"
+
+################################################
+# GENERATE STAGE
+################################################
+
+generate:web:
+  extends: [.pnpm]
+  stage: generate
+  needs: []
+  variables:
+    SOURCE_DIR: web
+  script:
+    - apk add git
+    - pnpm graphql
+    - pnpm --filter emails export
+    - |
+      if git diff --exit-code; then
+        echo "✅ Generated files are up to date."
+      else
+        echo "❌ Generated files have changed. Please re-run "pnpm graphql" and "pnpm --filter emails export" before committing."
+        exit 1
+      fi
+  rules:
+    - if: $TARGET_ENV == "feature"
+      changes:
+        - "web/**/*"
+    - if: $CI_COMMIT_TAG =~ /^backend-.*$/ # Triggered on tag -> staging or production
+      when: always
+
+################################################
+# TEST STAGE
+################################################
+
+test:web-bereich-a:
+  extends: [.pnpm]
+  stage: test
+  needs: []
+  variables:
+    SOURCE_DIR: web
+  script:
+    - pnpm --filter bereich-a test:ci
+  rules:
+    - if: $TARGET_ENV == "feature"
+      changes:
+        - "web/*"
+        - "web/bereich-a/**/*"
+    - if: $CI_COMMIT_TAG =~ /^backend-.*$/ # Triggered on tag -> staging or production
+      when: always
+
+test:unit:web-bereich-b:
+  extends: [.pnpm]
+  stage: test
+  needs: []
+  variables:
+    SOURCE_DIR: web
+  script:
+    - pnpm --filter bereich-b test:unit:coverage
+  artifacts:
+    when: always
+    expire_in: 15 mins
+    paths:
+      - web/bereich-b/coverage/lcov.info
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "schedule"
+      when: never
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event" && $CI_DEFAULT_BRANCH == $CI_MERGE_REQUEST_TARGET_BRANCH_NAME
+      changes:
+        - "web/*"
+        - "web/bereich-b/**/*"
+    - !reference [.sonar-analysis-rules, rules]
+
+################################################
+# BUILD STAGE
+################################################
+
+build:web-bereich-a:
+  extends: [.pnpm]
+  stage: build
+  needs: []
+  variables:
+    SOURCE_DIR: web
+  script:
+    - pnpm -w generate-sentry
+    - cp $DEPLOYMENT_ENV_FILE bereich-a/.env.production
+    - pnpm turbo build --filter bereich-a...
+  artifacts:
+    paths:
+      - web/bereich-a/dist
+    expire_in: 15 mins
+  rules:
+    - if: $TARGET_ENV == "feature"
+      changes:
+        - "web/*"
+        - "web/bereich-a/**/*"
+    - if: $CI_COMMIT_TAG =~ /^backend-.*$/ # Triggered on tag -> staging or production
+      when: always
+  environment:
+    name: $TARGET_ENV
+
+build:web-bereich-b:
+  extends: [.pnpm]
+  stage: build
+  needs: []
+  variables:
+    SOURCE_DIR: web
+  script:
+    - pnpm -w generate-sentry
+    - pnpm turbo build --filter bereich-b...
+  artifacts:
+    paths:
+      - web/bereich-b/.next/standalone
+      - web/bereich-b/.next/static
+    expire_in: 15 mins
+  rules:
+    - if: $TARGET_ENV == "feature"
+      changes:
+        - "web/*"
+        - "web/bereich-b/**/*"
+    - if: $CI_COMMIT_TAG =~ /^backend-.*$/ # Triggered on tag -> staging or production
+      when: always
+
+################################################
+# PACKAGE STAGE
+################################################
+
+package:web-bereich-a:
+  stage: package
+  tags:
+    - docker-build-new
+  extends: [.package-template]
+  needs:
+    - job: build:web-bereich-a
+  script:
+    - echo "Building version web-bereich-a-${IMAGE_TAG#*-}"
+    - docker build -t $CI_REGISTRY_IMAGE/web-bereich-a:web-bereich-a-"${IMAGE_TAG#*-}" -f web/bereich-a/Dockerfile web/bereich-a
+  rules:
+    - if: $TARGET_ENV == "feature"
+      when: never
+    - if: $CI_COMMIT_TAG =~ /^backend-.*$/ # Triggered on tag -> staging or production
+      when: always
+
+package:web-bereich-b:
+  stage: package
+  tags:
+    - docker-build-new
+  extends: [.package-template]
+  needs:
+    - job: build:web-bereich-b
+  script:
+    - echo "Building version web-bereich-b-${IMAGE_TAG#*-}"
+    - docker build -t $CI_REGISTRY_IMAGE/web-bereich-b:web-bereich-b-"${IMAGE_TAG#*-}" -f web/bereich-b/Dockerfile web/bereich-b
+  rules:
+    - if: $TARGET_ENV == "feature"
+      when: never
+    - if: $CI_COMMIT_TAG =~ /^backend-.*$/ # Triggered on tag -> staging or production
+      when: always
+
+push:web-bereich-a:
+  stage: push
+  extends: [.push-template]
+  tags:
+    - docker-build-new
+  needs:
+    - job: package:web-bereich-a
+  script:
+    - docker login -u "gitlab-ci-token" -p $CI_JOB_TOKEN $CI_REGISTRY
+    - echo "Push $CI_REGISTRY_IMAGE/web-bereich-a:web-bereich-a-"${IMAGE_TAG#*-}" to registry"
+    - docker push $CI_REGISTRY_IMAGE/web-bereich-a:web-bereich-a-"${IMAGE_TAG#*-}"
+  rules:
+    - if: $TARGET_ENV == "feature"
+      when: never
+    - if: $CI_COMMIT_TAG =~ /^backend-.*$/ # Triggered on tag -> staging or production
+      when: always
+
+push:web-bereich-b:
+  stage: push
+  extends: [.push-template]
+  tags:
+    - docker-build-new
+  needs:
+    - job: package:web-bereich-b
+  script:
+    - docker login -u "gitlab-ci-token" -p $CI_JOB_TOKEN $CI_REGISTRY
+    - echo "Push $CI_REGISTRY_IMAGE/web-bereich-b:web-bereich-b-"${IMAGE_TAG#*-}" "
+    - docker push $CI_REGISTRY_IMAGE/web-bereich-b:web-bereich-b-"${IMAGE_TAG#*-}"
+  rules:
+    - if: $TARGET_ENV == "feature"
+      when: never
+    - if: $CI_COMMIT_TAG =~ /^backend-.*$/ # Triggered on tag -> staging or production
+      when: always

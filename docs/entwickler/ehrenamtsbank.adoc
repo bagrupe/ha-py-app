@@ -1,0 +1,311 @@
+==== Ehrenamtsbank
+
+Die Ehrenamtsbank vermittelt nachbarschaftliche Hilfe. Bürger stellen entweder
+ein *Gesuch* ("Ich brauche Hilfe") oder ein *Angebot* ("Ich biete Hilfe") ein.
+Beide werden als dieselbe Entität `EhrenamtsbankEintrag` gespeichert und
+unterscheiden sich nur über das Feld `Typ` und die typ-exklusiven Felder.
+
+Die Kategorien der Ehrenamtsbank sind ein eigener Baum
+(`EhrenamtsbankKategorie`, Query `ehrenamtsbankKategorien`); ein Eintrag
+referenziert genau eine Kategorie.
+
+Siehe `backend/API/Features/Ehrenamtsbank/`.
+
+===== Datenmodell
+
+[cols="30%,20%,~"]
+|===
+| Feld
+| Typ
+| Beschreibung
+
+| `typ`
+| `Gesuch` \| `Angebot`
+| Nach Erstellung unveränderlich.
+
+| `ownerId`
+| Bürger
+| Inhaber des Eintrags. Nur registrierte Bürger können Einträge anlegen.
+
+| `title`
+| Text (max. 150)
+| Pflichtfeld.
+
+| `description`
+| Text
+| Pflichtfeld; leer oder reiner Whitespace wird abgelehnt.
+
+| `kategorieId`
+| Ehrenamtsbank-Kategorie
+| Muss effektiv aktiv sein (die Kategorie selbst und alle Eltern bis zur Wurzel).
+
+| `untereinheitId`
+| Untereinheit
+| Ort des Eintrags. Muss eine Gemeinde sein (`isGemeinde = true`).
+
+| `radiusKm`
+| Zahl, optional
+| Bereitschaftsradius. Reine Anzeigeinformation, keine Geo-Suche.
+
+| `status`
+| Status-Enum
+| Siehe Lebenszyklus. Neue Einträge starten in `Draft`.
+
+| `urgency`
+| `Niedrig` \| `Mittel` \| `Hoch`, optional
+| *Nur bei Gesuchen* erlaubt.
+
+| `estimatedDurationMinutes`
+| Zahl, optional
+| Geschätzter Aufwand in Minuten. *Nur bei Gesuchen* erlaubt; die Formatierung
+  obliegt dem Client.
+
+| `availability`
+| Freitext, optional
+| *Nur bei Angeboten* erlaubt.
+
+| `imageUrl`
+| Text, optional
+| Upload-Handling ist nicht Teil dieses Standes.
+
+| `tags`
+| Liste von Texten
+| Freie Schlagworte, z.B. "Werkzeug vorhanden".
+
+| `createdAt` / `updatedAt`
+| Zeitstempel
+| Werden serverseitig gesetzt.
+
+| `reviewedAt`
+| Zeitstempel, optional
+| Zeitpunkt der letzten Moderationsentscheidung (Freigabe oder Ablehnung).
+
+| `isDeleted`
+| Flag
+| Soft-Delete. Die Zeile bleibt erhalten, verschwindet aber aus allen Queries.
+|===
+
+Kein typ-spezifisches Feld ist verpflichtend, aber ein Gesuch darf keine
+Angebots-Felder setzen und umgekehrt (`EintragTypValidation`).
+
+===== Führungszeugnis-Vererbung
+
+Eine Kategorie erfordert *effektiv* ein Führungszeugnis, wenn sie selbst oder
+eine ihrer Eltern bis zur Wurzel `requiresClearance` gesetzt hat
+(`KategorieTree.RequiresEffectiveClearance`). Das Gate greift ausschließlich für
+*Angebote*: Wer ein Angebot in einer solchen Kategorie einstellen will, braucht
+ein verifiziertes Führungszeugnis. Gesuche sind davon nicht betroffen.
+
+===== Statuslebenszyklus
+
+Die Übergangstabelle ist geschlossen — alles, was hier nicht steht, ist
+verboten. `Completed` und `Closed` sind Endzustände ohne jeden Ausgang, auch
+nicht voneinander: beide beenden den Eintrag, und die Unterscheidung "Hilfe
+erbracht" gegenüber "zurückgezogen" bleibt in der eigenen Liste des Inhabers
+erhalten.
+
+[cols="20%,20%,20%,~"]
+|===
+| Von
+| Nach
+| Akteur
+| Bedeutung
+
+| `Draft`
+| `PendingReview`
+| Inhaber
+| Zur Prüfung einreichen.
+
+| `PendingReview`
+| `Active`
+| Moderation
+| Freigabe. Setzt `reviewedAt`.
+
+| `PendingReview`
+| `Draft`
+| Moderation
+| Ablehnung, zurück in die Bearbeitung. Setzt `reviewedAt`.
+
+| `Active`
+| `Paused`
+| Inhaber
+| Vorübergehend pausieren.
+
+| `Paused`
+| `Active`
+| Inhaber
+| Wieder aktivieren.
+
+| `Active` / `Paused`
+| `Completed`
+| Inhaber
+| Hilfe wurde erbracht.
+
+| `Active` / `Paused`
+| `PendingReview`
+| Inhaber (implizit)
+| Ausschließlich automatische Folge einer Bearbeitung, siehe unten. Über
+  `updateEhrenamtsbankEintragStatus` ist dieser Übergang bewusst *nicht*
+  anforderbar.
+
+| `Draft` / `PendingReview` / `Active` / `Paused`
+| `Closed`
+| Inhaber
+| Eintrag zurückziehen.
+
+| `Active` / `Paused`
+| `Closed`
+| Moderation
+| Takedown durch die Moderation.
+|===
+
+Wird ein bereits freigegebener Eintrag (`Active` oder `Paused`) vom Inhaber
+bearbeitet, wandert er automatisch zurück nach `PendingReview` — die Moderation
+darf nicht durch nachträgliche Bearbeitung umgangen werden. Einträge in
+`Completed` oder `Closed` können nicht mehr bearbeitet werden. Diese Statusfolge
+steckt in `EintragStateMachine.AfterContentEdit` und bewusst *nicht* in der
+Übergangstabelle der Statusmutation — sie ist eine Nebenwirkung des Bearbeitens
+und kein Statuswechsel, den ein Aufrufer direkt anfordern kann.
+
+===== Nebenläufigkeit
+
+Inhaber und Moderation greifen auf dieselbe Zeile zu. Der Eintrag trägt deshalb
+ein Nebenläufigkeits-Token (Postgres-Systemspalte `xmin`): Wurde die Zeile
+zwischen Laden und Speichern von jemand anderem geändert, schlägt das Speichern
+mit `EintragConflictError` fehl, statt die fremde Änderung zu überschreiben oder
+stillschweigend zu behalten. Ohne diese Absicherung könnte eine Bearbeitung, die
+parallel zu einer Freigabe läuft, ungeprüfte Inhalte im Status `Active`
+veröffentlichen — der Inhaber-Save fasst das Statusfeld in diesem Fall gar nicht
+an. Clients behandeln den Fehler durch Neuladen und erneutes Absenden.
+
+===== Berechtigungen
+
+"Moderation" bedeutet: Backoffice-Nutzer mit der globalen Funktionsberechtigung
+`Ehrenamtsbank` (Super-Admins erhalten sie automatisch, siehe
+<<_funktionsberechtigungen>>).
+
+[cols="30%,17%,17%,17%,~"]
+|===
+| Operation
+| Anonym
+| Registrierter Bürger
+| Inhaber
+| Moderation
+
+| `ehrenamtsbankEintraege` (ohne Status-Filter)
+| Ja
+| Ja
+| Ja
+| Ja
+
+| `ehrenamtsbankEintraege` (Status-Filter ≠ `Active`)
+| Nein
+| Nein
+| Nein
+| Ja
+
+| `meineEhrenamtsbankEintraege`
+| Nein
+| Ja (eigene, alle Status)
+| Ja
+| Nein
+
+| `ehrenamtsbankEintrag` (Status `Active`)
+| Ja
+| Ja
+| Ja
+| Ja
+
+| `ehrenamtsbankEintrag` (andere Status)
+| Nein
+| Nein
+| Ja
+| Ja
+
+| `owner { phone }`
+| Nein (`null`)
+| Ja
+| Ja
+| Nein (`null`)
+
+| `createEhrenamtsbankEintrag`
+| Nein
+| Ja
+| —
+| Nein
+
+| `updateEhrenamtsbankEintrag`
+| Nein
+| Nein
+| Ja
+| Nein
+
+| `deleteEhrenamtsbankEintrag`
+| Nein
+| Nein
+| Ja (Soft-Delete)
+| Nein
+
+| `updateEhrenamtsbankEintragStatus`
+| Nein
+| Nein
+| Ja (Inhaber-Übergänge)
+| Ja (Moderations-Übergänge)
+|===
+
+Die öffentliche Suche liefert ohne Status-Filter ausschließlich aktive, nicht
+gelöschte Einträge, neueste zuerst. Nicht vorhandene, gelöschte und fremde
+nicht-aktive Einträge sind in der Einzelansicht bewusst ununterscheidbar (kein
+Existenz-Leak).
+
+Name und Nachname des Inhabers werden immer vollständig ausgeliefert (die
+Abkürzung für die Anzeige obliegt dem Client); die Telefonnummer nur an
+registrierte Aufrufer.
+
+===== Konto löschen
+
+Registrierte Bürger können ihr Ehrenamtsbank-Konto über die Mutation
+`deleteEhrenamtsbankAccount` löschen. Die Löschung läuft in einer Transaktion und
+ersetzt die bisherige App-Identität durch eine neue schwache Anmeldung (gleiche
+Crypto-Eingaben wie bei `registerBuergerWeak`).
+
+*Voraussetzungen (Lösch-Sperren):*
+
+* Registrierter Aufrufer (`IsRegistered = true`)
+* Zeitkonto-Saldo ≥ `EhrenamtsbankZeitkonto:DeletionMinBalanceMinutes` (Standard: `0`)
+* Keine vereinbarten Ehrenamtsbank-Anfragen (`Status = Vereinbart`) als Inhaber
+  oder Interessent
+
+*Ablauf:*
+
+. Soft-Delete aller eigenen Ehrenamtsbank-Einträge; offene Anfragen darauf werden abgelehnt
+. Offene/akzeptierte Anfragen als Interessent werden zurückgezogen; optionale Nachrichten werden entfernt
+. Soft-Delete aller municipalen Anträge (`Ausführung`) des Bürgers mit Löschgrund
+  „Ehrenamtsbank-Konto gelöscht“ (revisionssicheres Protokoll wie bei Backoffice-Soft-Delete)
+. Entfernen von BundID-Verknüpfungen und Refresh-Tokens; Leeren von Ehrenamtsbank-PII am alten Datensatz
+. Markieren des alten Bürgers als `IsDeleted = true` (Telefon-Hash wird freigegeben)
+. Anlegen eines neuen anonymen Bürgers; Rückgabe von `buergerId` und schwachem JWT (`is_registered: false`)
+
+Zeitkonto-Transaktionen bleiben am gelöschten Bürger verknüpft; Notizen werden entfernt.
+Die endgültige Aufbewahrungsstrategie für Transaktionen folgt dem separaten
+Löschkonzept (#238).
+
+*Hinweise:*
+
+* Derzeit keine SMS-Bestätigung für das Löschen. Die App stellt sicher zeigt ein Dialog
+* Die App ersetzt nach erfolgreicher Mutation lokal `buergerId`, Token und Crypto-Material
+* Push-Tokens am alten Datensatz werden geleert; die App registriert Push für den neuen Bürger neu
+
+===== GraphQL
+
+Die Feldbeschreibungen stehen als XML-Doc-Kommentare an Entität, Enums und
+Resolvern und landen darüber in der Schema-Dokumentation. Die vollständige
+Signatur der Queries, Mutations, Filter-Inputs und Fehlertypen steht im
+exportierten Schema (`web/bereich-a/schema.graphql`, `app/lib/graphql/schema.graphql`)
+bzw. interaktiv in Banana Cake Pop unter `/graphql`.
+
+Fehlertypen der Mutationen: `Unauthenticated` (kein angemeldeter Nutzer — alle
+vier Mutationen setzen eine Anmeldung voraus), `NotAllowedError` (fehlende
+Berechtigung), `EintragValidationError` (Feld- oder Referenzfehler),
+`EintragStatusTransitionError` (unerlaubter Statuswechsel),
+`EintragNotFoundError`, `EintragConflictError` (nebenläufige Änderung).

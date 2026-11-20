@@ -1,0 +1,195 @@
+name: hameln
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: ${COMPOSE_PROJECT_NAME:-hameln}-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: db
+      POSTGRES_MONITORING_PASSWORD: monitoring
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres-volume:/var/lib/postgresql/data
+      - ./postgres/init:/docker-entrypoint-initdb.d:ro
+    networks:
+      - hameln-pyrmont
+
+  postgres-archive:
+    image: postgres:15-alpine
+    container_name: ${COMPOSE_PROJECT_NAME:-hameln}-postgres-archive
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: archive
+      POSTGRES_PASSWORD: archive-password
+      POSTGRES_DB: archive
+    ports:
+      - "${POSTGRES_ARCHIVE_PORT:-5434}:5432"
+    volumes:
+      - postgres-archive-volume:/var/lib/postgresql/data
+    networks:
+      - hameln-pyrmont
+
+  mongodb:
+    image: mongo:6.0.4
+    restart: unless-stopped
+    container_name: ${COMPOSE_PROJECT_NAME:-hameln}-mongodb
+    healthcheck:
+        test: ["CMD-SHELL", "bash -c '< /dev/tcp/127.0.0.1/27017'"]
+        interval: 15s
+        timeout: 5s
+        retries: 5
+
+    ports:
+      - "${MONGO_PORT:-27017}:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: password
+      MONGO_MONITORING_PASSWORD: monitoring
+    volumes:
+      - mongodb-volume:/data/db
+      - ./mongodb/init:/docker-entrypoint-initdb.d:ro
+    networks:
+      - hameln-pyrmont
+
+  gotenberg:
+    image: gotenberg/gotenberg:8
+    container_name: ${COMPOSE_PROJECT_NAME:-hameln}-gotenberg
+    restart: unless-stopped
+    ports:
+      - "${GOTENBERG_PORT:-3002}:3000"
+    networks:
+      - hameln-pyrmont
+
+  object-storage:
+    image: rustfs/rustfs:1.0.0
+    container_name: ${COMPOSE_PROJECT_NAME:-hameln}-object-storage
+    restart: unless-stopped
+    environment:
+      RUSTFS_ACCESS_KEY: hameln-local
+      RUSTFS_SECRET_KEY: hameln-local-secret
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/health"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    ports:
+      - "${OBJECT_STORAGE_PORT:-9000}:9000"
+      - "${OBJECT_STORAGE_CONSOLE_PORT:-9002}:9001"
+    volumes:
+      - object-storage-volume:/data
+    networks:
+      - hameln-pyrmont
+
+  object-storage-init:
+    image: amazon/aws-cli:2.31.0
+    container_name: ${COMPOSE_PROJECT_NAME:-hameln}-object-storage-init
+    depends_on:
+      object-storage:
+        condition: service_healthy
+    environment:
+      AWS_ACCESS_KEY_ID: hameln-local
+      AWS_SECRET_ACCESS_KEY: hameln-local-secret
+      AWS_DEFAULT_REGION: eu-central-1
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - >-
+        aws --endpoint-url http://object-storage:9000 s3api head-bucket --bucket hameln-local 2>/dev/null
+        || aws --endpoint-url http://object-storage:9000 s3api create-bucket --bucket hameln-local
+    networks:
+      - hameln-pyrmont
+
+  keycloak-db:
+    image: postgres:15-alpine
+    container_name: ${COMPOSE_PROJECT_NAME:-hameln}-keycloak-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: keycloak
+      POSTGRES_PASSWORD: keycloak-password
+      POSTGRES_DB: keycloak
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U keycloak -d keycloak"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - keycloak-postgres-volume:/var/lib/postgresql/data
+    networks:
+      - hameln-pyrmont
+
+  # BundID-Anbindung: Keycloak als Identity Broker/SAML Service Provider gegen die BundID.
+  # IdP-Konfiguration (Zertifikate etc.) wird nach dem Start per scripts/bundid/configure-bundid-idp.sh eingespielt.
+  keycloak:
+    build:
+      context: ./keycloak
+      dockerfile: Dockerfile
+    container_name: ${COMPOSE_PROJECT_NAME:-hameln}-keycloak
+    restart: unless-stopped
+    depends_on:
+      keycloak-db:
+        condition: service_healthy
+    command: start-dev --import-realm
+    environment:
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://keycloak-db:5432/keycloak
+      KC_DB_USERNAME: keycloak
+      KC_DB_PASSWORD: keycloak-password
+      KC_HOSTNAME: auth.example.invalid
+      KC_HOSTNAME_STRICT: "false"
+      KC_HTTP_ENABLED: "true"
+      KC_PROXY_HEADERS: xforwarded
+      KC_HEALTH_ENABLED: "true"
+      KC_METRICS_ENABLED: "true"
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:-admin}
+      # Von BundID vorgeschriebene Pflichtangaben im SAML-AuthnRequest (siehe
+      # keycloak-extension-bundid README, "Übergabe weiterer Pflichtattribute").
+      # Kein Secret, aber ORGANIZATION_DISPLAY_NAME sollte dem bei BundID registrierten Wert entsprechen.
+      KC_SPI_SAML_AUTHENTICATION_PREPROCESSOR_BUNDID_PROTOCOL_ONLINE_SERVICE_ID: BMI-B0002535
+      KC_SPI_SAML_AUTHENTICATION_PREPROCESSOR_BUNDID_PROTOCOL_ORGANIZATION_DISPLAY_NAME: ${BUNDID_ORGANIZATION_DISPLAY_NAME:-KommunalApp Hameln-Pyrmont}
+      # Bewusste Produktentscheidung: nur Benutzername/Passwort als BundID-Anmeldeweg anbieten.
+      # Ohne diese Einschränkung zeigt BundID zusätzlich Online-Ausweis/eID, EU-Identität etc. zur
+      # Auswahl an, für Nutzer ohne AusweisApp/NFC-Ausweis eine Fehlerquelle, und der Rücksprung in
+      # die KommunalApp nach einer eID-Anmeldung ist ungetestet. Alle anderen Methoden werden
+      # bewusst explizit deaktiviert statt nur wegzulassen: laut Extension-README erscheinen nicht
+      # gelistete Methoden gar nicht im AuthnMethods-Element, BundID würde sie dann nach eigenem
+      # Ermessen trotzdem anbieten. Muss bei jeder künftigen Staging-/PROD-Keycloak-Instanz
+      # identisch gesetzt werden, siehe bundid-secrets/keycloak-prod/README.md
+      # ("getrennte PROD-Realm-/IdP-Strategie" ist noch offen).
+      KC_SPI_SAML_AUTHENTICATION_PREPROCESSOR_BUNDID_PROTOCOL_ENABLED_AUTHN_METHODS: benutzername
+      KC_SPI_SAML_AUTHENTICATION_PREPROCESSOR_BUNDID_PROTOCOL_DISABLED_AUTHN_METHODS: eid,eidas,elster,authega,diia,fink
+    ports:
+      - "${KEYCLOAK_PORT:-8081}:8080"
+      - "${KEYCLOAK_MANAGEMENT_PORT:-9001}:9000"
+    volumes:
+      - ./keycloak/realm-kommunalapp.json:/opt/keycloak/data/import/realm-kommunalapp.json:ro
+      # Lokal korrigiertes BundID-Extension-JAR, vom Nutzer manuell befüllt.
+      # Siehe bundid-secrets/keycloak/README.md.
+      - ../bundid-secrets/keycloak/keycloak-extension-bundid-status-detail.jar:/opt/keycloak/providers/keycloak-extension-bundid.jar:ro
+      # SP-Signing-/Encryption-Keystores (PKCS12), damit Keycloak ausgehende SAML-Requests mit dem
+      # bei BundID (SSP) tatsächlich registrierten Schlüsselpaar signiert/verschlüsselt statt mit
+      # einem intern automatisch generierten Realm-Key.
+      - ../bundid-secrets/keycloak:/opt/keycloak/bundid-secrets:ro
+      # Eigenes Login-Theme, das nur die SAML-POST-Binding-Zwischenseite (AuthnRequest-Weiterleitung
+      # zu BundID) durch eine leere, unbeschriftete Seite ersetzt — siehe themes/kommunalapp/login/
+      # saml-post-form.ftl. Sonst blitzt kurz Keycloaks eigene "Redirecting..."-Seite im
+      # In-App-Browser auf, bevor die BundID-Seite lädt.
+      - ./keycloak/themes/kommunalapp:/opt/keycloak/themes/kommunalapp:ro
+    networks:
+      - hameln-pyrmont
+
+volumes:
+  postgres-volume:
+  postgres-archive-volume:
+  mongodb-volume:
+  payload-volume:
+  mailpit-volume:
+  keycloak-postgres-volume:
+  object-storage-volume:
+
+networks:
+  hameln-pyrmont:
+    name: ${COMPOSE_PROJECT_NAME:-hameln}-pyrmont

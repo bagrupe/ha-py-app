@@ -1,0 +1,79 @@
+query IdeenKarte($kommuneId: UUID!, $filter: SlotValueFilterInput) {
+  kommune(kommuneId: $kommuneId) {
+    ideenAusfuehrungen {
+      __typename
+      id
+      userId
+      slotValues(where: $filter) {
+        ...SlotValue
+      }
+      status
+    }
+  }
+}
+
+fragment IdeeAusfuehrung on Ausfuehrung {
+  __typename
+  id
+  userId
+  adresse: slotValue(names: "adresse") {
+    ...PlainSlotValue
+  }
+  beschreibung: slotValue(names: "beschreibung") {
+    ...PlainSlotValue
+  }
+  title: slotValue(names: "titel") {
+    ...PlainSlotValue
+  }
+  bilder: slotValue(names: "bilder") {
+    id
+    slotName
+    slotValueCount
+  }
+  status
+  prozessVersion {
+    prozess {
+      name
+    }
+  }
+}
+
+query Idee($kommuneId: UUID!, $ideeId: UUID!) {
+  kommune(kommuneId: $kommuneId) {
+    id
+    ideeAusfuehrung(id: $ideeId) {
+      ...IdeeAusfuehrung
+      aktuellerNutzerFolgt
+
+      historie {
+        ...HistorieEintrag
+      }
+    }
+  }
+}
+
+query MeineIdeen {
+  my {
+    id
+    ... on Buerger {
+      ideen {
+        ...IdeeAusfuehrung
+      }
+
+      gefolgteIdeen {
+        ...IdeeAusfuehrung
+      }
+    }
+  }
+}
+
+mutation IdeeFolgen($input: AusfuehrungFolgenInput!) {
+  ausfuehrungFolgen(input: $input) {
+    buerger {
+      id
+      gefolgteAusfuehrungen {
+        ...IdeeAusfuehrung
+      }
+    }
+  }
+}

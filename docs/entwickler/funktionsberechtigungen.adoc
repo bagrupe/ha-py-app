@@ -1,0 +1,141 @@
+==== Funktionsberechtigungen
+
+Funktionsberechtigungen steuern im Backoffice und in der Inhaltspflege, zu
+welchen Teilbereichen ein Mitarbeiter Zugriff hat und berechtigt ist, Änderungen
+vorzunehmen.
+
+===== Nutzerarten
+
+Neben den Funktionsberechtigungen gibt es auch Nutzerarten, die den
+Grad der Zugriffsrechte mitbestimmen:
+
+- "Dienstleister": Mitarbeiter eines externen Dienstleisters, eingeschränkt auf
+  die Bearbeitung zugewiesener Anträge.
+- "Nutzer": Normaler Nutzer, keine besonderen Einschränkungen
+- "Administrator": Grundvoraussetzung für die Nutzerverwaltung
+- "Super-Admin": Erhält automatisch alle Funktionsberechtigungen in allen
+  Organisationseinheiten
+
+Siehe `Features/Auth/User.cs` -> `BackofficeNutzerArt`
+
+===== Organisationseinheitsgebundene Funktionsberechtigungen
+Funktionsberechtigungen, die unter Angabe einer Organisationseinheit vergeben
+werden, sind nur im Zusammenhang mit dieser Organisationseinheit gültig.
+
+===== Liste der Funktionsberechtigungen
+
+[cols="27%,15%,20%,~"]
+
+|===
+
+| Funktionsberechtigung
+| Bereich
+| Gebunden an OE
+| Beschreibung
+
+| `Anträge`
+| Backoffice
+| Ja
+| Kann Anträge bearbeiten.
+
+| `Nutzendenverwaltung`
+| Backoffice
+| Ja
+| Kann andere Mitarbeiter einer Organisationseinheit verwalten. Diese
+Berechtigung erfordert die Nutzerart "Administrator".
+
+| `Dienstleisterverwaltung`
+| Backoffice
+| Ja
+| Kann externe Dienstleister einer Organisationseinheit verwalten. Diese
+Berechtigung erfordert die Nutzerart "Administrator".
+
+| `Prozessverwaltung`
+| Backoffice
+| Nein
+| Kann Prozesse erstellen und bearbeiten
+
+| `News-Artikel`
+| Inhaltspflege
+| Ja
+| Kann News-Artikel erstellen und bearbeiten.
+
+| `Wettermesspunkte`
+| Inhaltspflege
+| Ja
+| Kann Wettermesspunkte verwalten.
+
+| `Geoflächen`
+| Inhaltspflege
+| Ja
+| Kann Geoflächen verwalten.
+
+| `POIs`
+| Inhaltspflege
+| Ja
+| Kann Points of Interest verwalten.
+
+| `Integrationen`
+| Inhaltspflege
+| Ja
+| Kann Integrationen verwalten.
+
+| `Veranstaltungen`
+| Inhaltspflege
+| Ja
+| Kann Veranstaltugen verwalten.
+
+| `Sensoren`
+| Inhaltspflege
+| Ja
+| Kann Sensoren verwalten.
+
+|===
+
+===== "Virtuelle" Funktionsberechtigungen
+Wenn ein Mitarbeiter beliebige Funktionsberechtigungen im Backoffice oder
+in der Inhaltspflege erhalten hat, wird dies mit einer "virtuellen"
+Funktionsberechtigung `Backoffice` bzw. `Inhaltspflege`
+gekennzeichnet, um allgemeinen Zugriff auf den entsprechenden Bereich zu
+gewähren.
+
+===== Umsetzung im Backoffice
+
+Im Backoffice wirken sich die Funktionsberechtigungen vor allem darauf aus,
+welche Bereiche in der Navigation angezeigt werden (`DesktopNavigation` bzw.
+`MobileNavigation`), und welche Bereiche ggf. mit einem entsprechenden
+Vermerk blockiert werden. In beiden Fällen wird die Wrapper-Komponente
+`IfFunktionsberechtigung` eingesetzt.
+
+===== Umsetzung im Backend
+
+Im Backend wird ein `FunktionsberechtigungenService` bereitgestellt, der die
+Berechtigungslogik kapselt. Über die Methode `EnsureBackofficeUser` des
+`CurrentUserAccessor` ist es außerdem möglich, auf die Funktionsberechtigungen
+des aktuellen Nutzers abzufragen oder direkt Voraussetzungen zu stellen, die
+den Vorgang bei Nichterfüllung sofort abbrechen.
+
+```cs
+var (actingUser, berechtigungen) = await currentUserAccessor.EnsureBackofficeUser();
+
+// Berechtigung abfragen
+var istBerechtigt = berechtigungen.InOrganisationseinheit(
+  organisationseinheitId,
+  FunktionsberechtigungInOrganisationseinheit.BackofficeNutzendenverwaltung);
+
+// Berechtigung fordern (wirft eine `NotAllowedException` falls nicht berechtigt)
+berechtigungen.InBeliebigerOrganisationseinheit(
+  FunktionsberechtigungInOrganisationseinheit.BackofficeNutzendenverwaltung).Fordern();
+```
+
+===== Umsetzung in Payload
+
+In Payload bauen die Funktionsberechtigungen auf der Access Control von Payload
+auf. Hierfür werden die Sammlungsdefinitionen automatisch um entsprechende
+Regeln ergänzt; dies geschieht über das Plugin
+`plugins/default-access-control.ts`.
+
+Diese Regeln geben zum einen Lese- und Schreibrechte (`wrapAccess()`) anhand der
+in der Sammlung angegebenen Funktionsberechtigung
+(`custom.funktionsberechtigung`) vor, bestimmen aber auch, ob diese Sammlung
+in der UI angezeigt, oder gänzlich verborgen wird (`wrapHidden()`).

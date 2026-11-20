@@ -1,0 +1,61 @@
+query Untereinheiten {
+  my {
+    ... on BackofficeUser {
+      kommune {
+        untereinheiten {
+          ...VerwalteteUntereinheit
+        }
+      }
+    }
+  }
+}
+
+mutation UntereinheitUpdate($input: UntereinheitUpdateInput!) {
+  untereinheitUpdate(input: $input) {
+    untereinheit {
+      __typename
+      ...VerwalteteUntereinheit
+    }
+    errors {
+      __typename
+      ... on Error {
+        message
+      }
+    }
+  }
+}
+
+mutation UntereinheitDelete($input: UntereinheitDeleteInput!) {
+  untereinheitDelete(input: $input) {
+    untereinheit {
+      ...VerwalteteUntereinheit
+    }
+    errors {
+      __typename
+      ... on Error {
+        message
+      }
+    }
+  }
+}
+mutation UntereinheitCreate($input: UntereinheitCreateInput!) {
+  untereinheitCreate(input: $input) {
+    untereinheit {
+      __typename
+      ...VerwalteteUntereinheit
+    }
+    errors {
+      __typename
+      ... on Error {
+        message
+      }
+    }
+  }
+}
+
+fragment VerwalteteUntereinheit on Untereinheit {
+  id
+  name
+  isGemeinde
+  eMailAdressen
+}

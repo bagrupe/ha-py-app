@@ -1,0 +1,150 @@
+
+= Kommunal App Dokumentation
+Kommunal-App Projektteam
+Stand {localdate}
+:doctype: book
+:xrefstyle: full
+:!section-refsig: #https://docs.asciidoctor.org/asciidoc/latest/macros/xref-text-and-style/
+:sectnums:
+:chapter-number:
+:chapter-signifier:
+:toc:
+:figure-caption: Abbildung
+:toc-title: Inhalt
+:toclevels: 3
+:icons: font
+:imagesdir:
+:outline-title: Kommunal App Dokumentation
+:pdf-theme: ./pdf-theme.yml
+
+include::einleitung.adoc[]
+
+== Zielsetzung und Features
+
+include::features.adoc[]
+
+== Installation und Betrieb
+
+include::installation/betriebsanforderungen.adoc[]
+
+include::installation/start.adoc[]
+
+include::entwickler/versionsverwaltung.adoc[]
+
+include::entwickler/ci-cd.adoc[]
+
+== Anwenderhandbuch
+
+include::anwender/backoffice/einleitung.adoc[]
+
+<<<
+=== Administration
+
+include::anwender/backoffice/anlegen-oe.adoc[]
+
+include::anwender/backoffice/einladen-nutzer.adoc[]
+
+include::anwender/backoffice/passwort-reset.adoc[]
+
+include::anwender/backoffice/funktionsberechtigungen-aendern.adoc[]
+
+<<<
+=== Anträge
+
+include::anwender/backoffice/antraege-bearbeiten.adoc[]
+
+include::anwender/backoffice/antraege-weiterleiten.adoc[]
+
+<<<
+=== Prozesseditor
+
+include::anwender/backoffice/prozesse-einleitung.adoc[]
+
+include::anwender/backoffice/prozesse-uebersicht.adoc[]
+
+include::anwender/backoffice/prozesse-anlegen.adoc[]
+
+include::anwender/backoffice/prozesse-bearbeiten.adoc[]
+
+<<<
+=== Inhaltspflege
+
+include::anwender/inhaltspflege/einleitung.adoc[]
+
+include::anwender/inhaltspflege/inhalte-anlegen.adoc[]
+
+==== Collections für die mobile App
+
+include::anwender/inhaltspflege/mobile-app-collections.adoc[]
+
+==== Interne Collections
+
+include::anwender/inhaltspflege/interne-collections.adoc[]
+
+==== Collections für das Backoffice
+
+include::anwender/inhaltspflege/backoffice-collections.adoc[]
+
+<<<
+== Entwicklerdokumentation
+
+=== Architektur
+
+include::entwickler/architektur.adoc[]
+
+include::entwickler/backend.adoc[]
+
+include::entwickler/inhaltspflege.adoc[]
+
+include::entwickler/datenbanken.adoc[]
+
+include::entwickler/object-storage.adoc[]
+
+include::entwickler/monitoring.adoc[]
+
+include::entwickler/graphql.adoc[]
+
+include::entwickler/ende-zu-ende-verschluesselung.adoc[]
+
+include::entwickler/app.adoc[]
+
+include::entwickler/stele.adoc[]
+
+include::entwickler/dritt-services.adoc[]
+
+include::entwickler/externe-abhaengigkeiten.adoc[]
+
+=== Migration to Payload v3
+
+include::entwickler/payload-v3-migration.adoc[]
+
+=== API-Dokumentation
+
+include::entwickler/api-endpunkte.adoc[]
+
+=== Features
+
+include::entwickler/authentifizierung.adoc[]
+
+include::entwickler/funktionsberechtigungen.adoc[]
+
+include::entwickler/ehrenamtsbank.adoc[]
+
+include::entwickler/lagehelfer-seeding.adoc[]
+
+include::entwickler/lagehelfer-importformat.adoc[]
+
+include::entwickler/prozessbaukasten-uebersicht.adoc[]
+
+include::entwickler/prozessbaukasten-expressions.adoc[]
+
+include::entwickler/prozess-tags-einrichtung.adoc[]
+
+include::entwickler/bereich-b-synchronisation.adoc[]
+
+include::entwickler/bereich-b-importer.adoc[]
+
+include::entwickler/emails.adoc[]
+
+include::entwickler/push-notifications.adoc[]
+

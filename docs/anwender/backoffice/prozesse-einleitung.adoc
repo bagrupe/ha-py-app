@@ -1,0 +1,149 @@
+==== Der Prozesseditor
+
+Der Prozesseditor ist eine zentrale und sehr mächtige Komponente innerhalb der
+Kommunal-App. Über den Prozesseditor können Prozesse verwaltet, neu erstellt und
+bearbeitet werden - die dann als Antrag in der mobilen App auftauchen und
+Nutzern der App zur Verfügung stehen. Der *Mängelmelder* ist ein Beispiel für
+solch einen Prozess.
+
+Die grundlegende Idee hinter dem Prozesseditor ist, dass digitale Anträge von
+Gemeinden selbst erstellt und den Bürgern über die App zur Verfügung gestellt
+werden können. Dazu ist keine Programmierung oder Anpassung der Kommunal-App durch
+einen Dienstleister notwendig.
+
+Der Prozesseditor ist von Nutzern verwendbar, die dafür die notwendigen
+ <<veraendern_von_funktionsberechtigungen, Berechtigungen>> haben.
+
+[[prozesse]]
+===== Prozesse
+
+Ganz allgemein ist ein Prozess ein Folge von `Schritten`, die durch
+`Verbindungen` verbunden werden. Es gibt genau einen definierten
+`Start-Schritt`, der beim Anlegen eines Prozesses automatisch erstellt wird, und
+einen oder mehrere `Ende-Schritte`, die durch den Anwender angelegt werden. Der
+Prozesseditor ist ein graphisches Werkzeug, um einen Prozess zu entwerfen, indem
+Schritte erstellt und mit Verbindungen verbunden werden.
+
+===== Schritte
+
+Ein Schritt stellt innerhalb eines Prozesses einen bestimmten Zustand dar, in
+dem je nach *Typ* des Schritts bestimmte Aktionen möglich sind.
+
+====== Typen
+
+Aktuell gibt es folgende *Schritt-Typen*:
+
+- **Start-Schritt**: dieser Schritt-Type wird automatisch beim Erstellen eines
+Prozesses angelegt. Der Start-Schritt lässt sich inhaltlich durch einen anderen
+Schritt austauschen (siehe Platzhalter), es lässt sich jedoch kein anderer Schritt
+zu einem Start-Schritt umändern.
+
+- **Ende-Schritt**: ein Ende-Schritt stellt das Ende eines Prozesses dar und kann
+von Anwendern angelegt werden. Darüber hinaus sind mehrere Ende-Schritte erlaubt.
+Es ist nicht möglich weitere Schritte *nach* einem Ende-Schritt anzuhängen.
+
+- **Formular-Schritt**: dieser Schritt-Typ ermöglicht es Formulare aufzubauen.
+Über den Prozesseditor können dem Schritt unterschiedliche Formular-Felder
+hinzugefügt und in der Reihenfolge sortiert werden.
+
+- **Programmatischer Schritt**: dieser Schritt-Type ermöglicht es eine
+Automatisierung anzulegen, unterstützt wird aktuell die Option `Weiche`. Eine
+Automatisierung ermöglicht es Schritte fortzuführen, ohne dass ein
+Sachbearbeiter mit diesem Schritt interagieren muss. Im Vorgriff auf die
+Beschreibung zu Verbindungen: Programmatische Schritte werden ausgeführt, ohne dass
+dafür im Backoffice ein Button geklickt werden muss - somit wird der Prozess
+automatisch fortgeführt.
+
+- **Bezahlen Schritt**: Über den Bezahlen-Schritt kann zur Zahlung aufgefordert
+werden. Dieser Schritt wird zusammen mit dem
+
+- **Warte-auf-Bezahlung-abgeschlossen Schritt**: kombiniert.
+
+- **Platzhalter**: Platzhalter-Schritte sind solche Schritte, die einen anderen
+Schritt aufnehmen können - sie nehmen den Platz ein, bis ein "echter" Schritt
+eingefügt wird. Platzhalter-Schritte sind keine eigenständigen Schritte, sondern
+ermöglichen es bestimmte Aufgaben bei der Prozessbearbeitung zu ermöglichen. So
+kann ein Schritt z.B. "gelöst" werden, um ihn zu verschieben. Übrig bleibt dann
+der Platzhalter und die Verbindung zu und weg vom Schritt.
+
+Die unterschiedlichen Schritte ermöglichen unterschiedliche Aufgaben. Jeder
+Schritt hat individuelle Einstellungsmöglichkeiten. Z.B. lassen sich beim
+Formular-Schritt Formular-Felder hinzufügen ein konfigurieren, beim
+Programmatischen Schritt lässt sich festlegen, welche Art von Automatisierung
+gewünscht ist.
+
+====== Zuständigkeiten
+
+Schritte haben immer eine Zuständigkeit. Das bedeutet, dass für jeden Schritt
+einzeln festgelegt wird, wer ihn ausführt. Zur Auswahl stehen:
+
+- **Bürger**: dies sind Schritte, die innerhalb der mobilen App angezeigt und
+ausgeführt werden
+
+- **OE**: diese Schritte werden im Backoffice ausgeführt. Konkret sind dies
+solche Schritte, die durch Sachbearbeiter der Gemeinden im Backoffice bearbeitet
+werden
+
+- **DL**: diese Schritte werden von Dienstleistern ausgeführt und analog zu den
+*OE*-Schritten von Mitarbeitenden der Dienstleister im Backoffice bearbeitet
+
+- **Dynamisch**: bei diesen Schritten wird die Zuständigkeit dynamisch, aus dem
+Verlauf des Prozesses, bestimmt. Festgelegt wird diese dynamische Zuständigkeit
+durch das Weiterleiten von Anträgen. Siehe dazu die Beschreibung von Verbindungen.
+
+[TIP]
+.Beispiel Mängelmelder
+====
+- die ersten beiden Schritte des Mängelmelders sind
+__**Formular-Schritte**__, die in der mobilen App durch einen __**Bürger**__ ausgeführt
+werden
+- die ersten beiden Schritte des Mängelmelders sind
+__**Formular-Schritte**__, die in der mobilen App durch einen __**Bürger**__ ausgeführt
+werden
+
+- anschließend werden mehrere __**Programmatische Schritte**__ ausgeführt, die
+automatisch anhand der Eingaben des Bürgers entscheiden, welchen "Weg" der
+Mangel durch den Prozess nehmen soll. Die Zuständigkeit der programmatischen
+Schritte liegt bei __**OE**__
+
+- schließlich wird der gemeldete Mangel einem __**Formular-Schritt**__ in einer
+der Abteilungen mit Zuständigkeit __**OE**__ zugewiesen
+
+- innerhalb der Organisationseinheit kann noch entschieden werden den Mangel
+abzugeben. Dabei wird die Zuständigkeit dann an einen __**Formular-Schritt**__ mit
+__**dynamischer Zuständigkeit**__ übergeben - d.h. der Sachbearbeiter im
+Backoffice bestimmt innerhalb der Antragsbearbeitung selbst, wer konkret
+zuständig ist.
+====
+
+===== Verbindungen
+
+Schritte werden durch *Verbindungen* miteinander verbunden. Verbindungen sind
+gerichtet, das bedeutet der Fluss ist immer vom *Ausgang* eines Schritts zum
+*Eingang* eines anderen Schritts.
+
+Verbindungen haben nicht nur die Aufgabe zwei Schritte miteinander zu verbinden,
+sondern auch den Übergang von einem Schritt zum nächsten auszuführen und diesen
+Übergang zu dokumentieren. Darüber hinaus können bei Verbindungen *Bedingungen*
+angewendet werden, die erfüllt sein müssen, damit der Übergang stattfinden kann.
+
+Ein Schritt unterstützt demnach folgende Konfigurationen:
+
+- **Name**: der Name der Verbindung. Wird dieser Wert gesetzt, so wird die
+Verbindung ein Button im Backoffice. Im Prozesseditor wird dies entsprechend
+markiert.
+
+- **Statusänderung (Titel)**: Geht ein Schritt über eine Verbindung zu einem
+anderen über stellt dies eine Status- oder Zustandsänderung des Prozesses dar.
+Dieses Feld trägt den Titel dieser Änderung. In der mobilen App wird dieser
+Titel im Verlauf eines Antrags angezeigt.
+
+- **Statusänderung (Beschreibung)**: Wie der Titel. Hier wird die Beschreibung
+der Änderung aufgenommen. Auch dieser Wert wird in der mobilen App im Verlauf
+eines Antrags angezeigt.
+
+- **Bedingung**: Bedingungen geben an, ob der Übergang von einem Schritt zum
+anderen möglich ist. Standardmäßig ist dieses Feld mit dem Wert `true` befüllt.
+Die Eingaben in diesem Feld werden durch den Server ausgewertet. Das Ergebnis
+der Auswertung muss ein Wahrheitswert (`true` oder `false`) ergeben. Nur im Fall
+von `true` wird der Übergang gestattet.

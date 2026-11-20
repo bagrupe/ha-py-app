@@ -1,0 +1,197 @@
+query Ausfuehrung($ausfuehrungId: UUID!) {
+  ausfuehrung(id: $ausfuehrungId)
+    @export(exportName: "AntragDetailAusfuehrung") {
+    id
+    sharedKeyEncryptedForKommune
+    createdAt
+    updatedAt
+    status
+    manuellAbgeschlossen
+    nachrichtMaxLength
+    verlauf {
+      id
+      createdAt
+      statusAenderung
+      statusAenderungBeschreibung
+      benutzer
+      ziel
+      nachricht
+    }
+    istZustaendigkeit {
+      art
+      dienstleister {
+        id
+        name
+      }
+      organisationseinheit {
+        id
+        name
+      }
+      mitarbeiterGruppe {
+        id
+        name
+        isDeleted
+      }
+      zugewiesenePersonId
+      zugewiesenePerson {
+        id
+        vorname
+        nachname
+        isDeleted
+      }
+    }
+
+    bearbeitungen {
+      user {
+        ... on Mitarbeiter {
+          vorname
+          nachname
+        }
+      }
+      createdAt
+      schritt @export(exportName: "AntragDetailSchritt") {
+        __typename
+        id
+        erledigungDurchBuerger
+        titel
+        ... on FormularSchritt {
+          felder {
+            ...FormularSchrittFeld
+          }
+        }
+
+        slots {
+          ...Slot
+        }
+
+        ... on BezahlenSchritt {
+          betrag
+        }
+
+        ... on EmailForwarderExportSchritt {
+          body
+          subject
+          id
+          emailAddress
+          titel
+        }
+      }
+    }
+
+    prozessVersion {
+      id
+
+      prozess {
+        id
+        name
+        tags {
+          tag
+        }
+      }
+    }
+
+    slotValues {
+      ...SlotValue
+    }
+
+    currentSchritt {
+      id
+      titel
+      erledigungDurchBuerger
+      ... on FormularSchritt {
+        felder {
+          ...FormularSchrittFeld
+        }
+      }
+      ... on NachrichtSchritt {
+        nachrichtMaxLength
+      }
+      verbindungen {
+        id
+        name
+        nachId
+        istRelevant
+        nach {
+          sollZustaendigkeit {
+            art
+            liestRolleId
+            dynamischeArten
+          }
+        }
+      }
+      sollZustaendigkeit {
+        mitarbeiterGruppeId
+        mitarbeiterGruppe {
+          id
+          name
+        }
+      }
+    }
+  }
+}
+
+fragment Slot on Slot {
+  name
+  brauchtFreigabe
+  optional
+}
+
+mutation UpdateIstFreigegebenSlotValue(
+  $input: UpdateIstFreigegebenSlotValueInput!
+) {
+  updateIstFreigegebenSlotValue(input: $input) {
+    ausfuehrung {
+      id
+    }
+  }
+}
+
+mutation AusfuehrungContinue($input: AusfuehrungContinueInput!) {
+  ausfuehrungContinue(input: $input) {
+    ausfuehrungResult {
+      ausfuehrung {
+        id
+      }
+    }
+  }
+}
+mutation AusfuehrungUpdateZugewiesenePerson(
+  $ausfuehrungId: UUID!
+  $userId: UUID!
+) {
+  ausfuehrungUpdateZugewiesenePerson(
+    input: {ausfuehrungId: $ausfuehrungId, userId: $userId}
+  ) {
+    ausfuehrung {
+      id
+    }
+  }
+}
+
+fragment FormularSchrittFeld on FormularFeld {
+  __typename
+  id
+  angezeigterName
+  anweisung
+  slotName
+  pflichtfeld
+  istRelevant
+
+  ... on StringFormularFeld {
+    multiline
+    options {
+      key
+      value
+    }
+  }
+
+  ... on CheckboxListFormularFeld {
+    options {
+      key
+      label
+    }
+  }
+  ... on AnzeigeTextBlockFeld {
+    text
+  }
+}

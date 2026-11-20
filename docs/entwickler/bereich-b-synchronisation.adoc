@@ -1,0 +1,153 @@
+==== Bereich-B Synchronisation & Integration
+:toc:
+
+===== Überblick
+
+Bereich-B ist ein eigenständiges System auf Basis von Next.js und PayloadCMS, das unter anderem zentrale Inhalte für Geoflächen, Medien, News und Veranstaltungen verwaltet.
+Das C# Backend synchronisiert relevante Daten mit dieser Umgebung, um eine konsistente, mandantenfähige Datenbasis für verschiedene Frontends und Integrationen zu gewährleisten.
+
+===== Synchronisation zwischen Backend und Bereich-B
+
+====== Architektur & Mechanismus
+
+* Das C# Backend besitzt für jede zu synchronisierende Entität einen eigenen Synchronizer (z.B. `BackofficeUserSynchronizer`).
+* Die Basisklasse `BereichBSynchronizer` definiert das Grundprinzip (CRUD, Synchronize).
+* Die Synchronisation wird typischerweise durch Events oder periodische Jobs angestoßen, kann aber auch explizit aufgerufen werden (z.B. nach Änderungen).
+
+===== Beispiel: Nutzer-Sync (`BackofficeUserSynchronizer`)
+
+. Ablauf:
+.. Das Backend ermittelt das zu synchronisierende Objekt (z.B. einen Nutzer).
+.. Über den BereichB-Client (GraphQL) wird geprüft, ob der Nutzer bereits in Bereich-B existiert (`BackofficeByBereichAId`).
+.. Je nach Ergebnis wird der Datensatz neu angelegt (Create) oder aktualisiert (Update):
+*** Create: Der Nutzer wird mit allen erforderlichen Daten, Berechtigungen und der Kommune-Referenz in Bereich-B angelegt.
+*** Update: Änderungen an Organisationseinheiten, Berechtigungen, SuperAdmin-Status etc. werden übertragen.
+.. Die Zuordnung erfolgt über die BereichAId (technische ID aus dem C# Backend), die als Fremdschlüssel in Bereich-B gespeichert wird.
+.. Fehler werden protokolliert und im Backend-Objekt als `IsSyncedToBereichB = false` markiert.
+
+. Weitere Synchronizer existieren für Organisationseinheiten, Kommunen usw. nach ähnlichem Muster.
+
+===== Technische Details
+
+* Kommunikation: Die Anbindung erfolgt über einen GraphQL-Client (`IBereichBClient`), der die PayloadCMS-API von Bereich-B anspricht.
+* Authentifizierung: Siehe Unterabschnitt "Super-Admin API-Key" unten — eine einzige Konfigurationsquelle (`PAYLOAD_API_KEY`) versorgt sowohl den Payload-Super-Admin als auch den `BereichBClient` im Backend.
+* Mapping: Die Objekte werden explizit zugeordnet (gemappt) und bei Bedarf transformiert (z.B. Berechtigungen als JSON, IDs als Strings).
+* Referenzierung: Bereich-B verwendet die BereichAId als Referenz, alle synchronisierten Objekte sind eindeutig zuzuordnen.
+
+====== Super-Admin API-Key
+
+Der Backend-Sync authentifiziert sich gegenüber Bereich-B als Payload-Super-Admin über einen API-Key-Header (`Authorization: benutzer API-Key <uuid>`). Derselbe API-Key muss also an zwei Stellen identisch sein:
+
+* als `apiKey`-Feld des Super-Admin-Nutzers in der Mongo-Collection `benutzer` (gelesen und geprüft von Payload), und
+* als `BereichB:SuperAdminApiKey` in der Konfiguration des .NET-Backends (gesendet vom `BereichBClient`).
+
+Die einzige maßgebliche Quelle (Single Source of Truth) ist die Umgebungsvariable `PAYLOAD_API_KEY`. Alle anderen Komponenten beziehen den Wert von dort.
+
+*Bereich-B Seite (Automatische Korrektur beim Start)*::
+In der `onInit`-Funktion in `web/bereich-b/src/payload.config.ts` ruft die Initialisierungssequenz nach `runStartupMigrations` und `ensureIndexes` die Funktion `seedBenutzer` aus `src/dataseeder/seed-benutzer.ts` auf. Diese führt einen Upsert für den Nutzer mit der E-Mail aus `PAYLOAD_SUPERADMIN_EMAIL` durch und schreibt den `PAYLOAD_API_KEY` in sein `apiKey`-Feld. Nach dem Einspielen eines Datenbank-Dumps oder einem Container-Neustart wird der Wert so wieder auf den konfigurierten Stand zurückgesetzt. Fehlen die drei Umgebungsvariablen (`PAYLOAD_SUPERADMIN_EMAIL`, `PAYLOAD_SUPERADMIN_PASSWORD`, `PAYLOAD_API_KEY`), bricht der Startvorgang mit einer eindeutigen Fehlermeldung ab.
+
+*Backend Seite*::
+Für Deployments per Docker-Compose (staging/preprod/prod) wird in der `docker/docker-compose.yml` für den `backend`-Service folgende Umgebungsvariable per CI/CD Injection durchgereicht: `BereichB__SuperAdminApiKey: ${PAYLOAD_API_KEY}`. Das gleiche Vorgehen existiert in `docker/docker-compose.development.yml`.
++
+In der lokalen Entwicklung wird das Backend direkt über `task backend` (ohne Container) gestartet. Der Task führt vor `dotnet run` einmalig aus: `dotnet user-secrets set "BereichB:SuperAdminApiKey" "$(sed -n 's/^PAYLOAD_API_KEY=//p' ../../web/bereich-b/.env)"`. Damit ist `web/bereich-b/.env` auch für das Backend die alleinige Quelle; ein manueller `dotnet user-secrets set`-Befehl pro Entwickler-Rechner entfällt.
+
+*Rotation des API-Keys*::
+Einen neuen Wert in `.env` (dev) bzw. in der `$DEPLOYMENT_ENV_FILE` GitLab-CI-Variable setzen und die Services neu starten. Der Start von Bereich-B aktualisiert den Mongo-Nutzer, das Backend übernimmt den Wert automatisch.
+
+===== Retry-Verhalten und Fehlerdiagnose
+
+====== Automatische Wiederholung
+
+Der `SynchronizerRunner` (Quartz-Job, registriert in `API/Features/BereichB/Jobs/SychronizerRunner.cs`) läuft *jede Minute* (`0 */1 * ? * *`) und versucht alle `BackofficeUser`-Datensätze mit `IsSyncedToBereichB = false` erneut zu synchronisieren. Ein `BackoffService` drosselt erneute Versuche bei wiederholten Fehlschlägen für denselben Datensatz, damit ein dauerhaft fehlschlagender Sync das Log nicht überflutet. Nach Behebung der Ursache (siehe unten) erfolgt die Synchronisation automatisch mit der nächsten Ausführung des Cron-Jobs — ein manuelles Anstoßen ist selten nötig.
+
+====== Diagnose-Log-Format
+
+Bei einem fehlgeschlagenen Sync schreibt `BackofficeUserSynchronizer.ReportSyncError` eine Warnung mit vollem Kontext:
+
+[source,text]
+----
+BackofficeUser sync failed: id=<guid> email=<email> step=<step> clientError=<message>
+----
+
+Dieselben Felder landen in Sentry als Extra-Attribute (`BackofficeUserId`, `BackofficeUserEmail`, `SyncStep`, `ClientError`). Sucht man in den Backend-Logs nach `BackofficeUser sync failed`, erkennt man sofort, welcher Nutzer in welchem Schritt an welcher Client-Meldung gescheitert ist.
+
+====== Mögliche Werte für `step`
+
+|===
+| Step | Bedeutung | Typische Ursache
+
+| `lookup-bereich-b-user`
+| Die initiale `BackofficeByBereichAId`-Abfrage lieferte nicht exakt 0 oder 1 Treffer (mehrdeutig).
+| Bereich-B-Client unerreichbar, doppelte Dokumente in Mongo.
+
+| `create/lookup-kommune`
+| `KommuneByBereichAId` findet die zugehörige Kommune in Bereich-B nicht.
+| Kommune wurde noch nicht synchronisiert oder ist in Mongo gelöscht.
+
+| `create/lookup-untereinheiten`
+| `UntereinheitenByBereichAIds` schlägt fehl.
+| Untereinheiten wurden noch nicht synchronisiert (prüfe `Untereinheit.IsSyncedToBereichB` in Postgres).
+
+| `create/BackofficeUserCreate`
+| Die `BackofficeUserCreate`-Mutation wurde abgelehnt.
+| Häufigster Fall: *verwaistes Mongo-Dokument* mit derselben E-Mail aus einem früheren Sync-Versuch (siehe unten). Payload validiert `email` als eindeutig.
+
+| `update/lookup-bereich-b-user`
+| Beim Update-Pfad liefert `BackofficeByBereichAId` nicht exakt 1 Treffer.
+| Mongo-Dokument wurde gelöscht, `IsSyncedToBereichB` steht aber noch auf `true` in Postgres.
+
+| `update/bereich-b-id-null`
+| Treffer vorhanden, aber mit Null-ID — sollte in der Praxis nie eintreten.
+|
+
+| `update/lookup-untereinheiten`
+| Wie `create/lookup-untereinheiten`, im Update-Pfad.
+| Siehe oben.
+
+| `update/BackofficeUserUpdate`
+| Die `BackofficeUserUpdate`-Mutation wurde abgelehnt.
+| Access-Control-Regel in der `benutzer`-Collection greift, Zielfeld nicht schreibbar.
+
+| `delete/lookup-bereich-b-user`, `delete/bereich-b-id-null`, `delete/BackofficeUserDelete`
+| Analog im Delete-Pfad (ausgelöst bei `IsDeleted = true` im Backend).
+|
+|===
+
+====== Bekannte Stolperfalle: Verwaistes Mongo-Dokument nach Datenreset
+
+Wenn im Rahmen eines Cleanups ein `BackofficeUser` in Postgres gelöscht, das korrespondierende Bereich-B-Dokument in Mongo aber *nicht* entfernt wurde, bleibt die E-Mail-Adresse in der `benutzers`-Collection belegt. Ein späterer Re-Invite mit derselben E-Mail erzeugt einen neuen Postgres-Datensatz (neue `Id`/`BereichAId`). Der Sync-Flow:
+
+. `BackofficeByBereichAId` findet das verwaiste Dokument *nicht* (alte `bereichAId` ≠ neue), meldet also 0 Treffer.
+. Die Synchronisationslogik entscheidet sich für `Create`.
+. `BackofficeUserCreate` schlägt mit `ValidationError: The following field is invalid: email` fehl, da Payload die E-Mail als eindeutig validiert.
+
+Lösung: Das verwaiste Dokument in Mongo löschen. Anschließend wartet man eine Minute auf den `SynchronizerRunner` oder startet das Backend neu:
+
+[source,javascript]
+----
+db.benutzers.deleteOne({ email: "<email>", bereichAId: "<alte-postgres-id>" })
+----
+
+Generell gilt: Beim Aufräumen eines BackofficeUsers immer *beide* Datenbanken bereinigen (Postgres `Users` und Mongo `benutzers`) oder nur die Postgres-Seite löschen und `IsSyncedToBereichB` vorher auf `false` setzen, damit die Synchronisation die Löschung korrekt an das Zielsystem überträgt.
+
+===== Erweiterbarkeit & Anpassung
+
+* Neue Felder/Collections: Können in Bereich-B als neue Payload-Collections oder Felder ergänzt werden. Das Backend muss dann entsprechend angepasst werden, um diese ggf. zu synchronisieren.
+* Sync-Logik: Anpassbar durch neue Synchronizer im Backend und entsprechende GraphQL-Operationen im BereichB-Client.
+* Fehlerbehandlung: Fehler beim Sync werden im Backend (z.B. in Sentry) protokolliert und im Sync-Status vermerkt.
+* Anpassungen an Bereich-B können das zusammengeführte GraphQL-Schema verändern und haben somit auch Einfluss auf das Bereich-A- und App-Projekt.
+
+===== Besonderheiten & Hinweise
+
+* Datenhoheit: Bereich-B ist für Inhalte, die sich direkt an die Bürger richten, das führende System (Prozesse ausgenommen).
+* Komplexe Domänenlogik (wie z.B. das Versenden von Push-Notifications oder die Prozessverwaltung) ist weiterhin im C# Backend in Bereich-A angesiedelt.
+* Mandantenfähigkeit: Fast alle Collections besitzen eine Kommune-Referenz zur Trennung der Daten.
+* Referenzierung: Die BereichAId ist der technische Schlüssel für die Synchronisation.
+* Initiale Anlage: Kommunen und Nutzer werden initial aus dem Bereich-A Backend erzeugt, können dann aber auch in Bereich-B gepflegt werden (abhängig von den Access-Regeln).
+
+===== Relevante Code-Stellen
+
+* Bereich-B Collections: `src/collections/*.ts`
+* Backend-Synchronizer: `API/Features/BereichB/*Synchronizer.cs`
+* BereichB-Client/GraphQL: `API/Clients/BereichBClient/`
+* Beispiel: Nutzer-Sync (`BackofficeUserSynchronizer.cs`)

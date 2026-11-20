@@ -1,0 +1,8 @@
+query Kartenlizenzen($kommuneId: UUID!) {
+  kommune(kommuneId: $kommuneId) {
+    id
+    lizenzen {
+      kartenlizenzenHtml
+    }
+  }
+}

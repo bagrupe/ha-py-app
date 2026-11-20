@@ -1,0 +1,18 @@
+query GemeindeNewsPreferences($kommuneId: UUID!) {
+  kommune(kommuneId: $kommuneId) {
+    organisationseinheiten: untereinheiten {
+      id
+      name
+      newsNotificationsEnabled
+    }
+  }
+}
+
+mutation UpdateNewsNotificationsPreferences($input: UpdateNewsNotificationsPreferencesInput!) {
+  updateNewsNotificationsPreferences(input: $input) {
+    boolean
+    errors {
+      __typename
+    }
+  }
+}

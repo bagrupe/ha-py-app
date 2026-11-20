@@ -1,0 +1,178 @@
+query ProzessUebersicht(
+  $groupId: UUID
+  $search: String
+  $skip: Int
+  $take: Int
+) {
+  my {
+    id
+    ... on BackofficeUser {
+      kommune {
+        prozessGroups {
+          id
+          name
+        }
+        prozessTags @export(exportName: "ProzessTag") {
+          id
+          tag
+          prozesse {
+            id
+            name
+          }
+        }
+        prozesseUndLeistungen(
+          groupId: $groupId
+          search: $search
+          skip: $skip
+          take: $take
+        ) {
+          items @export(exportName: "UserFacingProzess") {
+            id
+            name
+            group @export(exportName: "ProzessGroup") {
+              id
+              name
+            }
+            ... on Prozess {
+              tags {
+                id
+                tag
+              }
+
+              versionenCount
+              deaktiviertAm
+              currentVersion {
+                id
+                publishedAt
+              }
+            }
+            ... on ServicePortalLink {
+              url
+            }
+          }
+          totalCount
+        }
+      }
+    }
+  }
+}
+
+mutation UpsertServicePortalLink($input: ServicePortalLinkUpsertInput!) {
+  servicePortalLinkUpsert(input: $input) {
+    servicePortalLink {
+      id
+      url
+    }
+  }
+}
+
+query ServicePortalLink($kommuneId: UUID!, $id: UUID!) {
+  kommune(kommuneId: $kommuneId) {
+    servicePortalLink(id: $id) {
+      id
+      url
+      name
+    }
+  }
+}
+
+mutation setGroupToProzess($groupId: UUID, $prozessId: UUID!) {
+  setGroupToProzess(input: {groupId: $groupId, prozessId: $prozessId}) {
+    userFacingProzess {
+      id
+      name
+    }
+  }
+}
+
+mutation DeleteProzessVersion($input: DeleteProzessVersionInput!) {
+  deleteProzessVersion(deleteProzessVersionInput: $input) {
+    prozessVersion {
+      id
+    }
+    errors {
+      __typename
+      ... on Error {
+        message
+      }
+    }
+  }
+}
+
+mutation DeleteServicePortalLink($input: DeleteServicePortalLinkInput!) {
+  deleteServicePortalLink(deleteServicePortalLinkInput: $input) {
+    servicePortalLink {
+      id
+    }
+    errors {
+      __typename
+      ... on Error {
+        message
+      }
+    }
+  }
+}
+
+mutation DeleteProzess($input: DeleteProzessInput!) {
+  deleteProzess(deleteProzessInput: $input) {
+    prozess {
+      id
+    }
+    errors {
+      __typename
+      ... on Error {
+        message
+      }
+    }
+  }
+}
+
+mutation ProzessDeaktivieren($input: ProzessDeaktivierenInput!) {
+  prozessDeaktivieren(input: $input) {
+    prozess {
+      id
+      deaktiviertAm
+    }
+    errors {
+      __typename
+      ... on Error {
+        message
+      }
+    }
+  }
+}
+
+mutation ProzessAktivieren($input: ProzessAktivierenInput!) {
+  prozessAktivieren(input: $input) {
+    prozess {
+      id
+      deaktiviertAm
+    }
+    errors {
+      __typename
+      ... on Error {
+        message
+      }
+    }
+  }
+}
+
+mutation assignProzessTag($prozessId: UUID!, $tagId: UUID!) {
+  assignProzessTag(input: {prozessId: $prozessId, tagId: $tagId}) {
+    __typename
+    prozess {
+      id
+      name
+      tags {
+        id
+        tag
+      }
+    }
+    errors {
+      __typename
+      ... on Error {
+        message
+      }
+    }
+  }
+}

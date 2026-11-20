@@ -1,0 +1,43 @@
+=== Einleitung zum Backoffice der Kommunal-App
+
+Das Backoffice der Kommunal-App stellt den zentralen Arbeitsbereich für
+verschiedene Nutzergruppen dar, die aus unterschiedlichen Organisationseinheiten
+stammen. Es bildet die Gegenstelle zur mobilen App und dient als wesentliches
+Werkzeug für die Verwaltung und Bearbeitung von Inhalten und Anfragen, die über
+die App eingereicht werden. Damit schafft es eine nahtlose Verbindung zwischen
+der mobilen Nutzererfahrung und der internen Bearbeitung durch die kommunalen
+Mitarbeiter. 
+
+Im Zentrum des Backoffice stehen drei Hauptfunktionen, die den Nutzern zur
+Verfügung stehen:
+
+. **Antragsbearbeitung**: Diese Funktion ermöglicht den Mitarbeitern der
+verknüpften Gemeinden die effiziente Verwaltung und Bearbeitung von Anträgen,
+die über die mobile App von Bürgern eingereicht wurden. Das Backoffice stellt
+sicher, dass Anträge automatisch den verantwortlichen Organisationseinheiten und
+spezifischen Abteilungen zugewiesen werden. Dadurch wird sichergestellt, dass
+sie von jenen Nutzern bearbeitet werden, die über die entsprechende Fachkenntnis
+und Zuständigkeit verfügen.
+
+. **Nutzendenverwaltung**: Innerhalb des Backoffice können Administratoren
+effektiv die Benutzerkonten verwalten. Dies umfasst die Zuweisung von Rollen und
+Rechten sowie die Verwaltung von Zugehörigkeiten zu verschiedenen
+Organisationseinheiten und Abteilungen. Ein Benutzer kann somit mehreren
+Einheiten und Abteilungen angehören, wodurch eine flexible und anpassbare
+Organisation der Nutzerstruktur ermöglicht wird.
+
+. **Prozesseditor**: Mit diesem Werkzeug können neue Prozesse und Anträge
+konfiguriert werden, die später über die mobile App von den Bürgern eingereicht
+werden können. Der Prozesseditor ist ein wesentlicher Bestandteil der
+Anpassungsfähigkeit des Systems, da er den Administratoren die Möglichkeit
+bietet, auf sich ändernde Anforderungen und neue Antragsarten schnell zu
+reagieren.
+
+Das gesamte System ist so konzipiert, dass es die Struktur der kommunalen
+Verwaltungseinheiten widerspiegelt. Dies erfolgt durch die Kategorisierung der
+Nutzer und Inhalte nach `Organisationseinheiten` und `Abteilungen`, wodurch eine
+präzise Verwaltung gewährleistet wird. Jeder Antrag, der über die mobile App
+eingereicht wird, wird im Backoffice spezifisch entsprechenden
+Organisationseinheiten und Abteilungen zugeordnet, was bedeutet, dass nur
+zugelassene Nutzer innerhalb einer Abteilung Zugang zu den relevanten Anträgen
+haben.

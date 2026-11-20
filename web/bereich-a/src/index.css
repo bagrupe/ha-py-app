@@ -1,0 +1,33 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --color-primary: 0 134 203;
+}
+
+.material-symbols-outlined {
+  font-variation-settings:
+    'FILL' 0,
+    'wght' 400,
+    'GRAD' 0,
+    'opsz' 24;
+}
+
+.icy-backdrop {
+  width: 100%;
+  height: 100%;
+  backdrop-filter: blur(3px); /* Adjust the blur intensity as needed */
+  z-index: 999; /* Ensure the backdrop is behind the dialog */
+  background-color: rgba(78, 78, 78, 0.1);
+}
+
+/*
+  Ensures rendering of stacking stuff more cleanly by forcing a new stacking-context to be created for the app while
+    everything inside the body is rendered on top that entire context.
+    https://github.com/radix-ui/primitives/issues/2773#issuecomment-1991433687
+ */
+#root {
+  position: relative;
+  z-index: 0;
+}

@@ -1,0 +1,21 @@
+query VolunteerCategories {
+  ehrenamtsbankKategorien(
+    where: {
+      requiresClearance: { eq: false }
+      parentId: { eq: null }
+    }
+    order: [{ name: ASC }]
+  ) {
+    id
+    name
+  }
+}
+
+query VolunteerMunicipalities($kommuneId: UUID!) {
+  kommune(kommuneId: $kommuneId) {
+    untereinheiten(where: { isGemeinde: { eq: true } }) {
+      id
+      name
+    }
+  }
+}

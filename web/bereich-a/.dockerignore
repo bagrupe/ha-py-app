@@ -1,0 +1,2 @@
+# MSW should not be available in production!
+public/mockServiceWorker.js

@@ -1,0 +1,253 @@
+{
+  "my": {
+    "kommune": {
+      "prozessById": {
+        "id": "019e88ab-c357-726d-8661-7dc08f48a21f",
+        "name": "felix statusänderung test",
+        "istOeffentlich": false,
+        "tags": [],
+        "latestVersion": {
+          "id": "019ecb63-80bd-72b1-a134-c8fab6c52ec8",
+          "publishedAt": "2026-06-15T13:06:00.664225Z",
+          "start": {
+            "id": "3af86a2f-c617-4664-ac6a-fccfd3fef0a6"
+          },
+          "rollen": [],
+          "alleSchritte": [
+            {
+              "__typename": "WarteAufGovManagerSchritt",
+              "id": "0d18fd0c-1de0-4a75-b679-56777448a2f1",
+              "titel": "Neuer Warte-auf-GovManager-Schritt",
+              "anweisung": null,
+              "erledigungDurchBuerger": false,
+              "sollZustaendigkeit": {
+                "art": "BUERGER",
+                "organisationseinheitId": null,
+                "mitarbeiterGruppeId": null,
+                "dienstleisterId": null,
+                "mitarbeiterGruppe": null,
+                "dynamischeArten": [],
+                "liestRolleId": null,
+                "liestRolle": null
+              },
+              "schreibtRolle": null,
+              "schreibtRolleId": null,
+              "versendeEMailAnMitarbeiterGruppe": null,
+              "verbindungen": [
+                {
+                  "id": "81547e10-fec0-43a2-9549-aa864c8eb6d0",
+                  "name": null,
+                  "vonId": "0d18fd0c-1de0-4a75-b679-56777448a2f1",
+                  "nachId": "5443ab46-49e4-4ee1-90bf-e6f61c6fb9a5",
+                  "statusAenderung": null,
+                  "statusAenderungBeschreibung": null,
+                  "istRelevant": "true"
+                }
+              ],
+              "nodePosition": {
+                "x": 830,
+                "y": 120
+              },
+              "slots": [
+                {
+                  "name": "govmanager-body",
+                  "encrypted": false,
+                  "valueType": "STRING",
+                  "optional": false,
+                  "brauchtFreigabe": false
+                }
+              ],
+              "govManagerSchrittId": "a2aea65c-07ae-40a5-88e0-c29b1fbbe485"
+            },
+            {
+              "__typename": "FormularSchritt",
+              "id": "3af86a2f-c617-4664-ac6a-fccfd3fef0a6",
+              "titel": "Neuer Schritt",
+              "anweisung": null,
+              "erledigungDurchBuerger": true,
+              "sollZustaendigkeit": {
+                "art": "BUERGER",
+                "organisationseinheitId": null,
+                "mitarbeiterGruppeId": null,
+                "dienstleisterId": null,
+                "mitarbeiterGruppe": null,
+                "dynamischeArten": [],
+                "liestRolleId": null,
+                "liestRolle": null
+              },
+              "schreibtRolle": null,
+              "schreibtRolleId": null,
+              "versendeEMailAnMitarbeiterGruppe": false,
+              "verbindungen": [
+                {
+                  "id": "fd8bfec0-fbec-4e40-a80c-35af78653544",
+                  "name": null,
+                  "vonId": "3af86a2f-c617-4664-ac6a-fccfd3fef0a6",
+                  "nachId": "a2aea65c-07ae-40a5-88e0-c29b1fbbe485",
+                  "statusAenderung": null,
+                  "statusAenderungBeschreibung": null,
+                  "istRelevant": "true"
+                }
+              ],
+              "nodePosition": null,
+              "slots": [
+                {
+                  "name": "Neuer Slot",
+                  "encrypted": false,
+                  "valueType": "STRING",
+                  "optional": true,
+                  "brauchtFreigabe": false
+                }
+              ],
+              "felder": [
+                {
+                  "__typename": "StringFormularFeld",
+                  "id": "019ecb63-80b1-77fd-b757-3fcacf9242a8",
+                  "slotName": "Neuer Slot",
+                  "angezeigterName": "Neues Feld",
+                  "anweisung": null,
+                  "order": 0,
+                  "encrypted": false,
+                  "inhaltsTag": null,
+                  "istRelevant": "true",
+                  "pflichtfeld": false,
+                  "oeffentlichSichtbar": false,
+                  "multiline": false,
+                  "options": []
+                }
+              ]
+            },
+            {
+              "__typename": "EmailForwarderExportSchritt",
+              "id": "5443ab46-49e4-4ee1-90bf-e6f61c6fb9a5",
+              "titel": "Neuer Email-Weiterleiten-Schritt",
+              "anweisung": null,
+              "erledigungDurchBuerger": false,
+              "sollZustaendigkeit": {
+                "art": "ORGANISATIONSEINHEIT",
+                "organisationseinheitId": "b8ad41ec-937b-4d62-a66b-fc88559cd8a5",
+                "mitarbeiterGruppeId": null,
+                "dienstleisterId": null,
+                "mitarbeiterGruppe": null,
+                "dynamischeArten": [],
+                "liestRolleId": null,
+                "liestRolle": null
+              },
+              "schreibtRolle": null,
+              "schreibtRolleId": null,
+              "versendeEMailAnMitarbeiterGruppe": null,
+              "verbindungen": [
+                {
+                  "id": "431c38a3-a9a7-41e7-bc5d-64f5f31d5112",
+                  "name": null,
+                  "vonId": "5443ab46-49e4-4ee1-90bf-e6f61c6fb9a5",
+                  "nachId": "5d3a14a7-de2e-4337-8138-3f6191ee8371",
+                  "statusAenderung": null,
+                  "statusAenderungBeschreibung": null,
+                  "istRelevant": "true"
+                }
+              ],
+              "nodePosition": {
+                "x": 1330,
+                "y": 140
+              },
+              "slots": [],
+              "emailAddress": "\"contact-a8ba1400@example.com\"",
+              "subject": "\"Statusänderung\"",
+              "body": "\"Ihr Antrag wurde bearbeitet.\""
+            },
+            {
+              "__typename": "EndeSchritt",
+              "id": "5d3a14a7-de2e-4337-8138-3f6191ee8371",
+              "titel": "Neuer Ende-Schritt",
+              "anweisung": null,
+              "erledigungDurchBuerger": false,
+              "sollZustaendigkeit": {
+                "art": "BUERGER",
+                "organisationseinheitId": null,
+                "mitarbeiterGruppeId": null,
+                "dienstleisterId": null,
+                "mitarbeiterGruppe": null,
+                "dynamischeArten": [],
+                "liestRolleId": null,
+                "liestRolle": null
+              },
+              "schreibtRolle": null,
+              "schreibtRolleId": null,
+              "versendeEMailAnMitarbeiterGruppe": null,
+              "verbindungen": [],
+              "nodePosition": {
+                "x": 1590,
+                "y": 420
+              },
+              "slots": []
+            },
+            {
+              "__typename": "GovManagerRestExportSchritt",
+              "id": "a2aea65c-07ae-40a5-88e0-c29b1fbbe485",
+              "titel": "Neuer GovManager-Export-Schritt",
+              "anweisung": null,
+              "erledigungDurchBuerger": false,
+              "sollZustaendigkeit": {
+                "art": "BUERGER",
+                "organisationseinheitId": null,
+                "mitarbeiterGruppeId": null,
+                "dienstleisterId": null,
+                "mitarbeiterGruppe": null,
+                "dynamischeArten": [],
+                "liestRolleId": null,
+                "liestRolle": null
+              },
+              "schreibtRolle": null,
+              "schreibtRolleId": null,
+              "versendeEMailAnMitarbeiterGruppe": null,
+              "verbindungen": [
+                {
+                  "id": "a78813b5-71c3-4fea-ba06-3d3fc17c3b14",
+                  "name": null,
+                  "vonId": "a2aea65c-07ae-40a5-88e0-c29b1fbbe485",
+                  "nachId": "0d18fd0c-1de0-4a75-b679-56777448a2f1",
+                  "statusAenderung": null,
+                  "statusAenderungBeschreibung": null,
+                  "istRelevant": "true"
+                }
+              ],
+              "nodePosition": {
+                "x": 560,
+                "y": 290
+              },
+              "slots": [
+                {
+                  "name": "id",
+                  "encrypted": false,
+                  "valueType": "STRING",
+                  "optional": false,
+                  "brauchtFreigabe": false
+                },
+                {
+                  "name": "requestId",
+                  "encrypted": false,
+                  "valueType": "STRING",
+                  "optional": false,
+                  "brauchtFreigabe": false
+                },
+                {
+                  "name": "uploadStatus",
+                  "encrypted": false,
+                  "valueType": "STRING",
+                  "optional": false,
+                  "brauchtFreigabe": false
+                }
+              ],
+              "exportFilePartsAsPdf": false,
+              "exportParts": [],
+              "vorgangsTyp": "",
+              "mandantenSchluessel": "",
+              "vorgangsSchluessel": ""
+            }
+          ]
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,15 @@
+﻿{
+  "data": {
+    "programmatischeSchritte": [
+      {
+        "name": "Zuständigkeit anhand Kategoriebaum und Ort ermitteln"
+      },
+      {
+        "name": "Logging (Proof of Concept)"
+      },
+      {
+        "name": "Weiche"
+      }
+    ]
+  }
+}

@@ -1,0 +1,42 @@
+==== Übersicht
+
+Die Kommunal-App ist aus folgenden Komponenten aufgebaut
+
+. Mobile App
+. Backoffice-Web App
+. Inhaltspflege / Payload CMS
+. Backend-Server
+
+Das folgende Diagramm zeigt neben den genannten Komponenten auch die
+Drittanbieter-Dienste und von den Komponenten benötigte Services, wie
+Datenbanken oder Mail-Server.
+
+image::assets/entwickler/Architektur.png[Kommunal-App Architektur]
+
+===== Mobile App
+Die Mobile App ist eine in Flutter geschriebene, native mobile App für Android
+und iOS. Sie verwendet die Schnittstellen, die durch den Backend-Server per
+`GraphQL-API` bereitgestellt werden.
+
+===== Backoffice Web-App
+Die Backoffice-Web-App ist eine in `React` geschriebene Web-App. Sie verwendet
+die durch das `Backend` bereitgestellte `GraphQL`-Schnittstelle. Das Backoffice
+ist der zentrale Zugang für Sachbearbeiter und Admins der Anwendung.
+
+===== Inhaltspflege / Payload CMS
+Die Inhaltspflege ist ein *Headless Content Management System*, genauer gesagt
+ein *Payload CMS*. Das CMS beherbergt die Inhalte, die an die App ausgespielt
+werden und importiert einige dieser Informationen selbst aus Dritt-Systemen.
+
+Darüber hinaus stellt das CMS eine `REST`-API und eine `GraphQL`-API bereit.
+Über `REST` lassen sich bspw. Veranstaltungen oder auch Points of Interest
+einpflegen. Die `GraphQL`-API wird vom `Backend` verwendet, um der App die
+Inhalte bereitzustellen.
+
+Die App greift nicht direkt auf das CMS zu, sondern indirekt über den
+Backend-Server.
+
+===== Backend-Server
+Der Backend-Server, im Weiteren *das Backend*, stellt die Gesamt-Schnittstelle
+zur App und dem Backoffice bereit. Darüber hinaus übernimmt es die
+Synchronisierung zwischen eigenen Daten und der Inhaltspflege.

@@ -1,0 +1,82 @@
+==== Anlegen neuer Inhalte
+
+Die Inhaltspflege der Kommunal-App ist technisch gesehen ein sog. *Headless Content
+Management System (CMS)* und als solches dafür zuständig die tatsächlichen
+Inhalte, die in der Endnutzer-App angezeigt werden, bereitzustellen.
+
+Die Inhalte, wie News, Veranstaltungen oder Points of Interest stammen aus
+unterschiedlichen Quellen und werden in der Inhaltspflege zusammengeführt und
+für die App vorbereitet.
+
+.Inhaltspflege - Übersicht
+image::assets/anwender/CMS_Uebersicht.png[Inhaltspflege - Übersicht]
+
+[NOTE]
+.Kurz und knapp
+====
+Die Inhaltspflege nimmt unterschiedliche Inhalte auf und stellt sie über eine Schnittstelle bereit!
+====
+
+Inhalte werden in der Inhaltspflege in sog. `Collections` organisiert. Jede
+`Collection` ist nach ihrem Inhalt benannt und nimmt auch nur entsprechende
+Einträge auf.
+
+Grundsätzlich können Inhalte auf unterschiedlichen Wegen in das CMS gelangen:
+
+. Durch das händische Anlegen
+. Durch das Hochladen von Inhalten über die REST-Schnittstelle
+. Durch den automatischen Import - dies stellt einen Sonderfall dar
+
+===== Händisch
+Jede `Collection` kann händisch mit Inhalten befüllt werden. Dazu wird nach dem
+Login als <<veraendern_von_funktionsberechtigungen, berechtigter Nutzer>> über
+das *Burger Menü* am oberen Bildschirmrand die `Inhaltspflege` geöffnet.
+
+Abhängig von den Berechtigungen werden links in der Menüleiste die vorhandenen
+`Collections` angezeigt. Mit einem Klick auf die gewünschte `Collection` wird
+diese geöffnet.
+
+Mit einem Klick auf `Create new`-Button neben dem Collection-Namen am oberen
+Bildschirm öffnet sich die Seite, auf der ein neuer Eintrag für die gewählte
+Collection geöffnet werden kann.
+
+Auf dieser Seite werden die Informationen, die für einen Eintrag notwendig sind,
+eingefügt. Pflichtfelder sind mit einem roten Stern markiert. Das Feld `Import
+ID` kann mit einem beliebigen Wert gefüllt werden, es muss aber dafür gesorgt
+werden, dass der Wert einzigartig innerhalb der Collection ist.
+
+Neben den Feldern, die die tatsächlichen Informationen des Eintrags aufnehmen
+befindet sich auf der rechten Seite des Bildschirm eine Menüleiste, in der
+globale Werte für Einträge gesetzt werden können. Bspw. müssen für
+`News-Artikel` ein Datum und die Kommune angegeben werden, damit die App die
+korrekte Zuordnung machen kann und der neue Artikel nur solchen App-Nutzern
+angegzeigt wird, die die entsprechenden Kommunen für News abboniert haben.
+
+Nach dem Eintragen aller erforderlichen Informationen wird in der Menüleiste auf
+der rechten Seite des Bildschirm der Button `Publish Changes` verwendet, um den
+Eintrag zu speichern. Ab diesem Zeitpunkt steht der neue Inhalt der App zur
+Verfügung.
+
+===== Über die REST-API
+Die `Collections` *Kommune*, *News-Artikel*, *Veranstaltungen* und *POIs*
+unterstützen das Hinzufügen, Ändern und Abfragen ihrer Einträge über eine
+REST-API. Dabei werden die Inhalte nicht über das User-Interface angelegt,
+sondern von einem externen Programm gesendet.
+
+Die Dokumentation zur REST-API und den Besonderheiten der jeweiligen Collection
+sind in der ebenfalls über die Inhaltspflege zugreifbare `API-Dokumentation`
+beschrieben.
+
+===== Automatischer Import
+Einige der Inhalte, die in der Inhaltspflege zu finden sind, werden durch einen
+automatischen Import bereitgestellt. Das bedeutet, dass diese Inhalte regelmäßig
+von der Inhaltspflege (dem Programm) bei unterschiedlichen Quellen abgefragt
+werden und anschließend der jeweiligen Collection hinzugefügt werden. Beispiele
+für solche Collections sind die News-Artikel, Veranstaltungen und Sensoren.
+Darüber erklärt sich auch die Bezeichnung `Import ID` bei vielen der Collections
+- das Feld wird üblicherweise durch den automatischen Import der Einträge von
+der Inhaltspflege befüllt.
+
+Das Hinzufügen von Einträgen in Collections die automatisch importiert werden
+über einen der anderen Wege ist weiterhin möglich und wird nicht durch den
+Import beschränkt.

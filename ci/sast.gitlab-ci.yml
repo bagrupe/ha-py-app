@@ -1,0 +1,66 @@
+# Pub resolution for Dart analysis must run on Linux (same as sonar-scanner).
+# generate:app runs on macOS (flutter-ha-py); macOS .dart_tool paths do not work here.
+prepare:flutter-deps:
+  extends: [.flutter-linux]
+  stage: generate
+  script:
+    - cd "$CI_PROJECT_DIR/app"
+    - fvm flutter pub get
+  artifacts:
+    paths:
+      - app/.dart_tool/
+      - app/.flutter-plugins
+      - app/.flutter-plugins-dependencies
+      - app/.fvm/flutter_sdk/
+      - .fvm-cache/
+      - .pub-cache/
+    expire_in: 15 mins
+  interruptible: true
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+      changes:
+        - "app/**/*"
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event" && $CI_DEFAULT_BRANCH == $CI_MERGE_REQUEST_TARGET_BRANCH_NAME
+      changes:
+        - "app/**/*"
+    - if: $CI_PIPELINE_SOURCE == "schedule"
+      when: never
+
+sonarqube:
+  stage: sast
+  needs:
+    - job: prepare:flutter-deps
+      artifacts: true
+      optional: true
+    - job: test:backend-unit-tests
+      artifacts: true
+      optional: true
+    - job: test:app
+      artifacts: true
+      optional: true
+    - job: test:unit:web-bereich-b
+      artifacts: true
+      optional: true
+  image:
+    name: sonarsource/sonar-scanner-cli:12.3.1.4302_8.3.1
+    entrypoint: [""]
+  variables:
+    PUB_CACHE: "${CI_PROJECT_DIR}/.pub-cache"
+    SONAR_USER_HOME: "${CI_PROJECT_DIR}/.sonar"  # Defines the location of the analysis task cache
+    GIT_DEPTH: "0"  # Tells git to fetch all the branches of the project, required by the analysis task
+    FF_ENABLE_JOB_CLEANUP: "1" # clean up the project directory automatically at the end of each CI/CD build
+  cache:
+    key: "${CI_JOB_NAME}"
+    paths:
+      - .sonar/cache
+      - .pub-cache/
+  script:
+    - sonar-scanner
+  allow_failure: false
+  interruptible: true
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "schedule"
+      when: never
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event" && $CI_DEFAULT_BRANCH == $CI_MERGE_REQUEST_TARGET_BRANCH_NAME
+

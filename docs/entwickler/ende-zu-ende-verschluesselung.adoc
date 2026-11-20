@@ -1,0 +1,114 @@
+==== Ende-zu-Ende-Verschlüsselung
+
+===== Einleitung
+Diese Dokumentation beschreibt die Ende-zu-Ende-Verschlüsselung in der
+Kommunal-App. Ziel ist es, personenbezogene Daten so abzusichern, dass nur
+berechtigte Bürger und Mitarbeitende des Mandanten Zugriff auf Klartextdaten
+erhalten.
+
+Felder eines Prozessformulars müssen im Prozesseditor als verschlüsselt markiert
+werden (`FormularFeld.Encrypted`), damit der `SlotValue` verschlüsselt wird.
+
+Die Umsetzung erfolgt über ein hybrides Verfahren aus symmetrischer
+und asymmetrischer Kryptographie.
+
+===== Übersicht
+Zur Datenverschlüsselung wird AES-GCM mit 256 Bit verwendet. Für jede Ausführung
+eines Prozesses wird ein neuer Sitzungsschlüssel erzeugt. Dieser wird per RSA
+(4096 Bit) für den Mandanten und für den Bürger asymmetrisch verschlüsselt.
+Private Schlüssel sind passwortgeschützt und verschlüsselt gespeichert. Die
+Ableitung erfolgt über PBKDF2 mit HMAC-SHA-512, 100.000 Iterationen und
+zufälligem Salt.
+
+===== Verschlüsselung durch den Bürger
+Bei der Eingabe von Daten wird ein zufälliger AES-256-Schlüssel erzeugt und die
+Nutzlast damit per AES-GCM verschlüsselt. Der zugehörige Nonce wird lokal
+generiert und zusammen mit den verschlüsselten Daten gespeichert. Der
+Sitzungsschlüssel wird anschließend RSA-verschlüsselt – einmal mit dem
+öffentlichen Schlüssel des Mandanten, einmal mit dem des Bürgers – und auf der
+Ausführung gespeichert (`Ausfuehrung.SharedKeyEncryptedForKommune` bzw.
+`Ausfuehrung.SharedKeyEncryptedForBuerger`).
+
+===== Entschlüsselung durch Mitarbeitende
+Sachbearbeiter authentifizieren sich mit ihrem Passwort, aus dem per PBKDF2 ein
+AES-Schlüssel abgeleitet wird. Damit wird der gemeinsam genutzte private
+Mandantenschlüssel entschlüsselt, der in verschlüsselter Form in der Datenbank
+liegt. Der private Schlüssel verbleibt temporär im Speicher der Browsersession
+und dient zur Entschlüsselung des Sitzungsschlüssels, mit dem die eigentlichen
+Daten entschlüsselt werden.
+
+===== Entschlüsselung durch den Bürger
+Bürger können ihre eigenen Daten lesen. Dazu wird der private Schlüssel, der
+passwortgeschützt gespeichert ist, entschlüsselt, und analog zur Entschlüsselung
+durch Mitarbeitende genutzt.
+
+===== Schlüsselmanagement
+Der private Mandantenschlüssel ist zentral in der Datenbank abgelegt, aber für
+jeden Mitarbeitenden individuell mit dessen Passwort verschlüsselt. Der
+öffentliche Schlüssel steht offen zur Verfügung. Bürger verfügen über ein
+eigenes RSA-Schlüsselpaar, wobei der private Schlüssel ebenfalls passwortbasiert
+gesichert ist. Nonces werden bei jeder AES-Verschlüsselung zufällig erzeugt und
+mitgesendet.
+
+===== Schlüsselhinterlegung für verifizierte Bürgerkonten
+Der private Schlüssel eines Bürgers ist nur mit dem Weak-Login-Token des Geräts
+verschlüsselt. Beim Abmelden löscht die App diese Zugangsdaten und legt ein neues
+anonymes Konto an. Ohne weitere Maßnahmen wären Profildaten und das Fortsetzen
+begonnener Anträge nach dem Abmelden oder auf einem zweiten Gerät verloren.
+
+Für Konten mit BundID oder bestätigter Telefonnummer hinterlegt die App den Schlüssel
+deshalb zusätzlich auf dem Server (Tabelle `BuergerKeyEscrows`), verschlüsselt mit
+AES-256-GCM. Die Bürger-ID ist als zusätzliche authentifizierte Angabe gebunden, ein
+Eintrag lässt sich also nicht einem anderen Konto unterschieben.
+
+Regeln im Backend (`KeyEscrowService`):
+
+- Hinterlegen nur für das eigene, verifizierte Konto, und nur wenn eine Testsignatur mit dem
+  Schlüssel zum gespeicherten öffentlichen Schlüssel passt. Höchstens einmal pro Minute.
+- Abrufen nur mit einem Token mit Claim `auth_provider` (BundID oder SMS), nie mit einem
+  reinen Weak-Login-Token. Höchstens 10 Abrufe pro Stunde. Jeder Abruf wird ohne
+  Schlüsselmaterial protokolliert.
+- Kein Zugriff aus dem Backoffice. Beim Löschen oder Zusammenführen eines Kontos wird
+  der Eintrag entfernt.
+- `hasKeyEscrow` ist nur wahr, wenn die Schlüsselversion des Eintrags konfiguriert ist.
+  Geräte, die den Schlüssel noch besitzen, hinterlegen ihn sonst beim Start neu.
+- Ein Konto mit BundID oder bestätigter Nummer kann eine neue Nummer nur mit einer starken
+  Sitzung bestätigen. Ein Weak-Login-Token kann sich so kein SMS-Token verschaffen.
+
+Ablauf in der App: Nach der Anmeldung vergleicht `initialize()` das Konto im Token mit
+dem zwischengespeicherten Konto. Passt der lokale Schlüssel nicht zum Konto, wird er aus
+der Hinterlegung geholt und an die Konto-ID gebunden im Secure Storage abgelegt. Vor dem
+Abmelden prüft die App, ob die Hinterlegung bestätigt ist. Ist das nicht möglich, fragt ein
+Dialog nach. Lokal gespeicherte Formular-Vorbelegungen werden beim Abmelden gelöscht.
+
+SMS-Abruf: Nummern, die zu einem BundID-Konto gehören, können sich nicht per SMS anmelden.
+Der SMS-Abruf betrifft daher nur reine SMS-Konten. Wer eine solche Nummer übernimmt,
+erhält Zugriff auf das Konto und dessen Schlüssel. Der Master-Code
+(`Ehrenamtsbank__ACCEPT_MASTER_CODE`, Standard `false`) darf nur in Testumgebungen aktiv sein, sonst könnte
+sich jeder mit einer fremden Nummer anmelden und deren Schlüssel abrufen.
+
+Konfiguration und Betrieb: `KeyEscrow__CurrentVersion` und `KeyEscrow__Keys__<Version>`
+werden wie die übrigen Backend-Geheimnisse je Umgebung gesetzt. Der Schlüssel darf nicht im
+Repository liegen und muss getrennt gesichert werden. Geht er verloren, sind die damit
+verschlüsselten Einträge unlesbar. Fehlt die Konfiguration, startet das Backend nicht.
+Fehlt nur eine ältere Version, startet es und protokolliert einen Fehler.
+
+Rotation:
+
+. `KeyEscrow__Keys__<Neu>` ergänzen, `KeyEscrow__CurrentVersion` umstellen, neu starten.
+. `dotnet API.dll rotate-key-escrow` ausführen. Exit-Code 1 bedeutet, dass Einträge nicht
+  umgeschlüsselt werden konnten.
+. Prüfen, dass kein Eintrag mehr die alte Version nutzt:
+  `select "KeyVersion", count(*) from "BuergerKeyEscrows" group by 1`.
+. Erst dann den alten Schlüssel entfernen.
+
+Die Hinterlegung bedeutet, dass der Betreiber des Backends technisch Zugriff auf die
+privaten Bürgerschlüssel hätte. Das ist in der Datenschutzdokumentation festzuhalten.
+
+===== Implementierung
+
+Die kryptografischen Methoden sind im Quellcode in folgenden Dateien definiert:
+
+- Backend: `API/Infrastructure/Crypto.cs`
+- Web-Frontend: `web/bereich-b/src/lib/crypto/crypto.tsx`
+- Mobile App: `app/lib/common/crypto/crypto.dart`

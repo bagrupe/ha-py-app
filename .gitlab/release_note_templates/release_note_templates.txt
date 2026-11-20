@@ -1,0 +1,23 @@
+Deployment of $CI_COMMIT_TAG
+
+**Docker Image**: $CI_COMMIT_TAG - [Dockerfile]($CI_REGISTRY_IMAGE/$COMPONENT:$CI_COMMIT_TAG)
+
+---
+
+### 📝 What's New in this Release:
+$GITLAB_CHANGELOG
+
+---
+
+$GITLAB_ISSUE_SUMMARY
+
+---
+
+### 🚀 Currently deployed on **$TARGET_ENV**:
+
+| Component | Version |
+|---|---|
+| **Backend** | [$BACKEND_IMAGE_VERSION]($CI_PROJECT_URL/-/tree/$BACKEND_IMAGE_VERSION/backend/) |
+| **Bereich A** | [$WEB_BEREICH_A_IMAGE_VERSION]($CI_PROJECT_URL/-/tree/$WEB_BEREICH_A_IMAGE_VERSION/web/bereich-a/) |
+| **Bereich B** | [$WEB_BEREICH_B_IMAGE_VERSION]($CI_PROJECT_URL/-/tree/$WEB_BEREICH_B_IMAGE_VERSION/web/bereich-b/) |
+| **App** | [$APP_IMAGE_VERSION]($CI_PROJECT_URL/-/tree/$APP_IMAGE_VERSION/app/) |

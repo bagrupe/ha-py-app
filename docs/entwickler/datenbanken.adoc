@@ -1,0 +1,259 @@
+==== Datenbanken
+In der KommunalApp kommen zwei Datenbanken zum Einsatz: eine Postgres-Datenbank
+für die Prozessverwaltung und -ausführung, sowie eine Mongo-DB-Instanz für die
+dokumentbasierte Inhaltspflege.
+
+===== Teilbereich "Prozesse" - Postgres
+
+====== Tabellen
+
+Dies ist eine Auflistung aller Tabellen, die in der Datenbank definiert sind.
+In der dritten Spalte wird auf die genaue Code-Stelle verwiesen, aus der die
+jeweilige Tabelle erzeugt wird.
+
+[cols="~,~,~"]
+
+|===
+| Tabelle
+| Beschreibung
+| Definition im Code
+
+| `__EFMigrationsHistory`
+| Enthält die von Entity Framework bisher ausgeführten Migrationen (wird
+  automatisch gepflegt)
+| (intern)
+
+| `AusfuehrungBuerger`
+| Zuordnung der Bürger, die einer Prozessausführung folgen.
+| `Features/Prozess/Ausfuehrung.cs -> Ausfuehrung -> Followers`
+
+| `Ausfuehrungen`
+| Ausführungen eines Prozesses ("Anträge")
+| `Features/Prozess/Ausfuehrung.cs -> Ausfuehrung`
+
+| `Bearbeitungen`
+| Diskrete Bearbeitungen ("Änderungen"), die durch eine Person an einer
+  Prozessausführung vorgenommen wurden
+| `Features/Prozess/Ausfuehrung.cs` -> `Bearbeitung`
+
+| `BuergerPersonalData`
+| Personenbezogene Daten, die vom Bürger im eigenen Profil hinterlegt worden
+  sind (verschlüsselt)
+| `Features/Auth/User.cs` -> `Buerger` -> `BuergerPersonalData`
+
+| `Dienstleister`
+| Externe Dienstleister
+| `Features/Dienstleistungen/Dienstleister.cs` -> `Dienstleister`
+
+| `DienstleisterOrganisationseinheit`
+| Zuordnung eines Dienstleisters zu einer oder mehreren Organisationseinheiten
+| `Features/Dienstleistungen/Dienstleister.cs` -> `Dienstleister` ->
+  `Organisationseinheiten`
+
+| `EhrenamtsbankKategorien`
+| Kategorien der Ehrenamtsbank, die über eine optionale Eltern-Referenz einen
+  Baum beliebiger Tiefe bilden.
+| `Features/Ehrenamtsbank/EhrenamtsbankKategorie.cs` -> `EhrenamtsbankKategorie`
+
+| `EmailAttachments`
+| E-Mail-Anhänge in den für den Versand geplanten automatischen E-Mails
+| `Features/Email/EmailOutboxItem.cs` -> `Dienstleister`
+
+| `EmailOutboxItems`
+| Automatische E-Mails, die durch einen Hintergrundjob versendet werden.
+| `Features/Dienstleistungen/Dienstleister.cs` -> `Dienstleister`
+
+| `FormularFelder`
+| In einem Formularschritt definierte Felder
+| `Features/Prozess/Prozess.cs` -> `FormularSchritt` -> `Felder`
+
+|`GovManagerRequests`
+| Anfragen an `GovManager`, die von einen Hintergrundjob ausgeführt werden.
+| `Features/GovManager/GovManagerRequest.cs` -> `GovManagerRequest`
+
+| `Kommunen`
+| Implementierung der Mandantenfähigkeit (`Kommune` == Mandant)
+| `Features/Kommune/Kommune.cs` -> `Kommune`
+
+| `MitarbeiterGruppen`
+| Abteilungen/Ämter/Fachbereiche in einer Organisationseinheit
+| `Features/Auth/User.cs` -> `MitarbeiterGruppe`
+
+| `MitarbeiterMitarbeiterGruppe`
+| Zuordnung eines Mitarbeiters zu einer oder mehreren Abteilungen
+| `Features/Auth/User.cs` -> `MitarbeiterGruppe` -> `Mitarbeiter`
+
+| `PaymentRequests`
+| Bezahlungsvorgänge über `pmPayment`, die in einem Hintergrundjob
+  durchgeführt werden
+| `Features/PmPayment/PaymentRequest.cs` -> `PaymentRequest`
+
+| `ProzessProzessTags`
+| Zugeordnete Tags an einem Prozess
+| `Features/Prozess/Prozess.cs` -> `Prozess` -> `Tags`
+
+| `ProzessTags`
+| Verfügbare Tags, die einem Prozess zugeordnet sein können
+| `Features/Prozess/Prozess.cs` -> `ProzessTag`
+
+| `ProzessVersionen`
+| Versionen eines Prozesses
+| `Features/Prozess/Prozess.cs` -> `Prozess` -> `Versionen`
+
+| `Schritte`
+| Schritte, die in einer Prozessversion definiert sind.
+| `Features/Prozess/Prozess.cs` -> `ProzessVersion` -> `Schritte`
+
+| `SlotValues`
+| Strukturierte Daten, die im Zuge einer Bearbeitung einer Prozessausführung
+  erfasst wurden
+| `Features/Prozess/Ausfuehrung.cs` -> `Bearbeitung` -> `SlotValues`
+
+| `Untereinheit`
+| Organisationseinheiten
+| `Features/Untereinheit/Untereinheit.cs`
+
+| `UntereinheitPermissions`
+| Zuordnung eines Mitarbeiters zu einer Organisationseinheit, und die in diesem
+  Zusammenhang gewährten Funktionsberechtigungen
+| `Features/Auth/User.cs` -> `BackofficeUser` -> `UntereinheitPermissions`
+
+| `UserFacingProzesse`
+| Definition der verfügbaren Prozesse in der App
+| `Features/Prozess/Prozess.cs` -> `UserFacingProzess`
+
+| `Users`
+| Nutzer (sowohl Mitarbeiter als auch Bürger und externe Dienstleister)
+| `Features/Auth/User.cs` -> `User`
+
+| `VerlaufsEintraege`
+| Unveränderliche Verlaufseinträge für den Lebenszyklus einer Prozessausführung
+| `Features/Prozess/Ausfuehrung.cs` -> `VerlaufsEintrag`
+
+| `Verbindungen`
+| Übergänge zwischen Prozess-Schritten
+| `Features/Prozess/Prozess.cs` -> `Verbindung`
+
+| `ZustaendigkeitRollen`
+| In einem Prozess definierte Rollen, um die Zuständigkeit eines Schrittes
+  ggf. dynamisch festzulegen.
+| `Features/Prozess/Prozess.cs` -> `ProzessVersion` -> `Rollen`
+
+|===
+
+====== Migrationen
+
+Migrationen werden automatisch beim Start des Backends ausgeführt. Neue
+Migrationen können über den Befehl
+
+[source,sh]
+----
+  dotnet ef migrations create "NameDerMigration" --project API
+----
+
+im Backend-Verzeichnis erstellt werden.
+
+===== Teilbereich "Inhaltspflege" - MongoDB
+
+====== Sammlungen
+
+Dies ist eine Auflistung aller Sammlungen, die in der Datenbank definiert sind.
+In der dritten Spalte wird auf die genaue Code-Stelle verwiesen, aus der die
+jeweilige Sammlung erzeugt wird.
+
+[cols="1,1,1"]
+
+|===
+| Sammlung
+| Beschreibung
+| Definition im Code
+
+| `_news-artikel_versions`
+| Versionierung der News-Artikel
+| `collections/news-artikel/news-artikel.ts`
+
+| `_preferences`
+| Payload-interne Nutzereinstellungen
+| (intern)
+
+| `benutzers`
+| Nutzer
+| `collections/benutzer.ts`
+
+| `geo-flaechens`
+| Mit GeoJSON definierte Geoflächen (z.B. zur Umsetzung von Geofencing in einem
+  Prozess mit `isInside`).
+| `collections/geoflaechen.ts`
+
+| `integrations`
+| Integrationen (Anbindung an externe Schnittstellen, Feeds usw.)
+| `collections/ingtegrations/integration.ts`
+
+| `kommunens`
+| Mandanten
+| `collections/kommunen.ts`
+
+| `mediens`
+| Benutzerdefinierte Medien (Uploads)
+| `collections/medien.ts`
+
+| `news-artikels`
+| News-Artikel
+| `collections/news-artikel/news-artikel.ts`
+
+| `poi-categories`
+| POI-Kategorien
+| `collections/pois/poi-categories.ts`
+
+| `poi-icons`
+| POI-Icons
+| `collections/medien.ts`
+
+| `poi-supercategories`
+| POI-Superkategorien
+| `collections/pois/poi-supercategories.ts`
+
+| `pois`
+| Points of Interest
+| `collections/pois/pois.ts`
+
+| `sensor-arts`
+| Sensorarten
+| `collections/sensoren/sensor-art.ts`
+
+| `sensorens`
+| Sensoren
+| `collections/sensoren/sensoren.tsx`
+
+| `untereinheits`
+| Organisationseinheiten
+| `collections/untereinheit.ts`
+
+| `veranstaltungskalender-kategories`
+| Veranstaltungskategorien
+| `collections/veranstaltungen/kategorien.tsx`
+
+| `veranstaltungskalender-quelles`
+| Veranstaltungsquellen
+| `collections/veranstaltungen/quellen.tsx`
+
+| `veranstaltungskalenders`
+| Veranstaltungen im Veranstaltungskalender
+| `collections/veranstaltungen/veranstaltungskalender.tsx`
+
+| `veranstaltungsmediens`
+| In einer Veranstaltung verwendete Medien
+| `collections/medien.ts`
+
+| `wettermesspunktes`
+| Wettermesspunkte
+| `collections/wettermesspunkte.ts`
+
+|===
+
+====== Migrationen
+
+Es gibt aktuell keinen Bedarf für Migrationen in der Inhaltspflege. Rein
+additive Änderungen wie etwa das Hinzufügen von Feldern können ohne Migration
+vorgenommen werden; weitreichendere Änderungen wie das Verschieben oder
+Umbenennen der Felder würde jedoch eine manuelle Migration erfordern.

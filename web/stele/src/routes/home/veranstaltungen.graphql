@@ -1,0 +1,57 @@
+query KioskVeranstaltungsTermineList(
+  $kommune: String
+  $untereinheiten: [String]
+  $von: String
+  $bis: String
+  $categoryIds: [String]
+  $limit: Int = 20
+  $page: Int = 1
+  $sortDirection: String = "asc"
+) {
+  veranstaltungsTermine(
+    kommune: $kommune
+    untereinheiten: $untereinheiten
+    von: $von
+    bis: $bis
+    categoryIds: $categoryIds
+    visible: true
+    limit: $limit
+    page: $page
+    sortDirection: $sortDirection
+  ) {
+    totalDocs
+    totalPages
+    hasNextPage
+    page
+    limit
+    docs {
+      id
+      titel
+      teaser
+      buchungsUrl
+      ticketUrl
+      anbieterUrl
+      locationName
+      start
+      end
+      dates {
+        start
+        end
+      }
+      titelbild {
+        external
+        url
+        internal {
+          url
+        }
+      }
+      veranstalterAdresse {
+        name
+        strasse
+        plz
+        ort
+        url
+      }
+    }
+  }
+}

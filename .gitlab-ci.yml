@@ -1,0 +1,132 @@
+# Migration job input variables
+spec:
+  inputs:
+    source_environment:
+      type: string
+      options:
+        - staging
+        - preprod
+        - production
+      default: staging
+    destination_environment:
+      type: string
+      options:
+        - staging
+        - preprod
+      default: staging
+    backup_date:
+      type: string
+      default: latest
+      description: 'latest, or YYYY-MM-DD (UTC day of backup job; must be within last 5 days).'
+---
+variables:
+  NODE_VERSION: 22.14.0
+  GIT_DEPTH: 0 # Fetches all tags and history so --merged works correctly
+
+workflow:
+  rules:
+    # Off while `include` blocks below are commented out. Need to remove if you want to run the pipelines.
+    - when: never
+
+    # Used to allow pipeline trigger via the gitlab UI
+    - if: $CI_PIPELINE_SOURCE == "web"
+
+    # Set variables for feature branch
+    # To Debug a pipeline job on a feature branch, you can set the TARGET_ENV to "DEBUG" and then add a rule to run the job if the TARGET_ENV == "DEBUG"
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      variables:
+        IMAGE_TAG: "latest"
+        TARGET_ENV: "feature"
+
+    # Scheduled pipeles are used to create backups and need no configuration at all.
+    - if: $CI_PIPELINE_SOURCE == "schedule"
+
+    # Avoid having a branch AND MR pipeline
+    - if: $CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS
+      when: never
+
+    # Set variables for development
+    - if: $CI_COMMIT_BRANCH == "main"
+      variables:
+        IMAGE_TAG: "dev-$CI_COMMIT_SHORT_SHA"
+        SENTRY_ENVIRONMENT: "development"
+        TARGET_ENV: "development"
+        APP_BACKEND_URL: ""
+
+    # Set variables for staging
+    # Example pattern app-v0.1.3-staging.10
+    - if: $CI_COMMIT_TAG =~ /^[a-z0-9,-]+-v(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)-staging\.?[0-9]*$/ # Staging version pattern
+      variables:
+        IMAGE_TAG: $CI_COMMIT_TAG
+        SENTRY_ENVIRONMENT: "staging"
+        TARGET_ENV: "staging"
+        APP_BACKEND_URL: https://app.example.invalid/
+
+    # Set variables for preprod
+    # Example pattern app-v0.1.3-RC
+    - if: $CI_COMMIT_TAG =~ /^[a-z0-9,-]+-v(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)-RC\.?[0-9]*$/ # Staging version pattern
+      variables:
+        IMAGE_TAG: $CI_COMMIT_TAG
+        SENTRY_ENVIRONMENT: "preprod"
+        TARGET_ENV: "preprod"
+        # APP_BACKEND_URL: https://app.example.invalid/ # Currently unknown
+
+    # Set variables for production
+    # Example pattern app-v0.1.3
+    - if: $CI_COMMIT_TAG =~ /^[a-z0-9,-]+-v(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)\.?[0-9]*$/ # Production version pattern
+      variables:
+        IMAGE_TAG: $CI_COMMIT_TAG
+        SENTRY_ENVIRONMENT: "production"
+        APP_BACKEND_URL: https://app.example.invalid
+        TARGET_ENV: "production"
+
+default:
+  before_script:
+    - set -euo pipefail
+  interruptible: true
+
+stages:
+  - backup
+  - generate
+  - lint
+  - test
+  - sast
+  - build
+  - package
+  - push
+  - deploy
+  - release
+
+# GitLab CI lint requires at least one job while.
+ci:pipelines-disabled:
+  stage: lint
+  rules:
+    - when: never
+  script:
+    - echo "Re-enable ci/*.gitlab-ci.yml includes to run pipelines."
+
+# Enable the following lines to include the CI jobs
+# include:
+#   - local: ci/template.gitlab-ci.yml
+#   - local: ci/backup.gitlab-ci.yml
+#   - local: ci/docs.gitlab-ci.yml
+#   - local: ci/flutter.gitlab-ci.yml
+#   - local: ci/csharp.gitlab-ci.yml
+#   - local: ci/helm.gitlab-ci.yml
+#   - local: ci/pnpm.gitlab-ci.yml
+#   - local: ci/fastlane.gitlab-ci.yml
+#   - local: ci/deployment.gitlab-ci.yml
+#   - local: ci/monitoring.gitlab-ci.yml
+#   - local: ci/monitoring-agents.gitlab-ci.yml
+#   - local: ci/migration.gitlab-ci.yml
+#     inputs:
+#       source_environment: $[[ inputs.source_environment ]]
+#       destination_environment: $[[ inputs.destination_environment ]]
+#       backup_date: $[[ inputs.backup_date ]]
+#   - local: ci/components/app.gitlab-ci.yml
+#   - local: ci/components/backend.gitlab-ci.yml
+#   - local: ci/components/web.gitlab-ci.yml
+#   - local: ci/components/stele.gitlab-ci.yml
+#   - local: ci/components/keycloak.gitlab-ci.yml
+#   - local: ci/release.gitlab-ci.yml
+#   - local: ci/sast.gitlab-ci.yml

@@ -1,0 +1,33 @@
+==== Inhaltspflege (Bereich-B)
+
+===== Aufbau der Inhaltspflege
+
+Der Teilbereich der Inhaltspflege ist mit Payload, einem auf TypeScript
+basierendem headless CMS, realisiert. Payload verfolgt einen *Code-First*
+Ansatz, ähnlich einem ORM, bei dem verschiedene Entitäten als Sammlungen
+(Collections) definiert werden. Aus dieser Konfiguration werden eine
+Benutzeroberfläche und eine API erzeugt.
+
+Es handelt sich hier weitestgehend um eine CRUD-Anwendung, bei der die Zugriffs-
+rechte über die Funktionsberechtigungen des eingeloggten Nutzers gesteuert
+werden.
+
+===== Payload-Konfiguration
+
+Es gibt eine zentrale Konfigurationsdatei (`payload.config.ts`), in der alle
+Sammlungsdefinitionen importiert werden (`collections: [...]`). Hier werden
+außerdem einschlägige GraphQL-Queries hinzugefügt, die nicht von Payload selbst
+bedient werden können (`graphQL: { ... }`}).
+
+===== Trennung der Teilbereiche
+
+Es wurde sich dafür entschieden, die Inhaltspflege in ein separates Modul
+auszulagern, um von der bereits bestehenden Funktionalität von Payload zu
+profitieren und so schneller zu einem Ergebnis zu kommen. Diese Trennung
+erfordert allerdings eine Synchronisierung duplizierter Entitäten in beiden
+Datenbanken, um beispielsweise Nutzer und Organisationseinheiten einheitlich zu
+halten. Es muss darüber hinaus eine Möglichkeit für das .NET-Backend geben, auf
+die in Payload definierten Sammlungen zuzugreifen, um beispielsweise:
+
+- Push Notifications über neue **News-Artikel** zu versenden
+- Einen Prozess mittels **Geoflächen** in geografisch einzuordnen

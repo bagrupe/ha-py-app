@@ -1,0 +1,64 @@
+# Documentation Rules for README.md
+
+## 1. General Formatting & Tone
+- **Tone:** Professional, clear, and actionable. Use emojis to aid visual scanning but do not overuse them.
+- **Headers:** Use clear hierarchy (`#`, `##`, `###`). Top-level headers usually have an emoji prefix (e.g., `## 🚀 Quick Start Guide`).
+- **Badges:** Maintain the shield badges at the very top for technology versions and status.
+- **Center Alignment:** Use `<div align="center">` for the main title, logos, and intro text to maintain the visual brand.
+
+## 2. Structure Standards
+When extending or modifying the README, adhere to this exact table of contents structure:
+1. **Header:** Logos, Title, Badges, Short Description.
+2. **Table of Contents:** Linked list of sections.
+3. **Project Structure:** A text-based tree view of the monorepo.
+4. **Tech Stack & Architecture:** Table of components followed by the architecture diagram.
+5. **Quick Start Guide:** Prerequisites, Installation (using `<details>`), and Start commands.
+6. **Docker Environment:** Configuration and Port mappings.
+7. **Component Guides:** Detailed, tab-like sections for Backend, Web, and Mobile.
+8. **Troubleshooting:** Collapsible `<details>` sections for common errors.
+
+## 3. Specific Section Rules
+
+### 3.1 Installation Steps (`<details>`)
+- All installation steps in the "Quick Start" section must be wrapped in `<details>` and `<summary>` tags to keep the page clean.
+- **Format:**
+  ```html
+  <details>
+  <summary><b>Step X: [Action Name]</b></summary>
+  [Content/Commands]
+  </details>
+````
+
+### 3.2 Tables
+
+  - Use Markdown tables for "Tech Stack", "Services & Ports", and "Task Commands".
+  - Columns must be aligned left (`:---`).
+  - **Docker Ports Table:** Must include `Service`, `Host Port`, `Container Port`, and `UI / Notes`.
+
+### 3.3 Code Blocks
+
+  - Always specify the language for syntax highlighting (e.g., `bash`, `json`, `yaml`, `text`).
+  - For file trees, use `text` or `bash`.
+
+### 3.4 Alerts & Notes
+
+  - Use blockquotes (`>`) for important notes, warnings, or tips.
+  - Prefix with an emoji for context:
+      - `> ⚠️ Note:` for warnings.
+      - `> 💡 Tip:` for helpful shortcuts.
+      - `> ℹ️ Note:` for general information.
+
+## 4\. Troubleshooting Section
+
+  - Entries must be collapsible using `<details>`.
+  - **Title Format:** `❌ Error: "[Error Message]"` or `🐳 Docker: "[Issue]"`.
+  - **Content Structure:**
+    1.  **The Problem:** Brief explanation.
+    2.  **The Solution:** Actionable steps or code blocks.
+    3.  **Test (Optional):** Command to verify the fix.
+
+## 5\. Visual Assets
+
+  - Images are stored in `/assets/`.
+  - Use HTML `<img>` tags when specific sizing (`width`, `height`) is needed, otherwise standard Markdown `![]()` is acceptable.
+

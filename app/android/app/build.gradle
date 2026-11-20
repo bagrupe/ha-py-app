@@ -1,0 +1,130 @@
+plugins {
+  // TODO: Add google-services.json and uncomment the plugin for Firebase Push notifications.
+  // id "com.google.gms.google-services"
+  id "com.android.application"
+  id "kotlin-android"
+  id "dev.flutter.flutter-gradle-plugin"
+}
+
+def localProperties = new Properties()
+def localPropertiesFile = rootProject.file('local.properties')
+if (localPropertiesFile.exists()) {
+  localPropertiesFile.withReader('UTF-8') { reader ->
+    localProperties.load(reader)
+  }
+}
+
+def flutterVersionCode = localProperties.getProperty('flutter.versionCode')
+if (flutterVersionCode == null) {
+  flutterVersionCode = '1'
+}
+
+def flutterVersionName = localProperties.getProperty('flutter.versionName')
+if (flutterVersionName == null) {
+  flutterVersionName = '1.0'
+}
+
+def keystoreProperties = new Properties()
+def keystorePropertiesFile = rootProject.file('key.properties')
+if (keystorePropertiesFile.exists()) {
+  keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+}
+
+android {
+  namespace "de.landkreis.hapy.app"
+  compileSdkVersion flutter.compileSdkVersion
+  ndkVersion flutter.ndkVersion
+
+  compileOptions {
+    coreLibraryDesugaringEnabled true
+
+    sourceCompatibility JavaVersion.VERSION_1_8
+    targetCompatibility JavaVersion.VERSION_1_8
+  }
+
+  kotlinOptions {
+    jvmTarget = '1.8'
+  }
+
+  sourceSets {
+    main.java.srcDirs += 'src/main/kotlin'
+  }
+
+  defaultConfig {
+    applicationId "de.landkreis.hapy.app"
+    minSdkVersion flutter.minSdkVersion
+    targetSdkVersion flutter.targetSdkVersion
+    versionCode flutterVersionCode.toInteger()
+    versionName flutterVersionName
+
+    // BundID/Keycloak-Login (flutter_appauth): Redirect-Scheme für RedirectUriReceiverActivity
+    // aus dem net.openid:appauth-Manifest, siehe de.landkreis.hapy.app:/oauthredirect.
+    manifestPlaceholders = [
+        appAuthRedirectScheme: "de.landkreis.hapy.app",
+    ]
+
+    testInstrumentationRunner "pl.leancode.patrol.PatrolJUnitRunner"
+    testInstrumentationRunnerArguments clearPackageData: "true"
+  }
+
+  signingConfigs {
+    release {
+      keyAlias keystoreProperties['keyAlias']
+      keyPassword keystoreProperties['keyPassword']
+      storeFile keystoreProperties['storeFile'] ? file(keystoreProperties['storeFile']) : null
+      storePassword keystoreProperties['storePassword']
+    }
+  }
+
+  flavorDimensions "default"
+    productFlavors {
+        production {
+            dimension "default"
+            applicationIdSuffix ""
+            manifestPlaceholders = [
+                appName   : "Ha-Py",
+                appLinkHost: "app.example.invalid",
+            ]
+        }
+        preprod {
+            dimension "default"
+            applicationIdSuffix ".preprod"
+            manifestPlaceholders = [
+                appName   : "[PreProd] Ha-Py",
+                appLinkHost: "app.example.invalid",
+            ]
+        }
+        staging {
+            dimension "default"
+            applicationIdSuffix ".staging"
+            manifestPlaceholders = [
+                appName   : "[STG] Ha-Py",
+                appLinkHost: "app.example.invalid",
+            ]
+        }
+
+    }
+
+
+  buildTypes {
+    release {
+      signingConfig signingConfigs.release
+      minifyEnabled true
+      proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+    }
+  }
+
+  testOptions {
+    execution "ANDROIDX_TEST_ORCHESTRATOR"
+  }
+}
+
+flutter {
+  source '../..'
+}
+
+dependencies {
+  implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:2.1.0"
+  coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.1.4'
+  androidTestUtil "androidx.test:orchestrator:1.4.2"
+}

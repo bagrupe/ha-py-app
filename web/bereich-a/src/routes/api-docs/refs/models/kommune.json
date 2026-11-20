@@ -1,0 +1,38 @@
+{
+  "Kommune": {
+    "type": "object",
+    "properties": {
+      "id": {
+        "type": "string"
+      },
+      "name": {
+        "type": "string"
+      },
+      "bereichAId": {
+        "type": "string"
+      },
+      "defaultPosition": {
+        "type": "array",
+        "items": {
+          "type": "number"
+        },
+        "minItems": 2,
+        "maxItems": 2
+      },
+      "design": {
+        "type": "object",
+        "properties": {
+          "logo": {
+            "type": "string"
+          },
+          "color": {
+            "type": "string"
+          },
+          "font": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

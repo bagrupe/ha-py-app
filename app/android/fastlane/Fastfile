@@ -1,0 +1,28 @@
+default_platform(:android)
+
+platform :android do
+
+  lane :internalplaystore do
+    desc "Submits a pre build android app to Google Playstore (internal track). Credentials are set via CI environment"
+
+    package_name=ENV["APP_IDENTIFIER"]
+
+    # Can always set to "completed" to ensure the app is instant available for the internal testers.
+    release_status_value ="completed"
+
+
+    upload_to_play_store(
+      aab_paths: ENV['AAB_PATH'],
+      package_name: package_name,
+      skip_upload_apk: true,
+      skip_upload_metadata: true,
+      skip_upload_images: true,
+      skip_upload_screenshots: true,
+      skip_upload_changelogs: true,
+      release_status: release_status_value,
+      track: "internal",
+      json_key_data: ENV['GOOGLE_PLAY_STORE_JSON_FILE_RAW'] #set in the ci variables
+  )
+  end
+
+end

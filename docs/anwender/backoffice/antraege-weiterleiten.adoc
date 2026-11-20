@@ -1,0 +1,106 @@
+==== Weiterleiten von Anträgen
+
+Es gibt zwei grundlegende Formen der Weiterleitung oder Übergabe von Anträgen
+an andere Beteiligte:
+
+. Das prozessabhängige Weiterleiten, das nur in dafür vorgesehenen Anträgen verfügbar ist
+. Das prozessunabhängige Weiterleiten von Anträgen, das in jedem Antrag verfügbar ist
+
+===== Prozessunabhängige Weiterleitung
+
+Anträge können weitergeleitet werden, und zwar unabhängig davon, ob die
+Weiterleitung ein expliziter Schritt innerhalb eines Prozesses ist. Die Funktion
+dient u.a. dazu fehlgeleitete Anträge an die richtige Stelle weiterzuleiten oder
+an Einheiten zu übergeben, die nicht Teil eines automatischen Prozesses sind.
+
+Die Weiterleitung findet sich in der Detail-Ansicht eines Antrags am oberen
+Bildschirmrand. Über den Button `Antrag weiterleiten` öffnet sich der
+Weiterleitungs-Dialog.
+
+Es gibt zwei Formen der Weiterleitung:
+
+- interne Weiterleitung
+- externe Weiterletiung
+
+Die interne Weiterleitung leitet einen Antrag an einen ausgewählten
+Sachbearbeiter weiter. Diese Weiterleitung führt dazu, dass der Antrag einem
+anderen Sachbeabeiter  aus der eigenen Abteilung zugewiesen wird. Die Zuweisung
+führt automatisch dazu, dass der Antrag seinen Status auf *in Bearbeitung*
+ändert
+
+Die externe Weiterleitung leitet einen Antrag per E-Mail weiter. Dabei wird aus
+dem Antrag ein PDF-Dokument erzeugt und der Weiterleitungs-Mail als Anhang
+hinzugefügt. Es gibt zwei Formen der externen Weiterleitung: `zur Ansicht` und
+`zur Abgabe`.
+
+Anträge die `zur Ansicht` weitergeleitet werden, werden *in Kopie*
+weitergeleitet. D.h. der Zustand des Antrags im Backoffice ändert sich nicht und
+nur der aktuelle Zustand des Antrag wird an die angegebene E-Mail-Adresse
+weitergeleitet.
+
+Anträge die `zur Abgabe` weitergeleitet werden, werden durch die Weiterleitung
+im Backoffice abgeschlossen. Die Annahme hierbei ist, dass die Abgabe an extern
+dazu führt, dass der Antrag im Backoffice nicht weiterbearbeitet werden kann und
+es dementsprechend auch keine Rückmeldung über etwaige Statusänderungen des
+Antrags gibt.
+
+.Antrag - Interne Weiterleitung
+image::assets/anwender/Antraege_interne_Weitereleitung.png[Antrag - Interne Weiterleitung]
+
+===== Prozessabhängige Weiterleitung
+
+Einige Prozesse definieren als Teil des Prozessablaufs die Möglichkeit Anträge
+an andere Organisationseinheiten oder auch Dienstleister weiterzuleiten oder zu
+übergeben.  Im Unterschied zum prozessunabhängigen Weiterleiten verbleibt der
+Antrag hier im vorgesehenen Ablauf des Antrags und folgt definierten Schritten.
+
+Die prozessabhängige Weiterleitung kann demnach nur in dafür vorgesehen
+Prozessen / Anträgen verwendet werden. Um diese Weiterleitung durchzuführen
+taucht in einem solchen Prozess ein entsprechender Button am oberen
+Bildschirmrand auf. Beim Klick auf diesen Button kann dann ausgewählt werden, an
+wen der Antrag übergeben werden soll - die Liste der Möglichkeiten wird dort
+angezeigt und kann durch den Sachbearbeiter ausgewählt werden.
+
+.Antrag - Prozessabhängige Weiterleitung
+image::assets/anwender/Antraege_Prozessabhaengige_Weiterleitung.png[Antrag - Prozessabhängige Weiterleitung]
+
+
+====== Weiterleiten an eine andere Organisationseinheit
+
+Die Weiterleitung an eine andere Organisationseinheit wird über einen Klick auf
+den entsprechenden Button innerhalb des Antrags gestartet, anschließend
+
+- wird die `Organisationseinheit` ausgewählt, an die der Antrag übergeben werden soll
+
+- optional kann auch eine `Abteilung` der ausgewählt werden, der der Antrag
+direkt zugeordnet werden soll
+
+Nachdem die Weiterleitung bestätigt wurde ist der Antrag in der Zuständigkeit der
+ausgewählten Organisationseinheit und wechselt sozusagen den Besitzer, sodass der
+Antrag dann nicht mehr der weiterleitenden Abteilung einsehbar ist.
+
+====== Weiterleiten an einen Dienstleister
+
+Analog zur Weiterleitung an eine andere Organisationseinheit kann ein Antrag direkt
+an einen Dienstleister übergeben werden.
+
+Auch hier wird zunächst der entsprechende Button geklickt, und anschließend das Ziel
+ausgewählt. In diesem Dialog stehen nur die Dienstleister zur Verfügung, die der
+Organisationseinheit des aktuellen Nutzers zur Verfügung stehen. D.h. Dienstleister,
+die nicht der aktuellen Organisationseinheit zugeordnet sind tauchen auch nicht in
+der Liste auf.
+
+.Antrag - Weiterleitung an einen Dienstleister
+image::assets/anwender/Antrage_Weiterleitung_an_Dienstleister.png[Antrag - Weiterleitung an einen Dienstleister]
+
+====== Kombiniertes Weiterleiten an einen Dienstleister oder eine andere Organisationseinheit
+
+Über den Prozesseditor ist konfigurierbar, ob die Weiterleitung nur an eine
+Organisationseinheit oder einen Dienstleister erfolgen soll, oder an beide.
+Infolgedessen gibt es den prozessabhängigen Weiterleitungsdialog in drei
+Ausprägungen:
+
+. an Organisationseinheit weiterleiten
+. an Dienstleister weiterleiten
+. einen kombinierten Dialog, in dem entschieden werden kann, ob an
+Organisationseinheit oder Dienstleister weitergeleitet werden soll

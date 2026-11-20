@@ -1,0 +1,21 @@
+query KioskHomeWeather($kommuneId: JSON!, $locationName: String!) {
+  wettermesspunkteList(
+    where: {
+      kommune: {equals: $kommuneId}
+      locationName: {equals: $locationName}
+    }
+  ) {
+    totalDocs
+    docs {
+      id
+      locationName
+      location
+      weather {
+        date
+        maxTemp
+        minTemp
+        icon
+      }
+    }
+  }
+}

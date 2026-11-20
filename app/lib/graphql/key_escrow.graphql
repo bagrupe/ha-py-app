@@ -1,0 +1,9 @@
+mutation StoreKeyEscrow($input: StoreKeyEscrowInput!) {
+  storeKeyEscrow(input: $input) {
+    boolean
+  }
+}
+
+query KeyEscrow {
+  keyEscrow
+}

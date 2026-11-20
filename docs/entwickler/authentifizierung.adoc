@@ -1,0 +1,165 @@
+==== Authentifizierung
+
+(`API/Features/Auth`)
+
+Authentifizierung gegen das Backend erfolgt über JWTs (JSON Web Tokens).
+
+- Der Client führt die `login` Mutation mit E-Mail und Passwort aus.
+- Das Passwort wird mit dem gespeicherten Hash in der Datenbank verglichen.
+- Bei einer Übereinstimmung wird ein JWT, das die Identität des Nutzers
+  bestätigt, mit den einem privaten Schlüssel signiert und ausgestellt.
+- In darauf folgenden Requests wird das Token vom Client im
+  `Authorization`-Header übermittelt.
+
+===== Geteilter Login für die Inhaltspflege (Mitarbeiter)
+
+Im Falle eines Mitarbeiter-Logins wird außerdem ein Zugang zu Payload CMS
+bereitgestellt. Dazu werden über einen Hinterkanal relevante Nutzerdaten an
+Payload übertragen (`web/bereich-b/src/sso.ts`).
+In Payload wird dann gegebenfalls ein neues Konto angelegt und ein weiteres JWT
+mit einer gültigen Session in ein Cookie geschrieben. Payload ist so
+konfiguriert, dass der Login immer über das Backend erfolgt, sodass eine
+mehrfache Anmeldung bzw. Registrierung nicht nötig ist.
+
+===== Abgelaufene Sitzung und Kontowechsel in der App
+
+Das Backend antwortet bei abgelaufenem Token mit HTTP 500 und dem Code
+`AUTH_NOT_AUTHORIZED`. `HttpAuthLink` erneuert das Token dann per Refresh-Token
+(`/api/auth/session/refresh`, `AuthSessionController`) und wiederholt die Anfrage. Ältere
+App-Versionen erneuern und widerrufen noch über `/api/auth/bundid/refresh` und `/revoke`, beide Pfade führen
+zu denselben Aktionen.
+
+BundID- und SMS-Anmeldungen erhalten beide ein starkes Token mit 15 Minuten Laufzeit
+(`AuthSession__StrongTokenLifetimeMinutes`) und ein Refresh-Token (Tabelle `RefreshTokens`,
+`RefreshTokenService`). Das Refresh-Token gilt 30 Tage (`AuthSession__RefreshTokenLifetimeDays`)
+und wird bei jedem Einlösen durch ein neues ersetzt (`ReplacedById`). Die früheren Schlüssel
+`BundId__StrongTokenLifetimeMinutes` und `BundId__RefreshTokenLifetimeDays` gelten weiter, wenn
+unter `AuthSession` nichts gesetzt ist.
+
+Jeder Widerruf hält seinen Grund fest (`RevokedReason`):
+
+* `Rotated`: eingelöst, `ReplacedById` zeigt auf den Nachfolger.
+* `SupersededByRetry`: Nachfolger, der durch eine Wiederholung nach verlorener Antwort ersetzt wurde.
+* `LoggedOut`: beim Abmelden, beim Abmelden auf allen Geräten, beim Ersetzen in der App oder bei einem
+  Nummernwechsel widerrufen.
+* `ReuseDetected`: durch eine erkannte Wiederverwendung gesperrt.
+* `AccountInvalid`: Konto gelöscht, SMS-Nummer nicht mehr bestätigt oder SMS-Sitzung eines inzwischen
+  mit BundID verknüpften Kontos.
+
+Geht die Antwort verloren, lässt sich ein `Rotated`-Token 15 Minuten lang erneut einlösen, solange
+sein Nachfolger unbenutzt ist; der Nachfolger wird dann `SupersededByRetry`. Wird ein
+`SupersededByRetry`-Token vorgelegt oder ein `Rotated`-Token, dessen Nachfolger schon benutzt
+wurde, ist das Diebstahl: Alle Sitzungen des Kontos auf allen Geräten enden, auch eine, die sich
+ein Angreifer über das Kulanzfenster geholt hat, und die alten, schon rotierten Tokens des Kontos
+gelten als `ReuseDetected`, damit ein einzelnes altes Token nicht jede spätere Anmeldung erneut
+beendet. Kommt ein `Rotated`-Token erst nach dem Kulanzfenster wieder, während sein Nachfolger noch
+unbenutzt ist, kann das auch die echte App nach einer verlorenen Antwort sein; dann endet nur diese
+eine Sitzung (das Token und seine Nachfolger). `LoggedOut`-, `ReuseDetected`- und
+`AccountInvalid`-Tokens werden nur abgelehnt.
+
+Beim Abmelden (`/api/auth/session/revoke`) werden das Token und alle seine Nachfolger widerrufen,
+andere Geräte desselben Kontos bleiben angemeldet. Erneuern, Abmelden und jede Stelle, die Sitzungen
+eines Kontos widerruft (Abmelden auf allen Geräten, Diebstahl, Nummernwechsel, Zusammenführen,
+BundID-Verknüpfung), nehmen dieselbe Sperre (`pg_advisory_xact_lock` pro Konto), damit ein Widerruf
+keinen gleichzeitig angelegten Nachfolger übersieht. Neue Anmeldungen per SMS oder BundID nehmen die
+Sperre nicht; eine Anmeldung, die gleichzeitig mit einem Widerruf fertig wird, verhält sich wie eine
+Anmeldung kurz danach. Die Kontolöschung löscht die Refresh-Tokens ohne diese Sperre; ein gleichzeitig
+erneuertes Token scheitert danach am gelöschten Konto.
+
+Pro Konto sind 20 Erneuerungen am Stück möglich, danach eine alle drei Minuten (HTTP 429 mit
+`Retry-After`). Unbekannte, abgelaufene und endgültig widerrufene Tokens werden vorher abgelehnt und
+belasten dieses Kontingent nicht; ein rotiertes Token eines inzwischen ungültigen Kontos wird beim
+ersten Vorlegen endgültig gesperrt. Tokens über 64 Zeichen lehnt `/refresh` mit HTTP 401 ab,
+`/revoke` mit HTTP 400.
+
+Jedes starke Zugangs-Token trägt die ID des Refresh-Tokens, mit dem es ausgestellt wurde
+(`auth_session`). Nach dem Abmelden eines einzelnen Geräts gilt ein schon ausgegebenes
+Zugangs-Token bis zu seinem Ablauf weiter (15 Minuten plus 5 Minuten Toleranz der
+JWT-Prüfung). Ein Nummernwechsel oder SMS-Schritt aus einer starken Sitzung, der Abruf der
+Schlüsselhinterlegung und `logoutAllDevices` verlangen deshalb, dass die Refresh-Kette dieses Tokens
+noch lebt (`RefreshTokenService.IsSessionActiveAsync`). Ein übrig gebliebenes Zugangs-Token kann so
+weder eine neue Sitzung erzeugen noch das Konto übernehmen.
+
+Die Spalte `Provider` legt fest, ob der Refresh ein BundID- oder ein SMS-Token ausstellt. Der Job
+`RefreshTokenCleanupJob` löscht stündlich abgelaufene Refresh-Tokens; widerrufene bleiben bis zu
+ihrem Ablauf erhalten, weil die Erkennung von Wiederverwendung sie braucht.
+
+Für ein mit BundID verknüpftes Konto belegt nur eine lebende BundID-Sitzung den Besitz. Ohne sie
+antwortet `requestSmsCode` mit `BUND_ID_LOGIN_REQUIRED`, bevor eine SMS verschickt wird, ein
+SMS-Schritt wird abgelehnt und die Schlüsselhinterlegung nicht herausgegeben. SMS-Sitzungen eines
+solchen Kontos enden beim nächsten Refresh (`AccountInvalid`) und werden beim Verknüpfen oder beim
+Zusammenführen in ein BundID-Konto sofort widerrufen. Ein SMS-Schritt in einer BundID-Sitzung
+(BundID-Onboarding, Nummer hinzufügen) stellt wieder eine BundID-Sitzung mit demselben
+Vertrauensniveau aus, auch wenn dabei Konten zusammengeführt werden.
+
+`/exchange` verknüpft eine neue BundID nur mit einem noch nicht bestätigten Konto. Ist das Konto
+schon bestätigt (bestätigte Nummer oder registriert), antwortet es mit
+`BUNDID_ACCOUNT_ALREADY_VERIFIED`, und die App bittet um die Anmeldung mit der Telefonnummer; sonst
+könnte jeder mit dem Gerätelogin eines bestätigten Kontos seine eigene BundID daran hängen. Zu einem
+bestätigten Konto kommt eine BundID nur über den SMS-Schritt einer BundID-Sitzung, also mit Besitz
+der Nummer. Gelöschte Konten lehnen `/exchange` und der BundID-Login ab.
+
+Beim Zusammenführen per SMS gibt das aufgelöste Konto seine Telefonnummer ab, damit die Nummer
+später nie wieder bei einem gelöschten Konto landet.
+
+In der App laufen Erneuern, Speichern einer Anmeldung, Verwerfen und Abmelden nacheinander
+(`app/lib/common/auth/strong_session.dart`). Hat ein anderer GraphQL-Client inzwischen eine neuere
+Sitzung gespeichert, übernimmt die App diese, statt erneut zu erneuern. Ein Refresh-Token geht nie
+zweimal gleichzeitig raus: Antwortet der Server nicht innerhalb von 15 Sekunden, wartet eine
+Wiederholung auf die noch laufende Anfrage, statt das Token ein zweites Mal zu schicken. Nur HTTP 401
+beendet die starke Sitzung; bei Netzwerkfehlern, Zeitüberschreitung und allen anderen Antworten
+bleiben die Tokens erhalten. Gehört die Sitzung zum Gerätekonto, arbeitet die App mit dem Weak Login
+weiter und versucht den Refresh vor späteren Anfragen erneut, zuerst nach 30 Sekunden, dann mit
+doppeltem Abstand bis höchstens 10 Minuten. Endet eine starke Sitzung, baut die App den Auth-Zustand
+neu auf und zeigt einen Hinweis.
+
+Ein reines SMS-Konto kann sich nach abgelaufener Sitzung mit seiner bestätigten Nummer
+erneut anmelden. `requestSmsCode` antwortet nur bei starker Sitzung mit
+`SAME_AS_CURRENT_PHONE_NUMBER`. Ersetzt ein Konto eine schon bestätigte Nummer, enden alle übrigen
+Sitzungen des Kontos sofort wie beim Abmelden auf allen Geräten; das Gerät, das die Nummer
+gewechselt hat, erhält ein neues Token mit dem neuen Zählerstand.
+
+Mit `logoutAllDevices` (Mein Konto, „Auf allen Geräten abmelden") beendet ein Nutzer alle Sitzungen
+des Kontos sofort. Dasselbe geschieht bei erkanntem Diebstahl und beim Nummernwechsel, alle drei
+laufen über `RefreshTokenService.EndAllSessionsAsync`:
+
+* Alle Refresh-Tokens des Kontos werden widerrufen (`LoggedOut`).
+* Der Zähler `SessionStamp` am Konto steigt um eins. Jedes Zugangs-Token eines Bürgers trägt den
+  Zählerstand, den sein Aussteller zusammen mit dem Konto gelesen hat (`session_stamp`, ohne den
+  Claim gilt 0); `AccessTokenRevocation` lehnt bei der JWT-Prüfung jedes Token mit anderem Stand ab,
+  auch schwache. Ein Login, der das Konto noch vor dem Abmelden gelesen hat, stellt damit kein
+  gültiges Token mehr aus. Das kostet eine Abfrage pro authentifizierter Anfrage. Den neuen Stand
+  liest `EndAllSessionsAsync` erst unter der Sperre des Kontos, damit zwei gleichzeitige Beendigungen
+  nicht denselben Stand schreiben.
+* Das Konto merkt sich den Zeitpunkt (`SessionsEndedAt`). BundID-Login und `/exchange` lehnen danach
+  jedes Keycloak-Token ab, dessen Anmeldung nicht später liegt (`auth_time`, ohne den Claim `iat`),
+  auch wenn das Token selbst frisch ist. Eine Keycloak-Sitzung von vorher reicht also nicht. Die App
+  verlangt deshalb bei jedem BundID-Login eine neue Anmeldung (`prompt=login`): Unter iOS hat die
+  flüchtige Browsersitzung ohnehin keine Keycloak-Sitzung, unter Android hält Chrome sie. Ob BundID
+  selbst dabei erneut nach dem Ausweis fragt, entscheidet BundID.
+* Der Gerätelogin gehört auf dem Gerät, das das Konto angelegt hat, zum Konto selbst. Sein Passwort
+  wird ersetzt, aber nur, wenn eine entschlüsselbare Schlüsselhinterlegung existiert
+  (`KeyEscrowService.ExistsAsync`, die Schlüsselversion muss konfiguriert sein). Ohne sie liegt der
+  private Schlüssel nur auf diesem Gerät; die Mutation antwortet dann `DEVICE_LOGIN_KEPT`, das Gerät
+  bleibt angemeldet und die App erklärt das. Ist das auslösende Gerät selbst dieses Gerät, meldet die
+  App einfach die Abmeldung.
+
+Lehnt das Backend den Gerätelogin ab (`WRONG_LOGIN`), löscht die App die Gerätezugangsdaten, sofern
+sie noch zu dieser Identität gehören, meldet das Sitzungsende und registriert eine neue anonyme
+Identität. Dabei entfernt sie vorbelegte Formularwerte und leert den persistenten GraphQL-Cache samt
+Abfrage-Snapshots; das Abmelden leert den Cache ebenso. Laufen Abmelden und eine solche Ablehnung
+gleichzeitig, teilen sie sich eine Registrierung. Daten, die auf einem Gerät offline liegen, erreicht
+das Backend nicht; deshalb rät der Bestätigungsdialog, vor der Weitergabe eines Geräts die App zu
+löschen. Push-Abonnements des Geräts bei Firebase bleiben bestehen.
+
+Fehlt der private Schlüssel, startet die App mit dem öffentlichen Schlüssel weiter.
+Absenden bleibt möglich, Fortsetzen begonnener Anträge und Profildaten nicht. Zur
+Wiederherstellung siehe Abschnitt Schlüsselhinterlegung.
+
+===== Weak Login in der App (Bürger)
+
+Für App-Nutzer erfolgt der Login automatisch und transparent im Hintergrund.
+Dazu wird nach erstem App-Start ein vorerst anonymes Nutzerkonto mit einem
+generierten Passwort erstellt, welches auf dem Gerät verschlüsselt (mittels
+`flutter_secure_storage`) und ohne weitere Eingabeaufforderung an das Backend
+übermittelt wird.

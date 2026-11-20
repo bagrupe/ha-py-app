@@ -1,0 +1,33 @@
+{
+  "RichTextBlock": {
+    "type": "object",
+    "properties": {
+      "content": {
+        "type": "array",
+        "items": {
+          "type": "any"
+        }
+      },
+      "id": {
+        "type": "string"
+      },
+      "blockName": {
+        "type": "string"
+      }
+    }
+  },
+  "ImageBlock": {
+    "type": "object",
+    "properties": {
+      "image": {
+        "type": "string"
+      },
+      "id": {
+        "type": "string"
+      },
+      "blockName": {
+        "type": "string"
+      }
+    }
+  }
+}

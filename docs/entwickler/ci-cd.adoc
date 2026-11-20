@@ -1,0 +1,511 @@
+==== Continuous Integration / Continuous Deployment (CI/CD)
+
+Der Entwicklungs- und Release-Prozess des Projekts setzt für Continuous
+Integration und Continuous Deployment die GitLab-eigene CI Funktionalität ein. 
+
+Die entsprechenden Pipelines für die automatisierte Qualitätssicherung, die
+Build-Prozesse sowie die Deployments werden über die modular strukturierte Datei
+`.gitlab-ci.yml` gesteuert. Mittels `include` ist diese Datei in
+unterschiedliche Module aufgeteilt, wiederverwendbare Job-Logik wird über
+`extends` eingebunden.
+
+Die Pipeline setzt sich aus den folgenden `Stages` zusammen, die sequenziell
+durchlaufen werden.
+
+[cols="~,~"]
+|===
+| Stage
+| Beschreibung
+
+| `sast`
+| Statische Codeanalysen (Security/Static Application Security Testing).
+
+| `generate`
+| Automatisierte Code-Generierung, z.B. aus GraphQL-Schemata.
+
+| `lint`
+| Formatierung und Linting in allen Bereichen.
+
+| `test`
+| Ausführung von Unit- und Integrationstests.
+
+| `build`
+| Kompilierung und Build-Prozesse, z.B. Flutter-App oder Backend-Binaries.
+
+| `package`
+| Erstellung von Docker-Images für das Backend und das Backoffice.
+
+| `e2e`
+| End-to-End-Tests zur Validierung gesamter Anwendungspfade.
+
+| `deploy`
+| Automatisiertes Deployment auf verschiedene Umgebungen.
+|===
+
+===== Deployment: Monitoring
+
+Neben der Anwendung existiert ein separater Monitoring-Stack auf einer
+dedizierten VM sowie Monitoring-Agenten auf jeder App-VM. Technische Details,
+Health-Endpunkte und Architektur: <<Monitoring und Observability,Monitoring>>.
+
+[cols="~,~"]
+|===
+| CI-Job | Beschreibung
+
+| `monitoring:deploy`
+| Kopiert `monitoring/` auf die Monitoring-VM und startet den Stack
+  (Prometheus, Pushgateway, Blackbox, Grafana, TLS-Proxy). GitLab-Umgebung
+  `monitoring`. Manuell; bei Änderungen unter `monitoring/**/*`.
+
+| `monitoring:stop`
+| Stoppt den Monitoring-Stack auf der Monitoring-VM.
+
+| `monitoring-agents-deploy`
+| Deployt cAdvisor, Postgres Exporter und MongoDB Exporter auf die App-VM der
+  gewählten Umgebung (`$TARGET_ENV`). Legt Monitoring-DB-Nutzer an
+  (`scripts/ensure-monitoring-db-users.sh`). Manuell; bei Änderungen unter
+  `monitoring/agents/**/*`.
+
+| `monitoring-agents-stop`
+| Stoppt die Monitoring-Agenten auf der App-VM.
+|===
+
+Nach einem Agenten-Deploy sollte `monitoring:deploy` erneut ausgeführt werden,
+damit Prometheus aktualisierte Scrape-Targets übernimmt.
+
+===== Docker Container-Images
+Die im Projekt verwendeten Container-Images werden im Rahmen der CI-Pipeline
+erzeugt (Stages `build` und `package`) und anschließend in der GitLab Container
+Registry abgelegt. Die drei Hauptbestandteile der Anwendung sind in folgende Images
+eingegliedert:
+
+- `kommunalapp/web-bereich-a` (Backoffice)
+
+- `kommunalapp/web-bereich-b` (Inhaltspflege)
+
+- `kommunalapp/backend` (Backend)
+
+Darüber hinaus existieren für die Review Apps folgende Images, die
+ausschließlich zur Vorschau der UI-Komponenten dienen.
+
+- `kommunalapp/web-storybook` (Web-basierte UI-Komponenten)
+
+Die Versionierung der Images erfolgt abhängig von der Zielumgebung:
+Für Produktions-Deployments werden die git-Tags des Repositories (z.B. `v1.0.0`)
+als Image-Tags verwendet. Builds aus dem `develop`-Branch erhalten ein Tag
+bestehend aus dem Branch-Namen und dem verkürzten Commit-Hash (z.B.
+`develop-a1b2c3d`). Feature-Branch-Images werden anhand des CI-internen und
+selbstbeschreibenden Ref-Slugs gekennzeichnet (z.B.
+`123---wetterdaten-in-der-app`).
+
+===== Kaniko
+In den Build-Jobs für die Web-basierten Teilbereiche (Backoffice und
+Inhaltspflege) kommt aktuell Kaniko zum Einsatz. Kaniko hat den Vorteil,
+dass es rootless und ohne Docker-Daemon, d.h. direkt in einem Gitlab-CI Job
+ausgeführt werden kann. Jedoch wird das Projekt nicht mehr gewartet und sollte
+daher durch eine alternative Lösung wie etwa Buildah oder Buildkit ersetzt
+werden.
+
+===== Deployment: Review Apps
+Review Apps stellen isolierte Test-Umgebungen dar, die bei Code Reviews
+und der Vorführung neuer Features unterstützen sollen.
+
+Eine Review App wird automatisch für jeden Feature- und Integration Branch
+eingerichtet und nach Abschluss des entsprechenden Features wieder entfernt.
+Die Review Apps werden über per Kubernetes-Cluster bereitgestellt , in das ein
+vollständiges Deployment der Anwendung mit Helm-Templates und Images aus der
+jeweiligen Build-Pipeline des letzten Commits im Branch eingespielt wird.  Alle
+dafür benötigten Konfigurationsdateien sind im Repository hinterlegt
+(Verzeichnis `k8s`).
+
+===== Deployment: Docker auf Staging und Production
+Das Deployment in den Umgebungen `Staging` und `Produktion` der
+containerisierten Dienste erfolgt über Docker Compose.  Ausgeführt wird dies
+direkt durch GitLab CI Runner, die auf den Zielsystemen installiert sind und im
+`shell`-Modus betrieben werden. Die Auswahl des entsprechenden Runners erfolgt
+dabei über CI-spezifische Tags (z.B. `staging` oder `production`). Dabei wird
+eine Vorlage aus dem Repository (`docker-compose.(production|staging).yml`) auf
+das Zielsystem kopiert, die Image-Tags des aktuellen Release eingetragen und
+alle laufenden Dienste aktualisiert. Es kommt dabei zu einer kurzfristigen
+Downtime bis die Dienste wieder gestartet wurden.
+
+Obwohl ein vollautomatisches Deployment auf diesem Wege möglich wäre, findet
+der Prozess aktuell nur unter Aufsicht statt, d.h. ein manuelles Anstoßen
+der Deployment-Jobs in GitLab ist notwendig.
+
+Ein unmittelbarer Rollback ist derzeit nur manuell möglich, indem in der
+Docker-Compose-Datei auf dem Server ein vorheriges Image-Tag eingetragen und der
+betroffene Dienst neu gestartet wird. Falls möglich, sollte ein Hotfix oder ein
+Revert-Commit nach der üblichen Vorgehensweise als getaggter Release eingespielt
+werden (Roll-Forward).
+
+===== Datenbank: Migration zwischen Umgebungen (CI)
+
+Über den GitLab-Menüpunkt *CI/CD* → *Pipelines* → *Run pipeline* kann der Job
+`db:migration` gestartet werden (Konfiguration `ci/migration.gitlab-ci.yml`).
+Damit werden Datenbank-Dumps aus den Artefakten eines erfolgreichen
+`backup:<Quellumgebung>`-Jobs auf den Zielserver kopiert und dort eingespielt.
+
+Als Eingaben stehen u.a. die Quell- und Zielumgebung sowie `backup_date`:
+entweder `latest` oder ein Datum `YYYY-MM-DD` (UTC-Kalendertag des
+Backup-Jobs). Nur Backups der letzten **fünf** Tage sind wählbar, passend zur
+Artefakt-Aufbewahrung der Backup-Jobs (`expire_in: 5d`).
+
+Technische Details und Tabellen der Pipeline-Inputs: `ci/README.md` (Abschnitt
+*Database migration between environments*).
+
+===== Deployment-Prozess: Mobile Apps
+Die mobilen Anwendungen werden innerhalb der GitLab CI ebenfalls automatisiert
+gebaut. Während Android-Builds auf einem regulären Linux-Runner erfolgen, ist
+für den iOS-Build ein Mac-basierter Runner erforderlich. Dieser wird durch
+einen spezifischen Tag im CI-Job ausgewählt. Der Release der Apps in den
+Google Play Store und den Apple App Store erfolgt anschließend automatisiert
+über Fastlane.
+
+Hinweis: für den Upload in die Stores ist nicht der Versionsstring
+(z.B. `1.0.0`) sondern eine eindeutige und hochzählende Build-Nummer der App
+ausschlaggebend. Fastlane passt die Build-Nummer automatisch an; sie wird daher
+nicht im Repository verwaltet.
+
+===== Secrets
+Vertrauliche Informationen wie Zugangsdaten und API-Schlüssel sind in GitLab
+als CI-Variablen hinterlegt, wo sie für die Review Apps verwendet werden. Für
+den Betrieb in Staging und Production werden Konfigurationen während des
+Deployment-Prozesses aus den CI-Variablen in dienstspezifische `.env`-Dateien auf
+dem Zielsystem geschrieben.
+
+**Übersicht der CI-Variablen**
+
+Beim Deployment der jeweiligen Umgebung (`Staging`, `Produktion` und auch
+`Review Apps`) werden die folgenden Konfigurationen, auch `secrets` genannt, für
+die jeweilige Umgebung oder CI-Job bereitgestellt. Die Tabelle zeigt welchen Typ
+die jeweilige Variable hat und in welcher Umgebung sie eingesetzt wird.
+
+[cols="~,~,~,~"]
+
+|===
+| Key
+| Typ
+| Benötigt für
+| Beschreibung
+
+| `BACKEND_ENV`
+| File
+| Review Apps
+| Umgebungsvariablen für das Backend
+
+| `BEREICH_B_ENV`
+| File
+| Review Apps
+| Umgebungsvariablen für die Inhaltspflege
+
+| `FASTLANE_ANDROID_JSON_KEY_FILE`
+| File
+| Play Store
+| Schlüsselspeicher für die Signierung der App für den Google Play Store
+
+| `FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD`
+| Value
+| App Store
+| Anwendungsspezifisches Passwort für den 2FA-aktivierten Upload in App Store
+  Connect
+
+| `FCM_CREDENTIALS_JSON`
+| File
+| Review Apps
+| Konfigurationsdatei für Firebase Cloud Messaging (Push-Notifications)
+
+| `KUBECONFIG`
+| File
+| Review Apps
+| Konfigurationsdatei für den Zugriff auf ein Kubernetes Cluster
+
+| `MONGO_ENV`
+| File
+| Review Apps
+| Umgebungsvariablen für MongoDB
+
+| `PLAY_STORE_UPLOAD_KEY`
+| Value
+| Play Store
+| Schlüsselspeicher (base64-kodiert)
+
+| `PLAY_STORE_UPLOAD_KEY_PROPERTIES`
+| File
+| Play Store
+| Metadaten für den Schlüsselspeicher (enthält `storePassword`, `keyPassword`, `keyAlias` und `storeFile`)
+
+| `PROD_BACKEND_ENV`
+| File
+| Production
+| Umgebungsvariablen für das Backend
+
+| `PROD_BEREICH_B_ENV`
+| File
+| Production
+| Umgebungsvariablen für die Inhaltspflege
+
+| `PROD_MONGO_ENV`
+| File
+| Production
+| Umgebungsvariablen für MongoDB
+
+| `PROD_POSTGRES_ENV`
+| File
+| Production
+| Umgebungsvariablen für PostgreSQL
+
+| `SENTRY_AUTH_TOKEN`
+| Value
+| Production
+| Auth-Token für Sentry
+
+| `STAGING_ENV`
+| File
+| Staging
+| Kombinierte Umgebungsvariablen für das Staging-System
+
+| `MONITORING_ENV_FILE`
+| File
+| Monitoring-VM; App-Umgebungen (Exporter)
+| Umgebungsvariablen für den Monitoring-Stack (`GF_*`, Probe-Ziele, SMTP) bzw.
+  Exporter-Verbindungsstrings auf App-VMs (`POSTGRES_EXPORTER_DATA_SOURCE_NAME`,
+  `MONGODB_EXPORTER_URI`). Scoped je nach Kontext auf `monitoring` oder
+  `staging`/`preprod`/`production`.
+
+|===
+
+===== Umgebungsvariablen: Backend
+
+Hinweis: in den Umgebungsvariablen des Backends wird Groß-/Kleinschreibung der
+Schlüssel nicht beachtet.
+
+[cols="~,~"]
+
+|===
+| Key
+| Beschreibung
+
+| `AllowedHosts`
+| Hosts, die vom Server bedient werden (oder Wildcard "*")
+
+| `ConnectionStrings__Domain`
+| Verbindungs- und Zugangsdaten für die Postgres-Datenbank. Format: `Server=postgres;Port=5432;Database=domain;UserId=domain;Password=<PASSWORT>;Enlist=false`
+
+| `ConnectionStrings__Archive`
+| Verbindungs- und Zugangsdaten für die Archiv-Postgres-Datenbank (Antragsarchivierung). Format: `Server=postgres-archive;Port=5432;Database=archive;UserId=archive;Password=<PASSWORT>;Enlist=false`
+
+| `Environment__Name`
+| Name der Umgebung (z.B. "Staging" oder "Production")
+
+| `JWT__Issuer`
+| Issuer (`iss`) Claim der ausgestellten JWTs
+
+| `Ehrenamtsbank__ACCEPT_MASTER_CODE`
+| Akzeptiert den festen SMS-Code `123456`. Standard ist `false`. Nur in Testumgebungen auf `true` setzen, nie in Produktion
+
+| `KeyEscrow__CurrentVersion`
+| Pflicht. Version des Schlüssels, mit dem neue Schlüsselhinterlegungen verschlüsselt werden, z.B. `1`
+
+| `KeyEscrow__Keys__<Version>`
+| Pflicht. Je Umgebung eigener Zufallsschlüssel (32 Byte, Base64), erzeugt mit `openssl rand -base64 32`. Fehlt er, startet das Backend nicht. Geheim halten, getrennt sichern und nie entfernen, solange Einträge diese Version nutzen, siehe Abschnitt Ende-zu-Ende-Verschlüsselung
+
+| `PmPayment__Url`
+| URL der pmPayment-API, z.B. `+https://payment-test.govconnect.de+`
+
+| `PmPayment__AGS`
+| Konfiguration des Mandanten in pmPayment
+
+| `PmPayment__Procedure`
+| Bezeichnung des Zahlungsverfahrens in pmPayment
+
+| `PmPayment__Salt`
+| Salt für die Verschlüsselung in pmPayment
+
+| `PmPayment__NotificationUrl`
+| Webhook-URL für Vorgangs-Updates aus pmPayment (`+https://<BASEURL>/api/PmPaymentNotification+`)
+
+| `GovManager__RestUrl`
+| URL der GovManager REST-API (z.B. `+https://govmanager.govconnect.de/rest/public/lieferungen/public/upload/<vorgangs-typ>?mandant=<mandanten-schluessel>&vorgang=<vorgang-schluessel>+`; die Platzhalter werden automatisch vom Backend ersetzt)
+
+| `GovManager__Username`
+| GovManager Zugangsdaten
+
+| `GovManager__Password`
+| GovManager Zugangsdaten
+
+| `GovManager__ResponseKey`
+| GovManager Zugangsdaten (UUID)
+
+| `DataSeeder__Enabled`
+| Seeden von Initialdaten erlauben (für Staging und Production `false`)
+
+| `DataSeeder__LageHelferEnabled`
+| Seeden des LageHelfer-Mandanten KRL (Standard `false`; Struktur auch in Production, Demo-Nutzer nur außerhalb Production). Unabhängig von `DataSeeder__Enabled`
+
+| `DataSeeder__LageHelferSeedPath`
+| Verzeichnis mit LageHelfer-Seed-Dateien (mindestens `seed.json` und `flaechen.geojson`). Deployment setzt bei aktivem LageHelfer-Seed `/opt/lagehelfer-seed` (alle Dateien der neuesten Version des Generic Packages `krl-seeding-data`, anhand `created_at`).
+
+| `DataSeeder__LageHelferKeyEncryptionKey`
+| Base64-AES-Schlüssel für den privaten Kommunen-Schlüssel des Mandanten
+
+| `BereichB__InternalApiUrl`
+| URL des Auth-Backchannels für die Inhaltspflege (`+http://bereich-b:3000/internal/+`)
+
+| `BereichB__InternalApiSecret`
+| Gemeinsames Geheimnis für den Auth-Backchannel; wird als Header `x-internal-api-secret` an die Inhaltspflege gesendet (Gegenstück zu `INTERNAL_API_SECRET`)
+
+| `BereichB__SuperAdminApiKey`
+| API-Key eines aktivierten Super-Admins für die Kommunikationen des Backends mit der Inhaltspflege
+
+| `Gotenberg__Url`
+| URL des Gotenberg-Dienstes (`+http://gotenberg:3000+`)
+
+| `Web__BaseUrl`
+| Öffentlich zugängliche Basis-URL des Backoffice
+
+| `EMail__Host`
+| Host des SMTP-Servers
+
+| `EMail__Port`
+| Port des SMTP-Servers
+
+| `EMail__User`
+| Nutzername des Zugangs auf den SMTP-Server
+
+| `EMail__Password`
+| Passwort des Zugangs auf den SMTP-Server
+
+| `EMail__EnableSsl`
+| `true` oder `false` (letzteres wenn der Mailpit-Dienst verwendet wird)
+
+| `EMail__From`
+| E-Mail-Adresse des Absenders in automatisierten E-Mails
+
+| `EMail__FromDisplayName`
+| Angezeigter Name des Absenders in automatisierten E-Mails
+
+|===
+
+===== Umgebungsvariablen: Inhaltspflege
+
+[cols="~,~"]
+
+|===
+
+| `ENABLE_DATASEEDER`
+| Seeden von Initialdaten erlauben (für Staging und Production `false`)
+
+| `ENABLE_LAGEHELFER_SEED`
+| Anlegen der LageHelfer-Kommune in der Inhaltspflege (Standard `false`; Staging). Unabhängig von `ENABLE_DATASEEDER`
+
+| `LAGEHELFER_KOMMUNE_ID`
+| Entspricht `kommune.id` in `seed.json` / `bereichAId` in der Kommune
+
+| `LAGEHELFER_KOMMUNE_NAME`
+| Anzeigename der Kommune in der Inhaltspflege
+
+| `LAGEHELFER_REGIONALSCHLUESSEL`
+| Optional (Standard `03252` für KRL)
+
+| `LAGEHELFER_DEFAULT_POSITION`
+| Optional, `lat,lon` für `defaultPosition`
+
+| `HAPY_SENSOREN_POSTGREST_TABLE`
+| Bezeichnung der Sensordaten-Tabelle
+
+| `HAPY_SENSOREN_POSTGREST_TOKEN`
+| Zugang zu Sensordaten
+
+| `HAPY_SENSOREN_POSTGREST_URL`
+| URL der Sensordaten-API
+
+| `HAPY_SENSOREN_SYNC_WINDOW_HOURS`
+| Zeitfenster in Stunden, aus dem der stündliche Sensor-Metadaten-Abgleich neue Felder liest (Standard `6`)
+
+| `IKISS_HAPY_USERNAME`
+| Zugang zur iKISS API
+
+| `IKISS_HAPY_PASSWORD`
+| Zugang zur iKISS API
+
+| `MAPBOX_TOKEN`
+| Zugang zur Mapbox API
+
+| `DATABASE_URL`
+| Vollständige MongoDB-Verbindungs-URI inklusive Zugangsdaten (`+mongodb://<user>:<pass>@mongodb:27017/bereich-b?authSource=admin+`). Ersetzt die früheren Variablen `MONGODB_URI`, `MONGODB_USERNAME` und `MONGODB_PASSWORD`.
+
+| `NOLIS_HAPY_TOKEN`
+| Zugang zur NOLIS API
+
+| `OPENWEATHER_API_KEY`
+| Zugang zur OpenWeather API
+
+| `PAYLOAD_API_KEY`
+| API-Key des Super-Admins (identisch zu `BereichB__SuperAdminApiKey` im Backend)
+
+| `NEXT_PUBLIC_SERVER_URL`
+| Öffentlich zugängliche Basis-URL des Backoffice (zur Build-Zeit in den Client-Code eingebettet). Ersetzt `PAYLOAD_PUBLIC_SERVER_URL`.
+
+| `INTERNAL_API_SECRET`
+| Gemeinsames Geheimnis für die internen Routen (`/internal/*`); Gegenstück zu `BereichB__InternalApiSecret` im Backend
+
+| `PAYLOAD_SECRET`
+| Secret zur Signierung von JWTs
+
+| `VERANSTALTUNGEN_HAPY_DEST_ONE_KEY`
+| Zugang zur Destination.One API
+
+|===
+
+===== Umgebungsvariablen: Postgres
+
+Die Deployment-`docker-compose.yml` startet zwei Postgres-Container: `postgres`
+(Domain-Datenbank) und `postgres-archive` (Archiv-Datenbank für archivierte
+Anträge). Jeder Container erhält nur seine Postgres-Initialisierungsvariablen aus
+der `.env` (`POSTGRES_USER`/`POSTGRES_PASSWORD`/`POSTGRES_DB` bzw.
+`POSTGRES_ARCHIVE_USER`/`POSTGRES_ARCHIVE_PASSWORD`; Archiv-DB heißt immer
+`archive`). Der Anwendungszugriff erfolgt über die Connection-Strings im Backend
+(`ConnectionStrings__Domain` bzw. `ConnectionStrings__Archive`); das Passwort in
+`ConnectionStrings__Archive` muss zum Archiv-DB-Nutzer passen.
+
+[cols="~,~"]
+
+|===
+
+| `POSTGRES_USER`
+| Nutzername des Domain-Postgres-Containers
+
+| `POSTGRES_PASSWORD`
+| Passwort des Domain-Postgres-Containers
+
+| `POSTGRES_DB`
+| Name der Domain-Datenbank (Standard in Compose: `domain`)
+
+| `POSTGRES_ARCHIVE_USER`
+| Nutzername des Archiv-Postgres-Containers
+
+| `POSTGRES_ARCHIVE_PASSWORD`
+| Passwort des Archiv-Postgres-Containers
+
+| `POSTGRES_MONITORING_PASSWORD`
+| Passwort des read-only Postgres-Nutzers `monitoring` (für Postgres Exporter)
+
+|===
+
+===== Umgebungsvariablen: MongoDB
+
+[cols="~,~"]
+
+|===
+
+| `MONGO_INITDB_ROOT_USERNAME`
+| Nutzername des MongoDB-Nutzers
+
+| `MONGO_INITDB_ROOT_PASSWORD`
+| Passwort des MongoDB-Nutzers
+
+| `MONGO_MONITORING_PASSWORD`
+| Passwort des read-only MongoDB-Nutzers `monitoring` (für MongoDB Exporter)
+
+|===

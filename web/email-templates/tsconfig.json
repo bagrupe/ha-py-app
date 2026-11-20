@@ -1,0 +1,8 @@
+{
+  "extends": "@kommunal/tsconfig/react-app.json",
+  "compilerOptions": {
+    "allowImportingTsExtensions": true,
+    "baseUrl": "./",
+    "types": ["node", "react", "react-dom"]
+  }
+}

@@ -1,0 +1,37 @@
+.dotnet-build:
+  needs: []
+  stage: build
+  image: mcr.microsoft.com/dotnet/sdk:8.0
+  before_script:
+    - mkdir -p /opt/caching/dotnet-packages
+    - cd backend
+    - >
+      function restore_and_publish() {
+        dotnet restore $1 --packages /opt/caching/dotnet-packages
+        dotnet publish $1 -c Release -o out /p:InformationalVersion=$CI_COMMIT_REF_SLUG /p:Description=$SENTRY_ENVIRONMENT --no-restore
+      }
+  artifacts:
+    paths:
+      - backend/out
+
+.csharp-test:
+  stage: test
+  needs: []
+  image: mcr.microsoft.com/dotnet/sdk:8.0
+  interruptible: true
+  artifacts:
+    when: always
+    expire_in: 1 hr
+    paths:
+      - ./**/*test-result.xml
+      - ./**/coverage.cobertura.xml
+    reports:
+      junit:
+        - ./**/*test-result.xml
+      coverage_report:
+        coverage_format: cobertura
+        path: backend/artifacts/cobertura/*/coverage.cobertura.xml
+  rules:
+    - if: $TARGET_ENV == "feature"
+      changes:
+        - "backend/**/*"

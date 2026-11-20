@@ -1,0 +1,67 @@
+= Deeplinks Dokumentation
+:toc:
+
+== Unterstützte Domains (Hosts) je Umgebung
+
+Je nach Build-Variante bzw. Umgebung werden folgende Domains verwendet:
+
+* *Production:* `app.example.invalid`
+* *Pre-Production:* `app.example.invalid`
+* *Staging:* `app.example.invalid`
+
+== Protokolle (Schemes) & Pfad-Präfix
+
+* *Schemes:* `https` und `http`
+* *Pfad-Präfix:* `/deeplinks` (zwingend erforderlich, definiert in `AndroidManifest.xml` und `deeplinks.dart`)
+
+== Verfügbare Deeplink-Routen
+
+Die Routen sind in `lib/routes/deeplinks/deeplinks.dart` definiert:
+
+=== 1. Antragsfortsetzung (`ausfuehrungContinue`)
+
+Leitet den Benutzer direkt zur Fortsetzung eines Online-Antrags weiter.
+
+* *Pfad-Muster:* `/deeplinks/ausfuehrungContinue/:id`
+* *Beispiel (Prod):* `https://app.example.invalid/deeplinks/ausfuehrungContinue/deine-antrags-id`
+* *Verhalten:* Versucht den Status der Ausführung zu laden. Wenn erfolgreich, Weiterleitung zu `/antraege/schritt`, andernfalls zu `/not_found/error`.
+
+=== 2. Antragsdetail (`antraege/detail`)
+
+Leitet den Benutzer zur Detailansicht eines Antrags weiter.
+
+* *Pfad-Muster:* `/deeplinks/antraege/detail/:id`
+* *Beispiel (Prod):* `https://app.example.invalid/deeplinks/antraege/detail/deine-antrags-id`
+* *Verhalten:* Weiterleitung zu `/antraege/detail/:id`. Die Detailseite lädt den Antrag anhand der ID über GraphQL.
+
+=== 3. Terminweiterleitung (`termine`)
+
+Leitet den Benutzer zu einem spezifischen Veranstaltungstermin weiter.
+
+* *Pfad-Muster:* `/deeplinks/termine/:id/:date`
+* *Beispiel (Prod):* `https://app.example.invalid/deeplinks/termine/event-id-123/2026-06-23T10:00:00`
+* *Verhalten:* Ruft über GraphQL den Termin ab und leitet anschließend auf die Detailseite des Termins (`/termine/:id`) weiter.
+
+=== 4. Ehrenamtsdatenbank (`ehrenamtsdatenbank`)
+
+Leitet den Benutzer in die Ehrenamtsdatenbank weiter.
+
+* *Pfad-Muster:* `/deeplinks/ehrenamtsdatenbank`
+* *Beispiel (Prod):* `https://app.example.invalid/deeplinks/ehrenamtsdatenbank`
+* *Verhalten:* Weiterleitung zu `/ehrenamtsdatenbank` (Vorschau).
+
+=== 5. News (`aktuelles/news`)
+
+Leitet den Benutzer zur News-Übersicht oder zu einem einzelnen News-Artikel weiter.
+
+==== News-Übersicht
+
+* *Pfad-Muster:* `/deeplinks/aktuelles/news`
+* *Beispiel (Prod):* `https://app.example.invalid/deeplinks/aktuelles/news`
+* *Verhalten:* Weiterleitung zu `/aktuelles/news`.
+
+==== News-Artikel
+
+* *Pfad-Muster:* `/deeplinks/aktuelles/news/:id`
+* *Beispiel (Prod):* `https://app.example.invalid/deeplinks/aktuelles/news/abc123`
+* *Verhalten:* Weiterleitung zu `/aktuelles/news/:id`. Die Detailseite lädt den Artikel anhand der ID über GraphQL.

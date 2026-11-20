@@ -1,0 +1,30 @@
+{
+  "sort": {
+    "name": "sort",
+    "in": "query",
+    "description": "Sort by field (use prefix `-` for descending sort)",
+    "required": false,
+    "type": "string"
+  },
+  "limit": {
+    "name": "limit",
+    "in": "query",
+    "description": "Limit the returned documents to a certain number",
+    "required": false,
+    "type": "number"
+  },
+  "page": {
+    "name": "page",
+    "in": "query",
+    "description": "Get a specific page of documents",
+    "required": false,
+    "type": "number"
+  },
+  "where": {
+    "name": "where",
+    "in": "query",
+    "description": "Constrain returned documents on certain fields (e.g.: `where[date][less_than_equal]=2023-12-24T00:00:00Z`)",
+    "required": false,
+    "type": "string"
+  }
+}

@@ -1,0 +1,192 @@
+spec:
+  inputs:
+    source_environment:
+      type: string
+      options:
+        - staging
+        - preprod
+        - production
+    destination_environment:
+      type: string
+      options:
+        - staging
+        - preprod
+    backup_date:
+      type: string
+      default: latest
+      description: 'latest, or YYYY-MM-DD (UTC day of backup job; must be within last 5 days).'
+---
+include:
+  - local: "/ci/colors.yml"
+  - local: "ci/template.gitlab-ci.yml"
+
+db:migration:
+  stage: deploy
+  extends:
+    - .ssh-connection
+  environment:
+    name: $[[ inputs.destination_environment ]]
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "web"
+      when: always
+    - when: never
+  script:
+    - |
+      set -e
+
+      # Error handling function
+      error_handler() {
+        local exit_code=$?
+        local line_number=$1
+        echo -e "${RED}--------------------------------------------------------------------------------------------------------------------------"
+        echo -e "❌ ERROR: Command failed at line $line_number with exit code $exit_code"
+        echo -e "Context:"
+        echo -e "  Source Env:      $[[ inputs.source_environment ]]"
+        echo -e "  Destination Env: $[[ inputs.destination_environment ]]"
+        echo -e "  Backup date:     $[[ inputs.backup_date ]]"
+        echo -e "  Job ID:          ${JOB_ID:-N/A}"
+        echo -e "  Project ID:      $CI_PROJECT_ID"
+        echo -e "--------------------------------------------------------------------------------------------------------------------------${RESET}"
+        exit $exit_code
+      }
+
+      trap 'error_handler $LINENO' ERR
+
+      echo -e "${BLUE}--------------------------------------------------------------------------------------------------------------------------"
+      echo -e "🚀 Starting Database Migration"
+      echo -e "Source Environment      $[[ inputs.source_environment ]]"
+      echo -e "Destination Environment $[[ inputs.destination_environment ]]"
+      echo -e "Backup date             $[[ inputs.backup_date ]]"
+      echo -e "--------------------------------------------------------------------------------------------------------------------------${RESET}"
+
+      # Install curl and jq for API interaction
+      echo "📦 Installing dependencies..."
+      apk add --no-cache curl jq 2>&1
+
+      # Determine the job name to download
+      SOURCE_JOB="backup:$[[ inputs.source_environment ]]"
+
+      mkdir -p ./database_dumps/
+
+      BACKUP_DATE_RAW="$[[ inputs.backup_date ]]"
+      BACKUP_DATE=$(printf '%s' "$BACKUP_DATE_RAW" | tr '[:upper:]' '[:lower:]' | tr -d '[:space:]')
+      [ -z "$BACKUP_DATE" ] && BACKUP_DATE="latest"
+
+      if [ "$BACKUP_DATE" != "latest" ]; then
+        if ! echo "$BACKUP_DATE" | grep -Eq '^[0-9]{4}-[0-9]{2}-[0-9]{2}$'; then
+          echo "❌ backup_date must be 'latest' or YYYY-MM-DD (UTC)."
+          exit 1
+        fi
+        MIN_DATE=$(date -u -d "@$(($(date +%s) - 432000))" +%Y-%m-%d)
+        MAX_DATE=$(date -u +%Y-%m-%d)
+        if [ "$BACKUP_DATE" \< "$MIN_DATE" ] || [ "$BACKUP_DATE" \> "$MAX_DATE" ]; then
+          echo "❌ backup_date must be between $MIN_DATE and $MAX_DATE (UTC), inclusive (5-day artifact window)."
+          exit 1
+        fi
+      fi
+
+      echo "🔍 Searching for successful artifact from $SOURCE_JOB (selection: $BACKUP_DATE)..."
+
+      # 5 days = 432000s, aligned with backup job artifact expire_in
+      THRESHOLD_DATE=$(date -u -d "@$(($(date +%s) - 432000))" +%Y-%m-%dT%H:%M:%SZ)
+      echo "📅 Including jobs with created_at >= $THRESHOLD_DATE (5-day window)..."
+
+      # Merge via temp files — passing large JSON in env/--argjson exceeds ARG_MAX ("Argument list too long").
+      JOBS_TMP=$(mktemp -d)
+      trap 'rm -rf "$JOBS_TMP"' EXIT
+      MERGED_JSON="$JOBS_TMP/merged.json"
+      PAGE_JSON="$JOBS_TMP/page.json"
+      echo '[]' >"$MERGED_JSON"
+
+      PAGE=1
+      while [ "$PAGE" -le 10 ]; do
+        echo "🔍 Fetching page $PAGE..."
+        curl -s --fail --silent --header "JOB-TOKEN: $CI_JOB_TOKEN" \
+          "$CI_API_V4_URL/projects/$CI_PROJECT_ID/jobs?scope=success&per_page=100&page=$PAGE" \
+          -o "$PAGE_JSON"
+
+        if [ "$(jq 'length' "$PAGE_JSON")" -eq 0 ]; then
+          echo "⚠️ No more jobs found."
+          break
+        fi
+
+        jq -s '.[0] + .[1]' "$MERGED_JSON" "$PAGE_JSON" >"$JOBS_TMP/new.json"
+        mv "$JOBS_TMP/new.json" "$MERGED_JSON"
+
+        OLDEST_JOB_DATE=$(jq -r '.[-1].created_at' "$PAGE_JSON")
+        if [ "$OLDEST_JOB_DATE" \< "$THRESHOLD_DATE" ]; then
+          echo "⏱️ Reached jobs older than 5-day window ($OLDEST_JOB_DATE). Stopping pagination."
+          break
+        fi
+
+        PAGE=$((PAGE + 1))
+      done
+
+      if [ "$PAGE" -gt 10 ]; then
+        echo "⚠️ Reached maximum page limit (10)."
+      fi
+
+      IN_WINDOW_JSON="$JOBS_TMP/in_window.json"
+      MATCHING_JSON="$JOBS_TMP/matching.json"
+      jq --arg t "$THRESHOLD_DATE" '[.[] | select(.created_at >= $t)]' "$MERGED_JSON" >"$IN_WINDOW_JSON"
+      jq --arg p "$SOURCE_JOB" '[.[] | select(.name | startswith($p))]' "$IN_WINDOW_JSON" >"$MATCHING_JSON"
+
+      if [ "$BACKUP_DATE" = "latest" ]; then
+        JOB_ID=$(jq -r 'if length == 0 then empty else (max_by(.created_at) | .id | tostring) end' "$MATCHING_JSON")
+      else
+        JOB_ID=$(jq -r --arg d "$BACKUP_DATE" '
+          [.[] | select((.created_at | split("T")[0]) == $d)]
+          | if length == 0 then empty else (max_by(.created_at) | .id | tostring) end
+        ' "$MATCHING_JSON")
+      fi
+
+      if [ -z "$JOB_ID" ] || [ "$JOB_ID" = "null" ]; then
+        echo "❌ Error: Could not find a successful $SOURCE_JOB job in the 5-day window"
+        if [ "$BACKUP_DATE" != "latest" ]; then
+          SEEN=$(jq -r '[.[].created_at | split("T")[0]] | unique | join(", ")' "$MATCHING_JSON")
+          if [ -n "$SEEN" ] && [ "$SEEN" != "null" ]; then
+            echo "   Backup job calendar days (UTC) in window: $SEEN"
+          fi
+        fi
+        exit 1
+      fi
+
+      rm -rf "$JOBS_TMP"
+      trap - EXIT
+
+      echo "✅ Selected Job ID: $JOB_ID"
+      DOWNLOAD_URL="$CI_API_V4_URL/projects/$CI_PROJECT_ID/jobs/$JOB_ID/artifacts"
+
+      echo "⬇️ Downloading artifacts..."
+      curl -L --fail --header "JOB-TOKEN: $CI_JOB_TOKEN" "$DOWNLOAD_URL" --output artifacts.zip 2>&1
+
+      if [ ! -s artifacts.zip ]; then
+        echo "❌ Error: Downloaded artifact is empty or download failed."
+        exit 1
+      fi
+
+      echo "📂 Unzipping artifacts..."
+      unzip -o artifacts.zip 2>&1
+      ls -R ./database_dumps/
+
+      echo -e "${BLUE}--------------------------------------------------------------------------------------------------------------------------"
+      echo -e "🚛 Transferring dumps and executing restore on ${SERVER_IP}..."
+      echo -e "--------------------------------------------------------------------------------------------------------------------------${RESET}"
+
+      # Create migration directory on server
+      echo "📁 Creating remote directory..."
+      ssh deploy_user@${SERVER_IP} "mkdir -p /home/deploy_user/migration/database_dumps" 2>&1
+
+      # Copy dumps
+      echo "📤 Uploading dumps..."
+      scp ./database_dumps/*.dump deploy_user@${SERVER_IP}:/home/deploy_user/migration/database_dumps/ 2>&1
+
+      # Execute the remote restore script
+      echo "⚙️ Executing remote restore script..."
+      ssh deploy_user@${SERVER_IP} "bash -s" < ./scripts/remote_restore.sh 2>&1
+
+      # Cleanup
+      echo "🧹 Cleaning up remote files..."
+      ssh deploy_user@${SERVER_IP} "rm -rf /home/deploy_user/migration" 2>&1
+
+      echo -e "${GREEN}✅ Migration completed successfully.${RESET}"

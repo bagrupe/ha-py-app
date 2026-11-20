@@ -1,0 +1,16 @@
+query Wettermesspunkte($kommuneId: JSON!) {
+  wettermesspunkteList(where: {kommune: {equals: $kommuneId}}) {
+    docs {
+      id
+      location
+      locationName
+      weather {
+        id
+        icon
+        date
+        minTemp
+        maxTemp
+      }
+    }
+  }
+}

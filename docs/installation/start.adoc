@@ -1,0 +1,23 @@
+=== Start der Anwendung
+
+Für den Start der Backend-Systeme der Kommunal-App werden neben einem Server
+folgende Dinge benötigt:
+
+* Docker Images der Backend-Systeme
+* Docker-Compose-Datei für den Start
+* Konfigurationen für die Anwendung
+
+An dieser Stelle wird davon ausgegangen, dass die Docker Container und die
+Docker-Compose-Datei vorhanden sind, zum Beispiel als Ergebnis des Build- und
+Deployment-Prozesses, der in Abschnitt CI/CD beschrieben wird.
+
+Um die Anwendung zu starten müssen zunächst die benötigten Konfigurationen
+vorgenommen werden. Als Grundlage für die Konfigurationen können die Dateien
+`.env.backend.example`, `.env.bereich-b.example`, `.env.mongo.example` und
+`.env.postgres.example` verwendet werden. 
+
+Sind die Konfigurationen vorhanden wird die Anwendung gestartet mit
+
+```
+docker compose -f docker-compose.production.yml up -d
+```

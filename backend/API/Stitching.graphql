@@ -1,0 +1,155 @@
+extend type Query {
+  newsArtikel(id: String!): NewsArtikel
+    @allowAnonymous
+    @delegate(schema: "BereichB", path: "NewsArtikel")
+  newsArtikelList(
+    where: NewsArtikel_where
+    sort: String
+    page: Int
+    limit: Int
+  ): NewsArtikels
+    @allowAnonymous
+    @delegate(schema: "BereichB", path: "NewsArtikels")
+  veranstalungskalender(id: String!): Veranstaltungskalender
+    @allowAnonymous
+    @delegate(schema: "BereichB", path: "Veranstaltungskalender")
+  veranstaltungskalender(id: String!): Veranstaltungskalender
+    @allowAnonymous
+    @delegate(schema: "BereichB", path: "Veranstaltungskalender")
+  veranstaltungskalenderList(
+    where: Veranstaltungskalender_where
+    sort: String
+    page: Int
+    limit: Int
+  ): Veranstaltungskalenders
+    @allowAnonymous
+    @delegate(schema: "BereichB", path: "Veranstaltungskalenders")
+  aufruf(id: String!): Aufrufe
+    @allowAnonymous
+    @delegate(schema: "BereichB", path: "Aufrufe")
+  aufrufeList(
+    where: Aufrufe_where
+    sort: String
+    page: Int
+    limit: Int
+  ): Aufrufes
+    @allowAnonymous
+    @delegate(schema: "BereichB", path: "Aufrufes")
+  wettermesspunkteList(
+    where: Wettermesspunkte_where
+    sort: String
+    page: Int
+    limit: Int
+  ): Wettermesspunktes
+    @allowAnonymous
+    @delegate(schema: "BereichB", path: "Wettermesspunktes")
+  poi(id: String!): Poi
+    @allowAnonymous
+    @delegate(schema: "BereichB", path: "Poi")
+  pois(where: Poi_where, sort: String, limit: Int): Pois
+    @allowAnonymous
+    @delegate(schema: "BereichB", path: "Pois")
+  poiCategories(
+    where: PoiCategory_where
+    sort: String
+    limit: Int
+  ): PoiCategories
+    @allowAnonymous
+    @delegate(schema: "BereichB", path: "PoiCategories")
+  sensoren(where: Sensoren_where, sort: String, limit: Int): Sensorens!
+    @allowAnonymous
+    @delegate(schema: "BereichB", path: "Sensorens")
+  sensor(id: String!): Sensoren
+    @allowAnonymous
+    @delegate(schema: "BereichB", path: "Sensoren")
+  sensorArten(where: SensorArt_where): SensorArts!
+    @allowAnonymous
+    @delegate(schema: "BereichB", path: "SensorArts")
+  untereinheitList(where: Untereinheit_where, limit: Int): Untereinheits
+    @allowAnonymous
+    @delegate(schema: "BereichB", path: "Untereinheits")
+  veranstaltungskalenderKategories(
+    where: VeranstaltungskalenderKategorie_where
+    limit: Int
+  ): VeranstaltungskalenderKategories
+    @allowAnonymous
+    @delegate(schema: "BereichB", path: "VeranstaltungskalenderKategories")
+  veranstaltungskalenderQuellen(
+    where: VeranstaltungskalenderQuelle_where
+    limit: Int
+  ): VeranstaltungskalenderQuellen
+    @allowAnonymous
+    @delegate(schema: "BereichB", path: "VeranstaltungskalenderQuellen")
+  veranstaltungsTermine(
+    kommune: String
+    untereinheit: String
+      @deprecated(reason: "Use `untereinheiten` for multi-select.")
+    untereinheiten: [String]
+    von: String
+    bis: String
+    categoryIds: [String]
+    search: String
+    visible: Boolean
+    limit: Int
+    page: Int
+    sortDirection: String
+  ): VeranstaltungsTermineResult
+    @allowAnonymous
+    @delegate(schema: "BereichB", path: "VeranstaltungsTermine")
+}
+
+extend type Kommune {
+  bereichBId: ID!
+    @delegate(
+      schema: "BereichB"
+      path: "KommuneByBereichAId(kommuneId: $fields:id).id"
+    )
+  name: String!
+    @delegate(
+      schema: "BereichB"
+      path: "KommuneByBereichAId(kommuneId: $fields:id).name"
+    )
+  design: KommuneDesign
+    @delegate(
+      schema: "BereichB"
+      path: "KommuneByBereichAId(kommuneId: $fields:id).design"
+    )
+  defaultPosition: [Float]!
+    @delegate(
+      schema: "BereichB"
+      path: "KommuneByBereichAId(kommuneId: $fields:id).defaultPosition"
+    )
+  geoFlaechen: GeoFlaechen!
+    @delegate(
+      schema: "BereichB"
+      path: "GeoflaechenByBereichAId(kommuneId: $fields:id)"
+    )
+  isPointInGeoflaeche(name: String!, position: Position!): IsInside!
+    @delegate(
+      schema: "BereichB"
+      path: "IsPointInGeoflaeche(kommuneId: $fields:id, name: $arguments:name, position: $arguments:position)"
+    )
+  lizenzen: BereichBKommune_Lizenzen!
+    @delegate(
+      schema: "BereichB"
+      path: "KommuneByBereichAId(kommuneId: $fields:id).lizenzen"
+    )
+  analytics: BereichBKommune_Analytics!
+    @delegate(
+      schema: "BereichB"
+      path: "KommuneByBereichAId(kommuneId: $fields:id).analytics"
+    )
+  rechtsTexte: BereichBKommune_Legal!
+    @delegate(
+      schema: "BereichB"
+      path: "KommuneByBereichAId(kommuneId: $fields:id).legal"
+    )
+}
+
+extend type Sensoren_Felder {
+  historie(duration: HistoryMode!): [SensorHistorieEintrag!]!
+    @delegate(
+      schema: "Internal"
+      path: "historie(sensorname: $fields:sensorname, feldname: $fields:name, duration: $arguments:duration, fetch: $fields:hasHistorie)"
+    )
+}

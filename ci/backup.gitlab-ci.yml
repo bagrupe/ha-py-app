@@ -1,0 +1,60 @@
+include:
+  - local: "/ci/colors.yml"
+  - local: "ci/template.gitlab-ci.yml"
+
+########################################
+# DATABASE BACKUPS
+########################################
+
+.backup:
+  stage: backup
+  extends:
+    - .ssh-connection
+  variables:
+    WORKING_DIRECTORY: "/home/deploy_user/backups"
+  script: |
+
+    echo -e "${BLUE}--------------------------------------------------------------------------------------------------------------------------"
+    echo -e "🚀 Starting database dump on ${SERVER_IP}..."
+    echo -e "--------------------------------------------------------------------------------------------------------------------------${RESET}"
+
+    ssh deploy_user@${SERVER_IP} "bash -s" < ./scripts/database_dump.sh "${WORKING_DIRECTORY}"
+    mkdir -p ./database_dumps/
+
+    scp -q deploy_user@${SERVER_IP}:${WORKING_DIRECTORY}/*.dump ./database_dumps/
+
+    # Delete only the files created from the database dump script.
+    for file in ./database_dumps/*.dump; do
+        filename=$(basename "$file")
+        ssh deploy_user@${SERVER_IP} "rm ${WORKING_DIRECTORY}/$filename"
+      done
+
+  artifacts:
+    paths:
+      - ./database_dumps/**/*
+    expire_in: 5d
+
+backup:staging:
+  extends:
+    - .backup
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "schedule" && $STAGING_BACKUP == "TRUE"
+      when: always
+  environment:
+    name: staging
+
+backup:preprod:
+  extends:
+    - .backup
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "schedule" && $PREPRODUCTION_BACKUP == "TRUE"
+  environment:
+    name: preprod
+
+backup:production:
+  extends:
+    - .backup
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "schedule" && $PRODUCTION_BACKUP == "TRUE"
+  environment:
+    name: production

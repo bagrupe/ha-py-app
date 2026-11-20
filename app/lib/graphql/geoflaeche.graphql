@@ -1,0 +1,8 @@
+query IsInside($kommuneId: UUID!, $name: String!, $position: Position!){
+  kommune(kommuneId: $kommuneId){
+    isPointInGeoflaeche(name: $name, position: $position){
+      isInside
+      message
+    }
+  }
+}

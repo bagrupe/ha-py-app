@@ -1,0 +1,18 @@
+mutation UpsertServicePortalLink($input: ServicePortalLinkUpsertInput!) {
+  servicePortalLinkUpsert(input: $input) {
+    servicePortalLink {
+      id
+      url
+    }
+  }
+}
+
+query ServicePortalLink($kommuneId: UUID!, $id: UUID!) {
+  kommune(kommuneId: $kommuneId) {
+    servicePortalLink(id: $id) {
+      id
+      url
+      name
+    }
+  }
+}

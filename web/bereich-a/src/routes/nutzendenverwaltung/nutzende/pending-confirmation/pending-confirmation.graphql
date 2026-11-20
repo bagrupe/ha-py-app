@@ -1,0 +1,26 @@
+query NutzendePendingConfrimation {
+  my {
+    ... on BackofficeUser {
+      kommune {
+        mitarbeiterPendingConfirmation {
+          ...PendingUser
+        }
+      }
+    }
+  }
+}
+
+fragment PendingUser on Mitarbeiter {
+  id
+  vorname
+  nachname
+  eMail
+  pendingConfirmation
+  publicKey
+}
+
+mutation UserConfirm($input: UserConfirmInput!) {
+  userConfirm(input: $input) {
+    boolean
+  }
+}

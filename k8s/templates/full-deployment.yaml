@@ -1,0 +1,5 @@
+{{ range $path, $_ := .Files.Glob "components/**.yaml" }}
+{{- $component := fromYaml ($.Files.Get $path) }}
+{{- $scope := dict "root" $ "component" $component }}
+{{- include "fullComponent" $scope }}
+{{- end }}

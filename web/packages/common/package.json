@@ -1,0 +1,27 @@
+{
+  "name": "@kommunalapp/common",
+  "type": "module",
+  "main": "./src/index.ts",
+  "devDependencies": {
+    "@kommunal/linting": "workspace:^",
+    "@kommunal/tsconfig": "workspace:*",
+    "@types/eslint": "8.44.0",
+    "@types/react": "19.2.9",
+    "eslint": "9.39.3",
+    "prettier": "3.0.0",
+    "react": "19.2.7",
+    "typescript": "5.9.3"
+  },
+  "peerDependencies": {
+    "react": ">=18 <20"
+  },
+  "prettier": "@kommunal/linting/prettier",
+  "scripts": {
+    "lint": "pnpm run lint:fix && pnpm run prettier:fix",
+    "lint:check": "eslint . --report-unused-disable-directives --max-warnings 0",
+    "lint:fix": "eslint . --fix --report-unused-disable-directives --max-warnings 0",
+    "prettier:check": "prettier . --check",
+    "prettier:fix": "prettier . --write",
+    "typecheck": "tsc --noEmit"
+  }
+}

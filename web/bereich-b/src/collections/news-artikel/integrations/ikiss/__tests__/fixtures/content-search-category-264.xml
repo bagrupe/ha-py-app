@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE ikiss SYSTEM "https://www.hameln-pyrmont.de/ikiss.dtd">
+<ikiss>
+    <result>
+            <tcontent_list>
+                <tcontent>
+                    <object_id>3767.1586.1</object_id>
+                    <object_title><![CDATA[Schulausfall Meldung]]></object_title>
+                    <title>Schulausfall Meldung</title>
+                    <description></description>
+                    <data_content></data_content>
+                    <author>Administrator</author>
+                    <date>2026-02-05 13:30:00</date>
+                </tcontent>
+                <tcontent>
+                    <object_id>3767.1977.1</object_id>
+                    <object_title><![CDATA[Das Smart City Projekt geht in Hameln-Pyrmont in die Verlängerung]]></object_title>
+                    <title>Das Smart City Projekt geht in Hameln-Pyrmont in die Verlängerung</title>
+                    <description></description>
+                    <data_content></data_content>
+                    <author>Administrator</author>
+                    <date>2026-10-22 13:07:49</date>
+                </tcontent>
+            </tcontent_list>
+    </result>
+</ikiss>

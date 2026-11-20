@@ -1,0 +1,19 @@
+extends: default-sans-with-font-fallbacks
+
+running-content:
+  start-at: after-toc
+
+page:
+  margin: [2.0cm, 2.5cm, 1.0cm, 2.5cm]
+
+footer:
+  recto:
+    right:
+      content: '{page-number}'
+    center:
+      content:  '{section-or-chapter-title}'
+  verso:
+    left:
+      content: '{page-number}'
+    center:
+      content: '{section-or-chapter-title}'

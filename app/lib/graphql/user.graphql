@@ -1,0 +1,75 @@
+query My {
+  my {
+    id
+    publicKey
+
+    ... on Buerger {
+      personalPrivateKey {
+        ...EncryptedValue
+      }
+      personalPrivateKeySalt
+      personalDataKey
+      hasKeyEscrow
+      hasBundId
+      phoneVerified
+    }
+  }
+}
+
+query MyPersonalData {
+  my {
+    id
+    __typename
+
+    ... on Buerger {
+      personalData {
+        id
+        key
+        value {
+          ...EncryptedValue
+        }
+      }
+    }
+  }
+}
+
+query MyMitteilungen {
+  my {
+    id
+
+    ... on Buerger {
+      mitteilungen {
+        id
+        prozessVersion {
+          prozess {
+            name
+          }
+        }
+        historie {
+          id
+          createdAt
+          statusAenderung
+          statusAenderungBeschreibung
+          nachricht
+        }
+      }
+    }
+  }
+}
+
+mutation UpdatePersonalData($input: PersonalDataUpdateInput!) {
+  personalDataUpdate(input: $input) {
+    buerger {
+      id
+      __typename
+
+      personalData {
+        id
+        key
+        value {
+          ...EncryptedValue
+        }
+      }
+    }
+  }
+}

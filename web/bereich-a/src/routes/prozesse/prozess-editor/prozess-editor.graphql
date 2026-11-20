@@ -1,0 +1,94 @@
+fragment ProzessVersion on ProzessVersion {
+  id
+  publishedAt
+  start {
+    id
+  }
+  rollen {
+    id
+    name
+  }
+  alleSchritte {
+    ...ProzessEditorSchritt
+  }
+}
+
+query GetProzessById($prozessId: UUID!) {
+  my {
+    ... on BackofficeUser {
+      kommune {
+        prozessById(id: $prozessId) {
+          ...ProzessEditorProzess
+        }
+      }
+    }
+  }
+}
+
+query MoeglicheZustaendige {
+  my {
+    ... on BackofficeUser {
+      kommune {
+        dienstleister {
+          id
+          name
+          eMailAdressen
+          organisationseinheiten {
+            id
+            name
+          }
+        }
+        organisationseinheiten: untereinheiten {
+          id
+          name
+          mitarbeiterGruppen(includeDeleted: false) {
+            id
+            name
+            eMailAdressen
+            isDeleted
+          }
+        }
+      }
+    }
+  }
+}
+
+query GruppenUndOrganisationseinheiten {
+  my {
+    id
+    ... on BackofficeUser {
+      organisationseinheiten {
+        organisationseinheit {
+          id
+          name
+        }
+      }
+      kommune {
+        mitarbeiterGruppen {
+          id
+          name
+          eMailAdressen
+        }
+      }
+    }
+  }
+}
+
+mutation ProzessVersionVeroeffentlichen(
+  $input: ProzessVersionVeroeffentlichenInput!
+) {
+  prozessVersionVeroeffentlichen(input: $input) {
+    prozessVersion {
+      ...ProzessVersion
+    }
+  }
+}
+
+mutation ProzessUmbenennen($input: ProzessUpsertInput!) {
+  prozessUpsert(input: $input) {
+    prozess {
+      id
+      name
+    }
+  }
+}

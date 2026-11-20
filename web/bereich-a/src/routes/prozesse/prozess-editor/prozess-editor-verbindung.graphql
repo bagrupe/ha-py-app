@@ -1,0 +1,10 @@
+fragment ProzessEditorVerbindung on Verbindung {
+  id
+  name
+  vonId
+  nachId
+  name
+  statusAenderung
+  statusAenderungBeschreibung
+  istRelevant
+}

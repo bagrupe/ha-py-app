@@ -1,0 +1,39 @@
+query loggedInLayout {
+  neu: ausfuehrungen(status: BEARBEITUNG_DURCH_KOMMUNE, zugewiesen: false) {
+    totalCount
+  }
+  inBearbeitung: ausfuehrungen(
+    status: BEARBEITUNG_DURCH_KOMMUNE
+    zugewiesen: true
+  ) {
+    totalCount
+  }
+  abgeschlossen: ausfuehrungen(status: ABGESCHLOSSEN) {
+    totalCount
+  }
+  my {
+    ... on BackofficeUser {
+      kommune {
+        id
+        prozesse {
+          id
+          name
+        }
+      }
+    }
+  }
+}
+
+query Rechtstexte {
+  my {
+    ... on BackofficeUser {
+      kommune {
+        id
+        rechtsTexte {
+          impressum
+          privacy
+        }
+      }
+    }
+  }
+}

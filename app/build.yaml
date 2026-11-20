@@ -1,0 +1,50 @@
+targets:
+  $default:
+    builders:
+      widgetbook_generator:telemetry:
+        enabled: false
+
+      json_serializable:
+        options:
+          field_rename: snake
+          any_map: true
+          explicit_to_json: true
+
+      graphql_codegen:
+        options:
+          clients:
+            - graphql
+            - graphql_flutter
+          outputDirectory: ./__generated__
+          namingSeparator: '_'
+          scalars:
+            UUID:
+              type: String
+            Decimal:
+              type: double
+            JSON:
+              type: dynamic
+            Instant:
+              type: DateTime
+            DateTime:
+              type: DateTime
+            LocalDate:
+              type: DateTime
+              fromJsonFunctionName: localDateFromJson
+              toJsonFunctionName: localDateToJson
+              import: package:app/common/util/local_date.dart
+            StringExpression:
+              type: StringExpression
+              fromJsonFunctionName: stringExpressionFromJson
+              toJsonFunctionName: stringExpressionToJson
+              import: package:app/common/expressions/expression.dart
+            BoolExpression:
+              type: BoolExpression
+              fromJsonFunctionName: boolExpressionFromJson
+              toJsonFunctionName: boolExpressionToJson
+              import: package:app/common/expressions/expression.dart
+            IntExpression:
+              type: IntExpression
+              fromJsonFunctionName: intExpressionFromJson
+              toJsonFunctionName: intExpressionToJson
+              import: package:app/common/expressions/expression.dart

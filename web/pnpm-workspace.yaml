@@ -1,0 +1,8 @@
+packages:
+  - "bereich-a"
+  - "bereich-b"
+  - "e2e"
+  - "packages/*"
+  - "email-templates"
+  - "email-templates/.react-email"
+  - "stele"

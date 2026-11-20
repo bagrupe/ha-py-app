@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE ikiss SYSTEM "https://www.hameln-pyrmont.de/ikiss.dtd">
+<ikiss>
+    <result>
+            <tevents>
+                <object_full_id>3767.3990.1</object_full_id>
+                <server_id>3767</server_id>
+                <object_id>3990</object_id>
+                <language>de</language>
+                <organizer_server_id>0</organizer_server_id>
+                <organizer_object_id>0</organizer_object_id>
+                <organizer_language></organizer_language>
+                <userfieldtempl_svr_id>0</userfieldtempl_svr_id>
+                <userfieldtempl_id>0</userfieldtempl_id>
+                <location_id>0.0</location_id>
+                <datetime_from>2026-09-25 16:00:00</datetime_from>
+                <datetime_to>2026-09-25 18:00:00</datetime_to>
+                <title><![CDATA[Impulsvortrag mit Prof. Dr. med Peter Schulte am Freitag, den 25. September:]]></title>
+                <data_short_content><![CDATA[In Kooperation mit dem »Familie im Zentrum Hameln« (FiZ), der Gleichstellungsbeauftragten des Landkreises Hameln-Pyrmont und dem »Länger besser leben.«-Institut dreht sich am 25. und 26. September alles um das Thema Mental Load:]]></data_short_content>
+                <data_content><![CDATA[<p>In Kooperation mit dem &bdquo;Familie im Zentrum Hameln&ldquo; (FiZ), der Gleichstellungsbeauftragten des Landkreises Hameln-Pyrmont und dem &bdquo;L&auml;nger besser leben.&ldquo;-Institut dreht sich am 25. und 26. September alles um das Thema Mental Load:</p>
+<p><strong>Impulsvortrag mit Prof. Dr. med Peter Schulte am Freitag, den 25. September:</strong></p>
+<p>Am Freitag, den 25. September, erwartet Sie ein spannender Impulsvortrag von Prof. Dr. med Peter Schulte, dem wissenschaftlichen Leiter des &bdquo;L&auml;nger besser leben.&ldquo;-Instituts. Er widmet sich dem Thema Mental Load und Achtsamkeit und wird Antworten auf die Frage liefern, wie wir unser inneres Gleichgewicht wiederfinden und unsere Gedanken positiv beeinflussen k&ouml;nnen.&nbsp;</p>
+<ul class=" ikiss-unordered-list">
+<li><strong><em>Der Vortrag findet statt am Freitag, den 25. September, von 16 Uhr bis 18 Uhr, im A.R.A in Hameln.</em></strong></li>
+</ul>
+<p><strong>Anmeldung und Organisatorisches</strong></p>
+<p>Beide Veranstaltungen sind kostenlos, Sie k&ouml;nnen sich gerne f&uuml;r beide Tage anmelden oder nur f&uuml;r eine der beiden Veranstaltungen. Die Anmeldung erfolgt &uuml;ber unseren Kooperationspartner FiZ unter <strong>030 00000000oder </strong><strong><ikiss i_ma="contact-4a668fd9@example.com" i_ms="" i_tp="3" i_lt="contact-4a668fd9@example.com" /></strong>. Der <strong>Anmeldeschluss ist der 11. September</strong>.</p>
+<p><strong>Sie ben&ouml;tigen eine Kinderbetreuung?</strong></p>
+<p>Dann sprechen Sie dies bei der Anmeldung an. F&uuml;r beide Termine ist eine Kinderbetreuung m&ouml;glich.</p>
+<p>Wir w&uuml;rden uns sehr freuen, Sie dort begr&uuml;&szlig;en zu d&uuml;rfen und selbstverst&auml;ndlich k&ouml;nnen Sie diese Einladung gerne weiterleiten, denn das Thema Mental Load und &Uuml;berforderung betrifft viele von uns aus den unterschiedlichsten Gr&uuml;nden und alle sind herzlich willkommen!</p>
+<p>Herzliche Gr&uuml;&szlig;e senden</p>]]></data_content>
+                <location>Osterstraße 46, 31785 Hameln</location>
+                <region></region>
+                <priceinfo></priceinfo>
+                <price>0.00</price>
+                <contact>030 00000000oder contact-4a668fd9@example.com</contact>
+                <fulltext_index_off>false</fulltext_index_off>
+                <pattern>false</pattern>
+                <update_date>2026-09-26 00:00:06</update_date>
+                <create_date>2026-09-03 08:27:05</create_date>
+                <properties>1</properties>
+                <release>false</release>
+                <area>internet</area>
+                <map_id>0</map_id>
+                <map_x>0</map_x>
+                <map_y>0</map_y>
+                <image>/media/custom/safe/3767_3464_1_t.PNG</image>
+                <tUserFields>
+                </tUserFields>
+                <tlocation_address>
+                    <object_full_id>2561.134.1</object_full_id>
+                </tlocation_address>
+                <booking></booking>
+                <ResultPic.data></ResultPic.data>
+                <categories></categories>
+                <synonyms></synonyms>
+                <tusers_list>
+                    <tusers>
+                        <user_id>3</user_id>
+                        <nickname>Administrator</nickname>
+                    </tusers>
+                </tusers_list>
+                <remote_identifier_list></remote_identifier_list>
+                <RefKey></RefKey>
+                <timer></timer>
+            </tevents>
+    </result>
+</ikiss>

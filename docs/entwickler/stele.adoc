@@ -1,0 +1,223 @@
+==== Stele Web-App
+Die Stele ist eine in `React` geschriebene Web-App, die für die Darstellung
+auf öffentlichen, digitalen Info-Stelen konzipiert ist. Sie verwendet die durch
+das `Backend` bereitgestellte `GraphQL`-Schnittstelle, um Inhalte aus der
+Inhaltspflege anzuzeigen.
+
+===== Tech Stack
+
+[cols="1,2", options="header"]
+|===
+| Technologie | Version
+
+| React
+| 19.2
+
+| TypeScript
+| 5.9
+
+| Vite
+| 5.4
+
+| Tailwind CSS
+| 3.4
+
+| URQL (GraphQL Client)
+| 4.0
+
+| Storybook
+| 10.2
+
+| Vitest
+| 2.1
+
+| Node.js
+| 22.14 (siehe `.nvmrc`)
+|===
+
+[NOTE]
+====
+Das Upgrade von React 18 auf React 19 (inkl. `react-dom`, `@types/react` und
+abhängiger Pakete wie `react-leaflet`) erfolgte projektweit in Commit
+`60c01f9` (`build(infrastructure): Upgrade to react 19 across web`, siehe
+MR !225).
+====
+
+Die App läuft im lokalen Entwicklungsmodus auf Port `3003` und proxyt
+`/graphql` sowie `/api` an das Backend (Port `5000`). Die typisierten
+URQL-Hooks werden über `graphql-codegen` aus den `.graphql`-Dokumenten
+generiert.
+
+===== Bibliotheken und ihr Einsatzzweck
+
+- *UI & Styling:* Das Styling erfolgt über `Tailwind CSS`. Als UI-Primitive
+  kommt `@base-ui/react` zum Einsatz, ergänzt um den Dialog aus `Radix UI`.
+- *Karten:* Interaktive Karten werden mit `Leaflet` (`react-leaflet` inkl.
+  `markercluster`) dargestellt — dieselbe Kartenbibliothek, auf der auch die
+  Mobile App über `flutter_map` aufbaut.
+- *Slider & Anzeige:* Die für den Kiosk-Betrieb typischen, automatisch
+  rotierenden Inhalte werden mit `Embla Carousel` (Autoplay) umgesetzt.
+  Ergänzend dienen `qrcode.react` für QR-Codes und `date-fns-tz` für die
+  zeitzonenkorrekte Darstellung von Terminen.
+
+===== Tooling
+
+- *Storybook:* Ein Großteil der Tickets bestand aus einzelnen Komponenten.
+  Storybook dient als isolierte Umgebung, um diese Komponenten unabhängig vom
+  Gesamtkontext zu entwickeln, zu testen und abzunehmen.
+- *Vitest:* Die Unit-Tests konzentrieren sich auf die Datums- und
+  Zeitzonenlogik.
+- *Linting:* Die geteilte Konfiguration `@kommunal/linting` (ESLint + Prettier)
+  wird wie in den übrigen Web-Paketen verwendet.
+
+===== Technologieentscheidungen
+
+Die Stele teilt sich mit `bereich-a` bewusst denselben Stack. Beide Apps
+liegen im selben `pnpm`-Workspace-Monorepo, sodass Werkzeuge,
+Linting-Konfiguration und GraphQL-Codegen ohne zusätzlichen Aufwand
+wiederverwendet werden konnten. Der Stack von `bereich-a` ist bereits erprobt;
+es gab keinen Grund, für die Stele davon abzuweichen. Abweichungen
+beschränken sich auf einzelne Bibliotheken für Stele-spezifische
+Anwendungsfälle (`Leaflet`, `Embla Carousel`, `qrcode.react`), während die
+Grundlage — React, Vite, TypeScript, Tailwind und URQL — identisch bleibt.
+
+===== Konfigurierbare Umgebungsvariablen
+
+Die Stele wird pro Kommune einmal gebaut und über `VITE_*`-Umgebungsvariablen
+konfiguriert. Diese werden von Vite zum *Build-Zeitpunkt* fest in das Bundle
+eingebettet (`import.meta.env.*`). Sie lassen sich also nicht zur Laufzeit
+ändern, sondern müssen vor dem Build gesetzt sein. Eine Vorlage aller
+Variablen liegt in `web/stele/.env.example`.
+
+In der CI/CD-Pipeline stammen die Werte aus der GitLab-CI/CD-File-Variable
+`DEPLOYMENT_ENV_FILE` (pro Umgebung hinterlegt). Der Job `build:stele` kopiert
+diese Datei nach `stele/.env.production`, bevor `turbo build` ausgeführt wird.
+Alle hier aufgeführten Variablen sind somit über GitLab-Deployment-Variablen
+konfigurierbar. Fehlt oder ist ein Wert ungültig, greift der angegebene
+Standardwert.
+
+[cols="2,2,3,2,1", options="header"]
+|===
+| Variable | Mögliche Werte | Zweck | Betroffene Komponenten | Über GitLab-Deployment-Variablen konfigurierbar
+
+| `VITE_KOMMUNE_ID`
+| Kommune-ID (Zeichenkette); leer = keine Inhaltsabfragen
+| Legt fest, welche Kommune die Stele anzeigt (ein Build pro Kommune)
+| `LocationContext`, Karte (POI-Abfrage), Aktuelles-Slides
+| Ja
+
+| `VITE_UNTEREINHEITEN_IDS`
+| Kommaseparierte Liste von Untereinheiten-IDs; leer erlaubt
+| Filtert Aktuelles/Aufrufe auf bestimmte Untereinheiten; dient als Standard-Gemeinde-Scope der Veranstaltungen, solange kein Gemeinde-Filter aktiv gewählt ist
+| `useAktuellesSlides` (Startseite, Aktuelles), `useKioskVeranstaltungen`
+| Ja
+
+| `VITE_AKTUELLES_NEWS_LIMIT`
+| Positive Ganzzahl; Standard `10`
+| Maximale Anzahl der News-Einträge im Aktuelles-Bereich
+| `useAktuellesSlides`
+| Ja
+
+| `VITE_AUFRUFE_QR_ENABLED`
+| `true` / `false`; Standard `false`
+| Schaltet QR-Codes auf Aufrufe-Slides ein
+| `useAktuellesSlides` (Aufrufe-Slides)
+| Ja
+
+| `VITE_SHOW_POI_MAP`
+| `true` / `false`; Standard `false`
+| Aktiviert die POI-Kartenroute (`/karte`) und die Karten-Kachel auf der Startseite
+| `router` (Route `/karte`), Startseite
+| Ja
+
+| `VITE_POI_MAP_CARD_IMAGE`
+| Bild-URL/-Pfad; leer = Standardbild (`poi.jpg`)
+| Hintergrundbild der POI-Karten-Kachel auf der Startseite
+| Startseite (POI-Kachel)
+| Ja
+
+| `VITE_CAROUSEL_SLIDER_AUTOPLAY_DELAY_MS`
+| Positive Ganzzahl in Millisekunden; Standard `10000` (10 s)
+| Autoplay-Intervall des Karussell-Sliders
+| `carousel-slider` (Embla Carousel)
+| Ja
+
+| `VITE_CAROUSEL_AUTO_COLLAPSE_TIMEOUT_MS`
+| Positive Ganzzahl in Millisekunden; Standard `30000` (30 s)
+| Dauer der Inaktivität, nach der eine aufgeklappte Aktuelles-/Veranstaltungen-Karte automatisch wieder einklappt
+| `useAutoCollapse` (`aktuelles-block`, `events-block`)
+| Ja
+
+| `VITE_ACTIVITY_TIMER_DURATION_SECS`
+| Positive Ganzzahl in Sekunden; Standard `120` (2 min)
+| Dauer der Inaktivität, bis die Stele in den inaktiven Zustand wechselt
+| `useCountdownStore` (Inaktivitäts-Timer)
+| Ja
+
+| `VITE_ACTIVITY_TIMER_WINDOW_THRESHOLD_SECS`
+| Positive Ganzzahl in Sekunden; Standard `10`
+| Verbleibende Sekunden, bei denen der „Sind Sie noch da?"-Dialog erscheint
+| `App` / Inaktivitäts-Dialog (`useInactivityTimer`, `ControlledModal`)
+| Ja
+|===
+
+===== Laufzeit-URL-Parameter
+
+Während die Umgebungsvariablen den Build pro Kommune festlegen, lassen sich
+einzelne Stelen zur *Laufzeit* über Parameter in der Start-URL unterscheiden.
+So kann derselbe Build an mehreren physischen Standorten betrieben werden, ohne
+neu zu bauen.
+
+[cols="1,2,3,1", options="header"]
+|===
+| Parameter | Mögliche Werte | Zweck | Pflicht
+
+| `location`
+| Ortsname als Zeichenkette (z. B. `Bad Pyrmont`)
+| Steuert den Willkommenstext (Kopfzeile) und die Wetteranzeige (Auswahl des
+  Wetter-Messpunkts). Der Wert wird zusätzlich in der `sessionStorage`
+  gehalten. Fehlt der URL-Parameter, wird zunächst der gespeicherte Wert
+  verwendet; ist keiner vorhanden, gilt der Standardort `Hameln`.
+| Optional
+
+| `lat`
+| Breitengrad in Dezimalgrad (WGS84), Bereich `-90` bis `90`
+| Setzt zusammen mit `lng` den Karten-Marker („Sie sind hier") und das
+  Kartenzentrum auf den exakten Stelen-Standort statt auf den Wetter-Messpunkt.
+  Die Werte werden — wie `location` — in der `sessionStorage` gehalten und
+  bleiben so beim Navigieren zwischen den Seiten erhalten.
+| Nur zusammen mit `lng`
+
+| `lng`
+| Längengrad in Dezimalgrad (WGS84), Bereich `-180` bis `180`
+| Siehe `lat`.
+| Nur zusammen mit `lat`
+|===
+
+Die Koordinaten-Parameter `lat` und `lng` wirken nur *gemeinsam*. Sind beide
+gültig, haben sie Vorrang vor gespeicherten Koordinaten und werden in der
+`sessionStorage` abgelegt. Ist nur einer von beiden gesetzt, ein Wert nicht
+numerisch oder außerhalb des gültigen Bereichs, werden beide ignoriert und
+zuvor gespeicherte Koordinaten entfernt. Der Karten-Marker fällt dann auf die
+Position des über `location` bestimmten Wetter-Messpunkts zurück (bisheriges
+Verhalten).
+
+Fehlen sowohl `lat` als auch `lng` in der URL, verwendet die Stele zunächst
+gültige Koordinaten aus der `sessionStorage`. Sind dort keine vorhanden, greift
+ebenfalls die Position des Wetter-Messpunkts. Die Wetter- und
+Willkommenstext-Anzeige bleibt in jedem Fall allein über `location` gesteuert.
+
+`location`, `lat` und `lng` werden in der `sessionStorage` des Browsers
+abgelegt — *nicht* in der `localStorage`. Beim Wechsel zwischen Startseite und
+Karte werden die URL-Parameter mitgeführt. Die zusätzliche Speicherung erhält
+die Konfiguration auch bei Navigationen oder einem Zurücksetzen der Stele, bei
+denen die Parameter nicht in der Ziel-URL enthalten sind. Die Werte werden beim
+Beenden der Browser-Sitzung (Schließen von Tab/Fenster) verworfen. Beim nächsten
+Start der Stele stammen die Werte wieder aus der Start-URL.
+
+Beispiel-URL:
+
+[source]
+----
+https://stele.example.invalid/?location=Bad%20Pyrmont&lat=51.986134&lng=9.220473
+----

@@ -1,0 +1,96 @@
+[[veraendern_von_funktionsberechtigungen]]
+==== Verändern von Funktionsberechtigungen
+
+Jeder Nutzer-Typ (Dienstleister ausgeschlossen) hat nach der
+<<einladen_von_nutzenden,Einladung>>
+unterschiedliche *Funktionsberechtigungen*.
+Das bedeutet er darf unterschiedliche Funktionen im Backoffice und der
+Inhaltspflege verwenden.
+
+Darüber hinaus gibt es konzeptionell Nutzer im Sinne von Sachbearbeitern, die
+eigentlich kein eigener Typ sind, jedoch mehr dürfen. Denkbar wäre zum Beispiel
+ein *Key-User*, der eigentlich ein normaler Nutzer ist, darüber hinaus aber den
+`Prozesseditor` verwenden darf, weil er in seine Zuständigkeit fällt.
+
+Um diesen Sachverhalt abzubilden beherrscht das Backoffice die
+Funktionsberechtigungen - ein Weg einzelnen Nutzern bestimmte Berechtigungen zu
+geben.
+
+Funktionsberechtigungen werden für jede Organisationseinheit einzeln vergeben,
+die folgenden Berechtigungen gibt es:
+
+* **Backoffice**
+    ** **Anträge**: Nutzende mit dieser Berechtigung dürfen Anträge innerhalb der
+    Organisationseinheit bearbeiten
+    ** **Nutzendenverwaltung**: Nutzer mit dieser Berechtigung dürfen andere
+    Nutzende innerhalb der Organisationseinheit verwalten
+* **Inhaltspflege**: 
+Sämtliche Berechtigungen für `Collections` der
+Inhaltspflege berechtigen den Nutzer zur Verwaltung der Daten der Collection
+innerhalb der gewählten Organisationseinheit. D.h. bekommt ein Nutzer
+Berechtigungen für die Inhaltspflege für eine Organisationseinheit kann
+er die Inhalte dieser Organisationseinheit verändern, nicht aber von anderen
+Organisationseinheiten.
+    ** **News-Artikel**
+    ** **Wettermesspunkte**
+    ** **Geoflächen**
+    ** **POIs**
+    ** **Integrationen**
+    ** **Veranstaltungen**
+    ** **Sensoren**
+
+.Funktionsberechtigungen für Organisationseinheiten ändern
+
+Jede dieser Berechtigungen bezieht sich immer auf eine Organisationseinheit. Das
+bedeutet, dass ein Nutzer, der für eine Organisationseinheit die
+Berechtigung hat News-Artikel in der Inhaltspflege zu Bearbeiten, für eine
+andere aber nicht, sieht auch in der Inhaltspflege nur News-Artikel der ersten.
+
+Ein anderes Beispiel: ein Nutzer, der Mitglied in den Organisationseinheiten
+*Hameln* und *Pyrmont* ist, aber nur für *Hameln* die Berechtigung für die
+*Nutzendenverwaltung* hat, sieht dort auch nur die Nutzer aus Hameln, nicht aber
+die aus *Pyrmont*.
+
+Neben diesen Funktionsberechtigungen auf der Ebene von Organisationseinheiten gibt
+es für jeden Benutzer die Möglichkeit die `globale` Funktionsberechtigung für
+den `Prozesseditor` zu vergeben. Im Unterschied zu den anderen Funktionsberechtigungen
+ist der Prozesseditor ein Funktion, die Einfluss auf den gesamten Mandanten nimmt.
+Prozesse / Anträge, die erstellt und veröffentlicht werden stehen in der mobilen App
+jedem Nutzer zur Verfügung, unabhängig von dem Ort an dem er sich befindet - daher
+ist auch der Prozesseditor nicht auf einzelnen Organisationseinheiten eingeschränkt.
+
+[[funktionsberechtigungen_prozessverwaltung_aendern, Funktionsberechtigungen für Prozessverwaltung ändern]]
+.Funktionsberechtigungen für Prozessverwaltung ändern
+image::assets/anwender/Nutzendeverwaltung_Funktionsberechtigung_Global.png[Funktionsberechtigungen für Prozessverwaltung ändern]
+
+Die Funktionsberechtigungen können ausschließlich durch `Admin`- oder
+`Super-Admin`-Nutzer oder Nutzer mit der entsprechenden Berechtigung verändert
+werden - `Admins` nur für die eigenen Organisationseinheiten.
+
+Dazu geht man wie folgt vor:
+
+- Als `Admin` oder `Super-Admin` gelangt man über das *Burger Menü* am oberen
+Bildschirmrand in die `Nutzendenverwaltung`.
+
+- Hier werden als `Super-Admin` sämtliche Nutzer aufgelistet, als `Admin` nur
+die der eignen Organisationseinheiten
+
+- Über einen Klick auf das `Stift-Symbol` öffnet sich der Nutzer-Dialog
+
+- Im Tab `Organisationseinheiten` werden sämtliche Organisationseinheiten
+aufgelistet
+
+- Jede Organisationseinheit kann ausgeklappt werden, um die oben genannten
+Berechtigungen anzuzeigen
+
+- Um einem Nutzer die Berechtigung an einer Funktion innerhalb einer
+Organisationseinheit zu gewähren wird dazu einfach die zugehörige `Checkbox`
+angeklickt
+
+- Um die ausgewählten Berechtigungen zu vergeben muss abschließend noch der
+Button `Übernehmen` am unteren Rand des Dialogs geklickt werden.
+
+
+Eine Ausnahme stellt die Berechtigung für den Prozesseditor dar - diese ist
+unter dem Tab `Funktionsberechtigungen` zu finden (siehe <<funktionsberechtigungen_prozessverwaltung_aendern, Abbildung>>) und funktioniert ebenfalls wie
+oben beschrieben.

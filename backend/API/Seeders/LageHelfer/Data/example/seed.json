@@ -1,0 +1,66 @@
+{
+  "version": 1,
+  "idNamespace": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+  "kommune": {
+    "id": "11111111-2222-3333-4444-555555555551",
+    "name": "Musterkreis LageHelfer"
+  },
+  "organisationseinheiten": [
+    {
+      "key": "Nordkreis",
+      "name": "Nordkreis",
+      "bereiche": [
+        {
+          // Without any einsatzleitung assigned to this Bereich
+          "key": "Nordstadt",
+          "name": "Nordstadt"
+        },
+        {
+          "key": "Walddorf",
+          "name": "Walddorf",
+          "einsatzleitung": "Einsatzleitung Walddorf"
+        }
+      ],
+      "abteilungen": []
+    },
+    {
+      "key": "Suedkreis",
+      "name": "Suedkreis",
+      "bereiche": [
+        {
+          "key": "Fluessenstadt",
+          "name": "Fluessenstadt",
+          "einsatzleitung": "Einsatzleitung Fluessenstadt"
+        }
+      ],
+      "abteilungen": []
+    }
+  ],
+  "demo": {
+    "passwort": "123456",
+    "nutzer": [
+      {
+        "key": "superadmin",
+        "email": "superadmin-beispiel@example.com",
+        "vorname": "Sina",
+        "nachname": "Superadmin",
+        "art": "Superadmin"
+      },
+      {
+        "key": "einsatzleitung-nord",
+        "email": "einsatzleitung-nord@example.com",
+        "vorname": "Nina",
+        "nachname": "Einsatz",
+        "art": "Nutzer",
+        "organisationseinheit": "Nordkreis",
+        "einsatzleitungBereich": "Walddorf",
+        "rechte": [
+          "BackofficeAntraege"
+        ],
+        "globaleRechte": [
+          "LageHelfer"
+        ]
+      }
+    ]
+  }
+}

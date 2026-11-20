@@ -1,0 +1,7 @@
+.prepare-helm-install:
+  before_script:
+    - !reference [ default, before_script ]
+    - cd ${CI_PROJECT_DIR}/k8s
+    - cp $MONGO_ENV components/mongo.env
+    - cp $BEREICH_B_ENV components/bereich-b.env
+    - cp $BACKEND_ENV components/backend.env

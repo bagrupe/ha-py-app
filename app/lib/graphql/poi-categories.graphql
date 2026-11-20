@@ -1,0 +1,33 @@
+query PoiCategoryForKommune($kommuneIdBereichB: JSON!, $sort: String) {
+  poiCategories(where: {kommune: {equals: $kommuneIdBereichB}} sort: $sort, limit: 999) {
+    docs {
+      id
+      title
+      icon {
+        ...PoiIcon
+      }
+      supercategory {
+        id
+        title
+      }
+    }
+  }
+
+  sensorArten(where: {kommune: {equals: $kommuneIdBereichB}}) {
+    docs {
+      id
+      name
+      icon {
+        ...PoiIcon
+      }
+    }
+  }
+}
+
+query SensorArtIds($kommuneIdBereichB: JSON!) {
+  sensorArten(where: {kommune: {equals: $kommuneIdBereichB}}) {
+    docs {
+      id
+    }
+  }
+}

@@ -1,0 +1,133 @@
+########################################################
+# 🚧 TODO 🚧
+# Need to rewrite the end to end tests for docker compose setup
+########################################################
+
+# e2e:web:
+#   extends: [.pnpm]
+#   stage: e2e
+#   needs:
+#     - package:web-bereich-a
+#     - package:web-bereich-b
+#     - package:backend
+#   image: registry.example.invalid:4567/example/helm-playwright:4
+#   artifacts:
+#     when: always
+#     paths:
+#       - ./web/e2e/playwright-report
+#       - ./web/e2e/test-results
+#     expire_in: 1 week
+#     reports:
+#       junit:
+#         - ./**/results.xml
+#   variables:
+#     SOURCE_DIR: web/e2e
+#     E2E_RELEASE_NAME: ${CI_COMMIT_SHORT_SHA}-e2e-${CI_PIPELINE_IID}
+#     BEREICH_A_URL: https://${CI_COMMIT_SHORT_SHA}-e2e-${CI_PIPELINE_IID}.internal.example.invalid
+#     BEREICH_B_URL: https://bereich-b-${CI_COMMIT_SHORT_SHA}-e2e-${CI_PIPELINE_IID}.internal.example.invalid
+#     PLAYWRIGHT_JUNIT_OUTPUT_NAME: results.xml
+#   before_script:
+#     - !reference [.pnpm, before_script]
+#     - !reference [.prepare-helm-install, before_script]
+#   script:
+#     - cd ${CI_PROJECT_DIR}/k8s
+#     # TODO(security) set `ingressWhiteListSourceRange` (currently doesn't work due to upstream load balancer)
+#     - helm install $E2E_RELEASE_NAME . --force --namespace kommunalapp-feature-branches --set imageTag=${IMAGE_TAG} --wait --wait-for-jobs --timeout 10m0s
+#     - cd ${CI_PROJECT_DIR}/web/e2e
+#     - pnpm run test --reporter=junit
+#   after_script:
+#     - helm uninstall $E2E_RELEASE_NAME --namespace kommunalapp-feature-branches
+
+# e2e:android:
+#   stage: e2e
+#   extends: [.flutter]
+#   services:
+#     - name: budtmo/docker-android:emulator_11.0
+#       alias: emulator
+#   variables:
+#     SOURCE_DIR: app
+#     E2E_RELEASE_NAME: ${CI_COMMIT_SHORT_SHA}-e2e-android-${CI_PIPELINE_IID}
+#   needs:
+#     - package:web-bereich-a
+#     - package:web-bereich-b
+#     - package:backend
+#   artifacts:
+#     when: always
+#     paths:
+#       - app/build/app/reports/androidTests/connected/debug
+#   before_script:
+#     - !reference [.flutter, before_script]
+#     - !reference [.prepare-helm-install, before_script]
+#   script:
+#     # While we wait for the emulator to boot up, we can already launch the k8s deployment to pass some time
+#     - curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+#     - cd ${CI_PROJECT_DIR}/k8s
+#     - helm install $E2E_RELEASE_NAME . --force --namespace kommunalapp-feature-branches --set imageTag=${IMAGE_TAG} --wait --wait-for-jobs --timeout 10m0s
+#     - cd ${CI_PROJECT_DIR}/app
+
+#     # Ensuring we are actually connected to the emulator on the known port is a bit tricky because services don't
+#     #   support proper health-checks and adb connect does not set an exit-code if connecting failed. So we use grep to
+#     #   parse the output and retry if we cannot find a sign that connecting was successful!
+#     - while true; do adb connect emulator:5555 | grep 'connected to' >/dev/null && break; sleep 1; done;
+
+#     # We then also wait for the device to be actually connected and listed as "device" in adb
+#     - while true; do adb devices | grep -E 'emulator:5555\s+device' >/dev/null && break; sleep 1; done;
+#     - dart pub global activate patrol_cli 3.5.1
+#     - export PATH="${PATH}:/root/.pub-cache/bin"
+#     - flutter build apk --debug || true
+#     - >
+#       patrol test -d emulator:5555 \
+#         --dart-define=BACKEND_URL=https://${E2E_RELEASE_NAME}.internal.example.invalid
+#   after_script:
+#     - helm uninstall $E2E_RELEASE_NAME --namespace kommunalapp-feature-branches
+
+# # Because the Mac does not (and should not) have access to the Kubernetes cluster to deploy,
+# #  we create / tear down the deployment in separate jobs
+# e2e:ios-pre:
+#   stage: e2e
+#   needs:
+#     - package:web-bereich-a
+#     - package:web-bereich-b
+#     - package:backend
+#   image: alpine/helm:3.11.1
+#   variables:
+#     E2E_RELEASE_NAME: ${CI_COMMIT_SHORT_SHA}-e2e-ios-${CI_PIPELINE_IID}
+#   before_script:
+#     - !reference [.prepare-helm-install, before_script]
+#   script:
+#     - cd ${CI_PROJECT_DIR}/k8s/
+#     - helm install $E2E_RELEASE_NAME . --force --namespace kommunalapp-feature-branches --set imageTag=${IMAGE_TAG} --wait --wait-for-jobs --timeout 10m0s
+
+# e2e:ios:
+#   stage: e2e
+#   needs: [e2e:ios-pre]
+#   tags:
+#     - ios-ci-m2
+#   variables:
+#     PATROL_FLUTTER_COMMAND: fvm flutter
+#     E2E_RELEASE_NAME: ${CI_COMMIT_SHORT_SHA}-e2e-ios-${CI_PIPELINE_IID}
+#   before_script:
+#     - PATH="$PATH":"$HOME/.pub-cache/bin"
+#     - iphone=$CI_COMMIT_REF_SLUG-$CI_PIPELINE_IID
+#     - xcrun simctl create $iphone "iPhone 15 Pro Max" "iOS18.1"
+#     - xcrun simctl boot $iphone
+#   script:
+#     - cd ${CI_PROJECT_DIR}/app
+#     - xcrun simctl bootstatus $iphone
+#     - >
+#       fvm dart run patrol_cli:main test -d $iphone --verbose \
+#         --dart-define=BACKEND_URL=https://${E2E_RELEASE_NAME}.internal.example.invalid
+#   after_script:
+#     - xcrun simctl shutdown $CI_COMMIT_REF_SLUG-$CI_PIPELINE_IID
+#     - xcrun simctl delete $CI_COMMIT_REF_SLUG-$CI_PIPELINE_IID
+
+# e2e:ios-post:
+#   stage: e2e
+#   needs: [e2e:ios]
+#   when: always
+#   image: alpine/helm:3.11.1
+#   variables:
+#     E2E_RELEASE_NAME: ${CI_COMMIT_SHORT_SHA}-e2e-ios-${CI_PIPELINE_IID}
+#   script:
+#     - cd k8s/
+#     - helm uninstall ${E2E_RELEASE_NAME} -n kommunalapp-feature-branches

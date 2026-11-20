@@ -1,0 +1,19 @@
+===== Geoflächen
+Das Backoffice verfügt mit dem `Prozesseditor` über ein Werkzeug, das
+unterschiedliche Informationen in den Ablauf von Prozessen einbeziehen kann, so
+auch Geoflächen.
+
+Möchte man im Prozesseditor eine Regel aufstellen, die basierend auf dem
+Standort einer Meldung oder eines Sachverhalts den Antrag der korrekten
+Abteilung innerhalb einer Organisationseinheit zuweist, dann muss dafür eine
+Geofläche vorhanden sein.
+
+Beispiel: ein Nutzer meldet einen Mangel in einer Kommune. Dieser Mangel soll
+automatisch der zuständigen Abteilung zugewiesen werden. Dann muss der
+Prozesseditor den Standort der Mangel-Meldung mit *etwas* abgleichen. Dieses
+*etwas* ist die Geofläche für die Organisationseinheit in dieser Kommune.
+
+In der Collection Geoflächen werden also Flächen im `GeoJSON`-Format hinterlegt
+und mit einer `Untereinheit` verknüpft - im Beispiel oben mit der Untereinheit
+dieser Kommune. Im Prozesseditor kann dann auf diese Geofläche referenziert werden, über
+den *Namen* der Geofläche.
