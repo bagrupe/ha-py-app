@@ -17,7 +17,7 @@ namespace API.Seeders.LageHelfer;
 /// </remarks>
 public static class EreignismeldungVorlage {
     /// <summary>Bump whenever the structure below changes, so the seeder publishes a new version.</summary>
-    private const int Revision = 4;
+    private const int Revision = 5;
 
     public const string StandortSlot = GebietEinsatzleitungZustaendigkeitSchritt.StandortSlotName;
     public const string KategorieSlot = "kategorie";
@@ -25,6 +25,9 @@ public static class EreignismeldungVorlage {
     public const string BilderSlot = "bilder";
     public const string RueckrufnummerSlot = "rueckrufnummer";
     public const int MaxFotos = 3;
+    public const string PrioritaetSlot = "prioritaet";
+    public const string InterneNotizSlot = "interneNotiz";
+    public const string VerbindungSpeichern = "Speichern";
 
     public const string StatusEingegangen = "Meldung ist eingegangen";
     public const string StatusHilfeUnterwegs = MeldungStatusErmittlung.StatusTextHilfeUnterwegs;
@@ -107,6 +110,24 @@ public static class EreignismeldungVorlage {
                 typeof(GebietEinsatzleitungZustaendigkeitSchritt).AssemblyQualifiedName!,
         };
 
+        // Leitstelle-only fields. Encrypted because the Backoffice encrypts every value it submits; they never
+        // appear in the citizen-facing status or in activeLagen.
+        var einschaetzung = () => new List<FormularFeld> {
+            new StringFormularFeld {
+                SlotName = PrioritaetSlot,
+                AngezeigterName = "Priorität",
+                Options = [new("Hoch"), new("Niedrig")],
+                Order = 0,
+            },
+            new StringFormularFeld {
+                SlotName = InterneNotizSlot,
+                AngezeigterName = "Interne Notiz",
+                Anweisung = "Nur für Leitstelle und Einsatzleitung sichtbar.",
+                Multiline = true,
+                Order = 1,
+            },
+        };
+
         var pruefung = new FormularSchritt {
             Titel = "Meldung prüfen",
             NodePosition = new NodePosition { X = 900, Y = 200 },
@@ -115,14 +136,23 @@ public static class EreignismeldungVorlage {
                 DynamischeArten = [ZustaendigkeitArt.Organisationseinheit],
             },
             SchreibtRolle = einsatzleitung,
-            Felder = [],
+            Felder = einschaetzung(),
+        };
+
+        // "Speichern" cannot loop back onto "Meldung prüfen": that step takes its Zuständigkeit from the Gebiet
+        // step, so a loop would ask the Backoffice for one. This twin reads it from the role instead.
+        var inPruefung = new FormularSchritt {
+            Titel = "Meldung in Prüfung",
+            NodePosition = new NodePosition { X = 900, Y = 400 },
+            SollZustaendigkeit = vonEinsatzleitung(),
+            Felder = einschaetzung(),
         };
 
         var einsatz = new FormularSchritt {
             Titel = "Einsatz läuft",
             NodePosition = new NodePosition { X = 1200, Y = 100 },
             SollZustaendigkeit = vonEinsatzleitung(),
-            Felder = [],
+            Felder = einschaetzung(),
         };
 
         var ende = new EndeSchritt {
@@ -131,7 +161,7 @@ public static class EreignismeldungVorlage {
         };
 
         // Start must be first: the seeder sets ProzessVersion.Start from it.
-        var schritte = new List<Schritt> { meldung, zuordnung, pruefung, einsatz, ende };
+        var schritte = new List<Schritt> { meldung, zuordnung, pruefung, inPruefung, einsatz, ende };
         var verbindungen = new List<Verbindung> {
             new() { Von = meldung, Nach = zuordnung, StatusAenderung = StatusEingegangen },
             new() { Von = zuordnung, Nach = pruefung },
@@ -142,9 +172,19 @@ public static class EreignismeldungVorlage {
                 Von = pruefung, Nach = ende, Name = "Meldung schließen",
                 StatusAenderung = "Meldung wurde geprüft und geschlossen",
             },
+            new() { Von = pruefung, Nach = inPruefung, Name = VerbindungSpeichern },
+            new() {
+                Von = inPruefung, Nach = einsatz, Name = "Hilfe einleiten", StatusAenderung = StatusHilfeUnterwegs,
+            },
+            new() {
+                Von = inPruefung, Nach = ende, Name = "Meldung schließen",
+                StatusAenderung = "Meldung wurde geprüft und geschlossen",
+            },
+            new() { Von = inPruefung, Nach = inPruefung, Name = VerbindungSpeichern },
             new() {
                 Von = einsatz, Nach = ende, Name = "Einsatz abschließen", StatusAenderung = "Einsatz abgeschlossen",
             },
+            new() { Von = einsatz, Nach = einsatz, Name = VerbindungSpeichern },
         };
 
         return (schritte, verbindungen, [einsatzleitung]);

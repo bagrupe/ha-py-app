@@ -1,3 +1,4 @@
+using API.Features.Auth;
 using Microsoft.EntityFrameworkCore;
 
 namespace API.Features.Prozess;
@@ -7,7 +8,7 @@ public enum MeldungStatus {
     [GraphQLDescription("Eingegangen, noch nicht von der Einsatzleitung übernommen.")]
     Eingegangen,
 
-    [GraphQLDescription("Von der Einsatzleitung übernommen und in Bearbeitung.")]
+    [GraphQLDescription("Von der Einsatzleitung übernommen oder bereits bearbeitet.")]
     InBearbeitung,
 
     [GraphQLDescription("Die Einsatzleitung hat Hilfe eingeleitet.")]
@@ -36,6 +37,12 @@ public static class MeldungStatusErmittlung {
             .Where(a => ausfuehrungIds.Contains(a.Id))
             .Select(a => new { a.Id, a.Status, Zugewiesen = a.IstZustaendigkeit.ZugewiesenePersonId != null })
             .ToListAsync(ct);
+        // Steps done by staff, e.g. saving a priority; the submitter and automatic steps act as other users.
+        var bearbeitetVonMitarbeitenden = (await db.Bearbeitungen
+                .Where(b => ausfuehrungIds.Contains(b.AusfuehrungId) && b.User is Mitarbeiter)
+                .Select(b => b.AusfuehrungId)
+                .ToListAsync(ct))
+            .ToHashSet();
         var hilfeUnterwegs = (await db.Bearbeitungen
                 .Where(b => ausfuehrungIds.Contains(b.AusfuehrungId)
                     && b.NextVerbindung.StatusAenderung == StatusTextHilfeUnterwegs)
@@ -51,7 +58,8 @@ public static class MeldungStatusErmittlung {
         return ausfuehrungen.ToDictionary(a => a.Id, a =>
             a.Status == AusfuehrungStatus.Abgeschlossen ? MeldungStatus.Abgeschlossen
             : hilfeUnterwegs.Contains(a.Id) ? MeldungStatus.HilfeUnterwegs
-            : a.Zugewiesen || uebernommen.Contains(a.Id) ? MeldungStatus.InBearbeitung
+            : a.Zugewiesen || uebernommen.Contains(a.Id) || bearbeitetVonMitarbeitenden.Contains(a.Id)
+                ? MeldungStatus.InBearbeitung
             : MeldungStatus.Eingegangen);
     }
 }

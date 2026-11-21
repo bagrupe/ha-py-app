@@ -202,7 +202,7 @@ export enum MeldungStatus {
   Eingegangen = 'EINGEGANGEN',
   /** Die Einsatzleitung hat Hilfe eingeleitet. */
   HilfeUnterwegs = 'HILFE_UNTERWEGS',
-  /** Von der Einsatzleitung übernommen und in Bearbeitung. */
+  /** Von der Einsatzleitung übernommen oder bereits bearbeitet. */
   InBearbeitung = 'IN_BEARBEITUNG',
 }
 

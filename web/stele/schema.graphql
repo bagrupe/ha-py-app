@@ -7371,7 +7371,7 @@ enum LogoutAllDevicesResult {
 enum MeldungStatus {
   "Eingegangen, noch nicht von der Einsatzleitung übernommen."
   EINGEGANGEN
-  "Von der Einsatzleitung übernommen und in Bearbeitung."
+  "Von der Einsatzleitung übernommen oder bereits bearbeitet."
   IN_BEARBEITUNG
   "Die Einsatzleitung hat Hilfe eingeleitet."
   HILFE_UNTERWEGS

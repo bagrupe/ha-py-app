@@ -1,3 +1,4 @@
+using System.Text.Json;
 using System.Text.Json.Nodes;
 using API.Features;
 using API.Features.Auth;
@@ -228,6 +229,7 @@ public class LageHelferSeederTest(LageHelferSeederApiFactory factory) : GraphQLT
             .Include(v => v.Schritte).ThenInclude(s => s.Verbindungen).SingleAsync();
         var meldung = version.Schritte.Single(s => s.Id == version.StartId);
         var pruefung = version.Schritte.Single(s => s.Titel == "Meldung prüfen");
+        var inPruefung = version.Schritte.Single(s => s.Titel == "Meldung in Prüfung");
         var einsatz = version.Schritte.Single(s => s.Titel == "Einsatz läuft");
         var fluessenstadtGebiet = LageHelferSeedData.GebietId(ExampleDocument.IdNamespace, "Fluessenstadt");
         var lage = await SeedLiveLage(fluessenstadtGebiet);
@@ -265,14 +267,21 @@ public class LageHelferSeederTest(LageHelferSeederApiFactory factory) : GraphQLT
         var fluessenstadt = LageHelferSeedData.EinsatzleitungId(ExampleDocument.IdNamespace, "Fluessenstadt");
         Assert.Equal(fluessenstadt, ausfuehrung.IstZustaendigkeit.MitarbeiterGruppeId);
 
-        var walkerFactory = Factory.Services.GetRequiredService<WalkerFactory>();
-        await using (var walker = await walkerFactory.ContinueAusfuehrung(ausfuehrung.Id)) {
-            walker.Step(LageHelferSeedData.NutzerId(ExampleDocument.IdNamespace, "superadmin"), pruefung.Verbindungen.Single(v => v.NachId == einsatz.Id).Id, [], null);
-            await walker.SaveChangesAsync();
-        }
+        var superadmin = LageHelferSeedData.NutzerId(ExampleDocument.IdNamespace, "superadmin");
+        var einschaetzung = new List<SlotValuesInput> {
+            new(EreignismeldungVorlage.PrioritaetSlot, new EncryptedValue("n", "t", "hoch-verschluesselt")),
+            new(EreignismeldungVorlage.InterneNotizSlot, new EncryptedValue("n", "t", "notiz-verschluesselt")),
+        };
+        await Weiter(ausfuehrung.Id, superadmin, pruefung, inPruefung, einschaetzung);
+        Assert.Equal("IN_BEARBEITUNG", await AnonymerStatus(correlationId));
+        await Weiter(ausfuehrung.Id, superadmin, inPruefung, inPruefung, einschaetzung);
+        await Weiter(ausfuehrung.Id, superadmin, inPruefung, einsatz, []);
+        await Weiter(ausfuehrung.Id, superadmin, einsatz, einsatz, einschaetzung);
 
         ausfuehrung = await NewDb().Ausfuehrungen.SingleAsync(a => a.Id == ausfuehrung.Id);
         Assert.Equal(einsatz.Id, ausfuehrung.SchrittId);
+        Assert.Equal(3, await NewDb().EncryptedSlotValues.CountAsync(sv =>
+            sv.SlotName == EreignismeldungVorlage.InterneNotizSlot && sv.Bearbeitung.AusfuehrungId == ausfuehrung.Id));
         Assert.Equal(fluessenstadt, ausfuehrung.IstZustaendigkeit.MitarbeiterGruppeId);
 
         Factory.Services.GetRequiredService<IHttpContextAccessor>().HttpContext = new DefaultHttpContext();
@@ -287,6 +296,10 @@ public class LageHelferSeederTest(LageHelferSeederApiFactory factory) : GraphQLT
         Assert.True(status.Errors is null, status.ToJson());
         Assert.Contains(EreignismeldungVorlage.StatusHilfeUnterwegs, status.ToJson());
         Assert.Contains("\"status\": \"HILFE_UNTERWEGS\"", status.ToJson());
+        // Saving priority or note leaves no trace in what the submitter sees.
+        Assert.Equal(2, JsonDocument.Parse(status.ToJson()).RootElement.GetProperty("data")
+            .GetProperty("ausfuehrungStatusAnonym").GetProperty("historie").GetArrayLength());
+        Assert.DoesNotContain("verschluesselt", status.ToJson());
         // The Superadmin clicked "Hilfe einleiten"; a CorrelationId must not reveal who that was.
         Assert.DoesNotContain("Superadmin", status.ToJson());
 
@@ -296,6 +309,24 @@ public class LageHelferSeederTest(LageHelferSeederApiFactory factory) : GraphQLT
             }
             """, new Dictionary<string, object?> { ["correlationId"] = correlationId });
         Assert.NotNull(mitName.Errors);
+    }
+
+    private async Task Weiter(Guid ausfuehrungId, Guid userId, Schritt von, Schritt nach,
+        IReadOnlyList<SlotValuesInput> slotValues) {
+        await using var walker = await Factory.Services.GetRequiredService<WalkerFactory>()
+            .ContinueAusfuehrung(ausfuehrungId);
+        walker.Step(userId, von.Verbindungen.Single(v => v.NachId == nach.Id).Id, slotValues, null);
+        await walker.SaveChangesAsync();
+    }
+
+    private async Task<string?> AnonymerStatus(Guid correlationId) {
+        Factory.Services.GetRequiredService<IHttpContextAccessor>().HttpContext = new DefaultHttpContext();
+        var result = await ExecuteGraphqlAsync(null, """
+            query Status($correlationId: UUID!) { ausfuehrungStatusAnonym(correlationId: $correlationId) { status } }
+            """, new Dictionary<string, object?> { ["correlationId"] = correlationId });
+        Assert.True(result.Errors is null, result.ToJson());
+        return JsonDocument.Parse(result.ToJson()).RootElement.GetProperty("data")
+            .GetProperty("ausfuehrungStatusAnonym").GetProperty("status").GetString();
     }
 
     private async Task<Lage> SeedLiveLage(Guid gebietId) {

@@ -23,6 +23,7 @@ import MoveLocation from '../../../assets/move_location.svg';
 import {Accordion} from '../../../components/accordion.tsx';
 import {CheckboxListFormField} from '../../../components/form/fields/checkbox-field';
 import {InputFormField} from '../../../components/form/fields/input-field';
+import {SelectFormField} from '../../../components/form/fields/select-field';
 import {Form} from '../../../components/form/form.tsx';
 import {Button, buttonVariants} from '../../../components/ui/button';
 import {
@@ -520,6 +521,26 @@ export const AntragDetail: FC = () => {
                     className={twMerge('w-full', PLATZHALTER_LABEL_CLASS)}
                   >
                     {currentSchritt.felder.map((feld) => {
+                      if (
+                        feld.__typename == 'StringFormularFeld' &&
+                        feld.options.length > 0
+                      ) {
+                        return (
+                          <SelectFormField
+                            key={feld.id}
+                            items={feld.options.map((o) => ({
+                              value: o.key,
+                              name: o.value,
+                            }))}
+                            disabled={
+                              !currentUserIsAssigned ||
+                              ausfuehrungContinueState.fetching
+                            }
+                            on={formbuilder.fields.slotValues[feld.slotName]}
+                            label={feld.angezeigterName ?? feld.slotName}
+                          />
+                        );
+                      }
                       if (feld.__typename == 'StringFormularFeld') {
                         return (
                           <InputFormField
