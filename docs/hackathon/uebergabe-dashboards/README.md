@@ -251,7 +251,7 @@ Die Kennzahlen im Mock (8 / 9 / 2 / 17 bzw. 5 / 3 / 2 / 11) passen nicht exakt z
 
 ## 8. Abweichungen zwischen Mock und echten Seed-Daten
 
-1. **Zuschnitt der Einsatzleitungen:** Der Mock hat zwei große Einsatzleitungen *Nord/Süd*. Im KRL-Seed hat jeder Bereich (= Gemeinde) seine eigene Einsatzleitung („Einsatzleitung Hameln“, „Einsatzleitung Bad Münder“ …); zwei Landkreise als Organisationseinheiten (Hameln-Pyrmont, Holzminden). Das Datenmodell erlaubt eine Gruppe für mehrere Gebiete (`addGebietEinsatzleitung`), Nord/Süd wäre also nachbildbar. **Für den Prototyp: Mock-Zuschnitt Nord/Süd verwenden**, Zuschnitt in der Datenschicht konfigurierbar halten.
+1. **Zuschnitt der Einsatzleitungen:** Der Mock hat zwei große Einsatzleitungen *Nord/Süd*. Im KRL-Seed hat jeder Bereich (= Gemeinde) seine eigene Einsatzleitung („Einsatzleitung Hameln“, „Einsatzleitung Bad Münder“ …); zwei Landkreise als Organisationseinheiten (Hameln-Pyrmont, Holzminden). Das Datenmodell erlaubt eine Gruppe für mehrere Gebiete (`addGebietEinsatzleitung`), Nord/Süd wäre also nachbildbar. **Für den Prototyp: KRL-Seed wie er ist** (Abschnitt 9); die Mock-Daten aus Abschnitt 7 werden auf die echten Einsatzleitungen verteilt.
 2. **Salzhemmendorf** hat im Seed keine Einsatzleitung, im Mock gehört es zu Nord.
 3. **Kategorien:** Mock nutzt *Sturm*/*Überschwemmung*, der Seed-Prozess hat *Unwetter*, *Großbrand*, *Hagelsturm*, *Blitzeis*. Kategorien und Farben daher nicht fest verdrahten (Abschnitt 6a).
 4. **Lage vs. Kategorie:** Die Lage heißt „Sturm“, enthält aber auch Überschwemmungs-Ereignisse. Kategorie ist also eine Eigenschaft des Ereignisses, nicht der Lage.
@@ -259,22 +259,27 @@ Die Kennzahlen im Mock (8 / 9 / 2 / 17 bzw. 5 / 3 / 2 / 11) passen nicht exakt z
 
 ---
 
-## 9. Offene Fragen (bitte mit Produkt/Team klären, nicht blockierend)
+## 9. Entscheidungen
 
-- Wann wird aus *zugewiesen* ein *in Bearbeitung*: durch die Einheit, die Einsatzleitung oder automatisch?
-- Darf eine Einsatzleitung Ereignisse zwischen eigenen Einheiten umhängen oder zurück in den Eingang ziehen?
-- Soll die Leitstelle auch Einheiten sehen/verschieben können oder nur Einsatzleitungen?
-- Schwellwert für die Wartezeit-Hervorhebung?
-- Drop auf eine Einheit mit „✗ fehlt“: blockieren oder mit Rückfrage trotzdem zuweisen?
-- Ersetzt die Klasse A–D den Slot `prioritaet` (Hoch/Niedrig), oder gibt es beides?
-- Bestimmung von Klasse, Bedarf und Notfall in der Demo: echter LLM-Aufruf oder regelbasierter Fallback?
-- Produktname: „Lagehelfer“ oder „DEICH“?
+Die Umsetzung des Prototyps läuft in derselben Session wie diese Übergabe (Full-Stack: Backend aus 5a + beide Dashboards).
 
 **Entschieden am 22.11.:**
 - Abgabe an die Leitstelle: Grund Pflicht, Kommentar nur bei *Sonstiges* Pflicht.
 - Bauhof/THW: externe Übergabe mit eigenem Endstatus, keine eigenen Mitarbeitergruppen.
 - Meldeweg: umkehrbar pausieren im Dashboard, endgültiges Beenden bleibt in `/lage`.
 - Farben: semantische Tokens im Design System, unabhängig von `primary`.
+- Klasse, benötigte Ausrüstung und möglicher Notfall: **nur regelbasiert** (Stichwörter), kein LLM im Prototyp.
+- Drop auf eine Einheit mit „✗ fehlt“: Rückfrage „Trotzdem zuweisen?“, dann zuweisen.
+- *Zugewiesen → in Bearbeitung*: Button **„Läuft“** neben „Erledigt“ an der Einheit (`meldungFortsetzen(HILFE_EINLEITEN)`).
+- Klasse A–D **ersetzt** den Slot `prioritaet`; der Slot wird aus der Prozessvorlage entfernt.
+- Zuschnitt: **KRL-Seed wie er ist** (je Gemeinde eine Einsatzleitung). Der Ansicht-Umschalter listet alle Einsatzleitungen; Nord/Süd aus dem Mock wird nicht nachgebaut.
+- Produktname im Kopf: **DEICH**.
+
+**Gesetzte Standards (ohne Rückfrage, änderbar):**
+- Wartezeit-Hervorhebung ab 2 h.
+- Die Einsatzleitung darf Ereignisse zwischen eigenen Einheiten umhängen und zurück in den Eingang ziehen.
+- Die Leitstelle sieht Einheiten nur als Zahl („2/4 frei“) je Einsatzleitung, verschiebt sie nicht.
+- Commits direkt auf `main`, kein Push.
 
 ---
 
