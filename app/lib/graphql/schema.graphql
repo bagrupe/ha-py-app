@@ -207,8 +207,8 @@ type AnonymeAusfuehrungStatus {
   status: AusfuehrungStatus!
   createdAt: Instant!
   abgeschlossenAm: Instant
-  "Bürgerseitige Status-Historie, wie sie auch angemeldete Bürger:innen sehen."
-  historie: [Historie!]!
+  "Bürgerseitige Status-Historie, ohne Namen der Bearbeitenden: Die CorrelationId ist kein Login."
+  historie: [AnonymerHistorieEintrag!]!
 }
 
 type AnonymeEinreichungNichtErlaubtError implements Error {
@@ -217,6 +217,15 @@ type AnonymeEinreichungNichtErlaubtError implements Error {
 
 type AnonymeEinreichungUnvollstaendigError implements Error {
   message: String!
+}
+
+"Eintrag im Status-Verlauf eines anonym eingereichten Antrags."
+type AnonymerHistorieEintrag {
+  createdAt: Instant!
+  statusAenderung: String
+  statusAenderungBeschreibung: String
+  "Freitextnachricht der Bearbeitenden an die meldende Person (falls vorhanden)."
+  nachricht: String
 }
 
 type AntragSoftLoeschenPayload {

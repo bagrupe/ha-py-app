@@ -21,6 +21,7 @@ public class AnonymeAusfuehrungQueries {
 
         var historie = await historieLoader.LoadAsync(ausfuehrung.Id, ct);
         return new AnonymeAusfuehrungStatus(ausfuehrung.Status, ausfuehrung.CreatedAt, ausfuehrung.AbgeschlossenAm,
-            historie.ToList());
+            historie.Select(h => new AnonymerHistorieEintrag(h.CreatedAt, h.StatusAenderung,
+                h.StatusAenderungBeschreibung, h.Nachricht)).ToList());
     }
 }

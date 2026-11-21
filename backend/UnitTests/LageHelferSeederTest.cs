@@ -281,10 +281,22 @@ public class LageHelferSeederTest(LageHelferSeederApiFactory factory) : GraphQLT
         Factory.Services.GetRequiredService<IHttpContextAccessor>().HttpContext = new DefaultHttpContext();
         var status = await ExecuteGraphqlAsync(null, """
             query Status($correlationId: UUID!) {
-              ausfuehrungStatusAnonym(correlationId: $correlationId) { historie { statusAenderung } }
+              ausfuehrungStatusAnonym(correlationId: $correlationId) {
+                historie { createdAt statusAenderung statusAenderungBeschreibung nachricht }
+              }
             }
             """, new Dictionary<string, object?> { ["correlationId"] = correlationId });
+        Assert.True(status.Errors is null, status.ToJson());
         Assert.Contains(EreignismeldungVorlage.StatusHilfeUnterwegs, status.ToJson());
+        // The Superadmin clicked "Hilfe einleiten"; a CorrelationId must not reveal who that was.
+        Assert.DoesNotContain("Superadmin", status.ToJson());
+
+        var mitName = await ExecuteGraphqlAsync(null, """
+            query Status($correlationId: UUID!) {
+              ausfuehrungStatusAnonym(correlationId: $correlationId) { historie { benutzer } }
+            }
+            """, new Dictionary<string, object?> { ["correlationId"] = correlationId });
+        Assert.NotNull(mitName.Errors);
     }
 
     private async Task<Lage> SeedLiveLage(Guid gebietId) {

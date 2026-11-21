@@ -25,8 +25,17 @@ public record AnonymeAusfuehrungStatus(
     AusfuehrungStatus Status,
     Instant CreatedAt,
     Instant? AbgeschlossenAm,
-    [property: GraphQLDescription("Bürgerseitige Status-Historie, wie sie auch angemeldete Bürger:innen sehen.")]
-    IReadOnlyList<Historie> Historie);
+    [property: GraphQLDescription(
+        "Bürgerseitige Status-Historie, ohne Namen der Bearbeitenden: Die CorrelationId ist kein Login.")]
+    IReadOnlyList<AnonymerHistorieEintrag> Historie);
+
+[GraphQLDescription("Eintrag im Status-Verlauf eines anonym eingereichten Antrags.")]
+public record AnonymerHistorieEintrag(
+    Instant CreatedAt,
+    string? StatusAenderung,
+    string? StatusAenderungBeschreibung,
+    [property: GraphQLDescription("Freitextnachricht der Bearbeitenden an die meldende Person (falls vorhanden).")]
+    string? Nachricht);
 
 public class AnonymeEinreichungNichtErlaubtException()
     : DomainException("Dieser Prozess kann nicht anonym eingereicht werden.");

@@ -653,7 +653,7 @@ export default {
                   kind: 'NON_NULL',
                   ofType: {
                     kind: 'OBJECT',
-                    name: 'Historie',
+                    name: 'AnonymerHistorieEintrag',
                     ofType: null,
                   },
                 },
@@ -722,6 +722,52 @@ export default {
             name: 'Error',
           },
         ],
+      },
+      {
+        kind: 'OBJECT',
+        name: 'AnonymerHistorieEintrag',
+        fields: [
+          {
+            name: 'createdAt',
+            type: {
+              kind: 'NON_NULL',
+              ofType: {
+                kind: 'SCALAR',
+                name: 'Instant',
+                ofType: null,
+              },
+            },
+            args: [],
+          },
+          {
+            name: 'nachricht',
+            type: {
+              kind: 'SCALAR',
+              name: 'String',
+              ofType: null,
+            },
+            args: [],
+          },
+          {
+            name: 'statusAenderung',
+            type: {
+              kind: 'SCALAR',
+              name: 'String',
+              ofType: null,
+            },
+            args: [],
+          },
+          {
+            name: 'statusAenderungBeschreibung',
+            type: {
+              kind: 'SCALAR',
+              name: 'String',
+              ofType: null,
+            },
+            args: [],
+          },
+        ],
+        interfaces: [],
       },
       {
         kind: 'UNION',
