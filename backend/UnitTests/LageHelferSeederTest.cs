@@ -3,11 +3,16 @@ using API.Features;
 using API.Features.Auth;
 using API.Features.Funktionsberechtigungen;
 using API.Features.Lage;
+using API.Features.Prozess;
 using API.Options;
 using API.Seeders.LageHelfer;
+using HotChocolate;
+using HotChocolate.Execution;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using NodaTime;
+using Path = System.IO.Path;
 
 namespace IntegrationTests;
 
@@ -24,11 +29,11 @@ public class LageHelferSeederTest(LageHelferSeederApiFactory factory) : GraphQLT
 
     private static LageHelferSeedDocument ExampleDocument => LageHelferSeedLoader.Load(ExampleSeedPath);
 
-    private async Task RunSeeder(EnvironmentOptions? environment = null) {
+    private async Task RunSeeder(EnvironmentOptions? environment = null, string? seedPath = null) {
         await using var scope = Factory.Services.CreateAsyncScope();
         var seederOptions = new DataSeederOptions {
             LageHelferEnabled = true,
-            LageHelferSeedPath = ExampleSeedPath,
+            LageHelferSeedPath = seedPath ?? ExampleSeedPath,
             LageHelferKeyEncryptionKey = DemoKeyEncryptionKey,
         };
         var seeder = environment is null
@@ -175,6 +180,119 @@ public class LageHelferSeederTest(LageHelferSeederApiFactory factory) : GraphQLT
         Assert.True(JsonNode.DeepEquals(JsonNode.Parse(mutated), JsonNode.Parse(after.Geometry!)));
         Assert.False(JsonNode.DeepEquals(JsonNode.Parse(original!), JsonNode.Parse(after.Geometry!)));
     }
+
+    private Guid MeldeprozessId => LageHelferSeedData.ProzessId(ExampleDocument.IdNamespace, "ereignis-melden");
+
+    [Fact]
+    public async Task Seeds_meldeprozess_with_anonym_tag_and_is_idempotent() {
+        await RunSeeder();
+        await RunSeeder();
+
+        var db = NewDb();
+        var prozess = await db.Prozesse.AsSplitQuery().Include(p => p.Tags).Include(p => p.Versionen)
+            .SingleAsync(p => p.Id == MeldeprozessId);
+        Assert.Equal("Ereignis melden", prozess.Name);
+        Assert.Equal(ExampleDocument.Kommune.Id, prozess.KommuneId);
+        Assert.Single(prozess.Versionen);
+        Assert.Equal([AnonymeEinreichung.ProzessTagName], prozess.Tags.Select(t => t.Tag));
+        Assert.Single(await db.ProzessTags.Where(t => t.Tag == AnonymeEinreichung.ProzessTagName).ToListAsync());
+        Assert.Single(await db.ProzessTagHistorie.Where(h => h.ProzessId == MeldeprozessId).ToListAsync());
+    }
+
+    [Fact]
+    public async Task Changed_kategorien_publish_a_new_version_and_keep_the_old_one() {
+        await RunSeeder();
+
+        var changedSeed = Path.Combine(Path.GetTempPath(), "lagehelfer-seed-" + Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(changedSeed);
+        File.Copy(Path.Combine(ExampleSeedPath, "flaechen.geojson"), Path.Combine(changedSeed, "flaechen.geojson"));
+        File.WriteAllText(Path.Combine(changedSeed, "seed.json"),
+            File.ReadAllText(Path.Combine(ExampleSeedPath, "seed.json"))
+                .Replace("\"Blitzeis\"]", "\"Blitzeis\", \"Hochwasser\"]"));
+        await RunSeeder(seedPath: changedSeed);
+        await RunSeeder(seedPath: changedSeed);
+
+        var db = NewDb();
+        var versionen = await db.ProzessVersionen.Where(v => v.ProzessId == MeldeprozessId).ToListAsync();
+        Assert.Equal(2, versionen.Count);
+    }
+
+    [Fact]
+    public async Task Seeded_meldeprozess_runs_from_anonymous_report_to_hilfe_unterwegs() {
+        await RunSeeder();
+        var db = NewDb();
+        // The database reset wipes the SystemUser that app startup normally guarantees.
+        await SystemUser.EnsureSystemUserExists(db);
+        var version = await db.ProzessVersionen.AsSplitQuery().Where(v => v.ProzessId == MeldeprozessId)
+            .Include(v => v.Schritte).ThenInclude(s => s.Verbindungen).SingleAsync();
+        var lebensgefahr = version.Schritte.Single(s => s.Id == version.StartId);
+        var meldung = version.Schritte.OfType<FormularSchritt>().Single(s => s.Titel == "Angaben zum Ereignis");
+        var pruefung = version.Schritte.Single(s => s.Titel == "Meldung prüfen");
+        var einsatz = version.Schritte.Single(s => s.Titel == "Einsatz läuft");
+
+        Factory.Services.GetRequiredService<IHttpContextAccessor>().HttpContext = new DefaultHttpContext();
+        var create = await ExecuteQuery(null, """
+            mutation CreateAnonym($input: AusfuehrungCreateAnonymInput!) {
+              ausfuehrungCreateAnonym(input: $input) {
+                anonymeAusfuehrungResult { correlationId }
+              }
+            }
+            """, new Dictionary<string, object?> {
+            ["prozessVersionId"] = version.Id,
+            ["sharedKeyEncryptedForKommune"] = "key",
+            ["bearbeitungen"] = new List<Dictionary<string, object?>> {
+                Bearbeitung(lebensgefahr, lebensgefahr.Verbindungen.Single(v => v.NachId == meldung.Id),
+                    (EreignismeldungVorlage.LebensgefahrSlot, "Nein")),
+                Bearbeitung(meldung, meldung.Verbindungen.Single(),
+                    (EreignismeldungVorlage.StandortSlot, new Dictionary<string, object?> {
+                        ["addressString"] = "Fluessenstadt",
+                        ["coordinates"] = new List<object> { 9.2, 51.95 },
+                    }),
+                    (EreignismeldungVorlage.KategorieSlot, "Unwetter")),
+            },
+        });
+        Assert.True(create.Errors is null, create.ToJson());
+        var correlationId = Guid.Parse(create.ToJson().Split("\"correlationId\": \"")[1][..36]);
+
+        await using (var scope = Factory.Services.CreateAsyncScope()) {
+            var runner = ActivatorUtilities.CreateInstance<ProgrammatischerSchrittRunner>(scope.ServiceProvider);
+            await runner.Execute(JobExecutionContextTestHelper.Create("test"));
+        }
+
+        var ausfuehrung = await NewDb().Ausfuehrungen.SingleAsync(a => a.CorrelationId == correlationId);
+        Assert.Equal(pruefung.Id, ausfuehrung.SchrittId);
+        var fluessenstadt = LageHelferSeedData.EinsatzleitungId(ExampleDocument.IdNamespace, "Fluessenstadt");
+        Assert.Equal(fluessenstadt, ausfuehrung.IstZustaendigkeit.MitarbeiterGruppeId);
+
+        var walkerFactory = Factory.Services.GetRequiredService<WalkerFactory>();
+        await using (var walker = await walkerFactory.ContinueAusfuehrung(ausfuehrung.Id)) {
+            walker.Step(LageHelferSeedData.NutzerId(ExampleDocument.IdNamespace, "superadmin"), pruefung.Verbindungen.Single(v => v.NachId == einsatz.Id).Id, [], null);
+            await walker.SaveChangesAsync();
+        }
+
+        ausfuehrung = await NewDb().Ausfuehrungen.SingleAsync(a => a.Id == ausfuehrung.Id);
+        Assert.Equal(einsatz.Id, ausfuehrung.SchrittId);
+        Assert.Equal(fluessenstadt, ausfuehrung.IstZustaendigkeit.MitarbeiterGruppeId);
+
+        Factory.Services.GetRequiredService<IHttpContextAccessor>().HttpContext = new DefaultHttpContext();
+        var status = await ExecuteGraphqlAsync(null, """
+            query Status($correlationId: UUID!) {
+              ausfuehrungStatusAnonym(correlationId: $correlationId) { historie { statusAenderung } }
+            }
+            """, new Dictionary<string, object?> { ["correlationId"] = correlationId });
+        Assert.Contains(EreignismeldungVorlage.StatusHilfeUnterwegs, status.ToJson());
+    }
+
+    private static Dictionary<string, object?> Bearbeitung(Schritt schritt, Verbindung verbindung,
+        params (string Slot, object Value)[] slots) =>
+        new() {
+            ["schrittId"] = schritt.Id,
+            ["nextVerbindungId"] = verbindung.Id,
+            ["slotValues"] = slots.Select(s => new Dictionary<string, object?> {
+                ["name"] = s.Slot,
+                ["value"] = new Dictionary<string, object?> { ["plainValue"] = System.Text.Json.JsonSerializer.SerializeToElement(s.Value) },
+            }).ToList(),
+        };
 
     [Theory]
     [InlineData("Production", false)]

@@ -23,5 +23,18 @@ public static class LageHelferSeedData {
     /// <summary>Leitet die ID eines Demo-Nutzers ab.</summary>
     public static Guid NutzerId(Guid idNamespace, string nutzerKey) => DeriveId(idNamespace, $"nutzer:{nutzerKey}");
 
+    /// <summary>Leitet die ID eines Prozesses ab.</summary>
+    public static Guid ProzessId(Guid idNamespace, string prozessKey) => DeriveId(idNamespace, $"prozess:{prozessKey}");
+
+    /// <summary>
+    /// Leitet die ID einer Prozessversion aus ihrem Inhalt ab: gleicher Inhalt, gleiche Version; jede Änderung
+    /// erzeugt eine neue Version, sodass laufende Anträge auf ihrer alten Version bleiben.
+    /// </summary>
+    public static Guid ProzessVersionId(Guid idNamespace, string prozessKey, string fingerprint) =>
+        DeriveId(idNamespace, $"prozess:{prozessKey}:version:{fingerprint}");
+
+    /// <summary>Leitet die ID eines neu angelegten Prozess-Tags ab; vorhandene Tags werden über ihren Namen gefunden.</summary>
+    public static Guid TagId(Guid idNamespace, string tag) => DeriveId(idNamespace, $"tag:{tag}");
+
     internal static Guid DeriveId(Guid idNamespace, string source) => GuidHelpers.CreateFromName(idNamespace, source);
 }

@@ -115,6 +115,7 @@ public static class LageHelferSeedLoader {
         }
 
         var geometrien = LoadFlaechen(flaechenPath, bereichKeys);
+        var prozesse = LoadProzesse(raw.Prozesse ?? []);
 
         return new LageHelferSeedDocument(
             raw.Version,
@@ -126,7 +127,47 @@ public static class LageHelferSeedLoader {
                 (oe.Bereiche ?? []).Select(b => new LageHelferBereichSeed(b.Key, b.Label, b.EinsatzleitungName)).ToList(),
                 (oe.Abteilungen ?? []).Select(a => new LageHelferAbteilungSeed(a.Key, a.Label)).ToList())).ToList(),
             demo,
-            geometrien);
+            geometrien,
+            prozesse);
+    }
+
+    private static List<LageHelferProzessSeed> LoadProzesse(List<SeedJsonProzess> prozesse) {
+        EnsureUniqueKeys(prozesse.Select(p => p.Key), "Prozess");
+
+        // A tag belongs to at most one Prozess per Kommune (see AssignProzessTag), so two entries cannot share one.
+        var tagOwner = new Dictionary<string, string>(StringComparer.Ordinal);
+        var result = new List<LageHelferProzessSeed>();
+        foreach (var prozess in prozesse) {
+            if (!Enum.TryParse<LageHelferProzessVorlage>(prozess.Vorlage, ignoreCase: false, out var vorlage)) {
+                throw new InvalidOperationException(
+                    $"Prozess '{prozess.Key}' hat unbekannte vorlage '{prozess.Vorlage}' " +
+                    $"(bekannt: {string.Join(", ", Enum.GetNames<LageHelferProzessVorlage>())}).");
+            }
+
+            if (string.IsNullOrWhiteSpace(prozess.Label)) {
+                throw new InvalidOperationException($"Prozess '{prozess.Key}' hat keinen name.");
+            }
+
+            var tags = prozess.Tags ?? [];
+            EnsureUniqueKeys(tags, $"Tag von Prozess '{prozess.Key}'");
+            foreach (var tag in tags) {
+                if (!tagOwner.TryAdd(tag, prozess.Key)) {
+                    throw new InvalidOperationException(
+                        $"Tag '{tag}' ist sowohl Prozess '{tagOwner[tag]}' als auch '{prozess.Key}' zugeordnet; " +
+                        "ein Tag gehört pro Kommune nur einem Prozess.");
+                }
+            }
+
+            var kategorien = prozess.Kategorien ?? [];
+            if (vorlage == LageHelferProzessVorlage.Ereignismeldung && kategorien.Count == 0) {
+                throw new InvalidOperationException($"Prozess '{prozess.Key}' braucht mindestens eine Kategorie.");
+            }
+            EnsureUniqueKeys(kategorien, $"Kategorie von Prozess '{prozess.Key}'");
+
+            result.Add(new LageHelferProzessSeed(prozess.Key, vorlage, prozess.Label, tags, kategorien));
+        }
+
+        return result;
     }
 
     private static void EnsureUniqueKeys(IEnumerable<string> keys, string kind) {
@@ -192,6 +233,18 @@ public static class LageHelferSeedLoader {
         public SeedJsonKommune? Kommune { get; set; }
         public List<SeedJsonOrganisationseinheit>? Organisationseinheiten { get; set; }
         public SeedJsonDemo? Demo { get; set; }
+        public List<SeedJsonProzess>? Prozesse { get; set; }
+    }
+
+    private sealed class SeedJsonProzess {
+        public required string Key { get; set; }
+        public string? Vorlage { get; set; }
+
+        [JsonPropertyName("name")]
+        public string? Label { get; set; }
+
+        public List<string>? Tags { get; set; }
+        public List<string>? Kategorien { get; set; }
     }
 
     private sealed class SeedJsonKommune {

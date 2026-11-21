@@ -36,6 +36,16 @@
       "abteilungen": []
     }
   ],
+  "prozesse": [
+    {
+      // Anonym: Meldung ohne Login möglich (ausfuehrungCreateAnonym)
+      "key": "ereignis-melden",
+      "vorlage": "Ereignismeldung",
+      "name": "Ereignis melden",
+      "tags": ["Anonym"],
+      "kategorien": ["Unwetter", "Großbrand", "Hagelsturm", "Blitzeis"]
+    }
+  ],
   "demo": {
     "passwort": "123456",
     "nutzer": [

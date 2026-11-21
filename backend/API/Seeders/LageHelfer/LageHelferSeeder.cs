@@ -4,6 +4,7 @@ using API.Features.Auth;
 using API.Features.Funktionsberechtigungen;
 using API.Features.Kommune;
 using API.Features.Lage;
+using API.Features.Prozess;
 using API.Features.Untereinheit;
 using API.Infrastructure;
 using API.Options;
@@ -11,6 +12,7 @@ using API.Seeders.Base;
 using FluentValidation;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using NodaTime;
 using static API.Seeders.LageHelfer.LageHelferSeedData;
 using IOPath = System.IO.Path;
 
@@ -30,6 +32,7 @@ public class LageHelferSeeder : DataSeeder<DomainContext> {
     private readonly EnvironmentOptions _environmentOptions;
     private readonly DataSeederOptions _dataSeederOptions;
     private readonly ILogger<LageHelferSeeder> _logger;
+    private readonly IClock _clock;
 
     /// <inheritdoc />
     public override bool MustRunBeforeImports => false;
@@ -37,7 +40,8 @@ public class LageHelferSeeder : DataSeeder<DomainContext> {
     /// <summary>Initialisiert den Seeder mit seinen Abhängigkeiten.</summary>
     public LageHelferSeeder(IDbContextFactory<DomainContext> dbContextFactory, ILogger<LageHelferSeeder> logger,
         IPasswordHasher<User> passwordHasher, EnvironmentOptions environmentOptions, DataSeederOptions dataSeederOptions,
-        IEnumerable<IValidator> validators) : base(dbContextFactory, logger, validators) {
+        IEnumerable<IValidator> validators, IClock clock) : base(dbContextFactory, logger, validators) {
+        _clock = clock;
         _dbContextFactory = dbContextFactory;
         _passwordHasher = passwordHasher;
         _environmentOptions = environmentOptions;
@@ -101,6 +105,10 @@ public class LageHelferSeeder : DataSeeder<DomainContext> {
                     document.Kommune.Id,
                     cancellationToken);
             }
+        }
+
+        foreach (var prozess in document.Prozesse) {
+            await SeedProzess(ns, document.Kommune.Id, prozess, cancellationToken);
         }
 
         if (document.Demo is null) {
@@ -185,6 +193,103 @@ public class LageHelferSeeder : DataSeeder<DomainContext> {
     private async Task SeedGebietEinsatzleitung(Guid gebietId, Guid mitarbeiterGruppeId, CancellationToken ct) =>
         await Build(new GebietEinsatzleitung { GebietId = gebietId, MitarbeiterGruppeId = mitarbeiterGruppeId })
             .SeedAsync(ct);
+
+    /// <summary>
+    /// Creates or renames the Prozess, publishes a new version only when the template or the seed content changed,
+    /// and makes its tags match seed.json exactly.
+    /// </summary>
+    private async Task SeedProzess(Guid idNamespace, Guid kommuneId, LageHelferProzessSeed seed, CancellationToken ct) {
+        var prozessId = ProzessId(idNamespace, seed.Key);
+        var prozess = await DbContext.Prozesse.AsTracking().Include(p => p.Tags)
+            .FirstOrDefaultAsync(p => p.Id == prozessId, ct);
+        if (prozess is null) {
+            prozess = new Prozess { Id = prozessId, Name = seed.Name, KommuneId = kommuneId };
+            DbContext.Prozesse.Add(prozess);
+        } else if (prozess.KommuneId != kommuneId) {
+            throw new InvalidOperationException(
+                $"Prozess '{seed.Key}' ({prozessId}) gehört zu einer anderen Kommune als in seed.json angegeben.");
+        } else {
+            prozess.Name = seed.Name;
+        }
+
+        var (fingerprint, beschreibungstext) = seed.Vorlage switch {
+            LageHelferProzessVorlage.Ereignismeldung =>
+                (EreignismeldungVorlage.Fingerprint(seed), EreignismeldungVorlage.Beschreibungstext),
+            _ => throw new InvalidOperationException($"Vorlage {seed.Vorlage} ist nicht implementiert."),
+        };
+        var versionId = ProzessVersionId(idNamespace, seed.Key, fingerprint);
+        if (!await DbContext.ProzessVersionen.AnyAsync(v => v.Id == versionId, ct)) {
+            var (schritte, verbindungen, rollen) = EreignismeldungVorlage.Build(seed, versionId);
+            foreach (var verbindung in verbindungen) {
+                verbindung.Von.Verbindungen.Add(verbindung);
+            }
+
+            var now = _clock.GetCurrentInstant();
+            var version = new ProzessVersion {
+                Id = versionId,
+                Prozess = prozess,
+                CreatedAt = now,
+                PublishedAt = now,
+                Schritte = schritte,
+                Rollen = rollen,
+                Beschreibungstext = beschreibungstext,
+            };
+            DbContext.ProzessVersionen.Add(version);
+            await SaveChangesAsync(ct);
+            version.StartId = schritte[0].Id;
+            _logger.LogInformation("LageHelfer-Prozess '{Prozess}' in neuer Version {Version} veröffentlicht.",
+                seed.Key, versionId);
+        }
+
+        await SyncTags(idNamespace, prozess, seed.Tags, ct);
+    }
+
+    private async Task SyncTags(Guid idNamespace, Prozess prozess, IReadOnlyList<string> tagNames,
+        CancellationToken ct) {
+        var tags = new List<ProzessTag>();
+        foreach (var name in tagNames) {
+            var tag = DbContext.ProzessTags.Local.FirstOrDefault(t => t.Tag == name)
+                ?? await DbContext.ProzessTags.AsTracking().FirstOrDefaultAsync(t => t.Tag == name, ct);
+            if (tag is null) {
+                tag = new ProzessTag { Id = TagId(idNamespace, name), Tag = name };
+                DbContext.ProzessTags.Add(tag);
+            }
+            tags.Add(tag);
+        }
+
+        var tagIds = tags.Select(t => t.Id).ToHashSet();
+
+        // Same rule as AssignProzessTag: a tag belongs to one Prozess per Kommune.
+        var andereTraeger = await DbContext.Prozesse.AsTracking().Include(p => p.Tags)
+            .Where(p => p.KommuneId == prozess.KommuneId && p.Id != prozess.Id
+                && p.Tags.Any(t => tagIds.Contains(t.Id)))
+            .ToListAsync(ct);
+        foreach (var andererProzess in andereTraeger) {
+            foreach (var tag in andererProzess.Tags.Where(t => tagIds.Contains(t.Id)).ToList()) {
+                andererProzess.Tags.Remove(tag);
+            }
+        }
+
+        foreach (var tag in prozess.Tags.Where(t => !tagIds.Contains(t.Id)).ToList()) {
+            prozess.Tags.Remove(tag);
+        }
+        foreach (var tag in tags.Where(t => !prozess.Tags.Contains(t))) {
+            prozess.Tags.Add(tag);
+        }
+
+        var bereitsInHistorie = await DbContext.ProzessTagHistorie
+            .Where(h => h.ProzessId == prozess.Id)
+            .Select(h => h.TagId)
+            .ToListAsync(ct);
+        foreach (var tag in tags.Where(t => !bereitsInHistorie.Contains(t.Id))) {
+            DbContext.ProzessTagHistorie.Add(new ProzessTagHistorieEintrag {
+                Id = Guid.NewGuid(),
+                ProzessId = prozess.Id,
+                TagId = tag.Id,
+                ZugewiesenAm = _clock.GetCurrentInstant(),
+            });
+        }
+    }
 
     private async Task SeedDemo(LageHelferSeedDocument document, Guid idNamespace,
         IReadOnlyDictionary<string, Untereinheit> organisationseinheiten,
