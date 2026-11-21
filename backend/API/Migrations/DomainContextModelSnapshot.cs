@@ -931,6 +931,9 @@ namespace API.Migrations
                     b.Property<Guid?>("GeloeschtVonId")
                         .HasColumnType("uuid");
 
+                    b.Property<Guid?>("LageGebietId")
+                        .HasColumnType("uuid");
+
                     b.Property<string>("Loeschgrund")
                         .HasColumnType("text");
 
@@ -961,6 +964,8 @@ namespace API.Migrations
 
                     b.HasIndex("CorrelationId")
                         .IsUnique();
+
+                    b.HasIndex("LageGebietId");
 
                     b.HasIndex("ProzessVersionId");
 
@@ -2237,6 +2242,11 @@ namespace API.Migrations
 
             modelBuilder.Entity("API.Features.Prozess.Ausfuehrung", b =>
                 {
+                    b.HasOne("API.Features.Lage.LageGebiet", "LageGebiet")
+                        .WithMany()
+                        .HasForeignKey("LageGebietId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("API.Features.Prozess.ProzessVersion", "ProzessVersion")
                         .WithMany()
                         .HasForeignKey("ProzessVersionId")
@@ -2336,6 +2346,8 @@ namespace API.Migrations
 
                     b.Navigation("IstZustaendigkeit")
                         .IsRequired();
+
+                    b.Navigation("LageGebiet");
 
                     b.Navigation("ProzessVersion");
 

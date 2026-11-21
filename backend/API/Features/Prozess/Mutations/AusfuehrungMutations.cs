@@ -1,6 +1,7 @@
 using API.Features.Auth;
 using API.Features.Funktionsberechtigungen;
 using API.Features.Kommune;
+using API.Features.Lage;
 using API.Features.PdfGenerator;
 using API.Features.Prozess.Queries;
 using API.Features.PushNotifications;
@@ -88,10 +89,12 @@ public class AusfuehrungMutations {
     [AllowAnonymous]
     [Error(typeof(AnonymeEinreichungNichtErlaubtException))]
     [Error(typeof(AnonymeEinreichungUnvollstaendigException))]
+    [Error(typeof(LageGebietNotLiveException))]
     [GraphQLDescription(
         "Reicht einen Antrag ohne Anmeldung ein. Nur für Prozesse mit dem Tag 'Anonym'. Alle Schritte der " +
         "antragstellenden Person müssen in diesem einen Aufruf enthalten sein, weil der Antrag danach niemandem " +
-        "mehr zum Fortsetzen gehört. Liefert die CorrelationId für die Statusabfrage.")]
+        "mehr zum Fortsetzen gehört. Liefert die CorrelationId für die Statusabfrage. Mit 'lage' wird die Meldung " +
+        "der gewählten Lage und dem gewählten Gebiet zugeordnet; dort muss die Lage gerade Meldungen annehmen.")]
     public async Task<AnonymeAusfuehrungResult> AusfuehrungCreateAnonym(
         IClock clock,
         [Service] AusfuehrungZustaendigkeitService ausfuehrungZustaendigkeitService,
@@ -99,11 +102,20 @@ public class AusfuehrungMutations {
         [Service] ProzessOptions prozessOptions,
         DomainContext db,
         WalkerFactory walkerFactory, Guid prozessVersionId, IEnumerable<AusfuehrungBearbeitungInput> bearbeitungen,
-        string sharedKeyEncryptedForKommune) {
-        var anonymErlaubt = await db.ProzessVersionen.AnyAsync(v =>
-            v.Id == prozessVersionId && v.Prozess.Tags.Any(t => t.Tag == AnonymeEinreichung.ProzessTagName));
-        if (!anonymErlaubt) {
-            throw new AnonymeEinreichungNichtErlaubtException();
+        string sharedKeyEncryptedForKommune, LageSelectionInput? lage, CancellationToken ct) {
+        var prozessKommuneId = await db.ProzessVersionen
+            .Where(v => v.Id == prozessVersionId
+                && v.Prozess.Tags.Any(t => t.Tag == AnonymeEinreichung.ProzessTagName))
+            .Select(v => (Guid?)v.Prozess.KommuneId)
+            .FirstOrDefaultAsync(ct) ?? throw new AnonymeEinreichungNichtErlaubtException();
+
+        Guid? lageGebietId = null;
+        if (lage is not null) {
+            var pass = await LiveLageGebiete.Find(db, lage.LageId, lage.GebietId, ct);
+            if (pass is null || pass.KommuneId != prozessKommuneId) {
+                throw new LageGebietNotLiveException();
+            }
+            lageGebietId = pass.Id;
         }
 
         var systemUser = await db.SystemUsers.SingleAsync(u => u.Id == SystemUser.UserId);
@@ -118,6 +130,7 @@ public class AusfuehrungMutations {
                 Status = AusfuehrungStatus.BearbeitungDurchBuerger,
                 SchrittId = Guid.Empty,
                 CorrelationId = Guid.NewGuid(),
+                LageGebietId = lageGebietId,
             });
 
         await PerformSteps(walker, systemUser, bearbeitungen, ausfuehrungZustaendigkeitService, null, prozessOptions);

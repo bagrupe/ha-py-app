@@ -443,6 +443,8 @@ type Ausfuehrung {
   createdAt: Instant!
   "Aktueller Status der Ausführung (z.B. Bearbeitung durch Bürger, Backoffice oder abgeschlossen)."
   status: AusfuehrungStatus!
+  "Lage und Gebiet, die die meldende Person gewählt hat. Null außerhalb des LageHelfers."
+  lage: LageAssignment
   "Gibt den verschlüsselten Schlüssel für Bürger zurück, sofern der aktuelle Nutzer der Antragsteller ist."
   sharedKeyEncryptedForBuerger: String!
   "Zeitpunkt der Soft-Löschung. Null bedeutet: nicht gelöscht. Nur für Backoffice-Nutzer mit der Funktionsberechtigung 'Anträge löschen'."
@@ -1214,6 +1216,14 @@ type GebietOfOtherUntereinheitError implements Error {
   message: String!
 }
 
+"Vorschlag für Lage und Gebiet anhand von Koordinaten."
+type GebietSuggestion {
+  lageId: UUID!
+  lageTitle: String!
+  gebietId: UUID!
+  gebietName: String!
+}
+
 "A segment of a collection."
 type GeloeschteAntraegeCollectionSegment {
   "Information to aid in pagination."
@@ -1523,6 +1533,14 @@ type Lage {
   archivedAt: Instant
 }
 
+"Lage und Gebiet, denen eine Meldung zugeordnet ist."
+type LageAssignment {
+  lageId: UUID!
+  lageTitle: String!
+  gebietId: UUID!
+  gebietName: String!
+}
+
 type LageClosedError implements Error {
   message: String!
 }
@@ -1543,6 +1561,10 @@ type LageGebiet {
   endedById: UUID
   doneAt: Instant
   doneById: UUID
+}
+
+type LageGebietNotLiveError implements Error {
+  message: String!
 }
 
 type LageNotFoundError implements Error {
@@ -1736,7 +1758,7 @@ type Mutation {
   antragWiederherstellen(input: AntragWiederherstellenInput!): AntragWiederherstellenPayload! @authorize
   "Startet einen neuen Antrag (Ausführung) für eine Prozessversion. Initialisiert den Prozess und führt die ersten Bearbeitungsschritte aus."
   ausfuehrungCreate(input: AusfuehrungCreateInput!): AusfuehrungCreatePayload! @authorize
-  "Reicht einen Antrag ohne Anmeldung ein. Nur für Prozesse mit dem Tag 'Anonym'. Alle Schritte der antragstellenden Person müssen in diesem einen Aufruf enthalten sein, weil der Antrag danach niemandem mehr zum Fortsetzen gehört. Liefert die CorrelationId für die Statusabfrage."
+  "Reicht einen Antrag ohne Anmeldung ein. Nur für Prozesse mit dem Tag 'Anonym'. Alle Schritte der antragstellenden Person müssen in diesem einen Aufruf enthalten sein, weil der Antrag danach niemandem mehr zum Fortsetzen gehört. Liefert die CorrelationId für die Statusabfrage. Mit 'lage' wird die Meldung der gewählten Lage und dem gewählten Gebiet zugeordnet; dort muss die Lage gerade Meldungen annehmen."
   ausfuehrungCreateAnonym(input: AusfuehrungCreateAnonymInput!): AusfuehrungCreateAnonymPayload! @allowAnonymous
   "Führt die Bearbeitung eines laufenden Antrags (Ausführung) fort. Überträgt die nächsten Schritte, Slot-Werte und ggf. Zuständigkeiten."
   ausfuehrungContinue(input: AusfuehrungContinueInput!): AusfuehrungContinuePayload! @authorize
@@ -2216,6 +2238,23 @@ type ProzesseUndLeistungenCollectionSegment {
   totalCount: Int!
 }
 
+"Gebiet (Region) einer Lage, das gerade Meldungen annimmt."
+type PublicGebiet {
+  id: UUID!
+  name: String!
+  "Fläche als GeoJSON (Polygon oder MultiPolygon)."
+  geometry: String
+}
+
+"Lage, zu der Bürger:innen gerade melden können. Enthält nur öffentliche Angaben."
+type PublicLage {
+  id: UUID!
+  title: String!
+  warningText: String
+  "Gebiete der Lage, die gerade Meldungen annehmen."
+  gebiete: [PublicGebiet!]!
+}
+
 type Query {
   newsArtikel(id: String!): NewsArtikel @allowAnonymous @delegate(schema: "BereichB", path: "NewsArtikel")
   newsArtikelList(where: NewsArtikel_where sort: String page: Int limit: Int): NewsArtikels @allowAnonymous @delegate(schema: "BereichB", path: "NewsArtikels")
@@ -2268,6 +2307,10 @@ type Query {
   gebiete(withoutEinsatzleitung: Boolean): [Gebiet!]! @authorize
   lagen(status: LageStatus): [Lage!]! @authorize
   lage(id: UUID!): Lage @authorize
+  "Lagen der Kommune, zu denen gerade gemeldet werden kann, mit ihren Gebieten. Ohne Anmeldung abrufbar."
+  activeLagen(kommuneId: UUID!): [PublicLage!]! @allowAnonymous
+  "Schlägt Lage und Gebiet für Koordinaten vor, etwa den aktuellen Standort des Geräts. Leer, wenn dort keine Lage Meldungen annimmt. Ohne Anmeldung abrufbar."
+  suggestedGebiete(kommuneId: UUID! longitude: Float! latitude: Float!): [GebietSuggestion!]! @allowAnonymous
   "Status eines anonym eingereichten Antrags anhand der CorrelationId aus ausfuehrungCreateAnonym. Null, wenn es keinen solchen Antrag (mehr) gibt."
   ausfuehrungStatusAnonym(correlationId: UUID!): AnonymeAusfuehrungStatus @allowAnonymous
   "Liefert eine paginierte Liste aller Anträge (Ausführungen), die für den angemeldeten Backoffice-Nutzer sichtbar sind. Optional filterbar nach Status, Zuweisung oder Prozess."
@@ -3136,7 +3179,7 @@ union AufbewahrungsEinstellungenAktualisierenError = NotAllowedError
 
 union AusfuehrungContinueError = AusfuehrungNotFoundError | NachrichtTooLongError
 
-union AusfuehrungCreateAnonymError = AnonymeEinreichungNichtErlaubtError | AnonymeEinreichungUnvollstaendigError
+union AusfuehrungCreateAnonymError = AnonymeEinreichungNichtErlaubtError | AnonymeEinreichungUnvollstaendigError | LageGebietNotLiveError
 
 union AusfuehrungUpdateZugewiesenePersonError = AusfuehrungNotFoundError | UserNotFoundError | MismatchingKommuneError | UnauthorizedAccessError
 
@@ -3641,6 +3684,7 @@ input AusfuehrungCreateAnonymInput {
   prozessVersionId: UUID!
   bearbeitungen: [AusfuehrungBearbeitungInput!]!
   sharedKeyEncryptedForKommune: String!
+  lage: LageSelectionInput
 }
 
 input AusfuehrungCreateInput {
@@ -4195,6 +4239,12 @@ input KommuneFilterInput {
   id: UuidOperationFilterInput
   name: StringOperationFilterInput
   publicKey: StringOperationFilterInput
+}
+
+"Von der meldenden Person gewählte Lage und Gebiet."
+input LageSelectionInput {
+  lageId: UUID!
+  gebietId: UUID!
 }
 
 input ListFilterInputTypeOfMitarbeiterGruppeFilterInput {

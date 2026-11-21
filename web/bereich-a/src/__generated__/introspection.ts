@@ -2449,6 +2449,15 @@ export default {
             args: [],
           },
           {
+            name: 'lage',
+            type: {
+              kind: 'OBJECT',
+              name: 'LageAssignment',
+              ofType: null,
+            },
+            args: [],
+          },
+          {
             name: 'loeschgrund',
             type: {
               kind: 'SCALAR',
@@ -2711,6 +2720,10 @@ export default {
           {
             kind: 'OBJECT',
             name: 'AnonymeEinreichungUnvollstaendigError',
+          },
+          {
+            kind: 'OBJECT',
+            name: 'LageGebietNotLiveError',
           },
         ],
       },
@@ -7536,6 +7549,10 @@ export default {
           },
           {
             kind: 'OBJECT',
+            name: 'LageGebietNotLiveError',
+          },
+          {
+            kind: 'OBJECT',
             name: 'LageNotFoundError',
           },
           {
@@ -8491,6 +8508,61 @@ export default {
             name: 'Error',
           },
         ],
+      },
+      {
+        kind: 'OBJECT',
+        name: 'GebietSuggestion',
+        fields: [
+          {
+            name: 'gebietId',
+            type: {
+              kind: 'NON_NULL',
+              ofType: {
+                kind: 'SCALAR',
+                name: 'UUID',
+                ofType: null,
+              },
+            },
+            args: [],
+          },
+          {
+            name: 'gebietName',
+            type: {
+              kind: 'NON_NULL',
+              ofType: {
+                kind: 'SCALAR',
+                name: 'String',
+                ofType: null,
+              },
+            },
+            args: [],
+          },
+          {
+            name: 'lageId',
+            type: {
+              kind: 'NON_NULL',
+              ofType: {
+                kind: 'SCALAR',
+                name: 'UUID',
+                ofType: null,
+              },
+            },
+            args: [],
+          },
+          {
+            name: 'lageTitle',
+            type: {
+              kind: 'NON_NULL',
+              ofType: {
+                kind: 'SCALAR',
+                name: 'String',
+                ofType: null,
+              },
+            },
+            args: [],
+          },
+        ],
+        interfaces: [],
       },
       {
         kind: 'OBJECT',
@@ -11286,6 +11358,61 @@ export default {
       },
       {
         kind: 'OBJECT',
+        name: 'LageAssignment',
+        fields: [
+          {
+            name: 'gebietId',
+            type: {
+              kind: 'NON_NULL',
+              ofType: {
+                kind: 'SCALAR',
+                name: 'UUID',
+                ofType: null,
+              },
+            },
+            args: [],
+          },
+          {
+            name: 'gebietName',
+            type: {
+              kind: 'NON_NULL',
+              ofType: {
+                kind: 'SCALAR',
+                name: 'String',
+                ofType: null,
+              },
+            },
+            args: [],
+          },
+          {
+            name: 'lageId',
+            type: {
+              kind: 'NON_NULL',
+              ofType: {
+                kind: 'SCALAR',
+                name: 'UUID',
+                ofType: null,
+              },
+            },
+            args: [],
+          },
+          {
+            name: 'lageTitle',
+            type: {
+              kind: 'NON_NULL',
+              ofType: {
+                kind: 'SCALAR',
+                name: 'String',
+                ofType: null,
+              },
+            },
+            args: [],
+          },
+        ],
+        interfaces: [],
+      },
+      {
+        kind: 'OBJECT',
         name: 'LageClosedError',
         fields: [
           {
@@ -11463,6 +11590,30 @@ export default {
           },
         ],
         interfaces: [],
+      },
+      {
+        kind: 'OBJECT',
+        name: 'LageGebietNotLiveError',
+        fields: [
+          {
+            name: 'message',
+            type: {
+              kind: 'NON_NULL',
+              ofType: {
+                kind: 'SCALAR',
+                name: 'String',
+                ofType: null,
+              },
+            },
+            args: [],
+          },
+        ],
+        interfaces: [
+          {
+            kind: 'INTERFACE',
+            name: 'Error',
+          },
+        ],
       },
       {
         kind: 'OBJECT',
@@ -17480,8 +17631,136 @@ export default {
       },
       {
         kind: 'OBJECT',
+        name: 'PublicGebiet',
+        fields: [
+          {
+            name: 'geometry',
+            type: {
+              kind: 'SCALAR',
+              name: 'String',
+              ofType: null,
+            },
+            args: [],
+          },
+          {
+            name: 'id',
+            type: {
+              kind: 'NON_NULL',
+              ofType: {
+                kind: 'SCALAR',
+                name: 'UUID',
+                ofType: null,
+              },
+            },
+            args: [],
+          },
+          {
+            name: 'name',
+            type: {
+              kind: 'NON_NULL',
+              ofType: {
+                kind: 'SCALAR',
+                name: 'String',
+                ofType: null,
+              },
+            },
+            args: [],
+          },
+        ],
+        interfaces: [],
+      },
+      {
+        kind: 'OBJECT',
+        name: 'PublicLage',
+        fields: [
+          {
+            name: 'gebiete',
+            type: {
+              kind: 'NON_NULL',
+              ofType: {
+                kind: 'LIST',
+                ofType: {
+                  kind: 'NON_NULL',
+                  ofType: {
+                    kind: 'OBJECT',
+                    name: 'PublicGebiet',
+                    ofType: null,
+                  },
+                },
+              },
+            },
+            args: [],
+          },
+          {
+            name: 'id',
+            type: {
+              kind: 'NON_NULL',
+              ofType: {
+                kind: 'SCALAR',
+                name: 'UUID',
+                ofType: null,
+              },
+            },
+            args: [],
+          },
+          {
+            name: 'title',
+            type: {
+              kind: 'NON_NULL',
+              ofType: {
+                kind: 'SCALAR',
+                name: 'String',
+                ofType: null,
+              },
+            },
+            args: [],
+          },
+          {
+            name: 'warningText',
+            type: {
+              kind: 'SCALAR',
+              name: 'String',
+              ofType: null,
+            },
+            args: [],
+          },
+        ],
+        interfaces: [],
+      },
+      {
+        kind: 'OBJECT',
         name: 'Query',
         fields: [
+          {
+            name: 'activeLagen',
+            type: {
+              kind: 'NON_NULL',
+              ofType: {
+                kind: 'LIST',
+                ofType: {
+                  kind: 'NON_NULL',
+                  ofType: {
+                    kind: 'OBJECT',
+                    name: 'PublicLage',
+                    ofType: null,
+                  },
+                },
+              },
+            },
+            args: [
+              {
+                name: 'kommuneId',
+                type: {
+                  kind: 'NON_NULL',
+                  ofType: {
+                    kind: 'SCALAR',
+                    name: 'UUID',
+                    ofType: null,
+                  },
+                },
+              },
+            ],
+          },
           {
             name: 'anfragenFuerEhrenamtsbankEintrag',
             type: {
@@ -18579,6 +18858,58 @@ export default {
                 type: {
                   kind: 'SCALAR',
                   name: 'Any',
+                },
+              },
+            ],
+          },
+          {
+            name: 'suggestedGebiete',
+            type: {
+              kind: 'NON_NULL',
+              ofType: {
+                kind: 'LIST',
+                ofType: {
+                  kind: 'NON_NULL',
+                  ofType: {
+                    kind: 'OBJECT',
+                    name: 'GebietSuggestion',
+                    ofType: null,
+                  },
+                },
+              },
+            },
+            args: [
+              {
+                name: 'kommuneId',
+                type: {
+                  kind: 'NON_NULL',
+                  ofType: {
+                    kind: 'SCALAR',
+                    name: 'UUID',
+                    ofType: null,
+                  },
+                },
+              },
+              {
+                name: 'latitude',
+                type: {
+                  kind: 'NON_NULL',
+                  ofType: {
+                    kind: 'SCALAR',
+                    name: 'Float',
+                    ofType: null,
+                  },
+                },
+              },
+              {
+                name: 'longitude',
+                type: {
+                  kind: 'NON_NULL',
+                  ofType: {
+                    kind: 'SCALAR',
+                    name: 'Float',
+                    ofType: null,
+                  },
                 },
               },
             ],

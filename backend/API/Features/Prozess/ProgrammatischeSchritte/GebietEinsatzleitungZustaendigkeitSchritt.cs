@@ -10,6 +10,8 @@ namespace API.Features.Prozess.ProgrammatischeSchritte;
 /// liegt. Überlappen sich Gebiete, gewinnt eines, dessen Lage gerade Meldungen annimmt
 /// (<see cref="LageGebietStateMachine.AcceptsMeldungen"/>). Ohne Live-Lage wird trotzdem die Einsatzleitung des
 /// Gebiets zuständig: die Gebietszuordnung gilt unabhängig von einer Lage. Erwartet genau eine ausgehende Verbindung.
+/// Hat die meldende Person Lage und Gebiet selbst gewählt (<see cref="Ausfuehrung.LageGebietId"/>), gilt dieses Gebiet
+/// statt des Standorts: Der Standort beschreibt das Ereignis, nicht zwingend die Region, in der gemeldet wird.
 /// </summary>
 [SchrittName("Einsatzleitung anhand Gebiet ermitteln", LiefertZustaendigkeit = true)]
 public class GebietEinsatzleitungZustaendigkeitSchritt(
@@ -20,12 +22,20 @@ public class GebietEinsatzleitungZustaendigkeitSchritt(
 
     public async Task<ProgrammatischerSchrittResult> ExecuteAsync(Walker walker) {
         var kommuneId = walker.Prozess.KommuneId;
-        var standort = KategorieOrtZustaendigkeitSchritt.GetLocationSlot(walker.CurrentSlotValues(), StandortSlotName);
-
-        var treffer = await ErmittleEinsatzleitung(kommuneId, standort)
-            ?? throw new InvalidOperationException(
-                $"Kein Gebiet mit Einsatzleitung deckt den Standort ({standort.Lng}, {standort.Lat}) ab " +
-                $"(Kommune {kommuneId}, Ausführung {walker.Ausfuehrung.Id}).");
+        Treffer treffer;
+        if (walker.Ausfuehrung.LageGebietId is { } lageGebietId) {
+            treffer = await EinsatzleitungDesGewaehltenGebiets(lageGebietId)
+                ?? throw new InvalidOperationException(
+                    $"Das gewählte Gebiet (LageGebiet {lageGebietId}) hat keine Einsatzleitung " +
+                    $"(Ausführung {walker.Ausfuehrung.Id}).");
+        } else {
+            var standort =
+                KategorieOrtZustaendigkeitSchritt.GetLocationSlot(walker.CurrentSlotValues(), StandortSlotName);
+            treffer = await ErmittleEinsatzleitung(kommuneId, standort)
+                ?? throw new InvalidOperationException(
+                    $"Kein Gebiet mit Einsatzleitung deckt den Standort ({standort.Lng}, {standort.Lat}) ab " +
+                    $"(Kommune {kommuneId}, Ausführung {walker.Ausfuehrung.Id}).");
+        }
 
         logger.LogInformation(
             "Meldung {AusfuehrungId} geht an Einsatzleitung {MitarbeiterGruppeId} von Gebiet {Gebiet} (Live-Lage: {Live})",
@@ -35,6 +45,31 @@ public class GebietEinsatzleitungZustaendigkeitSchritt(
     }
 
     public record Treffer(Guid GebietId, string GebietName, bool LageIstLive, Zustaendigkeit Zustaendigkeit);
+
+    public async Task<Treffer?> EinsatzleitungDesGewaehltenGebiets(Guid lageGebietId) {
+        await using var db = await dbContextFactory.CreateDbContextAsync();
+
+        var pass = await db.LageGebiete
+            .Where(lg => lg.Id == lageGebietId)
+            .Select(lg => new { lg.GebietId, lg.Gebiet.Name, lg.Gebiet.UntereinheitId, lg.Status })
+            .SingleAsync();
+        var einsatzleitung = await db.GebietEinsatzleitungen
+            .Where(GebietEinsatzleitung.IsEffective)
+            .Where(ge => ge.GebietId == pass.GebietId)
+            .OrderBy(ge => ge.MitarbeiterGruppe.Name)
+            .Select(ge => (Guid?)ge.MitarbeiterGruppeId)
+            .FirstOrDefaultAsync();
+        if (einsatzleitung is null) {
+            return null;
+        }
+
+        return new Treffer(pass.GebietId, pass.Name, LageGebietStateMachine.AcceptsMeldungen(pass.Status),
+            new Zustaendigkeit {
+                Art = ZustaendigkeitArt.Organisationseinheit,
+                OrganisationseinheitId = pass.UntereinheitId,
+                MitarbeiterGruppeId = einsatzleitung,
+            });
+    }
 
     public async Task<Treffer?> ErmittleEinsatzleitung(Guid kommuneId, EvaluatingVisitor.ParsedLocation standort) {
         await using var db = await dbContextFactory.CreateDbContextAsync();

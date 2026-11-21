@@ -76,6 +76,13 @@ public class Ausfuehrung {
     /// </summary>
     [GraphQLIgnore]
     public Guid? CorrelationId { get; init; }
+
+    /// <summary>The Lage pass (Lage + Gebiet) the submitter chose; null outside the LageHelfer.</summary>
+    [GraphQLIgnore]
+    public Guid? LageGebietId { get; init; }
+
+    [GraphQLIgnore]
+    public Lage.LageGebiet? LageGebiet { get; init; }
 }
 
 /// <summary>Definiert die Art der Zuständigkeit einer Ausführung.</summary>
@@ -214,6 +221,8 @@ public class AusfuehrungEntityTypeConfiguration : IEntityTypeConfiguration<Ausfu
         builder.HasOne(a => a.Schritt).WithMany().HasForeignKey(a => a.SchrittId)
             .OnDelete(DeleteBehavior.Restrict);
         builder.HasIndex(a => a.CorrelationId).IsUnique();
+        builder.HasOne(a => a.LageGebiet).WithMany().HasForeignKey(a => a.LageGebietId)
+            .OnDelete(DeleteBehavior.Restrict);
     }
 }
 
