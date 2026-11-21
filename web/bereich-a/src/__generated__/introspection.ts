@@ -17736,6 +17736,24 @@ export default {
             args: [],
           },
           {
+            name: 'meldungen',
+            type: {
+              kind: 'NON_NULL',
+              ofType: {
+                kind: 'LIST',
+                ofType: {
+                  kind: 'NON_NULL',
+                  ofType: {
+                    kind: 'OBJECT',
+                    name: 'PublicMeldung',
+                    ofType: null,
+                  },
+                },
+              },
+            },
+            args: [],
+          },
+          {
             name: 'title',
             type: {
               kind: 'NON_NULL',
@@ -17749,6 +17767,55 @@ export default {
           },
           {
             name: 'warningText',
+            type: {
+              kind: 'SCALAR',
+              name: 'String',
+              ofType: null,
+            },
+            args: [],
+          },
+        ],
+        interfaces: [],
+      },
+      {
+        kind: 'OBJECT',
+        name: 'PublicMeldung',
+        fields: [
+          {
+            name: 'description',
+            type: {
+              kind: 'SCALAR',
+              name: 'String',
+              ofType: null,
+            },
+            args: [],
+          },
+          {
+            name: 'latitude',
+            type: {
+              kind: 'NON_NULL',
+              ofType: {
+                kind: 'SCALAR',
+                name: 'Float',
+                ofType: null,
+              },
+            },
+            args: [],
+          },
+          {
+            name: 'longitude',
+            type: {
+              kind: 'NON_NULL',
+              ofType: {
+                kind: 'SCALAR',
+                name: 'Float',
+                ofType: null,
+              },
+            },
+            args: [],
+          },
+          {
+            name: 'status',
             type: {
               kind: 'SCALAR',
               name: 'String',

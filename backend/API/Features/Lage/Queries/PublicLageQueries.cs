@@ -8,15 +8,21 @@ namespace API.Features.Lage.Queries;
 public static class PublicLageQueries {
     [AllowAnonymous]
     [GraphQLDescription(
-        "Lagen der Kommune, zu denen gerade gemeldet werden kann, mit ihren Gebieten. Ohne Anmeldung abrufbar.")]
+        "Lagen der Kommune, zu denen gerade gemeldet werden kann, mit ihren Gebieten und offenen Meldungen. " +
+        "Ohne Anmeldung abrufbar.")]
     public static async Task<IReadOnlyList<PublicLage>> GetActiveLagen(Guid kommuneId, DomainContext db,
-        CancellationToken ct) =>
-        (await LiveLageGebiete.OfKommune(db, kommuneId, ct))
-        .GroupBy(p => (p.LageId, p.LageTitle, p.WarningText))
-        .OrderBy(g => g.Key.LageTitle)
-        .Select(g => new PublicLage(g.Key.LageId, g.Key.LageTitle, g.Key.WarningText,
-            g.OrderBy(p => p.GebietName).Select(p => new PublicGebiet(p.GebietId, p.GebietName, p.Geometry)).ToList()))
-        .ToList();
+        CancellationToken ct) {
+        var passes = await LiveLageGebiete.OfKommune(db, kommuneId, ct);
+        var meldungen = await OpenMeldungen.OfLagen(db, passes.Select(p => p.LageId).Distinct().ToList(), ct);
+        return passes
+            .GroupBy(p => (p.LageId, p.LageTitle, p.WarningText))
+            .OrderBy(g => g.Key.LageTitle)
+            .Select(g => new PublicLage(g.Key.LageId, g.Key.LageTitle, g.Key.WarningText,
+                g.OrderBy(p => p.GebietName).Select(p => new PublicGebiet(p.GebietId, p.GebietName, p.Geometry))
+                    .ToList(),
+                meldungen[g.Key.LageId].ToList()))
+            .ToList();
+    }
 
     [AllowAnonymous]
     [GraphQLDescription(

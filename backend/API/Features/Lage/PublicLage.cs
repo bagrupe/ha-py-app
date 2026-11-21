@@ -1,3 +1,6 @@
+using System.Text.Json;
+using API.Features.Prozess;
+using API.Features.Prozess.ProgrammatischeSchritte;
 using API.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 
@@ -9,7 +12,19 @@ public record PublicLage(
     string Title,
     string? WarningText,
     [property: GraphQLDescription("Gebiete der Lage, die gerade Meldungen annehmen.")]
-    IReadOnlyList<PublicGebiet> Gebiete);
+    IReadOnlyList<PublicGebiet> Gebiete,
+    [property: GraphQLDescription("Noch nicht abgeschlossene Meldungen der Lage, neueste zuerst.")]
+    IReadOnlyList<PublicMeldung> Meldungen);
+
+[GraphQLDescription(
+    "Noch nicht abgeschlossene Meldung einer Lage, etwa als Pin auf der Karte oder als Vorlage für eine eigene " +
+    "Meldung. Enthält bewusst keine Kennung und keine persönlichen Angaben.")]
+public record PublicMeldung(
+    [property: GraphQLDescription("Status, wie ihn auch die meldende Person sieht, z. B. \"Hilfe ist unterwegs\".")]
+    string? Status,
+    string? Description,
+    double Longitude,
+    double Latitude);
 
 [GraphQLDescription("Gebiet (Region) einer Lage, das gerade Meldungen annimmt.")]
 public record PublicGebiet(
@@ -51,4 +66,57 @@ public static class LiveLageGebiete {
     // AcceptsMeldungen is plain C#; filtering after loading keeps it the single source of truth.
     private static List<Pass> FilterLive(List<Pass> passes) =>
         passes.Where(p => LageGebietStateMachine.AcceptsMeldungen(p.Status)).ToList();
+}
+
+/// <summary>Open LageHelfer reports reduced to what may be shown publicly.</summary>
+public static class OpenMeldungen {
+    public const string StandortSlot = GebietEinsatzleitungZustaendigkeitSchritt.StandortSlotName;
+    public const string BeschreibungSlot = "beschreibung";
+
+    public static async Task<ILookup<Guid, PublicMeldung>> OfLagen(DomainContext db, IReadOnlyCollection<Guid> lageIds,
+        CancellationToken ct) {
+        var meldungen = await db.Ausfuehrungen.NotDeleted()
+            .Where(a => a.LageGebiet != null && lageIds.Contains(a.LageGebiet.LageId)
+                && a.Status != AusfuehrungStatus.Abgeschlossen)
+            .Select(a => new { a.Id, a.LageGebiet!.LageId, a.CreatedAt })
+            .ToListAsync(ct);
+        var ids = meldungen.Select(m => m.Id).ToList();
+
+        var slots = (await db.PlainSlotValues
+                .Where(sv => ids.Contains(sv.Bearbeitung.AusfuehrungId)
+                    && (sv.SlotName == StandortSlot || sv.SlotName == BeschreibungSlot))
+                .Select(sv => new { sv.Bearbeitung.AusfuehrungId, sv.Bearbeitung.CreatedAt, sv.SlotName, sv.Value })
+                .ToListAsync(ct))
+            .GroupBy(sv => (sv.AusfuehrungId, sv.SlotName))
+            .ToDictionary(g => g.Key, g => g.MaxBy(sv => sv.CreatedAt)!.Value);
+
+        var status = (await db.Bearbeitungen
+                .Where(b => ids.Contains(b.AusfuehrungId)
+                    && b.NextVerbindung.StatusAenderung != null && b.NextVerbindung.StatusAenderung != "")
+                .Select(b => new { b.AusfuehrungId, b.CreatedAt, b.NextVerbindung.StatusAenderung })
+                .ToListAsync(ct))
+            .GroupBy(b => b.AusfuehrungId)
+            .ToDictionary(g => g.Key, g => g.MaxBy(b => b.CreatedAt)!.StatusAenderung);
+
+        return meldungen
+            .OrderByDescending(m => m.CreatedAt)
+            .Select(m => (m.LageId, Meldung: ToPublic(m.Id)))
+            .Where(m => m.Meldung is not null)
+            .ToLookup(m => m.LageId, m => m.Meldung!);
+
+        PublicMeldung? ToPublic(Guid id) {
+            if (!slots.TryGetValue((id, StandortSlot), out var standort)
+                || standort.ValueKind != JsonValueKind.Object
+                || !standort.TryGetProperty("coordinates", out var coordinates)) {
+                return null;
+            }
+
+            var description = slots.TryGetValue((id, BeschreibungSlot), out var beschreibung)
+                && beschreibung.ValueKind == JsonValueKind.String
+                    ? beschreibung.GetString()
+                    : null;
+            return new PublicMeldung(status.GetValueOrDefault(id), description, coordinates[0].GetDouble(),
+                coordinates[1].GetDouble());
+        }
+    }
 }

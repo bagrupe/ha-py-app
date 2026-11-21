@@ -2257,6 +2257,17 @@ type PublicLage {
   warningText: String
   "Gebiete der Lage, die gerade Meldungen annehmen."
   gebiete: [PublicGebiet!]!
+  "Noch nicht abgeschlossene Meldungen der Lage, neueste zuerst."
+  meldungen: [PublicMeldung!]!
+}
+
+"Noch nicht abgeschlossene Meldung einer Lage, etwa als Pin auf der Karte oder als Vorlage für eine eigene Meldung. Enthält bewusst keine Kennung und keine persönlichen Angaben."
+type PublicMeldung {
+  "Status, wie ihn auch die meldende Person sieht, z. B. \"Hilfe ist unterwegs\"."
+  status: String
+  description: String
+  longitude: Float!
+  latitude: Float!
 }
 
 type Query {
@@ -2311,7 +2322,7 @@ type Query {
   gebiete(withoutEinsatzleitung: Boolean): [Gebiet!]! @authorize
   lagen(status: LageStatus): [Lage!]! @authorize
   lage(id: UUID!): Lage @authorize
-  "Lagen der Kommune, zu denen gerade gemeldet werden kann, mit ihren Gebieten. Ohne Anmeldung abrufbar."
+  "Lagen der Kommune, zu denen gerade gemeldet werden kann, mit ihren Gebieten und offenen Meldungen. Ohne Anmeldung abrufbar."
   activeLagen(kommuneId: UUID!): [PublicLage!]! @allowAnonymous
   "Schlägt Lage und Gebiet für Koordinaten vor, etwa den aktuellen Standort des Geräts. Leer, wenn dort keine Lage Meldungen annimmt. Ohne Anmeldung abrufbar."
   suggestedGebiete(kommuneId: UUID! longitude: Float! latitude: Float!): [GebietSuggestion!]! @allowAnonymous

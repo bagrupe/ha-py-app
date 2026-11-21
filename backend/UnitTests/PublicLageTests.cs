@@ -162,6 +162,38 @@ public class PublicLageTests(BackendApiFactory factory) : GraphQLTests(factory) 
     }
 
     [Fact]
+    public async Task ActiveLagen_lists_open_meldungen_with_status_description_and_coordinates_only() {
+        var (kommuneId, untereinheit) = await SeedKommuneMitUntereinheit();
+        var (west, _) = await SeedGebietMitEinsatzleitung(untereinheit, "West", West);
+        var lage = await lageSeeder.SeedLageForGebiet(west, Live);
+        var meldeprozess = await SeedMeldeprozess(kommuneId, lageErforderlich: true);
+        var auswahl = new LageSelectionInput(lage.Id, west.Id);
+        Assert.Null((await CreateAnonym(meldeprozess, auswahl, 9.21, 52.21, "Keller überflutet")).Errors);
+        Assert.Null((await CreateAnonym(meldeprozess, auswahl, 9.22, 52.22, "Schon erledigt")).Errors);
+        await using (var scope = Factory.Services.CreateAsyncScope()) {
+            await scope.ServiceProvider.GetRequiredService<DomainContext>().Ausfuehrungen
+                .Where(a => a.ProzessVersionId == meldeprozess.VersionId && a.Status != AusfuehrungStatus.Abgeschlossen)
+                .OrderByDescending(a => a.CreatedAt).Take(1)
+                .ExecuteUpdateAsync(a => a.SetProperty(x => x.Status, AusfuehrungStatus.Abgeschlossen));
+        }
+
+        ActAnonymously();
+        var result = await ExecuteGraphqlAsync(null, """
+            query ActiveLagen($kommuneId: UUID!) {
+              activeLagen(kommuneId: $kommuneId) { meldungen { status description longitude latitude } }
+            }
+            """, new Dictionary<string, object?> { ["kommuneId"] = kommuneId });
+
+        Assert.True(result.Errors is null, result.ToJson());
+        var meldung = Assert.Single(JsonDocument.Parse(result.ToJson()).RootElement.GetProperty("data")
+            .GetProperty("activeLagen")[0].GetProperty("meldungen").EnumerateArray());
+        Assert.Equal(EreignismeldungVorlage.StatusEingegangen, meldung.GetProperty("status").GetString());
+        Assert.Equal("Keller überflutet", meldung.GetProperty("description").GetString());
+        Assert.Equal(9.21, meldung.GetProperty("longitude").GetDouble());
+        Assert.Equal(52.21, meldung.GetProperty("latitude").GetDouble());
+    }
+
+    [Fact]
     public async Task LageHelfer_report_without_lage_is_rejected() {
         var (kommuneId, _) = await SeedKommuneMitUntereinheit();
         var meldeprozess = await SeedMeldeprozess(kommuneId, lageErforderlich: true);
@@ -238,7 +270,7 @@ public class PublicLageTests(BackendApiFactory factory) : GraphQLTests(factory) 
     }
 
     private async Task<IQueryResult> CreateAnonym(Meldeprozess prozess, LageSelectionInput? lage, double lng,
-        double lat) {
+        double lat, string beschreibung = "Baum blockiert Straße") {
         ActAnonymously();
         return await ExecuteQuery(null, CreateAnonymMutation, new Dictionary<string, object?> {
             ["prozessVersionId"] = prozess.VersionId,
@@ -251,7 +283,8 @@ public class PublicLageTests(BackendApiFactory factory) : GraphQLTests(factory) 
                 Bearbeitung(prozess.Meldung, prozess.ZurZuordnung,
                     (EreignismeldungVorlage.StandortSlot,
                         new { addressString = "Zuhause", coordinates = new[] { lng, lat } }),
-                    (EreignismeldungVorlage.KategorieSlot, "Unwetter")),
+                    (EreignismeldungVorlage.KategorieSlot, "Unwetter"),
+                    (EreignismeldungVorlage.BeschreibungSlot, beschreibung)),
             },
         });
     }

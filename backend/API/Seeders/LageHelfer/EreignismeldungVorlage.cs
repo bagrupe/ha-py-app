@@ -1,6 +1,7 @@
 using System.Security.Cryptography;
 using System.Text;
 using API.Features.Expressions;
+using API.Features.Lage;
 using API.Features.Prozess;
 using API.Features.Prozess.ProgrammatischeSchritte;
 
@@ -15,12 +16,12 @@ namespace API.Seeders.LageHelfer;
 /// </remarks>
 public static class EreignismeldungVorlage {
     /// <summary>Bump whenever the structure below changes, so the seeder publishes a new version.</summary>
-    private const int Revision = 1;
+    private const int Revision = 2;
 
     public const string LebensgefahrSlot = "lebensgefahr";
     public const string StandortSlot = GebietEinsatzleitungZustaendigkeitSchritt.StandortSlotName;
     public const string KategorieSlot = "kategorie";
-    public const string BeschreibungSlot = "beschreibung";
+    public const string BeschreibungSlot = OpenMeldungen.BeschreibungSlot;
     public const string BilderSlot = "bilder";
     public const string RueckrufnummerSlot = "rueckrufnummer";
 
@@ -93,6 +94,8 @@ public static class EreignismeldungVorlage {
                     Encrypted = false,
                     Pflichtfeld = true,
                     Order = 0,
+                    // Public: activeLagen shows open reports as pins on the map.
+                    OeffentlichSichtbar = true,
                 },
                 new StringFormularFeld {
                     SlotName = KategorieSlot,
@@ -108,6 +111,7 @@ public static class EreignismeldungVorlage {
                     Encrypted = false,
                     Multiline = true,
                     Order = 2,
+                    OeffentlichSichtbar = true,
                 },
                 new UploadFormularFeld {
                     SlotName = BilderSlot,
