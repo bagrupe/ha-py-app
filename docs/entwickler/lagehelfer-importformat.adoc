@@ -9,7 +9,7 @@ Siehe auch xref:entwickler/lagehelfer-seeding.adoc[LageHelfer-Demomandant].
 * `idNamespace` — GUID; Basis für alle abgeleiteten IDs (`GuidHelpers.CreateFromName`)
 * `kommune` — `{ id, name }`; `id` entspricht der `bereichAId` in der Inhaltspflege
 * `organisationseinheiten[]` — Landkreise mit `key`, `name`, `bereiche[]`, `abteilungen[]`
-** `bereiche[]` — `{ key, name, einsatzleitung? }`; gesetzte `einsatzleitung` wird als Abteilung (Mitarbeitergruppe) angelegt und dem Gebiet zugeordnet
+** `bereiche[]` — `{ key, name, einsatzleitung?, einheiten? }`; gesetzte `einsatzleitung` wird als Abteilung (Mitarbeitergruppe) angelegt und dem Gebiet zugeordnet; `einheiten` (Liste von Namen, z. B. `"HLF 20 Hameln"`) legt Einsatzeinheiten dieser Einsatzleitung an und ist nur mit `einsatzleitung` erlaubt
 ** `abteilungen[]` — optional zusätzliche `{ key, name }` (ohne Gebietszuordnung)
 * `demo` (optional) — `{ passwort, nutzer[] }` für Demo-Logins (nur außerhalb Production)
 
@@ -27,6 +27,7 @@ Nutzer-Einträge:
 | Quelle in der Datei | Abgeleitete ID
 | `landkreis:{organisationseinheit.key}` | Organisationseinheit
 | `einsatzleitung:{bereich.key}` | Einsatzleitung (Abteilung / Mitarbeitergruppe)
+| `einheit:{bereich.key}:{name}` | Einsatzeinheit der Einsatzleitung
 | `gebiet:{bereich.key}` | Gebiet
 | `abteilung:{abteilung.key}` | Abteilung (Mitarbeitergruppe)
 | `nutzer:{nutzer.key}` | Backoffice-Nutzer
