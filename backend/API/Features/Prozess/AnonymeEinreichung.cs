@@ -10,6 +10,9 @@ namespace API.Features.Prozess;
 /// </remarks>
 public static class AnonymeEinreichung {
     public const string ProzessTagName = "Anonym";
+
+    /// <summary>Prozesse with this tag only accept reports that name a Lage and Gebiet that are live.</summary>
+    public const string LageHelferTagName = "LageHelfer";
 }
 
 [GraphQLDescription("Ergebnis einer anonymen Einreichung.")]
@@ -30,3 +33,6 @@ public class AnonymeEinreichungNichtErlaubtException()
 
 public class AnonymeEinreichungUnvollstaendigException()
     : DomainException("Die anonyme Einreichung muss alle Schritte der antragstellenden Person auf einmal enthalten.");
+
+public class LageErforderlichException()
+    : DomainException("Für diese Meldung muss eine Lage und ein Gebiet gewählt werden.");

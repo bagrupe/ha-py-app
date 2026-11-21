@@ -194,9 +194,10 @@ public class LageHelferSeederTest(LageHelferSeederApiFactory factory) : GraphQLT
         Assert.Equal("Ereignis melden", prozess.Name);
         Assert.Equal(ExampleDocument.Kommune.Id, prozess.KommuneId);
         Assert.Single(prozess.Versionen);
-        Assert.Equal([AnonymeEinreichung.ProzessTagName], prozess.Tags.Select(t => t.Tag));
+        Assert.Equal([AnonymeEinreichung.ProzessTagName, AnonymeEinreichung.LageHelferTagName],
+            prozess.Tags.Select(t => t.Tag).Order());
         Assert.Single(await db.ProzessTags.Where(t => t.Tag == AnonymeEinreichung.ProzessTagName).ToListAsync());
-        Assert.Single(await db.ProzessTagHistorie.Where(h => h.ProzessId == MeldeprozessId).ToListAsync());
+        Assert.Equal(2, await db.ProzessTagHistorie.CountAsync(h => h.ProzessId == MeldeprozessId));
     }
 
     [Fact]
@@ -229,6 +230,8 @@ public class LageHelferSeederTest(LageHelferSeederApiFactory factory) : GraphQLT
         var meldung = version.Schritte.OfType<FormularSchritt>().Single(s => s.Titel == "Angaben zum Ereignis");
         var pruefung = version.Schritte.Single(s => s.Titel == "Meldung prüfen");
         var einsatz = version.Schritte.Single(s => s.Titel == "Einsatz läuft");
+        var fluessenstadtGebiet = LageHelferSeedData.GebietId(ExampleDocument.IdNamespace, "Fluessenstadt");
+        var lage = await SeedLiveLage(fluessenstadtGebiet);
 
         Factory.Services.GetRequiredService<IHttpContextAccessor>().HttpContext = new DefaultHttpContext();
         var create = await ExecuteQuery(null, """
@@ -240,6 +243,7 @@ public class LageHelferSeederTest(LageHelferSeederApiFactory factory) : GraphQLT
             """, new Dictionary<string, object?> {
             ["prozessVersionId"] = version.Id,
             ["sharedKeyEncryptedForKommune"] = "key",
+            ["lage"] = new Dictionary<string, object?> { ["lageId"] = lage.Id, ["gebietId"] = fluessenstadtGebiet },
             ["bearbeitungen"] = new List<Dictionary<string, object?>> {
                 Bearbeitung(lebensgefahr, lebensgefahr.Verbindungen.Single(v => v.NachId == meldung.Id),
                     (EreignismeldungVorlage.LebensgefahrSlot, "Nein")),
@@ -281,6 +285,20 @@ public class LageHelferSeederTest(LageHelferSeederApiFactory factory) : GraphQLT
             }
             """, new Dictionary<string, object?> { ["correlationId"] = correlationId });
         Assert.Contains(EreignismeldungVorlage.StatusHilfeUnterwegs, status.ToJson());
+    }
+
+    private async Task<Lage> SeedLiveLage(Guid gebietId) {
+        await using var db = await NewDbAsync();
+        var gebiet = await db.Gebiete.SingleAsync(g => g.Id == gebietId);
+        var now = Factory.Services.GetRequiredService<IClock>().GetCurrentInstant();
+        var actorId = LageHelferSeedData.NutzerId(ExampleDocument.IdNamespace, "superadmin");
+        var lage = Lage.Create(gebiet.UntereinheitId, "Hochwasser", [gebiet], actorId, now);
+        foreach (var status in new[] { LageGebietStatus.CalledOut, LageGebietStatus.Ready, LageGebietStatus.Live }) {
+            lage.TransitionGebiet(gebiet.Id, status, actorId, now);
+        }
+        db.Lagen.Add(lage);
+        await db.SaveChangesAsync();
+        return lage;
     }
 
     private static Dictionary<string, object?> Bearbeitung(Schritt schritt, Verbindung verbindung,

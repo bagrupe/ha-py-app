@@ -38,11 +38,11 @@
   ],
   "prozesse": [
     {
-      // Anonym: Meldung ohne Login möglich (ausfuehrungCreateAnonym)
+      // Anonym: Meldung ohne Login (ausfuehrungCreateAnonym); LageHelfer: Lage und Gebiet sind Pflicht
       "key": "ereignis-melden",
       "vorlage": "Ereignismeldung",
       "name": "Ereignis melden",
-      "tags": ["Anonym"],
+      "tags": ["Anonym", "LageHelfer"],
       "kategorien": ["Unwetter", "Großbrand", "Hagelsturm", "Blitzeis"]
     }
   ],

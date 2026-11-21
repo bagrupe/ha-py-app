@@ -90,11 +90,13 @@ public class AusfuehrungMutations {
     [Error(typeof(AnonymeEinreichungNichtErlaubtException))]
     [Error(typeof(AnonymeEinreichungUnvollstaendigException))]
     [Error(typeof(LageGebietNotLiveException))]
+    [Error(typeof(LageErforderlichException))]
     [GraphQLDescription(
         "Reicht einen Antrag ohne Anmeldung ein. Nur für Prozesse mit dem Tag 'Anonym'. Alle Schritte der " +
         "antragstellenden Person müssen in diesem einen Aufruf enthalten sein, weil der Antrag danach niemandem " +
         "mehr zum Fortsetzen gehört. Liefert die CorrelationId für die Statusabfrage. Mit 'lage' wird die Meldung " +
-        "der gewählten Lage und dem gewählten Gebiet zugeordnet; dort muss die Lage gerade Meldungen annehmen.")]
+        "der gewählten Lage und dem gewählten Gebiet zugeordnet; dort muss die Lage gerade Meldungen annehmen. Für " +
+        "Prozesse mit dem Tag 'LageHelfer' ist 'lage' Pflicht.")]
     public async Task<AnonymeAusfuehrungResult> AusfuehrungCreateAnonym(
         IClock clock,
         [Service] AusfuehrungZustaendigkeitService ausfuehrungZustaendigkeitService,
@@ -103,16 +105,23 @@ public class AusfuehrungMutations {
         DomainContext db,
         WalkerFactory walkerFactory, Guid prozessVersionId, IEnumerable<AusfuehrungBearbeitungInput> bearbeitungen,
         string sharedKeyEncryptedForKommune, LageSelectionInput? lage, CancellationToken ct) {
-        var prozessKommuneId = await db.ProzessVersionen
+        var prozess = await db.ProzessVersionen
             .Where(v => v.Id == prozessVersionId
                 && v.Prozess.Tags.Any(t => t.Tag == AnonymeEinreichung.ProzessTagName))
-            .Select(v => (Guid?)v.Prozess.KommuneId)
+            .Select(v => new {
+                v.Prozess.KommuneId,
+                LageErforderlich = v.Prozess.Tags.Any(t => t.Tag == AnonymeEinreichung.LageHelferTagName),
+            })
             .FirstOrDefaultAsync(ct) ?? throw new AnonymeEinreichungNichtErlaubtException();
+
+        if (prozess.LageErforderlich && lage is null) {
+            throw new LageErforderlichException();
+        }
 
         Guid? lageGebietId = null;
         if (lage is not null) {
             var pass = await LiveLageGebiete.Find(db, lage.LageId, lage.GebietId, ct);
-            if (pass is null || pass.KommuneId != prozessKommuneId) {
+            if (pass is null || pass.KommuneId != prozess.KommuneId) {
                 throw new LageGebietNotLiveException();
             }
             lageGebietId = pass.Id;

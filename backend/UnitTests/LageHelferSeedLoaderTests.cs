@@ -160,7 +160,7 @@ public class LageHelferSeedLoaderTests {
         var prozess = Assert.Single(doc.Prozesse);
         Assert.Equal("ereignis-melden", prozess.Key);
         Assert.Equal(LageHelferProzessVorlage.Ereignismeldung, prozess.Vorlage);
-        Assert.Equal(["Anonym"], prozess.Tags);
+        Assert.Equal(["Anonym", "LageHelfer"], prozess.Tags);
         Assert.Equal(["Unwetter", "Großbrand", "Hagelsturm", "Blitzeis"], prozess.Kategorien);
     }
 

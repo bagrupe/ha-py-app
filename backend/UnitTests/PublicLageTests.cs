@@ -112,7 +112,7 @@ public class PublicLageTests(BackendApiFactory factory) : GraphQLTests(factory) 
         await SeedGebietMitEinsatzleitung(untereinheit, "West", West);
         var (east, eastEinsatzleitung) = await SeedGebietMitEinsatzleitung(untereinheit, "East", East);
         var lage = await lageSeeder.SeedLageForGebiet(east, Live);
-        var meldeprozess = await SeedMeldeprozess(kommuneId);
+        var meldeprozess = await SeedMeldeprozess(kommuneId, lageErforderlich: true);
 
         // The person reports from home in West about an event they chose to file under East.
         var create = await CreateAnonym(meldeprozess, new LageSelectionInput(lage.Id, east.Id), lng: 9.2, lat: 52.2);
@@ -161,6 +161,18 @@ public class PublicLageTests(BackendApiFactory factory) : GraphQLTests(factory) 
         Assert.True(await NoAusfuehrungFor(meldeprozess.VersionId));
     }
 
+    [Fact]
+    public async Task LageHelfer_report_without_lage_is_rejected() {
+        var (kommuneId, _) = await SeedKommuneMitUntereinheit();
+        var meldeprozess = await SeedMeldeprozess(kommuneId, lageErforderlich: true);
+
+        var create = await CreateAnonym(meldeprozess, lage: null, lng: 9.2, lat: 52.2);
+
+        Assert.Null(create.Errors);
+        Assert.Contains("LageErforderlichError", create.ToJson());
+        Assert.True(await NoAusfuehrungFor(meldeprozess.VersionId));
+    }
+
     private async Task<JsonElement> Suggest(Guid kommuneId, double lng, double lat) {
         var result = await ExecuteGraphqlAsync(null, SuggestionQuery, new Dictionary<string, object?> {
             ["kommuneId"] = kommuneId,
@@ -181,14 +193,20 @@ public class PublicLageTests(BackendApiFactory factory) : GraphQLTests(factory) 
     private record Meldeprozess(Guid VersionId, Schritt Start, Verbindung ZurMeldung, Schritt Meldung,
         Verbindung ZurZuordnung);
 
-    private async Task<Meldeprozess> SeedMeldeprozess(Guid kommuneId) {
+    private async Task<Meldeprozess> SeedMeldeprozess(Guid kommuneId, bool lageErforderlich = false) {
         await using var scope = Factory.Services.CreateAsyncScope();
         var db = scope.ServiceProvider.GetRequiredService<DomainContext>();
-        var tag = await db.ProzessTags.AsTracking()
-            .FirstOrDefaultAsync(t => t.Tag == AnonymeEinreichung.ProzessTagName);
-        if (tag is null) {
-            tag = new ProzessTag { Id = Guid.NewGuid(), Tag = AnonymeEinreichung.ProzessTagName };
-            db.ProzessTags.Add(tag);
+        var tagNames = lageErforderlich
+            ? new[] { AnonymeEinreichung.ProzessTagName, AnonymeEinreichung.LageHelferTagName }
+            : [AnonymeEinreichung.ProzessTagName];
+        var tags = new List<ProzessTag>();
+        foreach (var name in tagNames) {
+            var tag = await db.ProzessTags.AsTracking().FirstOrDefaultAsync(t => t.Tag == name);
+            if (tag is null) {
+                tag = new ProzessTag { Id = Guid.NewGuid(), Tag = name };
+                db.ProzessTags.Add(tag);
+            }
+            tags.Add(tag);
         }
 
         var seed = new LageHelferProzessSeed("test", LageHelferProzessVorlage.Ereignismeldung, "Ereignis melden", [],
@@ -202,7 +220,7 @@ public class PublicLageTests(BackendApiFactory factory) : GraphQLTests(factory) 
         var now = scope.ServiceProvider.GetRequiredService<IClock>().GetCurrentInstant();
         var version = new ProzessVersion {
             Id = versionId,
-            Prozess = new Prozess { Id = Guid.NewGuid(), Name = "Ereignis melden", KommuneId = kommuneId, Tags = [tag] },
+            Prozess = new Prozess { Id = Guid.NewGuid(), Name = "Ereignis melden", KommuneId = kommuneId, Tags = tags },
             CreatedAt = now,
             PublishedAt = now,
             Schritte = schritte,
@@ -219,13 +237,15 @@ public class PublicLageTests(BackendApiFactory factory) : GraphQLTests(factory) 
             meldung, verbindungen.Single(v => v.Von == meldung));
     }
 
-    private async Task<IQueryResult> CreateAnonym(Meldeprozess prozess, LageSelectionInput lage, double lng,
+    private async Task<IQueryResult> CreateAnonym(Meldeprozess prozess, LageSelectionInput? lage, double lng,
         double lat) {
         ActAnonymously();
         return await ExecuteQuery(null, CreateAnonymMutation, new Dictionary<string, object?> {
             ["prozessVersionId"] = prozess.VersionId,
             ["sharedKeyEncryptedForKommune"] = "key",
-            ["lage"] = new Dictionary<string, object?> { ["lageId"] = lage.LageId, ["gebietId"] = lage.GebietId },
+            ["lage"] = lage is null
+                ? null
+                : new Dictionary<string, object?> { ["lageId"] = lage.LageId, ["gebietId"] = lage.GebietId },
             ["bearbeitungen"] = new List<Dictionary<string, object?>> {
                 Bearbeitung(prozess.Start, prozess.ZurMeldung, (EreignismeldungVorlage.LebensgefahrSlot, "Nein")),
                 Bearbeitung(prozess.Meldung, prozess.ZurZuordnung,

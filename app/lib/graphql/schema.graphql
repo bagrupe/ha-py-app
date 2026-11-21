@@ -1545,6 +1545,10 @@ type LageClosedError implements Error {
   message: String!
 }
 
+type LageErforderlichError implements Error {
+  message: String!
+}
+
 type LageGebiet {
   id: UUID!
   lageId: UUID!
@@ -1758,7 +1762,7 @@ type Mutation {
   antragWiederherstellen(input: AntragWiederherstellenInput!): AntragWiederherstellenPayload! @authorize
   "Startet einen neuen Antrag (Ausführung) für eine Prozessversion. Initialisiert den Prozess und führt die ersten Bearbeitungsschritte aus."
   ausfuehrungCreate(input: AusfuehrungCreateInput!): AusfuehrungCreatePayload! @authorize
-  "Reicht einen Antrag ohne Anmeldung ein. Nur für Prozesse mit dem Tag 'Anonym'. Alle Schritte der antragstellenden Person müssen in diesem einen Aufruf enthalten sein, weil der Antrag danach niemandem mehr zum Fortsetzen gehört. Liefert die CorrelationId für die Statusabfrage. Mit 'lage' wird die Meldung der gewählten Lage und dem gewählten Gebiet zugeordnet; dort muss die Lage gerade Meldungen annehmen."
+  "Reicht einen Antrag ohne Anmeldung ein. Nur für Prozesse mit dem Tag 'Anonym'. Alle Schritte der antragstellenden Person müssen in diesem einen Aufruf enthalten sein, weil der Antrag danach niemandem mehr zum Fortsetzen gehört. Liefert die CorrelationId für die Statusabfrage. Mit 'lage' wird die Meldung der gewählten Lage und dem gewählten Gebiet zugeordnet; dort muss die Lage gerade Meldungen annehmen. Für Prozesse mit dem Tag 'LageHelfer' ist 'lage' Pflicht."
   ausfuehrungCreateAnonym(input: AusfuehrungCreateAnonymInput!): AusfuehrungCreateAnonymPayload! @allowAnonymous
   "Führt die Bearbeitung eines laufenden Antrags (Ausführung) fort. Überträgt die nächsten Schritte, Slot-Werte und ggf. Zuständigkeiten."
   ausfuehrungContinue(input: AusfuehrungContinueInput!): AusfuehrungContinuePayload! @authorize
@@ -3179,7 +3183,7 @@ union AufbewahrungsEinstellungenAktualisierenError = NotAllowedError
 
 union AusfuehrungContinueError = AusfuehrungNotFoundError | NachrichtTooLongError
 
-union AusfuehrungCreateAnonymError = AnonymeEinreichungNichtErlaubtError | AnonymeEinreichungUnvollstaendigError | LageGebietNotLiveError
+union AusfuehrungCreateAnonymError = AnonymeEinreichungNichtErlaubtError | AnonymeEinreichungUnvollstaendigError | LageGebietNotLiveError | LageErforderlichError
 
 union AusfuehrungUpdateZugewiesenePersonError = AusfuehrungNotFoundError | UserNotFoundError | MismatchingKommuneError | UnauthorizedAccessError
 
