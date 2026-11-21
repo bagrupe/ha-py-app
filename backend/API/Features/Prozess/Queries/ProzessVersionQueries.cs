@@ -59,8 +59,8 @@ public class ProzessVersionQueries {
     [GraphQLDescription("Liefert die aktuell veröffentlichte Version eines Prozesses. Für Bürger:innen null, wenn der Prozess deaktiviert ist.")]
     public async Task<ProzessVersion?> GetCurrentVersion(CurrentUserAccessor userAccessor,
         ICurrentVersionByProzessIdDataLoader dataLoader, [Parent] Prozess prozess) {
-        var user = await userAccessor.User();
-        if (user is not BackofficeUser && prozess.DeaktiviertAm != null) {
+        var isBackofficeUser = userAccessor.TryUserId() is not null && await userAccessor.User() is BackofficeUser;
+        if (!isBackofficeUser && prozess.DeaktiviertAm != null) {
             return null;
         }
 
@@ -170,7 +170,8 @@ public class ProzessVersionExtensions {
     [GraphQLDescription("Liefert die ersten Schritte, die der Nutzer in diesem Prozess ausführen kann.")]
     public async Task<IEnumerable<Schritt>> ErsteSchritte(DomainContext context, [Parent] ProzessVersion prozessVersion,
         CurrentUserAccessor userAccessor, [Service] WalkerFactory walkerFactory) {
-        var isBuerger = await userAccessor.User() is Buerger;
+        // Anonymous submitters fill in the Bürger steps, see AusfuehrungCreateAnonym.
+        var isBuerger = userAccessor.TryUserId() is null || await userAccessor.User() is Buerger;
 
         if (prozessVersion.StartId is null) return Array.Empty<Schritt>();
 

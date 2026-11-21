@@ -919,6 +919,9 @@ namespace API.Migrations
                     b.Property<Instant?>("AbgeschlossenAm")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<Guid?>("CorrelationId")
+                        .HasColumnType("uuid");
+
                     b.Property<Instant>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
@@ -955,6 +958,9 @@ namespace API.Migrations
                         .HasColumnType("uuid");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("CorrelationId")
+                        .IsUnique();
 
                     b.HasIndex("ProzessVersionId");
 

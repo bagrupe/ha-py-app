@@ -85,6 +85,53 @@ public class AusfuehrungMutations {
     }
 
 
+    [AllowAnonymous]
+    [GraphQLDescription(
+        "Reicht einen Antrag ohne Anmeldung ein. Nur für Prozesse mit dem Tag 'Anonym'. Alle Schritte der " +
+        "antragstellenden Person müssen in diesem einen Aufruf enthalten sein, weil der Antrag danach niemandem " +
+        "mehr zum Fortsetzen gehört. Liefert die CorrelationId für die Statusabfrage.")]
+    public async Task<AnonymeAusfuehrungResult> AusfuehrungCreateAnonym(
+        IClock clock,
+        [Service] AusfuehrungZustaendigkeitService ausfuehrungZustaendigkeitService,
+        [Service] VorgangsverlaufService verlaufService,
+        [Service] ProzessOptions prozessOptions,
+        DomainContext db,
+        WalkerFactory walkerFactory, Guid prozessVersionId, IEnumerable<AusfuehrungBearbeitungInput> bearbeitungen,
+        string sharedKeyEncryptedForKommune) {
+        var anonymErlaubt = await db.ProzessVersionen.AnyAsync(v =>
+            v.Id == prozessVersionId && v.Prozess.Tags.Any(t => t.Tag == AnonymeEinreichung.ProzessTagName));
+        if (!anonymErlaubt) {
+            throw new AnonymeEinreichungNichtErlaubtException();
+        }
+
+        var systemUser = await db.SystemUsers.SingleAsync(u => u.Id == SystemUser.UserId);
+        var walker = await walkerFactory.StartNewAusfuehrung(prozessVersionId,
+            new Ausfuehrung {
+                ProzessVersionId = prozessVersionId,
+                UserId = systemUser.Id,
+                CreatedAt = clock.GetCurrentInstant(),
+                // There is no Bürger key pair to encrypt for; the submitter keeps nothing but the CorrelationId.
+                SharedKeyEncryptedForBuerger = "",
+                SharedKeyEncryptedForKommune = sharedKeyEncryptedForKommune,
+                Status = AusfuehrungStatus.BearbeitungDurchBuerger,
+                SchrittId = Guid.Empty,
+                CorrelationId = Guid.NewGuid(),
+            });
+
+        await PerformSteps(walker, systemUser, bearbeitungen, ausfuehrungZustaendigkeitService, null, prozessOptions);
+
+        if (walker.Ausfuehrung.Status == AusfuehrungStatus.BearbeitungDurchBuerger) {
+            throw new AnonymeEinreichungUnvollstaendigException();
+        }
+
+        await walker.SaveChangesAsync();
+
+        verlaufService.RecordEingang(db, walker.Ausfuehrung.Id, walker.Ausfuehrung.CreatedAt);
+        await db.SaveChangesAsync();
+
+        return new AnonymeAusfuehrungResult(walker.Ausfuehrung.CorrelationId!.Value);
+    }
+
     [Authorize]
     [Error(typeof(AusfuehrungNotFoundException))]
     [Error(typeof(NachrichtTooLongException))]
@@ -456,6 +503,12 @@ public class AusfuehrungMutations {
     ) {
         if (user is Buerger && schritt.ErledigungDurchBuerger && ausfuehrung.UserId == user.Id &&
             naechsteIstZustaendigkeit is null) {
+            return true;
+        }
+
+        // Nobody can log in as the SystemUser, so this branch is reachable only from AusfuehrungCreateAnonym.
+        if (user is SystemUser && ausfuehrung.CorrelationId is not null && ausfuehrung.UserId == user.Id &&
+            schritt.ErledigungDurchBuerger && naechsteIstZustaendigkeit is null) {
             return true;
         }
 

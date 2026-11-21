@@ -69,6 +69,13 @@ public class Ausfuehrung {
     public Guid SchrittId { get; set; }
     [GraphQLIgnore]
     public Schritt Schritt { get; set; } = null!;
+
+    /// <summary>
+    /// Secret handed to an anonymous submitter; whoever holds it can read the status without logging in.
+    /// Null for every Ausführung started by a logged-in user.
+    /// </summary>
+    [GraphQLIgnore]
+    public Guid? CorrelationId { get; init; }
 }
 
 /// <summary>Definiert die Art der Zuständigkeit einer Ausführung.</summary>
@@ -206,6 +213,7 @@ public class AusfuehrungEntityTypeConfiguration : IEntityTypeConfiguration<Ausfu
             .OnDelete(DeleteBehavior.Restrict);
         builder.HasOne(a => a.Schritt).WithMany().HasForeignKey(a => a.SchrittId)
             .OnDelete(DeleteBehavior.Restrict);
+        builder.HasIndex(a => a.CorrelationId).IsUnique();
     }
 }
 
