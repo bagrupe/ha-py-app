@@ -21,11 +21,10 @@
           <strong>Bitte rufe jetzt den Notruf 112 an. Nutze dieses Formular nicht bei akuter Lebensgefahr.</strong>
           <a class="btn btn--danger btn--block" href="tel:112">112 anrufen</a>
         </div>
+      } else {
+        <p class="card__meta" role="status" aria-live="polite">Bitte beantworte die Frage, um fortzufahren.</p>
+        <a class="btn btn--ghost btn--block" asp-page="Index">Zurück</a>
       }
-      <p class="card__meta" role="status" aria-live="polite">
-        @(Model.DangerReported ? "Du wirst nicht zum Meldeformular weitergeleitet." : "Bitte beantworte die Frage, um fortzufahren.")
-      </p>
-      <a class="btn btn--ghost btn--block" asp-page="Index">Zurück</a>
     </form>
   </div>
 </section>
