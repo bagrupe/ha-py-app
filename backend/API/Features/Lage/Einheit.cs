@@ -9,6 +9,9 @@ public class Einheit {
     public Guid Id { get; set; }
     public required string Name { get; set; }
 
+    [GraphQLDescription("Ausrüstung an Bord (z. B. \"Motorkettensäge\", \"Drehleiter\").")]
+    public List<string> Ausruestung { get; set; } = [];
+
     [GraphQLDescription("Einsatzleitung (Mitarbeitergruppe), zu der die Einheit gehört.")]
     public Guid MitarbeiterGruppeId { get; set; }
 

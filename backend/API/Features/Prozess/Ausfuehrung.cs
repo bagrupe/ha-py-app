@@ -105,6 +105,27 @@ public class Ausfuehrung {
 
     [GraphQLDescription("Begründung, mit der die Leitstelle die Meldung verworfen hat. Null = nicht verworfen.")]
     public string? VerwerfenGrund { get; set; }
+
+    [GraphQLDescription("Grund, aus dem die Einsatzleitung die Meldung an die Leitstelle abgegeben hat.")]
+    public Lage.AbgabeGrund? KlaerungGrund { get; set; }
+
+    [GraphQLDescription("Klasse A–D. Erst regelbasiert vorgeschlagen, dann von Leitstelle oder Einsatzleitung korrigierbar.")]
+    public Lage.MeldungKlasse? Klasse { get; set; }
+
+    [GraphQLDescription("Ausrüstung, die für die Meldung gebraucht wird (z. B. \"Motorkettensäge\").")]
+    public List<string>? BenoetigteAusruestung { get; set; }
+
+    [GraphQLDescription("Die Beschreibung klingt nach Gefahr für Leib und Leben; die Leitstelle muss das prüfen.")]
+    public bool MoeglicherNotfall { get; set; }
+
+    [GraphQLDescription("Ergebnis der Notfall-Prüfung durch die Leitstelle. Null = noch nicht geprüft.")]
+    public Lage.NotfallPruefung? NotfallPruefung { get; set; }
+
+    [GraphQLDescription("Stelle außerhalb der Einsatzleitungen, an die die Leitstelle die Meldung übergeben hat.")]
+    public Lage.ExterneStelle? ExterneStelle { get; set; }
+
+    [GraphQLDescription("Kommentar der Leitstelle zur Übergabe an die externe Stelle.")]
+    public string? ExternKommentar { get; set; }
 }
 
 /// <summary>Definiert die Art der Zuständigkeit einer Ausführung.</summary>

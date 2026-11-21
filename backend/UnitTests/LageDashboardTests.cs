@@ -25,14 +25,15 @@ public class LageDashboardTests(BackendApiFactory factory) : LageMeldungTestBase
         ClaimsPrincipal West,
         ClaimsPrincipal Ost);
 
-    private async Task<Szenario> SeedSzenario() {
+    private async Task<Szenario> SeedSzenario(string beschreibung = "Baum blockiert Straße") {
         var untereinheit = await gebietSeeder.SeedUntereinheit();
         var (west, einsatzleitungWest) = await SeedGebietMitEinsatzleitung(untereinheit, "West", West);
         var (_, einsatzleitungOst) = await SeedGebietMitEinsatzleitung(untereinheit, "Ost", East);
         var lage = await lageSeeder.SeedLageForGebiet(west, Live);
         var meldeprozess = await SeedMeldeprozess(KommuneSeeder.LandkreisHaPy.Id, lageErforderlich: true);
 
-        var create = await CreateAnonym(meldeprozess, new LageSelectionInput(lage.Id, west.Id), 9.2, 52.2);
+        var create = await CreateAnonym(meldeprozess, new LageSelectionInput(lage.Id, west.Id), 9.2, 52.2,
+            beschreibung);
         Assert.DoesNotContain("Error\"", create.ToJson());
         var correlationId = CorrelationIdOf(create);
         Guid ausfuehrungId;
@@ -52,7 +53,8 @@ public class LageDashboardTests(BackendApiFactory factory) : LageMeldungTestBase
         testSeeder.CreateBackofficeUserPrincipal(art, [GlobaleFunktionsberechtigung.LageHelfer], gruppen.ToList());
 
     private const string MeldungFields = """
-        id meldungsnummer ereignisStatus klaerungSeit klaerungKommentar verwerfenGrund anzahlBestaetigungen
+        id meldungsnummer ereignisStatus klaerungSeit klaerungGrund klaerungKommentar verwerfenGrund anzahlBestaetigungen
+        klasse benoetigteAusruestung moeglicherNotfall notfallPruefung externeStelle externKommentar
         einheit { id name }
         istZustaendigkeit { mitarbeiterGruppeId }
         """;
@@ -108,9 +110,21 @@ public class LageDashboardTests(BackendApiFactory factory) : LageMeldungTestBase
         Mutation(caller, "meldungFortsetzen", "MeldungFortsetzenInput",
             new() { ["ausfuehrungId"] = ausfuehrungId, ["aktion"] = aktion });
 
-    private Task<JsonElement> Abgeben(ClaimsPrincipal caller, Guid ausfuehrungId, string kommentar) =>
+    private Task<JsonElement> Abgeben(ClaimsPrincipal caller, Guid ausfuehrungId, string grund, string? kommentar) =>
         Mutation(caller, "meldungAnLeitstelleAbgeben", "MeldungAnLeitstelleAbgebenInput",
-            new() { ["ausfuehrungId"] = ausfuehrungId, ["kommentar"] = kommentar });
+            new() { ["ausfuehrungId"] = ausfuehrungId, ["grund"] = grund, ["kommentar"] = kommentar });
+
+    private Task<JsonElement> ExternUebergeben(ClaimsPrincipal caller, Guid ausfuehrungId, string stelle) =>
+        Mutation(caller, "meldungExternUebergeben", "MeldungExternUebergebenInput",
+            new() { ["ausfuehrungId"] = ausfuehrungId, ["stelle"] = stelle, ["kommentar"] = "Radlader nötig" });
+
+    private Task<JsonElement> NotfallPruefen(ClaimsPrincipal caller, Guid ausfuehrungId, string ergebnis) =>
+        Mutation(caller, "meldungNotfallPruefen", "MeldungNotfallPruefenInput",
+            new() { ["ausfuehrungId"] = ausfuehrungId, ["ergebnis"] = ergebnis });
+
+    private Task<JsonElement> Meldeweg(ClaimsPrincipal caller, Guid lageId, bool offen) =>
+        Mutation(caller, "setLageMeldeweg", "SetLageMeldewegInput",
+            new() { ["lageId"] = lageId, ["offen"] = offen }, "lage { meldewegPausiertSeit }");
 
     private Task<JsonElement> Umverteilen(ClaimsPrincipal caller, Guid ausfuehrungId, Guid gruppeId) =>
         Mutation(caller, "meldungUmverteilen", "MeldungUmverteilenInput",
@@ -179,10 +193,12 @@ public class LageDashboardTests(BackendApiFactory factory) : LageMeldungTestBase
     [Fact]
     public async Task Abgegebene_meldung_waits_in_klaerung_until_the_leitstelle_hands_it_to_another_einsatzleitung() {
         var s = await SeedSzenario();
-        Fails(await Abgeben(s.West, s.AusfuehrungId, "  "), "BegruendungErforderlichError");
+        Fails(await Abgeben(s.West, s.AusfuehrungId, "SONSTIGES", "  "), "BegruendungErforderlichError");
 
-        var abgegeben = Ok(await Abgeben(s.West, s.AusfuehrungId, "Kettensäge fehlt")).GetProperty("ausfuehrung");
+        var abgegeben = Ok(await Abgeben(s.West, s.AusfuehrungId, "AUSRUESTUNG_FEHLT", "Kettensäge fehlt"))
+            .GetProperty("ausfuehrung");
         Assert.Equal("IN_KLAERUNG", abgegeben.GetProperty("ereignisStatus").GetString());
+        Assert.Equal("AUSRUESTUNG_FEHLT", abgegeben.GetProperty("klaerungGrund").GetString());
         Assert.Equal("Kettensäge fehlt", abgegeben.GetProperty("klaerungKommentar").GetString());
         Fails(await EinheitZuweisen(s.West, s.AusfuehrungId, null), "MeldungInKlaerungError");
         Fails(await Umverteilen(s.West, s.AusfuehrungId, s.EinsatzleitungOst.Id), "NotAllowedError");
@@ -192,6 +208,7 @@ public class LageDashboardTests(BackendApiFactory factory) : LageMeldungTestBase
 
         Assert.Equal("EINGEGANGEN", umverteilt.GetProperty("ereignisStatus").GetString());
         Assert.Equal(JsonValueKind.Null, umverteilt.GetProperty("klaerungSeit").ValueKind);
+        Assert.Equal(JsonValueKind.Null, umverteilt.GetProperty("klaerungGrund").ValueKind);
         Assert.Equal(s.EinsatzleitungOst.Id,
             umverteilt.GetProperty("istZustaendigkeit").GetProperty("mitarbeiterGruppeId").GetGuid());
         Assert.Empty(await LageMeldungen(s.West, s.LageId));
@@ -273,5 +290,118 @@ public class LageDashboardTests(BackendApiFactory factory) : LageMeldungTestBase
         var publicId = await scope.ServiceProvider.GetRequiredService<DomainContext>().Ausfuehrungen
             .Where(a => a.Id == s.AusfuehrungId).Select(a => a.PublicId!.Value).SingleAsync();
         Fails(await Bestaetigen(publicId, null), "LageGebietNotLiveError");
+    }
+    [Fact]
+    public async Task A_reason_other_than_sonstiges_needs_no_comment() {
+        var s = await SeedSzenario();
+
+        var abgegeben = Ok(await Abgeben(s.West, s.AusfuehrungId, "KEINE_EINHEIT_FREI", null))
+            .GetProperty("ausfuehrung");
+
+        Assert.Equal("KEINE_EINHEIT_FREI", abgegeben.GetProperty("klaerungGrund").GetString());
+        Assert.Equal(JsonValueKind.Null, abgegeben.GetProperty("klaerungKommentar").ValueKind);
+    }
+
+    [Fact]
+    public async Task Leitstelle_hands_a_report_to_the_bauhof_which_closes_it() {
+        var s = await SeedSzenario();
+        Ok(await Abgeben(s.West, s.AusfuehrungId, "KEIN_FALL_FUER_FEUERWEHR", null));
+        Fails(await ExternUebergeben(s.West, s.AusfuehrungId, "BAUHOF"), "NotAllowedError");
+
+        var uebergeben = Ok(await ExternUebergeben(s.Leitstelle, s.AusfuehrungId, "BAUHOF")).GetProperty("ausfuehrung");
+
+        Assert.Equal("EXTERN_UEBERGEBEN", uebergeben.GetProperty("ereignisStatus").GetString());
+        Assert.Equal("BAUHOF", uebergeben.GetProperty("externeStelle").GetString());
+        Assert.Equal("Radlader nötig", uebergeben.GetProperty("externKommentar").GetString());
+        Assert.Equal("ABGESCHLOSSEN", await BuergerStatus(s.CorrelationId));
+        Assert.Single(await LageMeldungen(s.Leitstelle, s.LageId, offen: false));
+    }
+
+    [Fact]
+    public async Task New_reports_get_a_rule_based_class_and_equipment_which_the_einsatzleitung_can_correct() {
+        var s = await SeedSzenario("Baum liegt quer über der Fahrbahn");
+        var meldung = Assert.Single(await LageMeldungen(s.West, s.LageId));
+        Assert.Equal("A", meldung.GetProperty("klasse").GetString());
+        Assert.Equal(["Motorkettensäge"],
+            meldung.GetProperty("benoetigteAusruestung").EnumerateArray().Select(a => a.GetString()));
+        Assert.False(meldung.GetProperty("moeglicherNotfall").GetBoolean());
+
+        var korrigiert = Ok(await Mutation(s.West, "meldungEinschaetzungSetzen", "MeldungEinschaetzungSetzenInput",
+            new() {
+                ["ausfuehrungId"] = s.AusfuehrungId,
+                ["klasse"] = "C",
+                ["benoetigteAusruestung"] = new[] { "Motorkettensäge", " Absperrung " },
+            })).GetProperty("ausfuehrung");
+
+        Assert.Equal("C", korrigiert.GetProperty("klasse").GetString());
+        Assert.Equal(["Motorkettensäge", "Absperrung"],
+            korrigiert.GetProperty("benoetigteAusruestung").EnumerateArray().Select(a => a.GetString()));
+    }
+
+    [Fact]
+    public async Task A_possible_emergency_is_flagged_and_only_the_leitstelle_resolves_it() {
+        var s = await SeedSzenario("Baum aufs Haus gefallen, Nachbarin noch drin");
+        var meldung = Assert.Single(await LageMeldungen(s.Leitstelle, s.LageId));
+        Assert.True(meldung.GetProperty("moeglicherNotfall").GetBoolean());
+        Assert.Equal("A", meldung.GetProperty("klasse").GetString());
+        Fails(await NotfallPruefen(s.West, s.AusfuehrungId, "KEIN_NOTFALL"), "NotAllowedError");
+
+        var geprueft = Ok(await NotfallPruefen(s.Leitstelle, s.AusfuehrungId, "KEIN_NOTFALL")).GetProperty("ausfuehrung");
+        Assert.Equal("KEIN_NOTFALL", geprueft.GetProperty("notfallPruefung").GetString());
+        Assert.Equal("EINGEGANGEN", geprueft.GetProperty("ereignisStatus").GetString());
+
+        var anEls = Ok(await NotfallPruefen(s.Leitstelle, s.AusfuehrungId, "AN_ELS_UEBERGEBEN"))
+            .GetProperty("ausfuehrung");
+        Assert.Equal("EXTERN_UEBERGEBEN", anEls.GetProperty("ereignisStatus").GetString());
+        Assert.Equal("ELS", anEls.GetProperty("externeStelle").GetString());
+    }
+
+    [Fact]
+    public async Task Taking_the_meldeweg_offline_stops_reports_and_confirmations_until_it_is_back_online() {
+        var s = await SeedSzenario();
+        Fails(await Meldeweg(s.West, s.LageId, false), "NotAllowedError");
+
+        var offline = Ok(await Meldeweg(s.Leitstelle, s.LageId, false)).GetProperty("lage");
+        Assert.NotEqual(JsonValueKind.Null, offline.GetProperty("meldewegPausiertSeit").ValueKind);
+        Assert.DoesNotContain(await ActiveLageIds(), id => id == s.LageId);
+        Fails(await Bestaetigen(await PublicIdOf(s.AusfuehrungId), null), "LageGebietNotLiveError");
+        Assert.Single(await LageMeldungen(s.Leitstelle, s.LageId, offen: true));
+
+        var online = Ok(await Meldeweg(s.Leitstelle, s.LageId, true)).GetProperty("lage");
+        Assert.Equal(JsonValueKind.Null, online.GetProperty("meldewegPausiertSeit").ValueKind);
+        Assert.Contains(await ActiveLageIds(), id => id == s.LageId);
+        Ok(await Bestaetigen(await PublicIdOf(s.AusfuehrungId), null));
+    }
+
+    [Fact]
+    public async Task A_new_einheit_gets_the_standard_equipment_of_its_vehicle_type_unless_given() {
+        var s = await SeedSzenario();
+
+        var standard = Ok(await Mutation(s.West, "createEinheit", "CreateEinheitInput",
+            new() { ["name"] = "DLK 23/12 West", ["mitarbeiterGruppeId"] = s.EinsatzleitungWest.Id },
+            "einheit { ausruestung }")).GetProperty("einheit");
+        var eigene = Ok(await Mutation(s.West, "createEinheit", "CreateEinheitInput",
+            new() {
+                ["name"] = "Bagger West",
+                ["mitarbeiterGruppeId"] = s.EinsatzleitungWest.Id,
+                ["ausruestung"] = new[] { "Radlader" },
+            }, "einheit { ausruestung }")).GetProperty("einheit");
+
+        Assert.Equal(["Drehleiter", "Motorkettensäge", "Absperrung"],
+            standard.GetProperty("ausruestung").EnumerateArray().Select(a => a.GetString()));
+        Assert.Equal(["Radlader"], eigene.GetProperty("ausruestung").EnumerateArray().Select(a => a.GetString()));
+    }
+
+    private async Task<Guid[]> ActiveLageIds() {
+        ActAnonymously();
+        var data = await Data(null, "query($kommuneId: UUID!) { activeLagen(kommuneId: $kommuneId) { id } }",
+            new Dictionary<string, object?> { ["kommuneId"] = KommuneSeeder.LandkreisHaPy.Id });
+        return data.GetProperty("activeLagen").EnumerateArray().Select(l => l.GetProperty("id").GetGuid()).ToArray();
+    }
+
+    private async Task<Guid> PublicIdOf(Guid ausfuehrungId) {
+        await using var scope = Factory.Services.CreateAsyncScope();
+        return await scope.ServiceProvider.GetRequiredService<DomainContext>().Ausfuehrungen
+            .Where(a => a.Id == ausfuehrungId).Select(a => a.PublicId!.Value).SingleAsync();
     }
 }

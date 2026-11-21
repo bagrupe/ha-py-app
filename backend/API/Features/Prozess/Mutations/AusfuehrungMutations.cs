@@ -157,6 +157,10 @@ public class AusfuehrungMutations {
         verlaufService.RecordEingang(db, walker.Ausfuehrung.Id, walker.Ausfuehrung.CreatedAt);
         await db.SaveChangesAsync();
 
+        if (lageGebietId is not null) {
+            await MeldungEinschaetzung.EinschaetzenUndSpeichern(db, [walker.Ausfuehrung.Id], ct);
+        }
+
         return new AnonymeAusfuehrungResult(walker.Ausfuehrung.CorrelationId!.Value, meldungsnummer);
     }
 

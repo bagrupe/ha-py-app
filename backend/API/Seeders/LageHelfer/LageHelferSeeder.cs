@@ -115,6 +115,8 @@ public class LageHelferSeeder : DataSeeder<DomainContext> {
             await SeedProzess(ns, document.Kommune.Id, prozess, cancellationToken);
         }
 
+        await MeldungEinschaetzung.Nachholen(DbContext, cancellationToken);
+
         if (document.Demo is null) {
             return;
         }
@@ -195,8 +197,16 @@ public class LageHelferSeeder : DataSeeder<DomainContext> {
         }).OnUpdate((current, next) => current.Name = next.Name).SeedAsync(ct);
 
     private async Task SeedEinheit(Guid id, string name, Guid mitarbeiterGruppeId, CancellationToken ct) =>
-        await Build(new Einheit { Id = id, Name = name, MitarbeiterGruppeId = mitarbeiterGruppeId })
-            .OnUpdate((current, next) => current.Name = next.Name).SeedAsync(ct);
+        await Build(new Einheit {
+            Id = id,
+            Name = name,
+            MitarbeiterGruppeId = mitarbeiterGruppeId,
+            Ausruestung = Fahrzeugausstattung.Standard(name),
+        })
+            .OnUpdate((current, next) => {
+                current.Name = next.Name;
+                if (current.Ausruestung.Count == 0) current.Ausruestung = next.Ausruestung;
+            }).SeedAsync(ct);
 
     private async Task SeedGebietEinsatzleitung(Guid gebietId, Guid mitarbeiterGruppeId, CancellationToken ct) =>
         await Build(new GebietEinsatzleitung { GebietId = gebietId, MitarbeiterGruppeId = mitarbeiterGruppeId })

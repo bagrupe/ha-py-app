@@ -269,7 +269,6 @@ public class LageHelferSeederTest(LageHelferSeederApiFactory factory) : GraphQLT
 
         var superadmin = LageHelferSeedData.NutzerId(ExampleDocument.IdNamespace, "superadmin");
         var einschaetzung = new List<SlotValuesInput> {
-            new(EreignismeldungVorlage.PrioritaetSlot, new EncryptedValue("n", "t", "hoch-verschluesselt")),
             new(EreignismeldungVorlage.InterneNotizSlot, new EncryptedValue("n", "t", "notiz-verschluesselt")),
         };
         await Weiter(ausfuehrung.Id, superadmin, pruefung, inPruefung, einschaetzung);

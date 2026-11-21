@@ -466,6 +466,20 @@ type Ausfuehrung {
   klaerungKommentar: String
   "Begründung, mit der die Leitstelle die Meldung verworfen hat. Null = nicht verworfen."
   verwerfenGrund: String
+  "Grund, aus dem die Einsatzleitung die Meldung an die Leitstelle abgegeben hat."
+  klaerungGrund: AbgabeGrund
+  "Klasse A–D. Erst regelbasiert vorgeschlagen, dann von Leitstelle oder Einsatzleitung korrigierbar."
+  klasse: MeldungKlasse
+  "Ausrüstung, die für die Meldung gebraucht wird (z. B. \"Motorkettensäge\")."
+  benoetigteAusruestung: [String!]
+  "Die Beschreibung klingt nach Gefahr für Leib und Leben; die Leitstelle muss das prüfen."
+  moeglicherNotfall: Boolean!
+  "Ergebnis der Notfall-Prüfung durch die Leitstelle. Null = noch nicht geprüft."
+  notfallPruefung: NotfallPruefung
+  "Stelle außerhalb der Einsatzleitungen, an die die Leitstelle die Meldung übergeben hat."
+  externeStelle: ExterneStelle
+  "Kommentar der Leitstelle zur Übergabe an die externe Stelle."
+  externKommentar: String
   "Lage und Gebiet, die die meldende Person gewählt hat. Null außerhalb des LageHelfers."
   lage: LageAssignment
   "Stand der Meldung für Leitstelle und Einsatzleitung. Null außerhalb des LageHelfers."
@@ -1076,6 +1090,8 @@ type EhrenamtsbankZeitkonto {
 type Einheit {
   id: UUID!
   name: String!
+  "Ausrüstung an Bord (z. B. \"Motorkettensäge\", \"Drehleiter\")."
+  ausruestung: [String!]!
   "Einsatzleitung (Mitarbeitergruppe), zu der die Einheit gehört."
   mitarbeiterGruppeId: UUID!
 }
@@ -1605,6 +1621,8 @@ type Lage {
   closedAt: Instant
   closedById: UUID
   archivedAt: Instant
+  "Seit wann die Leitstelle den Meldeweg offline genommen hat. Null = Meldeweg offen, solange ein Gebiet LIVE ist."
+  meldewegPausiertSeit: Instant
 }
 
 "Lage und Gebiet, denen eine Meldung zugeordnet ist."
@@ -1790,6 +1808,16 @@ type MeldungEinheitZuweisenPayload {
   errors: [MeldungEinheitZuweisenError!]
 }
 
+type MeldungEinschaetzungSetzenPayload {
+  ausfuehrung: Ausfuehrung
+  errors: [MeldungEinschaetzungSetzenError!]
+}
+
+type MeldungExternUebergebenPayload {
+  ausfuehrung: Ausfuehrung
+  errors: [MeldungExternUebergebenError!]
+}
+
 type MeldungFortsetzenPayload {
   ausfuehrung: Ausfuehrung
   errors: [MeldungFortsetzenError!]
@@ -1801,6 +1829,11 @@ type MeldungInKlaerungError implements Error {
 
 type MeldungNotFoundError implements Error {
   message: String!
+}
+
+type MeldungNotfallPruefenPayload {
+  ausfuehrung: Ausfuehrung
+  errors: [MeldungNotfallPruefenError!]
 }
 
 type MeldungUmverteilenPayload {
@@ -1894,12 +1927,18 @@ type Mutation {
   meldungEinheitZuweisen(input: MeldungEinheitZuweisenInput!): MeldungEinheitZuweisenPayload! @authorize
   "Geht für die Einsatzleitung den nächsten Prozessschritt einer Meldung, ohne Formularwerte. So sehen Bürger:innen den neuen Stand (\"Hilfe ist unterwegs\", \"Abgeschlossen\")."
   meldungFortsetzen(input: MeldungFortsetzenInput!): MeldungFortsetzenPayload! @authorize
-  "Gibt eine Meldung an die Leitstelle ab, die die Einsatzleitung nicht bearbeiten kann (z. B. \"Kettensäge fehlt\"). Der Kommentar ist Pflicht; die Einheit wird gelöst."
+  "Gibt eine Meldung an die Leitstelle ab, die die Einsatzleitung nicht bearbeiten kann. Der Grund ist Pflicht, der Kommentar nur bei SONSTIGES (z. B. \"Radlader nötig\"); die Einheit wird gelöst."
   meldungAnLeitstelleAbgeben(input: MeldungAnLeitstelleAbgebenInput!): MeldungAnLeitstelleAbgebenPayload! @authorize
   "Nur Leitstelle: gibt eine Meldung einer anderen Einsatzleitung (Mitarbeitergruppe), etwa aus der Klärung heraus. Löst Einheit, zugewiesene Person und Klärung."
   meldungUmverteilen(input: MeldungUmverteilenInput!): MeldungUmverteilenPayload! @authorize
   "Nur Leitstelle: schließt eine Meldung mit Pflicht-Begründung, ohne dass ein Einsatz stattfindet (\"Verwerfen\", \"Schließen mit Begründung\"). Bürger:innen sehen \"Abgeschlossen\"."
   meldungVerwerfen(input: MeldungVerwerfenInput!): MeldungVerwerfenPayload! @authorize
+  "Nur Leitstelle: übergibt eine Meldung an eine Stelle außerhalb der Einsatzleitungen (Bauhof, THW, ELS) und schließt sie damit. Bürger:innen sehen \"Abgeschlossen\"."
+  meldungExternUebergeben(input: MeldungExternUebergebenInput!): MeldungExternUebergebenPayload! @authorize
+  "Nur Leitstelle: erledigt den Hinweis \"möglicher Notfall\". AN_ELS_UEBERGEBEN übergibt die Meldung an das Einsatzleitsystem und schließt sie; KEIN_NOTFALL lässt sie im normalen Ablauf."
+  meldungNotfallPruefen(input: MeldungNotfallPruefenInput!): MeldungNotfallPruefenPayload! @authorize
+  "Korrigiert Klasse und benötigte Ausrüstung einer offenen Meldung. Nicht angegebene Werte bleiben, wie sie sind."
+  meldungEinschaetzungSetzen(input: MeldungEinschaetzungSetzenInput!): MeldungEinschaetzungSetzenPayload! @authorize
   "\"+1 · Sehe ich auch\": bestätigt eine offene Meldung einer Lage, die gerade Meldungen annimmt, statt sie doppelt zu melden. publicId stammt aus activeLagen.meldungen.id. Fotos wie im Slot \"bilder\", höchstens 3. Ohne Anmeldung möglich."
   meldungBestaetigen(input: MeldungBestaetigenInput!): MeldungBestaetigenPayload! @allowAnonymous
   createLage(input: CreateLageInput!): CreateLagePayload! @authorize
@@ -1908,6 +1947,8 @@ type Mutation {
   setLageGebietStatus(input: SetLageGebietStatusInput!): SetLageGebietStatusPayload! @authorize
   closeLage(input: CloseLageInput!): CloseLagePayload! @authorize
   updateLageWarningText(input: UpdateLageWarningTextInput!): UpdateLageWarningTextPayload! @authorize
+  "Nur Leitstelle: nimmt den Meldeweg einer Lage offline (offen: false) oder wieder online (offen: true). Offline nimmt keine neuen Meldungen und keine Bestätigungen an und blendet die Lage in activeLagen aus; die Gebiete bleiben LIVE, offene Meldungen bleiben bearbeitbar."
+  setLageMeldeweg(input: SetLageMeldewegInput!): SetLageMeldewegPayload! @authorize
   "Erzeugt die Zahlungs-URL für den aktuellen Bezahlen-Schritt eines Antrags. Nur für den Antragsteller oder zuständige Backoffice-Nutzer."
   bezahlenSchrittUrl(input: BezahlenSchrittUrlInput!): BezahlenSchrittUrlPayload! @authorize
   "Fügt einen Antrag (Ausführung) der persönlichen Beobachtungsliste eines Bürgers hinzu oder entfernt ihn daraus. Ermöglicht z.B. Benachrichtigungen bei Statusänderungen."
@@ -2665,6 +2706,11 @@ type SetGroupToProzessPayload {
 type SetLageGebietStatusPayload {
   lage: Lage
   errors: [SetLageGebietStatusError!]
+}
+
+type SetLageMeldewegPayload {
+  lage: Lage
+  errors: [SetLageMeldewegError!]
 }
 
 "Ermöglicht die digitale Erfassung einer Unterschrift."
@@ -3439,7 +3485,13 @@ union MeldungBestaetigenError = MeldungNotFoundError | MeldungAbgeschlossenError
 
 union MeldungEinheitZuweisenError = NotAllowedError | MeldungNotFoundError | MeldungAbgeschlossenError | MeldungInKlaerungError | EinheitNotFoundError | EinheitGehoertNichtZurEinsatzleitungError
 
+union MeldungEinschaetzungSetzenError = NotAllowedError | MeldungNotFoundError | MeldungAbgeschlossenError
+
+union MeldungExternUebergebenError = NotAllowedError | MeldungNotFoundError | MeldungAbgeschlossenError
+
 union MeldungFortsetzenError = NotAllowedError | MeldungNotFoundError | MeldungAbgeschlossenError | MeldungInKlaerungError | MeldungAktionNichtMoeglichError
+
+union MeldungNotfallPruefenError = NotAllowedError | MeldungNotFoundError | MeldungAbgeschlossenError
 
 union MeldungUmverteilenError = NotAllowedError | MeldungNotFoundError | MeldungAbgeschlossenError | MitarbeiterGruppeNotFoundError
 
@@ -3462,6 +3514,8 @@ union ProzessVersionErstellenError = EmailAddressNotProvidedError
 union RemoveGebietEinsatzleitungError = NotAllowedError | GebietNotFoundError
 
 union SetLageGebietStatusError = NotAllowedError | LageNotFoundError | LageClosedError | GebietNotInLageError | InvalidLageGebietTransitionError
+
+union SetLageMeldewegError = NotAllowedError | LageNotFoundError | LageClosedError
 
 union UntereinheitCreateError = InvalidEmailError
 
@@ -3935,6 +3989,20 @@ input AusfuehrungFilterInput {
   klaerungKommentar: StringOperationFilterInput
   "Begründung, mit der die Leitstelle die Meldung verworfen hat. Null = nicht verworfen."
   verwerfenGrund: StringOperationFilterInput
+  "Grund, aus dem die Einsatzleitung die Meldung an die Leitstelle abgegeben hat."
+  klaerungGrund: NullableOfAbgabeGrundOperationFilterInput
+  "Klasse A–D. Erst regelbasiert vorgeschlagen, dann von Leitstelle oder Einsatzleitung korrigierbar."
+  klasse: NullableOfMeldungKlasseOperationFilterInput
+  "Ausrüstung, die für die Meldung gebraucht wird (z. B. \"Motorkettensäge\")."
+  benoetigteAusruestung: ListStringOperationFilterInput
+  "Die Beschreibung klingt nach Gefahr für Leib und Leben; die Leitstelle muss das prüfen."
+  moeglicherNotfall: BooleanOperationFilterInput
+  "Ergebnis der Notfall-Prüfung durch die Leitstelle. Null = noch nicht geprüft."
+  notfallPruefung: NullableOfNotfallPruefungOperationFilterInput
+  "Stelle außerhalb der Einsatzleitungen, an die die Leitstelle die Meldung übergeben hat."
+  externeStelle: NullableOfExterneStelleOperationFilterInput
+  "Kommentar der Leitstelle zur Übergabe an die externe Stelle."
+  externKommentar: StringOperationFilterInput
 }
 
 input AusfuehrungFolgenInput {
@@ -4088,6 +4156,8 @@ input CreateEhrenamtsbankEintragInput {
 input CreateEinheitInput {
   name: String!
   mitarbeiterGruppeId: UUID!
+  "Ausrüstung an Bord. Null = Standard des Fahrzeugtyps aus dem Namen (z. B. \"HLF\")."
+  ausruestung: [String!]
 }
 
 input CreateLageInput {
@@ -4575,7 +4645,8 @@ input LoginInput {
 
 input MeldungAnLeitstelleAbgebenInput {
   ausfuehrungId: UUID!
-  kommentar: String!
+  grund: AbgabeGrund!
+  kommentar: String
 }
 
 input MeldungBestaetigenInput {
@@ -4588,9 +4659,26 @@ input MeldungEinheitZuweisenInput {
   einheitId: UUID
 }
 
+input MeldungEinschaetzungSetzenInput {
+  ausfuehrungId: UUID!
+  klasse: MeldungKlasse
+  benoetigteAusruestung: [String!]
+}
+
+input MeldungExternUebergebenInput {
+  ausfuehrungId: UUID!
+  stelle: ExterneStelle!
+  kommentar: String
+}
+
 input MeldungFortsetzenInput {
   ausfuehrungId: UUID!
   aktion: MeldungAktion!
+}
+
+input MeldungNotfallPruefenInput {
+  ausfuehrungId: UUID!
+  ergebnis: NotfallPruefung!
 }
 
 input MeldungUmverteilenInput {
@@ -4906,6 +4994,34 @@ input NodePositionInput {
 input NotificationTokenRegisterInput {
   kommuneId: UUID!
   token: String!
+}
+
+input NullableOfAbgabeGrundOperationFilterInput {
+  eq: AbgabeGrund
+  neq: AbgabeGrund
+  in: [AbgabeGrund]
+  nin: [AbgabeGrund]
+}
+
+input NullableOfExterneStelleOperationFilterInput {
+  eq: ExterneStelle
+  neq: ExterneStelle
+  in: [ExterneStelle]
+  nin: [ExterneStelle]
+}
+
+input NullableOfMeldungKlasseOperationFilterInput {
+  eq: MeldungKlasse
+  neq: MeldungKlasse
+  in: [MeldungKlasse]
+  nin: [MeldungKlasse]
+}
+
+input NullableOfNotfallPruefungOperationFilterInput {
+  eq: NotfallPruefung
+  neq: NotfallPruefung
+  in: [NotfallPruefung]
+  nin: [NotfallPruefung]
 }
 
 input NullableOfPendingConfirmationReasonOperationFilterInput {
@@ -6138,6 +6254,11 @@ input SetLageGebietStatusInput {
   lageId: UUID!
   gebietId: UUID!
   status: LageGebietStatus!
+}
+
+input SetLageMeldewegInput {
+  lageId: UUID!
+  offen: Boolean!
 }
 
 input SignatureFormularFeldInput {
@@ -7422,6 +7543,15 @@ input ZustaendigkeitRolleInput {
   name: String!
 }
 
+"Warum die Einsatzleitung eine Meldung an die Leitstelle abgibt."
+enum AbgabeGrund {
+  AUSRUESTUNG_FEHLT
+  KEINE_EINHEIT_FREI
+  NICHT_UNSER_GEBIET
+  KEIN_FALL_FUER_FEUERWEHR
+  SONSTIGES
+}
+
 enum ApplyPolicy {
   BEFORE_RESOLVER
   AFTER_RESOLVER
@@ -7527,6 +7657,16 @@ enum EreignisStatus {
   ERLEDIGT
   "Von der Leitstelle mit Begründung verworfen."
   VERWORFEN
+  "Von der Leitstelle an eine externe Stelle (Bauhof, THW, ELS) übergeben und damit abgeschlossen."
+  EXTERN_UEBERGEBEN
+}
+
+"Stelle außerhalb der Einsatzleitungen, die eine Meldung übernimmt."
+enum ExterneStelle {
+  BAUHOF
+  THW
+  "Einsatzleitsystem der 112 (Übergabe als EIDO)."
+  ELS
 }
 
 enum FallbackLocaleInputType @source(name: "FallbackLocaleInputType", schema: "BereichB") {
@@ -7626,6 +7766,18 @@ enum MeldungAktion {
   EINSATZ_ABSCHLIESSEN
 }
 
+"Klasse einer Meldung nach dem Eisenhower-Schema."
+enum MeldungKlasse {
+  "Dringend und wichtig."
+  A
+  "Wichtig, nicht dringend."
+  B
+  "Dringend, nicht wichtig."
+  C
+  "Weder dringend noch wichtig."
+  D
+}
+
 "Stand einer Meldung, wie ihn die meldende Person sieht."
 enum MeldungStatus {
   "Eingegangen, noch nicht von der Einsatzleitung übernommen."
@@ -7646,6 +7798,13 @@ enum NewsArtikel__status @source(name: "NewsArtikel__status", schema: "BereichB"
 enum NewsArtikel__status_Input @source(name: "NewsArtikel__status_Input", schema: "BereichB") {
   draft
   published
+}
+
+"Ergebnis der Notfall-Prüfung durch die Leitstelle."
+enum NotfallPruefung {
+  "An das Einsatzleitsystem übergeben; die Meldung ist damit für den Meldeweg abgeschlossen."
+  AN_ELS_UEBERGEBEN
+  KEIN_NOTFALL
 }
 
 enum PasswordConfirmationResult {
