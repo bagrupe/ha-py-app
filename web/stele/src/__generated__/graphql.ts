@@ -105,6 +105,22 @@ export enum EhrenamtsbankTransaktionStatus {
   Confirmed = 'CONFIRMED',
 }
 
+/** Stand einer LageHelfer-Meldung, wie ihn Leitstelle und Einsatzleitung sehen. */
+export enum EreignisStatus {
+  /** Eingegangen, noch keiner Einheit zugewiesen. */
+  Eingegangen = 'EINGEGANGEN',
+  /** Einsatz abgeschlossen. */
+  Erledigt = 'ERLEDIGT',
+  /** Hilfe eingeleitet (Bürger:innen sehen "Hilfe ist unterwegs"). */
+  InBearbeitung = 'IN_BEARBEITUNG',
+  /** Von der Einsatzleitung an die Leitstelle abgegeben. */
+  InKlaerung = 'IN_KLAERUNG',
+  /** Von der Leitstelle mit Begründung verworfen. */
+  Verworfen = 'VERWORFEN',
+  /** Einer Einheit zugewiesen, Hilfe noch nicht eingeleitet. */
+  Zugewiesen = 'ZUGEWIESEN',
+}
+
 export enum FallbackLocaleInputType {
   De = 'de',
   En = 'en',
@@ -192,6 +208,26 @@ export enum LoginResult {
 export enum LogoutAllDevicesResult {
   DeviceLoginKept = 'DEVICE_LOGIN_KEPT',
   LoggedOut = 'LOGGED_OUT',
+}
+
+/** Schritt, den die Einsatzleitung an einer Meldung im Prozess geht. */
+export enum MeldungAktion {
+  /** Einsatz abschließen; leitet vorher Hilfe ein, falls das noch nicht geschehen ist. */
+  EinsatzAbschliessen = 'EINSATZ_ABSCHLIESSEN',
+  /** Hilfe einleiten: Bürger:innen sehen "Hilfe ist unterwegs". */
+  HilfeEinleiten = 'HILFE_EINLEITEN',
+}
+
+/** Stand einer Meldung, wie ihn die meldende Person sieht. */
+export enum MeldungStatus {
+  /** Abgeschlossen, es folgen keine weiteren Änderungen. */
+  Abgeschlossen = 'ABGESCHLOSSEN',
+  /** Eingegangen, noch nicht von der Einsatzleitung übernommen. */
+  Eingegangen = 'EINGEGANGEN',
+  /** Die Einsatzleitung hat Hilfe eingeleitet. */
+  HilfeUnterwegs = 'HILFE_UNTERWEGS',
+  /** Von der Einsatzleitung übernommen, einer Einheit zugewiesen oder bereits bearbeitet. */
+  InBearbeitung = 'IN_BEARBEITUNG',
 }
 
 export enum NewsArtikel__Status {

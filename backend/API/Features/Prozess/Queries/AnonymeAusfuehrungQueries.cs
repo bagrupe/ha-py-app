@@ -13,7 +13,7 @@ public class AnonymeAusfuehrungQueries {
         IAusfuehrungHistorieByIdDataLoader historieLoader, CancellationToken ct) {
         var ausfuehrung = await db.Ausfuehrungen.NotDeleted()
             .Where(a => a.CorrelationId == correlationId)
-            .Select(a => new { a.Id, a.CreatedAt, a.AbgeschlossenAm })
+            .Select(a => new { a.Id, a.CreatedAt, a.AbgeschlossenAm, a.Meldungsnummer })
             .SingleOrDefaultAsync(ct);
         if (ausfuehrung is null) {
             return null;
@@ -22,7 +22,7 @@ public class AnonymeAusfuehrungQueries {
         var historie = await historieLoader.LoadAsync(ausfuehrung.Id, ct);
         var status = (await MeldungStatusErmittlung.Ermittle(db, [ausfuehrung.Id], ct))[ausfuehrung.Id];
         return new AnonymeAusfuehrungStatus(status, MeldungStatusErmittlung.Text(status), ausfuehrung.CreatedAt,
-            ausfuehrung.AbgeschlossenAm,
+            ausfuehrung.AbgeschlossenAm, ausfuehrung.Meldungsnummer,
             historie.Select(h => new AnonymerHistorieEintrag(h.CreatedAt, h.StatusAenderung,
                 h.StatusAenderungBeschreibung, h.Nachricht)).ToList());
     }

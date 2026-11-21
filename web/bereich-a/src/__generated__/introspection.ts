@@ -615,6 +615,15 @@ export default {
             },
             args: [],
           },
+          {
+            name: 'meldungsnummer',
+            type: {
+              kind: 'SCALAR',
+              name: 'Int',
+              ofType: null,
+            },
+            args: [],
+          },
         ],
         interfaces: [],
       },
@@ -658,6 +667,15 @@ export default {
                   },
                 },
               },
+            },
+            args: [],
+          },
+          {
+            name: 'meldungsnummer',
+            type: {
+              kind: 'SCALAR',
+              name: 'Int',
+              ofType: null,
             },
             args: [],
           },
@@ -2396,6 +2414,18 @@ export default {
             args: [],
           },
           {
+            name: 'anzahlBestaetigungen',
+            type: {
+              kind: 'NON_NULL',
+              ofType: {
+                kind: 'SCALAR',
+                name: 'Int',
+                ofType: null,
+              },
+            },
+            args: [],
+          },
+          {
             name: 'bearbeitungen',
             type: {
               kind: 'NON_NULL',
@@ -2432,6 +2462,24 @@ export default {
             args: [],
           },
           {
+            name: 'bestaetigungen',
+            type: {
+              kind: 'NON_NULL',
+              ofType: {
+                kind: 'LIST',
+                ofType: {
+                  kind: 'NON_NULL',
+                  ofType: {
+                    kind: 'OBJECT',
+                    name: 'MeldungBestaetigung',
+                    ofType: null,
+                  },
+                },
+              },
+            },
+            args: [],
+          },
+          {
             name: 'createdAt',
             type: {
               kind: 'NON_NULL',
@@ -2452,6 +2500,23 @@ export default {
                 name: 'Schritt',
                 ofType: null,
               },
+            },
+            args: [],
+          },
+          {
+            name: 'einheit',
+            type: {
+              kind: 'OBJECT',
+              name: 'Einheit',
+              ofType: null,
+            },
+            args: [],
+          },
+          {
+            name: 'ereignisStatus',
+            type: {
+              kind: 'SCALAR',
+              name: 'Any',
             },
             args: [],
           },
@@ -2507,6 +2572,24 @@ export default {
             args: [],
           },
           {
+            name: 'klaerungKommentar',
+            type: {
+              kind: 'SCALAR',
+              name: 'String',
+              ofType: null,
+            },
+            args: [],
+          },
+          {
+            name: 'klaerungSeit',
+            type: {
+              kind: 'SCALAR',
+              name: 'Instant',
+              ofType: null,
+            },
+            args: [],
+          },
+          {
             name: 'lage',
             type: {
               kind: 'OBJECT',
@@ -2529,6 +2612,15 @@ export default {
             type: {
               kind: 'SCALAR',
               name: 'Instant',
+              ofType: null,
+            },
+            args: [],
+          },
+          {
+            name: 'meldungsnummer',
+            type: {
+              kind: 'SCALAR',
+              name: 'Int',
               ofType: null,
             },
             args: [],
@@ -2716,6 +2808,15 @@ export default {
                   },
                 },
               },
+            },
+            args: [],
+          },
+          {
+            name: 'verwerfenGrund',
+            type: {
+              kind: 'SCALAR',
+              name: 'String',
+              ofType: null,
             },
             args: [],
           },
@@ -3649,6 +3750,30 @@ export default {
       {
         kind: 'OBJECT',
         name: 'BearbeitungNotFoundError',
+        fields: [
+          {
+            name: 'message',
+            type: {
+              kind: 'NON_NULL',
+              ofType: {
+                kind: 'SCALAR',
+                name: 'String',
+                ofType: null,
+              },
+            },
+            args: [],
+          },
+        ],
+        interfaces: [
+          {
+            kind: 'INTERFACE',
+            name: 'Error',
+          },
+        ],
+      },
+      {
+        kind: 'OBJECT',
+        name: 'BegruendungErforderlichError',
         fields: [
           {
             name: 'message',
@@ -4861,6 +4986,55 @@ export default {
         ],
       },
       {
+        kind: 'UNION',
+        name: 'CloseLageError',
+        possibleTypes: [
+          {
+            kind: 'OBJECT',
+            name: 'LageClosedError',
+          },
+          {
+            kind: 'OBJECT',
+            name: 'LageNotFoundError',
+          },
+          {
+            kind: 'OBJECT',
+            name: 'NotAllowedError',
+          },
+        ],
+      },
+      {
+        kind: 'OBJECT',
+        name: 'CloseLagePayload',
+        fields: [
+          {
+            name: 'errors',
+            type: {
+              kind: 'LIST',
+              ofType: {
+                kind: 'NON_NULL',
+                ofType: {
+                  kind: 'UNION',
+                  name: 'CloseLageError',
+                  ofType: null,
+                },
+              },
+            },
+            args: [],
+          },
+          {
+            name: 'lage',
+            type: {
+              kind: 'OBJECT',
+              name: 'Lage',
+              ofType: null,
+            },
+            args: [],
+          },
+        ],
+        interfaces: [],
+      },
+      {
         kind: 'OBJECT',
         name: 'CollectionSegmentInfo',
         fields: [
@@ -5061,6 +5235,59 @@ export default {
                 ofType: {
                   kind: 'UNION',
                   name: 'CreateEhrenamtsbankEintragError',
+                  ofType: null,
+                },
+              },
+            },
+            args: [],
+          },
+        ],
+        interfaces: [],
+      },
+      {
+        kind: 'UNION',
+        name: 'CreateEinheitError',
+        possibleTypes: [
+          {
+            kind: 'OBJECT',
+            name: 'EinheitNameErforderlichError',
+          },
+          {
+            kind: 'OBJECT',
+            name: 'EinheitNameVergebenError',
+          },
+          {
+            kind: 'OBJECT',
+            name: 'MitarbeiterGruppeNotFoundError',
+          },
+          {
+            kind: 'OBJECT',
+            name: 'NotAllowedError',
+          },
+        ],
+      },
+      {
+        kind: 'OBJECT',
+        name: 'CreateEinheitPayload',
+        fields: [
+          {
+            name: 'einheit',
+            type: {
+              kind: 'OBJECT',
+              name: 'Einheit',
+              ofType: null,
+            },
+            args: [],
+          },
+          {
+            name: 'errors',
+            type: {
+              kind: 'LIST',
+              ofType: {
+                kind: 'NON_NULL',
+                ofType: {
+                  kind: 'UNION',
+                  name: 'CreateEinheitError',
                   ofType: null,
                 },
               },
@@ -5505,6 +5732,51 @@ export default {
                 ofType: {
                   kind: 'UNION',
                   name: 'DeleteEhrenamtsbankEintragError',
+                  ofType: null,
+                },
+              },
+            },
+            args: [],
+          },
+        ],
+        interfaces: [],
+      },
+      {
+        kind: 'UNION',
+        name: 'DeleteEinheitError',
+        possibleTypes: [
+          {
+            kind: 'OBJECT',
+            name: 'EinheitNotFoundError',
+          },
+          {
+            kind: 'OBJECT',
+            name: 'NotAllowedError',
+          },
+        ],
+      },
+      {
+        kind: 'OBJECT',
+        name: 'DeleteEinheitPayload',
+        fields: [
+          {
+            name: 'einheit',
+            type: {
+              kind: 'OBJECT',
+              name: 'Einheit',
+              ofType: null,
+            },
+            args: [],
+          },
+          {
+            name: 'errors',
+            type: {
+              kind: 'LIST',
+              ofType: {
+                kind: 'NON_NULL',
+                ofType: {
+                  kind: 'UNION',
+                  name: 'DeleteEinheitError',
                   ofType: null,
                 },
               },
@@ -6838,6 +7110,145 @@ export default {
       },
       {
         kind: 'OBJECT',
+        name: 'Einheit',
+        fields: [
+          {
+            name: 'id',
+            type: {
+              kind: 'NON_NULL',
+              ofType: {
+                kind: 'SCALAR',
+                name: 'UUID',
+                ofType: null,
+              },
+            },
+            args: [],
+          },
+          {
+            name: 'mitarbeiterGruppeId',
+            type: {
+              kind: 'NON_NULL',
+              ofType: {
+                kind: 'SCALAR',
+                name: 'UUID',
+                ofType: null,
+              },
+            },
+            args: [],
+          },
+          {
+            name: 'name',
+            type: {
+              kind: 'NON_NULL',
+              ofType: {
+                kind: 'SCALAR',
+                name: 'String',
+                ofType: null,
+              },
+            },
+            args: [],
+          },
+        ],
+        interfaces: [],
+      },
+      {
+        kind: 'OBJECT',
+        name: 'EinheitGehoertNichtZurEinsatzleitungError',
+        fields: [
+          {
+            name: 'message',
+            type: {
+              kind: 'NON_NULL',
+              ofType: {
+                kind: 'SCALAR',
+                name: 'String',
+                ofType: null,
+              },
+            },
+            args: [],
+          },
+        ],
+        interfaces: [
+          {
+            kind: 'INTERFACE',
+            name: 'Error',
+          },
+        ],
+      },
+      {
+        kind: 'OBJECT',
+        name: 'EinheitNameErforderlichError',
+        fields: [
+          {
+            name: 'message',
+            type: {
+              kind: 'NON_NULL',
+              ofType: {
+                kind: 'SCALAR',
+                name: 'String',
+                ofType: null,
+              },
+            },
+            args: [],
+          },
+        ],
+        interfaces: [
+          {
+            kind: 'INTERFACE',
+            name: 'Error',
+          },
+        ],
+      },
+      {
+        kind: 'OBJECT',
+        name: 'EinheitNameVergebenError',
+        fields: [
+          {
+            name: 'message',
+            type: {
+              kind: 'NON_NULL',
+              ofType: {
+                kind: 'SCALAR',
+                name: 'String',
+                ofType: null,
+              },
+            },
+            args: [],
+          },
+        ],
+        interfaces: [
+          {
+            kind: 'INTERFACE',
+            name: 'Error',
+          },
+        ],
+      },
+      {
+        kind: 'OBJECT',
+        name: 'EinheitNotFoundError',
+        fields: [
+          {
+            name: 'message',
+            type: {
+              kind: 'NON_NULL',
+              ofType: {
+                kind: 'SCALAR',
+                name: 'String',
+                ofType: null,
+              },
+            },
+            args: [],
+          },
+        ],
+        interfaces: [
+          {
+            kind: 'INTERFACE',
+            name: 'Error',
+          },
+        ],
+      },
+      {
+        kind: 'OBJECT',
         name: 'EintragConflictError',
         fields: [
           {
@@ -7555,6 +7966,26 @@ export default {
           },
           {
             kind: 'OBJECT',
+            name: 'BegruendungErforderlichError',
+          },
+          {
+            kind: 'OBJECT',
+            name: 'EinheitGehoertNichtZurEinsatzleitungError',
+          },
+          {
+            kind: 'OBJECT',
+            name: 'EinheitNameErforderlichError',
+          },
+          {
+            kind: 'OBJECT',
+            name: 'EinheitNameVergebenError',
+          },
+          {
+            kind: 'OBJECT',
+            name: 'EinheitNotFoundError',
+          },
+          {
+            kind: 'OBJECT',
             name: 'EintragConflictError',
           },
           {
@@ -7631,11 +8062,31 @@ export default {
           },
           {
             kind: 'OBJECT',
+            name: 'MeldungAbgeschlossenError',
+          },
+          {
+            kind: 'OBJECT',
+            name: 'MeldungAktionNichtMoeglichError',
+          },
+          {
+            kind: 'OBJECT',
+            name: 'MeldungInKlaerungError',
+          },
+          {
+            kind: 'OBJECT',
+            name: 'MeldungNotFoundError',
+          },
+          {
+            kind: 'OBJECT',
             name: 'MismatchingKommuneError',
           },
           {
             kind: 'OBJECT',
             name: 'MitarbeiterGruppeDeletedError',
+          },
+          {
+            kind: 'OBJECT',
+            name: 'MitarbeiterGruppeNotFoundError',
           },
           {
             kind: 'OBJECT',
@@ -12382,6 +12833,495 @@ export default {
       },
       {
         kind: 'OBJECT',
+        name: 'MeldungAbgeschlossenError',
+        fields: [
+          {
+            name: 'message',
+            type: {
+              kind: 'NON_NULL',
+              ofType: {
+                kind: 'SCALAR',
+                name: 'String',
+                ofType: null,
+              },
+            },
+            args: [],
+          },
+        ],
+        interfaces: [
+          {
+            kind: 'INTERFACE',
+            name: 'Error',
+          },
+        ],
+      },
+      {
+        kind: 'OBJECT',
+        name: 'MeldungAktionNichtMoeglichError',
+        fields: [
+          {
+            name: 'message',
+            type: {
+              kind: 'NON_NULL',
+              ofType: {
+                kind: 'SCALAR',
+                name: 'String',
+                ofType: null,
+              },
+            },
+            args: [],
+          },
+        ],
+        interfaces: [
+          {
+            kind: 'INTERFACE',
+            name: 'Error',
+          },
+        ],
+      },
+      {
+        kind: 'UNION',
+        name: 'MeldungAnLeitstelleAbgebenError',
+        possibleTypes: [
+          {
+            kind: 'OBJECT',
+            name: 'BegruendungErforderlichError',
+          },
+          {
+            kind: 'OBJECT',
+            name: 'MeldungAbgeschlossenError',
+          },
+          {
+            kind: 'OBJECT',
+            name: 'MeldungInKlaerungError',
+          },
+          {
+            kind: 'OBJECT',
+            name: 'MeldungNotFoundError',
+          },
+          {
+            kind: 'OBJECT',
+            name: 'NotAllowedError',
+          },
+        ],
+      },
+      {
+        kind: 'OBJECT',
+        name: 'MeldungAnLeitstelleAbgebenPayload',
+        fields: [
+          {
+            name: 'ausfuehrung',
+            type: {
+              kind: 'OBJECT',
+              name: 'Ausfuehrung',
+              ofType: null,
+            },
+            args: [],
+          },
+          {
+            name: 'errors',
+            type: {
+              kind: 'LIST',
+              ofType: {
+                kind: 'NON_NULL',
+                ofType: {
+                  kind: 'UNION',
+                  name: 'MeldungAnLeitstelleAbgebenError',
+                  ofType: null,
+                },
+              },
+            },
+            args: [],
+          },
+        ],
+        interfaces: [],
+      },
+      {
+        kind: 'UNION',
+        name: 'MeldungBestaetigenError',
+        possibleTypes: [
+          {
+            kind: 'OBJECT',
+            name: 'LageGebietNotLiveError',
+          },
+          {
+            kind: 'OBJECT',
+            name: 'MeldungAbgeschlossenError',
+          },
+          {
+            kind: 'OBJECT',
+            name: 'MeldungNotFoundError',
+          },
+          {
+            kind: 'OBJECT',
+            name: 'ZuVieleDateienError',
+          },
+        ],
+      },
+      {
+        kind: 'OBJECT',
+        name: 'MeldungBestaetigenPayload',
+        fields: [
+          {
+            name: 'errors',
+            type: {
+              kind: 'LIST',
+              ofType: {
+                kind: 'NON_NULL',
+                ofType: {
+                  kind: 'UNION',
+                  name: 'MeldungBestaetigenError',
+                  ofType: null,
+                },
+              },
+            },
+            args: [],
+          },
+          {
+            name: 'meldungBestaetigenResult',
+            type: {
+              kind: 'OBJECT',
+              name: 'MeldungBestaetigenResult',
+              ofType: null,
+            },
+            args: [],
+          },
+        ],
+        interfaces: [],
+      },
+      {
+        kind: 'OBJECT',
+        name: 'MeldungBestaetigenResult',
+        fields: [
+          {
+            name: 'anzahlBestaetigungen',
+            type: {
+              kind: 'NON_NULL',
+              ofType: {
+                kind: 'SCALAR',
+                name: 'Int',
+                ofType: null,
+              },
+            },
+            args: [],
+          },
+        ],
+        interfaces: [],
+      },
+      {
+        kind: 'OBJECT',
+        name: 'MeldungBestaetigung',
+        fields: [
+          {
+            name: 'createdAt',
+            type: {
+              kind: 'NON_NULL',
+              ofType: {
+                kind: 'SCALAR',
+                name: 'Instant',
+                ofType: null,
+              },
+            },
+            args: [],
+          },
+          {
+            name: 'fotos',
+            type: {
+              kind: 'SCALAR',
+              name: 'JSON',
+              ofType: null,
+            },
+            args: [],
+          },
+          {
+            name: 'id',
+            type: {
+              kind: 'NON_NULL',
+              ofType: {
+                kind: 'SCALAR',
+                name: 'UUID',
+                ofType: null,
+              },
+            },
+            args: [],
+          },
+        ],
+        interfaces: [],
+      },
+      {
+        kind: 'UNION',
+        name: 'MeldungEinheitZuweisenError',
+        possibleTypes: [
+          {
+            kind: 'OBJECT',
+            name: 'EinheitGehoertNichtZurEinsatzleitungError',
+          },
+          {
+            kind: 'OBJECT',
+            name: 'EinheitNotFoundError',
+          },
+          {
+            kind: 'OBJECT',
+            name: 'MeldungAbgeschlossenError',
+          },
+          {
+            kind: 'OBJECT',
+            name: 'MeldungInKlaerungError',
+          },
+          {
+            kind: 'OBJECT',
+            name: 'MeldungNotFoundError',
+          },
+          {
+            kind: 'OBJECT',
+            name: 'NotAllowedError',
+          },
+        ],
+      },
+      {
+        kind: 'OBJECT',
+        name: 'MeldungEinheitZuweisenPayload',
+        fields: [
+          {
+            name: 'ausfuehrung',
+            type: {
+              kind: 'OBJECT',
+              name: 'Ausfuehrung',
+              ofType: null,
+            },
+            args: [],
+          },
+          {
+            name: 'errors',
+            type: {
+              kind: 'LIST',
+              ofType: {
+                kind: 'NON_NULL',
+                ofType: {
+                  kind: 'UNION',
+                  name: 'MeldungEinheitZuweisenError',
+                  ofType: null,
+                },
+              },
+            },
+            args: [],
+          },
+        ],
+        interfaces: [],
+      },
+      {
+        kind: 'UNION',
+        name: 'MeldungFortsetzenError',
+        possibleTypes: [
+          {
+            kind: 'OBJECT',
+            name: 'MeldungAbgeschlossenError',
+          },
+          {
+            kind: 'OBJECT',
+            name: 'MeldungAktionNichtMoeglichError',
+          },
+          {
+            kind: 'OBJECT',
+            name: 'MeldungInKlaerungError',
+          },
+          {
+            kind: 'OBJECT',
+            name: 'MeldungNotFoundError',
+          },
+          {
+            kind: 'OBJECT',
+            name: 'NotAllowedError',
+          },
+        ],
+      },
+      {
+        kind: 'OBJECT',
+        name: 'MeldungFortsetzenPayload',
+        fields: [
+          {
+            name: 'ausfuehrung',
+            type: {
+              kind: 'OBJECT',
+              name: 'Ausfuehrung',
+              ofType: null,
+            },
+            args: [],
+          },
+          {
+            name: 'errors',
+            type: {
+              kind: 'LIST',
+              ofType: {
+                kind: 'NON_NULL',
+                ofType: {
+                  kind: 'UNION',
+                  name: 'MeldungFortsetzenError',
+                  ofType: null,
+                },
+              },
+            },
+            args: [],
+          },
+        ],
+        interfaces: [],
+      },
+      {
+        kind: 'OBJECT',
+        name: 'MeldungInKlaerungError',
+        fields: [
+          {
+            name: 'message',
+            type: {
+              kind: 'NON_NULL',
+              ofType: {
+                kind: 'SCALAR',
+                name: 'String',
+                ofType: null,
+              },
+            },
+            args: [],
+          },
+        ],
+        interfaces: [
+          {
+            kind: 'INTERFACE',
+            name: 'Error',
+          },
+        ],
+      },
+      {
+        kind: 'OBJECT',
+        name: 'MeldungNotFoundError',
+        fields: [
+          {
+            name: 'message',
+            type: {
+              kind: 'NON_NULL',
+              ofType: {
+                kind: 'SCALAR',
+                name: 'String',
+                ofType: null,
+              },
+            },
+            args: [],
+          },
+        ],
+        interfaces: [
+          {
+            kind: 'INTERFACE',
+            name: 'Error',
+          },
+        ],
+      },
+      {
+        kind: 'UNION',
+        name: 'MeldungUmverteilenError',
+        possibleTypes: [
+          {
+            kind: 'OBJECT',
+            name: 'MeldungAbgeschlossenError',
+          },
+          {
+            kind: 'OBJECT',
+            name: 'MeldungNotFoundError',
+          },
+          {
+            kind: 'OBJECT',
+            name: 'MitarbeiterGruppeNotFoundError',
+          },
+          {
+            kind: 'OBJECT',
+            name: 'NotAllowedError',
+          },
+        ],
+      },
+      {
+        kind: 'OBJECT',
+        name: 'MeldungUmverteilenPayload',
+        fields: [
+          {
+            name: 'ausfuehrung',
+            type: {
+              kind: 'OBJECT',
+              name: 'Ausfuehrung',
+              ofType: null,
+            },
+            args: [],
+          },
+          {
+            name: 'errors',
+            type: {
+              kind: 'LIST',
+              ofType: {
+                kind: 'NON_NULL',
+                ofType: {
+                  kind: 'UNION',
+                  name: 'MeldungUmverteilenError',
+                  ofType: null,
+                },
+              },
+            },
+            args: [],
+          },
+        ],
+        interfaces: [],
+      },
+      {
+        kind: 'UNION',
+        name: 'MeldungVerwerfenError',
+        possibleTypes: [
+          {
+            kind: 'OBJECT',
+            name: 'BegruendungErforderlichError',
+          },
+          {
+            kind: 'OBJECT',
+            name: 'MeldungAbgeschlossenError',
+          },
+          {
+            kind: 'OBJECT',
+            name: 'MeldungNotFoundError',
+          },
+          {
+            kind: 'OBJECT',
+            name: 'NotAllowedError',
+          },
+        ],
+      },
+      {
+        kind: 'OBJECT',
+        name: 'MeldungVerwerfenPayload',
+        fields: [
+          {
+            name: 'ausfuehrung',
+            type: {
+              kind: 'OBJECT',
+              name: 'Ausfuehrung',
+              ofType: null,
+            },
+            args: [],
+          },
+          {
+            name: 'errors',
+            type: {
+              kind: 'LIST',
+              ofType: {
+                kind: 'NON_NULL',
+                ofType: {
+                  kind: 'UNION',
+                  name: 'MeldungVerwerfenError',
+                  ofType: null,
+                },
+              },
+            },
+            args: [],
+          },
+        ],
+        interfaces: [],
+      },
+      {
+        kind: 'OBJECT',
         name: 'MismatchingKommuneError',
         fields: [
           {
@@ -12690,6 +13630,30 @@ export default {
       {
         kind: 'OBJECT',
         name: 'MitarbeiterGruppeDeletedError',
+        fields: [
+          {
+            name: 'message',
+            type: {
+              kind: 'NON_NULL',
+              ofType: {
+                kind: 'SCALAR',
+                name: 'String',
+                ofType: null,
+              },
+            },
+            args: [],
+          },
+        ],
+        interfaces: [
+          {
+            kind: 'INTERFACE',
+            name: 'Error',
+          },
+        ],
+      },
+      {
+        kind: 'OBJECT',
+        name: 'MitarbeiterGruppeNotFoundError',
         fields: [
           {
             name: 'message',
@@ -13178,6 +14142,29 @@ export default {
             ],
           },
           {
+            name: 'closeLage',
+            type: {
+              kind: 'NON_NULL',
+              ofType: {
+                kind: 'OBJECT',
+                name: 'CloseLagePayload',
+                ofType: null,
+              },
+            },
+            args: [
+              {
+                name: 'input',
+                type: {
+                  kind: 'NON_NULL',
+                  ofType: {
+                    kind: 'SCALAR',
+                    name: 'Any',
+                  },
+                },
+              },
+            ],
+          },
+          {
             name: 'confirmEhrenamtsbankAbschluss',
             type: {
               kind: 'NON_NULL',
@@ -13230,6 +14217,29 @@ export default {
               ofType: {
                 kind: 'OBJECT',
                 name: 'CreateEhrenamtsbankEintragPayload',
+                ofType: null,
+              },
+            },
+            args: [
+              {
+                name: 'input',
+                type: {
+                  kind: 'NON_NULL',
+                  ofType: {
+                    kind: 'SCALAR',
+                    name: 'Any',
+                  },
+                },
+              },
+            ],
+          },
+          {
+            name: 'createEinheit',
+            type: {
+              kind: 'NON_NULL',
+              ofType: {
+                kind: 'OBJECT',
+                name: 'CreateEinheitPayload',
                 ofType: null,
               },
             },
@@ -13322,6 +14332,29 @@ export default {
               ofType: {
                 kind: 'OBJECT',
                 name: 'DeleteEhrenamtsbankEintragPayload',
+                ofType: null,
+              },
+            },
+            args: [
+              {
+                name: 'input',
+                type: {
+                  kind: 'NON_NULL',
+                  ofType: {
+                    kind: 'SCALAR',
+                    name: 'Any',
+                  },
+                },
+              },
+            ],
+          },
+          {
+            name: 'deleteEinheit',
+            type: {
+              kind: 'NON_NULL',
+              ofType: {
+                kind: 'OBJECT',
+                name: 'DeleteEinheitPayload',
                 ofType: null,
               },
             },
@@ -13786,6 +14819,144 @@ export default {
               },
             },
             args: [],
+          },
+          {
+            name: 'meldungAnLeitstelleAbgeben',
+            type: {
+              kind: 'NON_NULL',
+              ofType: {
+                kind: 'OBJECT',
+                name: 'MeldungAnLeitstelleAbgebenPayload',
+                ofType: null,
+              },
+            },
+            args: [
+              {
+                name: 'input',
+                type: {
+                  kind: 'NON_NULL',
+                  ofType: {
+                    kind: 'SCALAR',
+                    name: 'Any',
+                  },
+                },
+              },
+            ],
+          },
+          {
+            name: 'meldungBestaetigen',
+            type: {
+              kind: 'NON_NULL',
+              ofType: {
+                kind: 'OBJECT',
+                name: 'MeldungBestaetigenPayload',
+                ofType: null,
+              },
+            },
+            args: [
+              {
+                name: 'input',
+                type: {
+                  kind: 'NON_NULL',
+                  ofType: {
+                    kind: 'SCALAR',
+                    name: 'Any',
+                  },
+                },
+              },
+            ],
+          },
+          {
+            name: 'meldungEinheitZuweisen',
+            type: {
+              kind: 'NON_NULL',
+              ofType: {
+                kind: 'OBJECT',
+                name: 'MeldungEinheitZuweisenPayload',
+                ofType: null,
+              },
+            },
+            args: [
+              {
+                name: 'input',
+                type: {
+                  kind: 'NON_NULL',
+                  ofType: {
+                    kind: 'SCALAR',
+                    name: 'Any',
+                  },
+                },
+              },
+            ],
+          },
+          {
+            name: 'meldungFortsetzen',
+            type: {
+              kind: 'NON_NULL',
+              ofType: {
+                kind: 'OBJECT',
+                name: 'MeldungFortsetzenPayload',
+                ofType: null,
+              },
+            },
+            args: [
+              {
+                name: 'input',
+                type: {
+                  kind: 'NON_NULL',
+                  ofType: {
+                    kind: 'SCALAR',
+                    name: 'Any',
+                  },
+                },
+              },
+            ],
+          },
+          {
+            name: 'meldungUmverteilen',
+            type: {
+              kind: 'NON_NULL',
+              ofType: {
+                kind: 'OBJECT',
+                name: 'MeldungUmverteilenPayload',
+                ofType: null,
+              },
+            },
+            args: [
+              {
+                name: 'input',
+                type: {
+                  kind: 'NON_NULL',
+                  ofType: {
+                    kind: 'SCALAR',
+                    name: 'Any',
+                  },
+                },
+              },
+            ],
+          },
+          {
+            name: 'meldungVerwerfen',
+            type: {
+              kind: 'NON_NULL',
+              ofType: {
+                kind: 'OBJECT',
+                name: 'MeldungVerwerfenPayload',
+                ofType: null,
+              },
+            },
+            args: [
+              {
+                name: 'input',
+                type: {
+                  kind: 'NON_NULL',
+                  ofType: {
+                    kind: 'SCALAR',
+                    name: 'Any',
+                  },
+                },
+              },
+            ],
           },
           {
             name: 'notificationTokenRegister',
@@ -14392,6 +15563,29 @@ export default {
               ofType: {
                 kind: 'OBJECT',
                 name: 'UpdateLagePayload',
+                ofType: null,
+              },
+            },
+            args: [
+              {
+                name: 'input',
+                type: {
+                  kind: 'NON_NULL',
+                  ofType: {
+                    kind: 'SCALAR',
+                    name: 'Any',
+                  },
+                },
+              },
+            ],
+          },
+          {
+            name: 'updateLageWarningText',
+            type: {
+              kind: 'NON_NULL',
+              ofType: {
+                kind: 'OBJECT',
+                name: 'UpdateLageWarningTextPayload',
                 ofType: null,
               },
             },
@@ -17848,7 +19042,40 @@ export default {
         name: 'PublicMeldung',
         fields: [
           {
+            name: 'anzahlBestaetigungen',
+            type: {
+              kind: 'NON_NULL',
+              ofType: {
+                kind: 'SCALAR',
+                name: 'Int',
+                ofType: null,
+              },
+            },
+            args: [],
+          },
+          {
             name: 'description',
+            type: {
+              kind: 'SCALAR',
+              name: 'String',
+              ofType: null,
+            },
+            args: [],
+          },
+          {
+            name: 'id',
+            type: {
+              kind: 'NON_NULL',
+              ofType: {
+                kind: 'SCALAR',
+                name: 'UUID',
+                ofType: null,
+              },
+            },
+            args: [],
+          },
+          {
+            name: 'kategorie',
             type: {
               kind: 'SCALAR',
               name: 'String',
@@ -18422,6 +19649,33 @@ export default {
             ],
           },
           {
+            name: 'einheiten',
+            type: {
+              kind: 'NON_NULL',
+              ofType: {
+                kind: 'LIST',
+                ofType: {
+                  kind: 'NON_NULL',
+                  ofType: {
+                    kind: 'OBJECT',
+                    name: 'Einheit',
+                    ofType: null,
+                  },
+                },
+              },
+            },
+            args: [
+              {
+                name: 'mitarbeiterGruppeId',
+                type: {
+                  kind: 'SCALAR',
+                  name: 'UUID',
+                  ofType: null,
+                },
+              },
+            ],
+          },
+          {
             name: 'funktionsberechtigungen',
             type: {
               kind: 'NON_NULL',
@@ -18637,6 +19891,44 @@ export default {
                     name: 'UUID',
                     ofType: null,
                   },
+                },
+              },
+            ],
+          },
+          {
+            name: 'lageMeldungen',
+            type: {
+              kind: 'NON_NULL',
+              ofType: {
+                kind: 'LIST',
+                ofType: {
+                  kind: 'NON_NULL',
+                  ofType: {
+                    kind: 'OBJECT',
+                    name: 'Ausfuehrung',
+                    ofType: null,
+                  },
+                },
+              },
+            },
+            args: [
+              {
+                name: 'lageId',
+                type: {
+                  kind: 'NON_NULL',
+                  ofType: {
+                    kind: 'SCALAR',
+                    name: 'UUID',
+                    ofType: null,
+                  },
+                },
+              },
+              {
+                name: 'offen',
+                type: {
+                  kind: 'SCALAR',
+                  name: 'Boolean',
+                  ofType: null,
                 },
               },
             ],
@@ -22851,6 +24143,55 @@ export default {
                 ofType: {
                   kind: 'UNION',
                   name: 'UpdateLageError',
+                  ofType: null,
+                },
+              },
+            },
+            args: [],
+          },
+          {
+            name: 'lage',
+            type: {
+              kind: 'OBJECT',
+              name: 'Lage',
+              ofType: null,
+            },
+            args: [],
+          },
+        ],
+        interfaces: [],
+      },
+      {
+        kind: 'UNION',
+        name: 'UpdateLageWarningTextError',
+        possibleTypes: [
+          {
+            kind: 'OBJECT',
+            name: 'LageClosedError',
+          },
+          {
+            kind: 'OBJECT',
+            name: 'LageNotFoundError',
+          },
+          {
+            kind: 'OBJECT',
+            name: 'NotAllowedError',
+          },
+        ],
+      },
+      {
+        kind: 'OBJECT',
+        name: 'UpdateLageWarningTextPayload',
+        fields: [
+          {
+            name: 'errors',
+            type: {
+              kind: 'LIST',
+              ofType: {
+                kind: 'NON_NULL',
+                ofType: {
+                  kind: 'UNION',
+                  name: 'UpdateLageWarningTextError',
                   ofType: null,
                 },
               },

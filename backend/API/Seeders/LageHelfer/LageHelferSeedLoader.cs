@@ -67,7 +67,11 @@ public static class LageHelferSeedLoader {
 
                 if (!string.IsNullOrWhiteSpace(bereich.EinsatzleitungName)) {
                     bereichMitEinsatzleitung.Add(bereich.Key);
+                } else if (bereich.Einheiten is { Count: > 0 }) {
+                    throw new InvalidOperationException(
+                        $"Bereich '{bereich.Key}' hat einheiten, aber keine einsatzleitung, zu der sie gehören.");
                 }
+                EnsureUniqueKeys(bereich.Einheiten ?? [], $"Einheit in Bereich '{bereich.Key}'");
             }
 
             var abteilungen = oe.Abteilungen ?? [];
@@ -124,7 +128,8 @@ public static class LageHelferSeedLoader {
             organisationseinheiten.Select(oe => new LageHelferOrganisationseinheitSeed(
                 oe.Key,
                 oe.Label,
-                (oe.Bereiche ?? []).Select(b => new LageHelferBereichSeed(b.Key, b.Label, b.EinsatzleitungName)).ToList(),
+                (oe.Bereiche ?? []).Select(b => new LageHelferBereichSeed(b.Key, b.Label, b.EinsatzleitungName,
+                    b.Einheiten ?? [])).ToList(),
                 (oe.Abteilungen ?? []).Select(a => new LageHelferAbteilungSeed(a.Key, a.Label)).ToList())).ToList(),
             demo,
             geometrien,
@@ -272,6 +277,8 @@ public static class LageHelferSeedLoader {
 
         [JsonPropertyName("einsatzleitung")]
         public string? EinsatzleitungName { get; set; }
+
+        public List<string>? Einheiten { get; set; }
     }
 
     private sealed class SeedJsonAbteilung {

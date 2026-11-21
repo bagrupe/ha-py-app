@@ -128,6 +128,7 @@ public class AusfuehrungMutations {
             lageGebietId = pass.Id;
         }
 
+        int? meldungsnummer = lageGebietId is null ? null : await LageMeldungen.NextMeldungsnummer(db, ct);
         var systemUser = await db.SystemUsers.SingleAsync(u => u.Id == SystemUser.UserId);
         var walker = await walkerFactory.StartNewAusfuehrung(prozessVersionId,
             new Ausfuehrung {
@@ -141,6 +142,8 @@ public class AusfuehrungMutations {
                 SchrittId = Guid.Empty,
                 CorrelationId = Guid.NewGuid(),
                 LageGebietId = lageGebietId,
+                Meldungsnummer = meldungsnummer,
+                PublicId = lageGebietId is null ? null : Guid.NewGuid(),
             });
 
         await PerformSteps(walker, systemUser, bearbeitungen, ausfuehrungZustaendigkeitService, null, prozessOptions);
@@ -154,7 +157,7 @@ public class AusfuehrungMutations {
         verlaufService.RecordEingang(db, walker.Ausfuehrung.Id, walker.Ausfuehrung.CreatedAt);
         await db.SaveChangesAsync();
 
-        return new AnonymeAusfuehrungResult(walker.Ausfuehrung.CorrelationId!.Value);
+        return new AnonymeAusfuehrungResult(walker.Ausfuehrung.CorrelationId!.Value, meldungsnummer);
     }
 
     [Authorize]

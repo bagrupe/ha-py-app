@@ -8,7 +8,7 @@ public enum MeldungStatus {
     [GraphQLDescription("Eingegangen, noch nicht von der Einsatzleitung übernommen.")]
     Eingegangen,
 
-    [GraphQLDescription("Von der Einsatzleitung übernommen oder bereits bearbeitet.")]
+    [GraphQLDescription("Von der Einsatzleitung übernommen, einer Einheit zugewiesen oder bereits bearbeitet.")]
     InBearbeitung,
 
     [GraphQLDescription("Die Einsatzleitung hat Hilfe eingeleitet.")]
@@ -35,7 +35,11 @@ public static class MeldungStatusErmittlung {
         IReadOnlyCollection<Guid> ausfuehrungIds, CancellationToken ct) {
         var ausfuehrungen = await db.Ausfuehrungen
             .Where(a => ausfuehrungIds.Contains(a.Id))
-            .Select(a => new { a.Id, a.Status, Zugewiesen = a.IstZustaendigkeit.ZugewiesenePersonId != null })
+            .Select(a => new {
+                a.Id,
+                a.Status,
+                Zugewiesen = a.IstZustaendigkeit.ZugewiesenePersonId != null || a.EinheitId != null,
+            })
             .ToListAsync(ct);
         // Steps done by staff, e.g. saving a priority; the submitter and automatic steps act as other users.
         var bearbeitetVonMitarbeitenden = (await db.Bearbeitungen

@@ -14,6 +14,9 @@ public static class LageHelferSeedData {
         DeriveId(idNamespace, $"einsatzleitung:{bereichKey}");
 
     /// <summary>Leitet die ID des Gebiets eines Bereichs ab.</summary>
+    public static Guid EinheitId(Guid idNamespace, string bereichKey, string einheitName) =>
+        DeriveId(idNamespace, $"einheit:{bereichKey}:{einheitName}");
+
     public static Guid GebietId(Guid idNamespace, string bereichKey) => DeriveId(idNamespace, $"gebiet:{bereichKey}");
 
     /// <summary>Leitet die ID der Abteilung einer Organisationseinheit ab.</summary>

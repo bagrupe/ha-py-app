@@ -200,6 +200,8 @@ type AnfragenFuerEhrenamtsbankEintragCollectionSegment {
 type AnonymeAusfuehrungResult {
   "Geheimnis für die Statusabfrage ohne Anmeldung. Nur einmal ausgeliefert, also auf dem Gerät speichern."
   correlationId: UUID!
+  "Laufende Nummer der Meldung (angezeigt als \"E-1042\"). Null außerhalb des LageHelfers."
+  meldungsnummer: Int
 }
 
 "Status eines anonym eingereichten Antrags."
@@ -209,6 +211,8 @@ type AnonymeAusfuehrungStatus {
   statusText: String!
   createdAt: Instant!
   abgeschlossenAm: Instant
+  "Laufende Nummer der Meldung (angezeigt als \"E-1042\"). Null außerhalb des LageHelfers."
+  meldungsnummer: Int
   "Bürgerseitige Status-Historie, ohne Namen der Bearbeitenden: Die CorrelationId ist kein Login."
   historie: [AnonymerHistorieEintrag!]!
 }
@@ -454,8 +458,24 @@ type Ausfuehrung {
   createdAt: Instant!
   "Aktueller Status der Ausführung (z.B. Bearbeitung durch Bürger, Backoffice oder abgeschlossen)."
   status: AusfuehrungStatus!
+  "Laufende Nummer einer LageHelfer-Meldung (angezeigt als \"E-1042\"). Null außerhalb des LageHelfers."
+  meldungsnummer: Int
+  "Seit wann die Einsatzleitung die Meldung an die Leitstelle abgegeben hat. Null = nicht in Klärung."
+  klaerungSeit: Instant
+  "Begründung der Einsatzleitung für die Abgabe an die Leitstelle."
+  klaerungKommentar: String
+  "Begründung, mit der die Leitstelle die Meldung verworfen hat. Null = nicht verworfen."
+  verwerfenGrund: String
   "Lage und Gebiet, die die meldende Person gewählt hat. Null außerhalb des LageHelfers."
   lage: LageAssignment
+  "Stand der Meldung für Leitstelle und Einsatzleitung. Null außerhalb des LageHelfers."
+  ereignisStatus: EreignisStatus
+  "Einheit, der die Einsatzleitung die Meldung zugewiesen hat."
+  einheit: Einheit
+  "Bestätigungen (\"+1 · Sehe ich auch\") weiterer Personen, älteste zuerst."
+  bestaetigungen: [MeldungBestaetigung!]!
+  "Anzahl der Bestätigungen (\"+1\")."
+  anzahlBestaetigungen: Int!
   "Gibt den verschlüsselten Schlüssel für Bürger zurück, sofern der aktuelle Nutzer der Antragsteller ist."
   sharedKeyEncryptedForBuerger: String!
   "Zeitpunkt der Soft-Löschung. Null bedeutet: nicht gelöscht. Nur für Backoffice-Nutzer mit der Funktionsberechtigung 'Anträge löschen'."
@@ -594,6 +614,10 @@ type Bearbeitung {
 }
 
 type BearbeitungNotFoundError implements Error {
+  message: String!
+}
+
+type BegruendungErforderlichError implements Error {
   message: String!
 }
 
@@ -756,6 +780,11 @@ type CheckboxListFormularFeld implements FormularFeld {
   oeffentlichSichtbar: Boolean!
 }
 
+type CloseLagePayload {
+  lage: Lage
+  errors: [CloseLageError!]
+}
+
 "Information about the offset pagination."
 type CollectionSegmentInfo {
   "Indicates whether more items exist following the set defined by the clients arguments."
@@ -777,6 +806,11 @@ type CreateEhrenamtsbankAnfragePayload {
 type CreateEhrenamtsbankEintragPayload {
   ehrenamtsbankEintrag: EhrenamtsbankEintrag
   errors: [CreateEhrenamtsbankEintragError!]
+}
+
+type CreateEinheitPayload {
+  einheit: Einheit
+  errors: [CreateEinheitError!]
 }
 
 type CreateLagePayload {
@@ -837,6 +871,11 @@ type DeleteEhrenamtsbankAccountResult {
 type DeleteEhrenamtsbankEintragPayload {
   deletedId: UUID
   errors: [DeleteEhrenamtsbankEintragError!]
+}
+
+type DeleteEinheitPayload {
+  einheit: Einheit
+  errors: [DeleteEinheitError!]
 }
 
 type DeleteProzessGroupPayload {
@@ -1031,6 +1070,30 @@ type EhrenamtsbankZeitkonto {
   debitMinutes: Int!
   "Startguthaben plus Gutschrift minus Belastung. Kann negativ sein."
   balanceMinutes: Int!
+}
+
+"Einsatzeinheit (z. B. \"HLF 20 Hameln\"), die eine Einsatzleitung mit Meldungen beauftragt."
+type Einheit {
+  id: UUID!
+  name: String!
+  "Einsatzleitung (Mitarbeitergruppe), zu der die Einheit gehört."
+  mitarbeiterGruppeId: UUID!
+}
+
+type EinheitGehoertNichtZurEinsatzleitungError implements Error {
+  message: String!
+}
+
+type EinheitNameErforderlichError implements Error {
+  message: String!
+}
+
+type EinheitNameVergebenError implements Error {
+  message: String!
+}
+
+type EinheitNotFoundError implements Error {
+  message: String!
 }
 
 type EintragConflictError implements Error {
@@ -1690,6 +1753,66 @@ type MeineEhrenamtsbankTransaktionenCollectionSegment {
   totalCount: Int!
 }
 
+type MeldungAbgeschlossenError implements Error {
+  message: String!
+}
+
+type MeldungAktionNichtMoeglichError implements Error {
+  message: String!
+}
+
+type MeldungAnLeitstelleAbgebenPayload {
+  ausfuehrung: Ausfuehrung
+  errors: [MeldungAnLeitstelleAbgebenError!]
+}
+
+type MeldungBestaetigenPayload {
+  meldungBestaetigenResult: MeldungBestaetigenResult
+  errors: [MeldungBestaetigenError!]
+}
+
+"Ergebnis einer Bestätigung (\"+1\")."
+type MeldungBestaetigenResult {
+  "Anzahl der Bestätigungen der Meldung einschließlich dieser."
+  anzahlBestaetigungen: Int!
+}
+
+"Bestätigung (\"+1 · Sehe ich auch\") einer offenen Meldung durch eine weitere Person."
+type MeldungBestaetigung {
+  id: UUID!
+  createdAt: Instant!
+  "Fotos der bestätigenden Person, gleiches Format wie der Slot \"bilder\" der Meldung."
+  fotos: JSON
+}
+
+type MeldungEinheitZuweisenPayload {
+  ausfuehrung: Ausfuehrung
+  errors: [MeldungEinheitZuweisenError!]
+}
+
+type MeldungFortsetzenPayload {
+  ausfuehrung: Ausfuehrung
+  errors: [MeldungFortsetzenError!]
+}
+
+type MeldungInKlaerungError implements Error {
+  message: String!
+}
+
+type MeldungNotFoundError implements Error {
+  message: String!
+}
+
+type MeldungUmverteilenPayload {
+  ausfuehrung: Ausfuehrung
+  errors: [MeldungUmverteilenError!]
+}
+
+type MeldungVerwerfenPayload {
+  ausfuehrung: Ausfuehrung
+  errors: [MeldungVerwerfenError!]
+}
+
 type MismatchingKommuneError implements Error {
   message: String!
 }
@@ -1713,6 +1836,10 @@ type MitarbeiterGruppe {
 }
 
 type MitarbeiterGruppeDeletedError implements Error {
+  message: String!
+}
+
+type MitarbeiterGruppeNotFoundError implements Error {
   message: String!
 }
 
@@ -1759,10 +1886,28 @@ type Mutation {
   deleteEhrenamtsbankEintrag(input: DeleteEhrenamtsbankEintragInput!): DeleteEhrenamtsbankEintragPayload! @authorize
   addGebietEinsatzleitung(input: AddGebietEinsatzleitungInput!): AddGebietEinsatzleitungPayload! @authorize
   removeGebietEinsatzleitung(input: RemoveGebietEinsatzleitungInput!): RemoveGebietEinsatzleitungPayload! @authorize
+  "Legt eine Einheit einer Einsatzleitung an."
+  createEinheit(input: CreateEinheitInput!): CreateEinheitPayload! @authorize
+  "Löscht eine Einheit. Ihre offenen Meldungen gehen zurück in den Eingang."
+  deleteEinheit(input: DeleteEinheitInput!): DeleteEinheitPayload! @authorize
+  "Weist eine Meldung einer Einheit der zuständigen Einsatzleitung zu. einheitId: null legt sie zurück in den Eingang."
+  meldungEinheitZuweisen(input: MeldungEinheitZuweisenInput!): MeldungEinheitZuweisenPayload! @authorize
+  "Geht für die Einsatzleitung den nächsten Prozessschritt einer Meldung, ohne Formularwerte. So sehen Bürger:innen den neuen Stand (\"Hilfe ist unterwegs\", \"Abgeschlossen\")."
+  meldungFortsetzen(input: MeldungFortsetzenInput!): MeldungFortsetzenPayload! @authorize
+  "Gibt eine Meldung an die Leitstelle ab, die die Einsatzleitung nicht bearbeiten kann (z. B. \"Kettensäge fehlt\"). Der Kommentar ist Pflicht; die Einheit wird gelöst."
+  meldungAnLeitstelleAbgeben(input: MeldungAnLeitstelleAbgebenInput!): MeldungAnLeitstelleAbgebenPayload! @authorize
+  "Nur Leitstelle: gibt eine Meldung einer anderen Einsatzleitung (Mitarbeitergruppe), etwa aus der Klärung heraus. Löst Einheit, zugewiesene Person und Klärung."
+  meldungUmverteilen(input: MeldungUmverteilenInput!): MeldungUmverteilenPayload! @authorize
+  "Nur Leitstelle: schließt eine Meldung mit Pflicht-Begründung, ohne dass ein Einsatz stattfindet (\"Verwerfen\", \"Schließen mit Begründung\"). Bürger:innen sehen \"Abgeschlossen\"."
+  meldungVerwerfen(input: MeldungVerwerfenInput!): MeldungVerwerfenPayload! @authorize
+  "\"+1 · Sehe ich auch\": bestätigt eine offene Meldung einer Lage, die gerade Meldungen annimmt, statt sie doppelt zu melden. publicId stammt aus activeLagen.meldungen.id. Fotos wie im Slot \"bilder\", höchstens 3. Ohne Anmeldung möglich."
+  meldungBestaetigen(input: MeldungBestaetigenInput!): MeldungBestaetigenPayload! @allowAnonymous
   createLage(input: CreateLageInput!): CreateLagePayload! @authorize
   updateLage(input: UpdateLageInput!): UpdateLagePayload! @authorize
   addGebieteToLage(input: AddGebieteToLageInput!): AddGebieteToLagePayload! @authorize
   setLageGebietStatus(input: SetLageGebietStatusInput!): SetLageGebietStatusPayload! @authorize
+  closeLage(input: CloseLageInput!): CloseLagePayload! @authorize
+  updateLageWarningText(input: UpdateLageWarningTextInput!): UpdateLageWarningTextPayload! @authorize
   "Erzeugt die Zahlungs-URL für den aktuellen Bezahlen-Schritt eines Antrags. Nur für den Antragsteller oder zuständige Backoffice-Nutzer."
   bezahlenSchrittUrl(input: BezahlenSchrittUrlInput!): BezahlenSchrittUrlPayload! @authorize
   "Fügt einen Antrag (Ausführung) der persönlichen Beobachtungsliste eines Bürgers hinzu oder entfernt ihn daraus. Ermöglicht z.B. Benachrichtigungen bei Statusänderungen."
@@ -2274,12 +2419,17 @@ type PublicLage {
 
 "Noch nicht abgeschlossene Meldung einer Lage, etwa als Pin auf der Karte oder als Vorlage für eine eigene Meldung. Enthält bewusst keine Kennung und keine persönlichen Angaben."
 type PublicMeldung {
+  "Öffentliche Kennung für meldungBestaetigen. Nicht die interne Antrags-Id."
+  id: UUID!
   status: MeldungStatus!
   "Anzeigetext zum Status, z. B. \"Hilfe ist unterwegs\"."
   statusText: String!
   description: String
+  kategorie: String
   longitude: Float!
   latitude: Float!
+  "Anzahl der Bestätigungen (\"+1 · Sehe ich auch\")."
+  anzahlBestaetigungen: Int!
 }
 
 type Query {
@@ -2332,6 +2482,10 @@ type Query {
   kommunen: [Kommune!]! @allowAnonymous
   kommune(kommuneId: UUID!): Kommune! @allowAnonymous
   gebiete(withoutEinsatzleitung: Boolean): [Gebiet!]! @authorize
+  "Meldungen einer Lage, älteste zuerst. Leitstelle (Admin, Superadmin) sieht alle, eine Einsatzleitung nur die ihrer Gruppen. offen: true = nur nicht abgeschlossene, false = nur abgeschlossene, null = alle."
+  lageMeldungen(lageId: UUID! offen: Boolean): [Ausfuehrung!]! @authorize
+  "Einheiten der Kommune, optional nur die einer Einsatzleitung (Mitarbeitergruppe)."
+  einheiten(mitarbeiterGruppeId: UUID): [Einheit!]! @authorize
   lagen(status: LageStatus): [Lage!]! @authorize
   lage(id: UUID!): Lage @authorize
   "Lagen der Kommune, zu denen gerade gemeldet werden kann, mit ihren Gebieten und offenen Meldungen. Ohne Anmeldung abrufbar."
@@ -2768,6 +2922,11 @@ type UpdateIstFreigegebenSlotValuePayload {
 type UpdateLagePayload {
   lage: Lage
   errors: [UpdateLageError!]
+}
+
+type UpdateLageWarningTextPayload {
+  lage: Lage
+  errors: [UpdateLageWarningTextError!]
 }
 
 type UpdateMyProfilePayload {
@@ -3222,17 +3381,23 @@ union BackofficeUserDeleteError = NotAllowedError
 
 union BackofficeUserUpdateError = NotAllowedError
 
+union CloseLageError = NotAllowedError | LageNotFoundError | LageClosedError
+
 union ConfirmEhrenamtsbankAbschlussError = Unauthenticated | NotAllowedError | AnfrageNotFoundError | EintragNotFoundError | AbschlussNotVereinbartError | AbschlussNoProposalError | AbschlussSelfConfirmError | AbschlussAlreadyBookedError | AbschlussEintragNotAssignedError
 
 union CreateEhrenamtsbankAnfrageError = Unauthenticated | NotAllowedError | EintragNotFoundError | AnfrageForItselfError | EintragNotActiveError | MultipleAnfrageError
 
 union CreateEhrenamtsbankEintragError = NotAllowedError | EintragValidationError
 
+union CreateEinheitError = NotAllowedError | MitarbeiterGruppeNotFoundError | EinheitNameVergebenError | EinheitNameErforderlichError
+
 union CreateLageError = NotAllowedError | LageUntereinheitNotFoundError | GebietOfOtherUntereinheitError
 
 union DeleteEhrenamtsbankAccountError = Unauthenticated | NotAllowedError | NegativeZeitkontoSaldoError | VereinbarteAnfragenError | OffeneAusfuehrungenError
 
 union DeleteEhrenamtsbankEintragError = NotAllowedError | EintragNotFoundError | EintragConflictError
+
+union DeleteEinheitError = NotAllowedError | EinheitNotFoundError
 
 union DeleteProzessError = NotAllowedError | ProzessHasVersionen | ProzessNotFound
 
@@ -3267,6 +3432,18 @@ union KategorieDeleteError = NotAllowedError
 union KategorieRenameError = NotAllowedError
 
 union KategorieZustaendigkeitSetzenError = NotAllowedError
+
+union MeldungAnLeitstelleAbgebenError = NotAllowedError | MeldungNotFoundError | MeldungAbgeschlossenError | MeldungInKlaerungError | BegruendungErforderlichError
+
+union MeldungBestaetigenError = MeldungNotFoundError | MeldungAbgeschlossenError | LageGebietNotLiveError | ZuVieleDateienError
+
+union MeldungEinheitZuweisenError = NotAllowedError | MeldungNotFoundError | MeldungAbgeschlossenError | MeldungInKlaerungError | EinheitNotFoundError | EinheitGehoertNichtZurEinsatzleitungError
+
+union MeldungFortsetzenError = NotAllowedError | MeldungNotFoundError | MeldungAbgeschlossenError | MeldungInKlaerungError | MeldungAktionNichtMoeglichError
+
+union MeldungUmverteilenError = NotAllowedError | MeldungNotFoundError | MeldungAbgeschlossenError | MitarbeiterGruppeNotFoundError
+
+union MeldungVerwerfenError = NotAllowedError | MeldungNotFoundError | MeldungAbgeschlossenError | BegruendungErforderlichError
 
 union NewsArtikel_Inhalte @source(name: "NewsArtikel_Inhalte", schema: "BereichB") = RichTextBlock | ImageBlockVeranstaltungsmedien
 
@@ -3303,6 +3480,8 @@ union UpdateEhrenamtsbankEintragStatusError = NotAllowedError | EintragStatusTra
 union UpdateIstFreigegebenSlotValueError = BearbeitungNotFoundError | SlotValueNotFoundError
 
 union UpdateLageError = NotAllowedError | LageNotFoundError
+
+union UpdateLageWarningTextError = NotAllowedError | LageNotFoundError | LageClosedError
 
 union UpdateNewsNotificationsPreferencesError = OrganisationseinheitNotFoundError | NotAllowedError
 
@@ -3748,6 +3927,14 @@ input AusfuehrungFilterInput {
   createdAt: InstantFilterInput
   "Aktueller Status der Ausführung (z.B. Bearbeitung durch Bürger, Backoffice oder abgeschlossen)."
   status: AusfuehrungStatusOperationFilterInput
+  "Laufende Nummer einer LageHelfer-Meldung (angezeigt als \"E-1042\"). Null außerhalb des LageHelfers."
+  meldungsnummer: IntOperationFilterInput
+  "Seit wann die Einsatzleitung die Meldung an die Leitstelle abgegeben hat. Null = nicht in Klärung."
+  klaerungSeit: InstantFilterInput
+  "Begründung der Einsatzleitung für die Abgabe an die Leitstelle."
+  klaerungKommentar: StringOperationFilterInput
+  "Begründung, mit der die Leitstelle die Meldung verworfen hat. Null = nicht verworfen."
+  verwerfenGrund: StringOperationFilterInput
 }
 
 input AusfuehrungFolgenInput {
@@ -3870,6 +4057,10 @@ input CheckboxListFormularFeldInput {
   oeffentlichSichtbar: Boolean! = false
 }
 
+input CloseLageInput {
+  lageId: UUID!
+}
+
 input ConfirmEhrenamtsbankAbschlussInput {
   anfrageId: UUID!
 }
@@ -3892,6 +4083,11 @@ input CreateEhrenamtsbankEintragInput {
   imageKey: String
   tags: [String!]
   location: EhrenamtsbankLocationInput
+}
+
+input CreateEinheitInput {
+  name: String!
+  mitarbeiterGruppeId: UUID!
 }
 
 input CreateLageInput {
@@ -3928,6 +4124,10 @@ input DeleteEhrenamtsbankAccountInput {
 
 input DeleteEhrenamtsbankEintragInput {
   id: UUID!
+}
+
+input DeleteEinheitInput {
+  einheitId: UUID!
 }
 
 input DeleteProzessGroupInput {
@@ -4371,6 +4571,36 @@ input LoginBuergerWeakInput {
 input LoginInput {
   email: String!
   password: String!
+}
+
+input MeldungAnLeitstelleAbgebenInput {
+  ausfuehrungId: UUID!
+  kommentar: String!
+}
+
+input MeldungBestaetigenInput {
+  publicId: UUID!
+  fotos: JSON
+}
+
+input MeldungEinheitZuweisenInput {
+  ausfuehrungId: UUID!
+  einheitId: UUID
+}
+
+input MeldungFortsetzenInput {
+  ausfuehrungId: UUID!
+  aktion: MeldungAktion!
+}
+
+input MeldungUmverteilenInput {
+  ausfuehrungId: UUID!
+  mitarbeiterGruppeId: UUID!
+}
+
+input MeldungVerwerfenInput {
+  ausfuehrungId: UUID!
+  begruendung: String!
 }
 
 input MitarbeiterFilterInput {
@@ -6216,6 +6446,11 @@ input UpdateLageInput {
   note: String
 }
 
+input UpdateLageWarningTextInput {
+  lageId: UUID!
+  warningText: String
+}
+
 input UpdateMyProfileInput {
   vorname: String
   nachname: String
@@ -7278,6 +7513,22 @@ enum EhrenamtsbankTransaktionStatus {
   ADJUSTED
 }
 
+"Stand einer LageHelfer-Meldung, wie ihn Leitstelle und Einsatzleitung sehen."
+enum EreignisStatus {
+  "Eingegangen, noch keiner Einheit zugewiesen."
+  EINGEGANGEN
+  "Einer Einheit zugewiesen, Hilfe noch nicht eingeleitet."
+  ZUGEWIESEN
+  "Hilfe eingeleitet (Bürger:innen sehen \"Hilfe ist unterwegs\")."
+  IN_BEARBEITUNG
+  "Von der Einsatzleitung an die Leitstelle abgegeben."
+  IN_KLAERUNG
+  "Einsatz abgeschlossen."
+  ERLEDIGT
+  "Von der Leitstelle mit Begründung verworfen."
+  VERWORFEN
+}
+
 enum FallbackLocaleInputType @source(name: "FallbackLocaleInputType", schema: "BereichB") {
   de
   en
@@ -7367,11 +7618,19 @@ enum LogoutAllDevicesResult {
   DEVICE_LOGIN_KEPT
 }
 
+"Schritt, den die Einsatzleitung an einer Meldung im Prozess geht."
+enum MeldungAktion {
+  "Hilfe einleiten: Bürger:innen sehen \"Hilfe ist unterwegs\"."
+  HILFE_EINLEITEN
+  "Einsatz abschließen; leitet vorher Hilfe ein, falls das noch nicht geschehen ist."
+  EINSATZ_ABSCHLIESSEN
+}
+
 "Stand einer Meldung, wie ihn die meldende Person sieht."
 enum MeldungStatus {
   "Eingegangen, noch nicht von der Einsatzleitung übernommen."
   EINGEGANGEN
-  "Von der Einsatzleitung übernommen oder bereits bearbeitet."
+  "Von der Einsatzleitung übernommen, einer Einheit zugewiesen oder bereits bearbeitet."
   IN_BEARBEITUNG
   "Die Einsatzleitung hat Hilfe eingeleitet."
   HILFE_UNTERWEGS

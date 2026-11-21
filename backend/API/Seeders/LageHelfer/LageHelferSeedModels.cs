@@ -18,7 +18,11 @@ public sealed record LageHelferOrganisationseinheitSeed(
     IReadOnlyList<LageHelferBereichSeed> Bereiche,
     IReadOnlyList<LageHelferAbteilungSeed> Abteilungen);
 
-public sealed record LageHelferBereichSeed(string Key, string Name, string? Einsatzleitung);
+public sealed record LageHelferBereichSeed(
+    string Key,
+    string Name,
+    string? Einsatzleitung,
+    IReadOnlyList<string>? Einheiten = null);
 
 public sealed record LageHelferAbteilungSeed(string Key, string Name);
 

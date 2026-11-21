@@ -18,7 +18,9 @@ public static class AnonymeEinreichung {
 [GraphQLDescription("Ergebnis einer anonymen Einreichung.")]
 public record AnonymeAusfuehrungResult(
     [property: GraphQLDescription("Geheimnis für die Statusabfrage ohne Anmeldung. Nur einmal ausgeliefert, also auf dem Gerät speichern.")]
-    Guid CorrelationId);
+    Guid CorrelationId,
+    [property: GraphQLDescription("Laufende Nummer der Meldung (angezeigt als \"E-1042\"). Null außerhalb des LageHelfers.")]
+    int? Meldungsnummer);
 
 [GraphQLDescription("Status eines anonym eingereichten Antrags.")]
 public record AnonymeAusfuehrungStatus(
@@ -27,6 +29,8 @@ public record AnonymeAusfuehrungStatus(
     string StatusText,
     Instant CreatedAt,
     Instant? AbgeschlossenAm,
+    [property: GraphQLDescription("Laufende Nummer der Meldung (angezeigt als \"E-1042\"). Null außerhalb des LageHelfers.")]
+    int? Meldungsnummer,
     [property: GraphQLDescription(
         "Bürgerseitige Status-Historie, ohne Namen der Bearbeitenden: Die CorrelationId ist kein Login.")]
     IReadOnlyList<AnonymerHistorieEintrag> Historie);

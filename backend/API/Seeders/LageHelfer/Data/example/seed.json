@@ -18,7 +18,9 @@
         {
           "key": "Walddorf",
           "name": "Walddorf",
-          "einsatzleitung": "Einsatzleitung Walddorf"
+          "einsatzleitung": "Einsatzleitung Walddorf",
+          // Optional: units the Einsatzleitung assigns reports to
+          "einheiten": ["HLF 20 Walddorf", "MTW Walddorf"]
         }
       ],
       "abteilungen": []

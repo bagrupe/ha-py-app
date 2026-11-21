@@ -88,6 +88,8 @@ public class DomainContext : DbContext, IDataProtectionKeyContext {
     public DbSet<Lage.Gebiet> Gebiete { get; set; } = null!;
     public DbSet<Lage.LageGebiet> LageGebiete { get; set; } = null!;
     public DbSet<Lage.GebietEinsatzleitung> GebietEinsatzleitungen { get; set; } = null!;
+    public DbSet<Lage.Einheit> Einheiten { get; set; } = null!;
+    public DbSet<Lage.MeldungBestaetigung> MeldungBestaetigungen { get; set; } = null!;
 
     public DbSet<DataProtectionKey> DataProtectionKeys { get; set; } = null!;
 
@@ -99,6 +101,7 @@ public class DomainContext : DbContext, IDataProtectionKeyContext {
         type => type.Name != nameof(BuergerEntityTypeConfiguration));
 
         modelBuilder.ApplyConfiguration(new BuergerEntityTypeConfiguration(_dataProtectionProvider));
+        modelBuilder.HasSequence<int>(Lage.LageMeldungen.MeldungsnummerSequence).StartsAt(1000);
     }
 
     /// <summary>Konfiguriert Konventionen für bestimmte Eigenschaftstypen.</summary>

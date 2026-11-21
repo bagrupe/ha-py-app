@@ -83,6 +83,28 @@ public class Ausfuehrung {
 
     [GraphQLIgnore]
     public Lage.LageGebiet? LageGebiet { get; init; }
+
+    [GraphQLDescription("Laufende Nummer einer LageHelfer-Meldung (angezeigt als \"E-1042\"). Null außerhalb des LageHelfers.")]
+    public int? Meldungsnummer { get; init; }
+
+    /// <summary>Handle for anonymous callers ("Sehe ich auch"); the internal Id stays private.</summary>
+    [GraphQLIgnore]
+    public Guid? PublicId { get; init; }
+
+    [GraphQLIgnore]
+    public Guid? EinheitId { get; set; }
+
+    [GraphQLIgnore]
+    public Lage.Einheit? Einheit { get; set; }
+
+    [GraphQLDescription("Seit wann die Einsatzleitung die Meldung an die Leitstelle abgegeben hat. Null = nicht in Klärung.")]
+    public Instant? KlaerungSeit { get; set; }
+
+    [GraphQLDescription("Begründung der Einsatzleitung für die Abgabe an die Leitstelle.")]
+    public string? KlaerungKommentar { get; set; }
+
+    [GraphQLDescription("Begründung, mit der die Leitstelle die Meldung verworfen hat. Null = nicht verworfen.")]
+    public string? VerwerfenGrund { get; set; }
 }
 
 /// <summary>Definiert die Art der Zuständigkeit einer Ausführung.</summary>
@@ -223,6 +245,10 @@ public class AusfuehrungEntityTypeConfiguration : IEntityTypeConfiguration<Ausfu
         builder.HasIndex(a => a.CorrelationId).IsUnique();
         builder.HasOne(a => a.LageGebiet).WithMany().HasForeignKey(a => a.LageGebietId)
             .OnDelete(DeleteBehavior.Restrict);
+        builder.HasIndex(a => a.PublicId).IsUnique();
+        builder.HasIndex(a => a.Meldungsnummer).IsUnique();
+        builder.HasOne(a => a.Einheit).WithMany().HasForeignKey(a => a.EinheitId)
+            .OnDelete(DeleteBehavior.SetNull);
     }
 }
 

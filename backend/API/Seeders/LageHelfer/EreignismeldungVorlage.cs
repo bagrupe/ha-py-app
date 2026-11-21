@@ -28,6 +28,9 @@ public static class EreignismeldungVorlage {
     public const string PrioritaetSlot = "prioritaet";
     public const string InterneNotizSlot = "interneNotiz";
     public const string VerbindungSpeichern = "Speichern";
+    public const string VerbindungHilfeEinleiten = "Hilfe einleiten";
+    public const string VerbindungEinsatzAbschliessen = "Einsatz abschließen";
+    public const string VerbindungMeldungSchliessen = "Meldung schließen";
 
     public const string StatusEingegangen = "Meldung ist eingegangen";
     public const string StatusHilfeUnterwegs = MeldungStatusErmittlung.StatusTextHilfeUnterwegs;
@@ -166,23 +169,23 @@ public static class EreignismeldungVorlage {
             new() { Von = meldung, Nach = zuordnung, StatusAenderung = StatusEingegangen },
             new() { Von = zuordnung, Nach = pruefung },
             new() {
-                Von = pruefung, Nach = einsatz, Name = "Hilfe einleiten", StatusAenderung = StatusHilfeUnterwegs,
+                Von = pruefung, Nach = einsatz, Name = VerbindungHilfeEinleiten, StatusAenderung = StatusHilfeUnterwegs,
             },
             new() {
-                Von = pruefung, Nach = ende, Name = "Meldung schließen",
+                Von = pruefung, Nach = ende, Name = VerbindungMeldungSchliessen,
                 StatusAenderung = "Meldung wurde geprüft und geschlossen",
             },
             new() { Von = pruefung, Nach = inPruefung, Name = VerbindungSpeichern },
             new() {
-                Von = inPruefung, Nach = einsatz, Name = "Hilfe einleiten", StatusAenderung = StatusHilfeUnterwegs,
+                Von = inPruefung, Nach = einsatz, Name = VerbindungHilfeEinleiten, StatusAenderung = StatusHilfeUnterwegs,
             },
             new() {
-                Von = inPruefung, Nach = ende, Name = "Meldung schließen",
+                Von = inPruefung, Nach = ende, Name = VerbindungMeldungSchliessen,
                 StatusAenderung = "Meldung wurde geprüft und geschlossen",
             },
             new() { Von = inPruefung, Nach = inPruefung, Name = VerbindungSpeichern },
             new() {
-                Von = einsatz, Nach = ende, Name = "Einsatz abschließen", StatusAenderung = "Einsatz abgeschlossen",
+                Von = einsatz, Nach = ende, Name = VerbindungEinsatzAbschliessen, StatusAenderung = "Einsatz abgeschlossen",
             },
             new() { Von = einsatz, Nach = einsatz, Name = VerbindungSpeichern },
         };

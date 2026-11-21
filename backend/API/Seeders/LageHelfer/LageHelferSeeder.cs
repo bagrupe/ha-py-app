@@ -93,6 +93,10 @@ public class LageHelferSeeder : DataSeeder<DomainContext> {
                     cancellationToken);
                 abteilungen[bereich.Key] = einsatzleitung;
                 await SeedGebietEinsatzleitung(GebietId(ns, bereich.Key), einsatzleitung.Id, cancellationToken);
+                foreach (var einheit in bereich.Einheiten ?? []) {
+                    await SeedEinheit(EinheitId(ns, bereich.Key, einheit), einheit, einsatzleitung.Id,
+                        cancellationToken);
+                }
             }
         }
 
@@ -189,6 +193,10 @@ public class LageHelferSeeder : DataSeeder<DomainContext> {
             Name = abteilung.Name,
             Organisationseinheiten = [oe],
         }).OnUpdate((current, next) => current.Name = next.Name).SeedAsync(ct);
+
+    private async Task SeedEinheit(Guid id, string name, Guid mitarbeiterGruppeId, CancellationToken ct) =>
+        await Build(new Einheit { Id = id, Name = name, MitarbeiterGruppeId = mitarbeiterGruppeId })
+            .OnUpdate((current, next) => current.Name = next.Name).SeedAsync(ct);
 
     private async Task SeedGebietEinsatzleitung(Guid gebietId, Guid mitarbeiterGruppeId, CancellationToken ct) =>
         await Build(new GebietEinsatzleitung { GebietId = gebietId, MitarbeiterGruppeId = mitarbeiterGruppeId })

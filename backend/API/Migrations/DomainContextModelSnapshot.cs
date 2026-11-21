@@ -27,6 +27,9 @@ namespace API.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.HasSequence<int>("Meldungsnummern")
+                .StartsAt(1000L);
+
             modelBuilder.Entity("API.Features.Aufbewahrung.AntragLoeschProtokoll", b =>
                 {
                     b.Property<Guid>("Id")
@@ -702,6 +705,27 @@ namespace API.Migrations
                     b.ToTable("Kommunen");
                 });
 
+            modelBuilder.Entity("API.Features.Lage.Einheit", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("MitarbeiterGruppeId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MitarbeiterGruppeId", "Name")
+                        .IsUnique();
+
+                    b.ToTable("Einheiten");
+                });
+
             modelBuilder.Entity("API.Features.Lage.Gebiet", b =>
                 {
                     b.Property<Guid>("Id")
@@ -851,6 +875,28 @@ namespace API.Migrations
                     b.ToTable("LageGebiete");
                 });
 
+            modelBuilder.Entity("API.Features.Lage.MeldungBestaetigung", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("AusfuehrungId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Instant>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<JsonElement?>("Fotos")
+                        .HasColumnType("jsonb");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AusfuehrungId");
+
+                    b.ToTable("MeldungBestaetigungen");
+                });
+
             modelBuilder.Entity("API.Features.ObjectStorage.ObjectDeletionOutboxItem", b =>
                 {
                     b.Property<Guid>("Id")
@@ -925,11 +971,20 @@ namespace API.Migrations
                     b.Property<Instant>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<Guid?>("EinheitId")
+                        .HasColumnType("uuid");
+
                     b.Property<Instant?>("GeloeschtAm")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<Guid?>("GeloeschtVonId")
                         .HasColumnType("uuid");
+
+                    b.Property<string>("KlaerungKommentar")
+                        .HasColumnType("text");
+
+                    b.Property<Instant?>("KlaerungSeit")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<Guid?>("LageGebietId")
                         .HasColumnType("uuid");
@@ -940,7 +995,13 @@ namespace API.Migrations
                     b.Property<Instant?>("ManuellAbgeschlossen")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<int?>("Meldungsnummer")
+                        .HasColumnType("integer");
+
                     b.Property<Guid>("ProzessVersionId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("PublicId")
                         .HasColumnType("uuid");
 
                     b.Property<Guid>("SchrittId")
@@ -960,14 +1021,25 @@ namespace API.Migrations
                     b.Property<Guid>("UserId")
                         .HasColumnType("uuid");
 
+                    b.Property<string>("VerwerfenGrund")
+                        .HasColumnType("text");
+
                     b.HasKey("Id");
 
                     b.HasIndex("CorrelationId")
                         .IsUnique();
 
+                    b.HasIndex("EinheitId");
+
                     b.HasIndex("LageGebietId");
 
+                    b.HasIndex("Meldungsnummer")
+                        .IsUnique();
+
                     b.HasIndex("ProzessVersionId");
+
+                    b.HasIndex("PublicId")
+                        .IsUnique();
 
                     b.HasIndex("SchrittId");
 
@@ -2164,6 +2236,17 @@ namespace API.Migrations
                     b.Navigation("GovManagerSchritt");
                 });
 
+            modelBuilder.Entity("API.Features.Lage.Einheit", b =>
+                {
+                    b.HasOne("API.Features.Auth.MitarbeiterGruppe", "MitarbeiterGruppe")
+                        .WithMany()
+                        .HasForeignKey("MitarbeiterGruppeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("MitarbeiterGruppe");
+                });
+
             modelBuilder.Entity("API.Features.Lage.Gebiet", b =>
                 {
                     b.HasOne("API.Features.Untereinheit.Untereinheit", "Untereinheit")
@@ -2224,6 +2307,17 @@ namespace API.Migrations
                     b.Navigation("Lage");
                 });
 
+            modelBuilder.Entity("API.Features.Lage.MeldungBestaetigung", b =>
+                {
+                    b.HasOne("API.Features.Prozess.Ausfuehrung", "Ausfuehrung")
+                        .WithMany()
+                        .HasForeignKey("AusfuehrungId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Ausfuehrung");
+                });
+
             modelBuilder.Entity("API.Features.PmPayment.PaymentRequest", b =>
                 {
                     b.HasOne("API.Features.Prozess.Ausfuehrung", "Ausfuehrung")
@@ -2245,6 +2339,11 @@ namespace API.Migrations
 
             modelBuilder.Entity("API.Features.Prozess.Ausfuehrung", b =>
                 {
+                    b.HasOne("API.Features.Lage.Einheit", "Einheit")
+                        .WithMany()
+                        .HasForeignKey("EinheitId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
                     b.HasOne("API.Features.Lage.LageGebiet", "LageGebiet")
                         .WithMany()
                         .HasForeignKey("LageGebietId")
@@ -2346,6 +2445,8 @@ namespace API.Migrations
 
                             b1.Navigation("ZugewiesenePerson");
                         });
+
+                    b.Navigation("Einheit");
 
                     b.Navigation("IstZustaendigkeit")
                         .IsRequired();

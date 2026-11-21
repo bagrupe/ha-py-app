@@ -73,6 +73,21 @@ public class Lage {
         }
     }
 
+    /// <summary>Ends every running Gebiet (Inactive ones stay as they are) and closes the Lage.</summary>
+    public void Close(Guid byId, Instant at) {
+        if (Status == LageStatus.Closed) {
+            throw new InvalidOperationException($"Lage {Id} is already closed.");
+        }
+        foreach (var pass in CurrentPasses().Where(p =>
+                     LageGebietStateMachine.IsAllowed(p.Status, LageGebietStatus.Ended))) {
+            pass.TransitionTo(LageGebietStatus.Ended, byId, at);
+        }
+        Status = LageStatus.Closed;
+        ClosedAt = at;
+        ClosedById = byId;
+        UpdatedAt = at;
+    }
+
     /// <summary>Starts a new Inactive pass; a Gebiet whose earlier pass has ended may be added again.</summary>
     public void AddGebiet(Gebiet gebiet) {
         if (Status == LageStatus.Closed) {

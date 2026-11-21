@@ -237,9 +237,12 @@ public class TestSeeder(BackendApiFactory factory) {
 
     public async Task<ClaimsPrincipal> CreateBackofficeUserPrincipal(
         BackofficeNutzerArt art = BackofficeNutzerArt.Nutzer,
-        List<GlobaleFunktionsberechtigung>? funktionsberechtigungen = null) {
+        List<GlobaleFunktionsberechtigung>? funktionsberechtigungen = null,
+        List<Guid>? mitarbeiterGruppenIds = null) {
         await using var scope = factory.Services.CreateAsyncScope();
         var db = scope.ServiceProvider.GetRequiredService<DomainContext>();
+        var gruppenIds = mitarbeiterGruppenIds ?? [];
+        var gruppen = await db.MitarbeiterGruppen.AsTracking().Where(g => gruppenIds.Contains(g.Id)).ToListAsync();
 
         var user = new BackofficeUser {
             Id = Guid.NewGuid(),
@@ -249,7 +252,7 @@ public class TestSeeder(BackendApiFactory factory) {
             KommuneId = KommuneSeeder.LandkreisHaPy.Id,
             Art = art,
             Funktionsberechtigungen = funktionsberechtigungen ?? [],
-            Gruppen = [],
+            Gruppen = gruppen,
             UntereinheitPermissions = [],
         };
 

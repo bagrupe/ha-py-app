@@ -177,6 +177,59 @@ public class LageMutations {
         return lage;
     }
 
+    /// <summary>Ends all running Gebiete and closes the Lage: no new reports, the citizen button disappears</summary>
+    /// <param name="lageId">Lage ID</param>
+    /// <returns>closed Lage</returns>
+    [Authorize]
+    [Error(typeof(NotAllowedException))]
+    [Error(typeof(LageNotFoundException))]
+    [Error(typeof(LageClosedException))]
+    public async Task<Lage> CloseLage(
+        DomainContext db,
+        CurrentUserAccessor currentUserAccessor,
+        IClock clock,
+        Guid lageId,
+        CancellationToken ct) {
+        var (user, berechtigungen) = await currentUserAccessor.EnsureBackofficeUser();
+        berechtigungen.Global(GlobaleFunktionsberechtigung.LageHelfer).Fordern();
+
+        var lage = await TrackedLageOfKommune(db, lageId, user.KommuneId, ct);
+        if (lage.Status == LageStatus.Closed) throw new LageClosedException();
+
+        lage.Close(user.Id, clock.GetCurrentInstant());
+        await db.SaveChangesAsync(ct);
+
+        return lage;
+    }
+
+    /// <summary>Sets the notice the citizen app shows in the Lage banner; null or blank removes it</summary>
+    /// <param name="lageId">Lage ID</param>
+    /// <param name="warningText">notice for citizens</param>
+    /// <returns>updated Lage</returns>
+    [Authorize]
+    [Error(typeof(NotAllowedException))]
+    [Error(typeof(LageNotFoundException))]
+    [Error(typeof(LageClosedException))]
+    public async Task<Lage> UpdateLageWarningText(
+        DomainContext db,
+        CurrentUserAccessor currentUserAccessor,
+        IClock clock,
+        Guid lageId,
+        string? warningText,
+        CancellationToken ct) {
+        var (user, berechtigungen) = await currentUserAccessor.EnsureBackofficeUser();
+        berechtigungen.Global(GlobaleFunktionsberechtigung.LageHelfer).Fordern();
+
+        var lage = await TrackedLageOfKommune(db, lageId, user.KommuneId, ct);
+        if (lage.Status == LageStatus.Closed) throw new LageClosedException();
+
+        lage.WarningText = string.IsNullOrWhiteSpace(warningText) ? null : warningText.Trim();
+        lage.UpdatedAt = clock.GetCurrentInstant();
+        await db.SaveChangesAsync(ct);
+
+        return lage;
+    }
+
     private static async Task<Lage> TrackedLageOfKommune(DomainContext db, Guid lageId, Guid kommuneId,
         CancellationToken ct) =>
         await db.Lagen.AsTracking()

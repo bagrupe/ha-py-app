@@ -26,6 +26,28 @@ public class LageHelferSeedLoaderTests {
     }
 
     [Fact]
+    public void Load_example_reads_einheiten_of_a_bereich() {
+        var doc = LageHelferSeedLoader.Load(ExamplePath);
+        var walddorf = doc.Organisationseinheiten.SelectMany(o => o.Bereiche).Single(b => b.Key == "Walddorf");
+        Assert.Equal(["HLF 20 Walddorf", "MTW Walddorf"], walddorf.Einheiten);
+    }
+
+    [Fact]
+    public void Rejects_einheiten_without_einsatzleitung() {
+        var dir = WriteTempSeed("""
+            {
+              "version": 1,
+              "idNamespace": "325be732-b4d0-4bbe-9ff6-4be737e4c909",
+              "kommune": {"id": "84a06067-dc9e-46d0-b60a-8258cf7c1ce7", "name": "x"},
+              "organisationseinheiten": [
+                {"key": "A", "name": "A", "bereiche": [{"key": "X", "name": "X", "einheiten": ["HLF"]}], "abteilungen": []}
+              ]
+            }
+            """);
+        Assert.Throws<InvalidOperationException>(() => LageHelferSeedLoader.Load(dir));
+    }
+
+    [Fact]
     public void Rejects_unknown_version() {
         var dir = WriteTempSeed("""{"version":2,"idNamespace":"325be732-b4d0-4bbe-9ff6-4be737e4c909","kommune":{"id":"84a06067-dc9e-46d0-b60a-8258cf7c1ce7","name":"x"},"organisationseinheiten":[]}""");
         Assert.Throws<InvalidOperationException>(() => LageHelferSeedLoader.Load(dir));
