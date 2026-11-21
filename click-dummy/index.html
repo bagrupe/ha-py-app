@@ -1,0 +1,520 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Lagehelfer – Demo</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .invalid .input, .invalid .choice__opt span { border-color: var(--bad); }
+    .invalid > label, .invalid > legend { color: var(--bad); }
+    .btn[hidden] { display: none; }
+  </style>
+</head>
+<body>
+<div class="app">
+
+  <!-- TOP: never changes -->
+  <header class="app-bar">
+    <span class="brand-logo-slot" aria-label="Platzhalter für das Landkreis- oder App-Logo">
+      <!-- SVG-LOGO HIER EINFÜGEN -->
+       <img src="/src/hapy-logo.svg" role="image" style="height: 40px; width: auto; margin-right: 8px;" alt="Logo">
+    </span>
+    <span class="app-bar__title">Lagehelfer</span>
+    <span class="badge" style="padding:2px; background-color: #d7ffda; color: #000;">Temperatur: 6 °C</span>
+    <span class="badge" style="padding:2px; background-color: #d7ffda; color: #000;">Hochwasser: 2,41 m</span>
+  </header>
+
+  <!-- MAIN: one .view is visible at a time -->
+  <main class="app-content">
+
+    <div class="view" id="karte" data-title="Karte" hidden>
+      <section>
+        <div class="section-title"><h2>Wetter &amp; Sensoren</h2></div>
+        <div class="tile-grid" style="margin-top:8px">
+        </div>
+      </section>
+    </div>
+
+    <div class="view" id="start" data-title="Start" hidden>
+      <section>
+        <div class="section-title"><h2>Aktuelle Wetterlage</h2></div>
+        <div class="card" style="margin-top:8px"><ul class="list">
+          <li class="list__item"><div class="list__main"><strong>Hameln</strong><span class="list__sub">vor 2 Stunden</span></div><span class="badge badge--work">Unwetterwarnung</span></li>
+          <li class="list__item"><div class="list__main"><strong>Aerzen</strong><span class="list__sub">vor 8 Stunden</span></div><span class="badge badge--done">Wetterlage stabil</span></li>
+        </ul></div>
+      </section>
+      <section>
+        <div class="section-title"><h2>Vorfall melden</h2></div>
+        <div class="card" style="margin-top:8px">
+          <div class="card__body">
+            <p style="margin:0">Du möchtest einen Vorfall melden? Der Lagehelfer leitet dich an die richtige Stelle weiter.</p>
+            <a class="btn btn--block" href="#gefahr-check" style="margin-top:8px">Vorfall melden</a>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <div class="view" id="gefahr-check" data-title="Notfallprüfung" hidden>
+      <section>
+        <div class="section-title"><h2>Bevor du eine Meldung machst</h2></div>
+        <div class="card" style="margin-top:8px">
+          <div class="card__body" style="gap:14px">
+            <fieldset class="choice">
+              <legend>Ist ein Mensch in unmittelbarer Lebensgefahr?</legend>
+              <div class="choice__row">
+                <label class="choice__opt choice__opt--danger">
+                  <input type="radio" name="precheck-danger" value="ja">
+                  <span>Ja</span>
+                </label>
+                <label class="choice__opt">
+                  <input type="radio" name="precheck-danger" value="nein">
+                  <span>Nein</span>
+                </label>
+              </div>
+            </fieldset>
+            <div class="notice notice--danger" id="precheck112" role="alert" hidden>
+              <strong>Bitte rufe jetzt den Notruf 112 an. Nutze dieses Formular nicht bei akuter Lebensgefahr.</strong>
+              <a class="btn btn--danger btn--block" href="tel:112">112 anrufen</a>
+            </div>
+            <p id="precheckHint" class="card__meta" role="status" aria-live="polite">
+              Bitte beantworte die Frage, um fortzufahren.
+            </p>
+            <button class="btn btn--ghost btn--block" type="button" data-goto="start">Zurück</button>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <div class="view" id="melden" data-title="Melden" hidden>
+      <section>
+        <div class="section-title"><h2>Notlage melden</h2></div>
+
+        <!--
+          FORMULAR
+          Jedes Feld muss ein name="..." haben, damit es in der JSON landet. Die Felder lat/lng/standortQuelle werden von der Karte gesetzt.
+          Optional: ein Foto kann als data URL (JPEG) in der JSON gespeichert werden.
+        -->
+        <form class="card" id="report" style="margin-top:8px" novalidate onsubmit="return false">
+          <div class="card__body" style="gap:14px">
+
+            <!-- Die Vorprüfung wurde auf der separaten Ansicht #gefahr-check beantwortet. -->
+            <input type="hidden" name="danger" value="nein">
+
+            <div class="field">
+              <label for="adresse">Wo ist es passiert?</label>
+              <div class="input-row">
+                <input class="input" id="adresse" name="adresse" type="search" autocomplete="off" required placeholder="Straße, Hausnummer, Ort">
+                <button class="btn btn--soft" type="button" id="searchBtn">Suchen</button>
+              </div>
+              <div class="map" id="map" role="application" aria-label="Karte zur Standortwahl"></div>
+              <span class="card__meta" id="mapStatus" role="status"></span>
+              <button class="btn btn--ghost" type="button" id="locateBtn">📍 Meinen Standort verwenden</button>
+              <!-- Filled by the map code. Hidden fields are saved like any other field. -->
+              <input type="hidden" name="lat" data-type="number">
+              <input type="hidden" name="lng" data-type="number">
+              <input type="hidden" name="standortQuelle">
+            </div>
+
+            <div class="field"><label for="m">Was ist passiert?</label>
+              <textarea class="input" id="m" name="beschreibung" required placeholder="z. B. Umgefallener Baum auf der Straße"></textarea></div>
+
+            <!-- Optional photo: name="foto" -> saved in the JSON as a compressed JPEG data URL (or null) -->
+            <div class="field">
+              <label for="fotoBtn">Foto (optional)</label>
+              <input type="file" id="foto" name="foto" accept="image/*" capture="environment" hidden>
+              <button class="btn btn--ghost" type="button" id="fotoBtn">📷 Foto aufnehmen</button>
+              <img id="fotoPreview" alt="Vorschau des Fotos" hidden
+                   style="width:100%;max-height:240px;object-fit:cover;border-radius:var(--r-md);border:1px solid var(--line)">
+              <button class="btn btn--soft" type="button" id="fotoRemove" hidden>Foto entfernen</button>
+            </div>
+
+            <!-- ADD MORE FIELDS HERE (see the explanation: they only need a name="...") -->
+
+            <div class="notice notice--info" id="formStatus" role="status" hidden></div>
+            <button class="btn btn--block" type="submit" id="submitBtn">Meldung senden</button>
+            <button class="btn btn--ghost btn--block" type="button" data-goto="start">Abbrechen</button>
+          </div>
+        </form>
+
+        <div id="json"></div>
+      </section>
+    </div>
+
+    <div class="view" id="danke" data-title="Danke" hidden>
+      <section>
+        <div class="card" style="margin-top:8px">
+          <div class="card__body" style="align-items:center;text-align:center;gap:10px">
+            <div style="font-size:3rem">✅</div>
+            <h2>Danke, deine Meldung ist eingegangen.</h2>
+            <p class="card__meta" id="refId" style="margin:0"></p>
+            <a class="btn btn--block" href="#start" style="margin-top:8px">Zur Startseite</a>
+            <a class="btn btn--ghost btn--block" href="#melden">Weitere Meldung</a>
+          </div>
+        </div>
+      </section>
+    </div>
+
+  </main>
+
+  <!-- BOTTOM: never changes; only the highlighted tab does -->
+  <nav class="tab-bar" aria-label="Hauptnavigation">
+    <a class="tab" href="#start">
+      <span class="tab__icon icon-slot" aria-hidden="true"><!-- SVG-ICON: START --></span>
+      Start
+    </a>
+    <a class="tab" href="#gefahr-check">
+      <span class="tab__icon icon-slot" aria-hidden="true"><!-- SVG-ICON: MELDEN --></span>
+      Melden
+    </a>
+  </nav>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+  /* =====================================================================
+     1. CONFIG — put your API endpoint here
+     ===================================================================== */
+  const API_URL = "";   // e.g. "https://api.example.de/meldungen"  (empty = demo mode, nothing is sent)
+
+  /* =====================================================================
+     2. VIEW SWITCHING (tabs + data-goto buttons)
+     ===================================================================== */
+  const views = [...document.querySelectorAll(".view")];
+  const tabs  = [...document.querySelectorAll(".tab")];
+  const HOME  = "start";
+  let submitted = false;      // true only right after a successful send
+
+  function show() {
+    const id = location.hash.slice(1);
+    let target = views.find(v => v.id === id) || document.getElementById(HOME);
+    // The reporting form is only reachable after the explicit "not in danger" answer.
+    if (target.id === "melden" && form?.elements["danger"]?.value !== "nein") {
+      target = document.getElementById("gefahr-check");
+    }
+    if (target.id === "danke" && !submitted) target = document.getElementById(HOME);
+    if (target.id !== "danke") submitted = false;
+    if (target.id === "gefahr-check") {
+      document.querySelectorAll('input[name="precheck-danger"]').forEach(r => r.checked = false);
+      precheck112.hidden = true;
+      precheckHint.textContent = "Bitte beantworte die Frage, um fortzufahren.";
+      if (form?.elements["danger"]) form.elements["danger"].value = "";
+    }
+    views.forEach(v => v.hidden = v !== target);
+    tabs.forEach(t => {
+      if (t.getAttribute("href") === "#" + target.id) t.setAttribute("aria-current", "page");
+      else t.removeAttribute("aria-current");
+    });
+    document.title = target.dataset.title + " – Lagehelfer";
+    if (target.id === "melden") initMap();
+    window.scrollTo(0, 0);
+  }
+  window.addEventListener("hashchange", show);
+  document.addEventListener("click", e => {
+    const el = e.target.closest("[data-goto]");
+    if (el) location.hash = el.dataset.goto;
+  });
+
+  /* =====================================================================
+     3. FORM -> ONE JSON OBJECT
+        readForm() walks every named field in the form and builds the object.
+        refresh() runs on every change and updates formData + the JSON preview.
+     ===================================================================== */
+  const form      = document.getElementById("report");
+  const jsonOut   = document.getElementById("json");
+  const addrInput = document.getElementById("adresse");
+  const precheck112 = document.getElementById("precheck112");
+  const precheckHint = document.getElementById("precheckHint");
+  let formData = {};
+
+  function readForm() {
+    const data = {};
+    for (const el of form.elements) {
+      const n = el.name;
+      if (!n || el.disabled || el.type === "button" || el.type === "submit") continue;
+
+      if (el.type === "file") { data[n] = photoCache[n] ?? null; continue; }   // photo -> data URL
+
+      if (el.type === "radio") {                       // one value per group
+        if (el.checked) data[n] = el.value;
+      } else if (el.type === "checkbox") {
+        const group = form.querySelectorAll(`input[type=checkbox][name="${n}"]`);
+        if (group.length > 1) {                        // several boxes, same name -> array
+          data[n] ??= [];
+          if (el.checked) data[n].push(el.value);
+        } else {
+          data[n] = el.checked;                        // single box -> true / false
+        }
+      } else if (el.type === "number" || el.dataset.type === "number") {
+        data[n] = el.value === "" ? null : Number(el.value);
+      } else {
+        data[n] = el.value.trim();                     // text, textarea, select, hidden, tel, ...
+      }
+    }
+    return data;
+  }
+
+  function refresh() {
+    formData = readForm();
+    jsonOut.textContent = JSON.stringify(formData, (k, v) =>
+      typeof v === "string" && v.startsWith("data:image")
+        ? v.slice(0, 30) + "… (" + Math.round(v.length * 0.75 / 1024) + " KB)"   // preview only
+        : v, 2);
+  }
+  form.addEventListener("input", refresh);
+  form.addEventListener("change", refresh);
+
+  // Separate first step: acute danger stops the reporting flow and directs to 112.
+  document.querySelectorAll('input[name="precheck-danger"]').forEach(r =>
+    r.addEventListener("change", () => {
+      if (r.value === "ja") {
+        precheck112.hidden = false;
+        precheckHint.textContent = "Du wirst nicht zum Meldeformular weitergeleitet.";
+      } else {
+        precheck112.hidden = true;
+        precheckHint.textContent = "Keine unmittelbare Lebensgefahr angegeben. Das Meldeformular wird geöffnet.";
+        // Preserve the answer in the report data and continue to the actual form.
+        form.elements["danger"].value = "nein";
+        location.hash = "melden";
+      }
+    }));
+
+  // remove the red marking as soon as the person edits that field
+  const clearInvalid = e => e.target.closest(".invalid")?.classList.remove("invalid");
+  form.addEventListener("input", clearInvalid);
+  form.addEventListener("change", clearInvalid);
+
+  /* =====================================================================
+     4. SENDING TO YOUR API  <<<<<<<<<<  THIS IS WHERE THE REQUEST HAPPENS
+     ===================================================================== */
+  async function sendReport(data) {
+    if (!API_URL) {                                    // demo mode
+      console.log("DEMO – would POST this JSON:", JSON.stringify(data));
+      return { demo: true };
+    }
+    const res = await fetch(API_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),                      // <- the JSON object
+    });
+    if (!res.ok) throw new Error("Server antwortete mit " + res.status);
+    return res.json().catch(() => ({}));               // server may return e.g. { id: 123 }
+  }
+
+  const formStatus = document.getElementById("formStatus");
+  const submitBtn  = document.getElementById("submitBtn");
+  function showStatus(text, ok) {
+    formStatus.className = "notice " + (ok ? "notice--info" : "notice--danger");
+    formStatus.textContent = text;
+    formStatus.hidden = false;
+  }
+
+  // Finds every field with the "required" attribute that is still empty.
+  function validate() {
+    const missing = [], seen = new Set();
+    for (const el of form.elements) {
+      if (!el.required || el.disabled || seen.has(el.name)) continue;
+      let empty;
+      if (el.type === "radio") {
+        seen.add(el.name);
+        empty = !form.querySelector(`input[type=radio][name="${el.name}"]:checked`);
+      } else if (el.type === "checkbox") empty = !el.checked;
+      else empty = !el.value.trim();
+      if (empty) {
+        missing.push(el);
+        el.closest(".field, .choice")?.classList.add("invalid");
+      }
+    }
+    return missing;
+  }
+  function labelOf(el) {
+    if (el.type === "radio") return el.closest("fieldset")?.querySelector("legend")?.textContent.trim();
+    return (el.labels?.[0]?.textContent || el.name).trim();
+  }
+
+  form.addEventListener("submit", async e => {
+    e.preventDefault();                                 // never let the browser reload the page
+    refresh();
+
+    const missing = validate();
+    if (missing.length) {                               // stay on this screen and say what is missing
+      showStatus("Bitte ausfüllen: " + [...new Set(missing.map(labelOf))].join(", "), false);
+      missing[0].closest(".field, .choice").scrollIntoView({ block: "center", behavior: "smooth" });
+      missing[0].focus({ preventScroll: true });
+      return;
+    }
+
+    submitBtn.disabled = true;
+    showStatus("Wird gesendet …", true);
+    try {
+      const reply = await sendReport(formData);
+
+      // ---- success: clear the form and go to the confirmation screen ----
+      document.getElementById("refId").textContent =
+        reply.demo ? "Demo: es wurde nichts gesendet (API_URL ist leer)."
+                   : reply.id ? "Meldungs-Nr. " + reply.id : "";
+      form.reset();                                     // clear fields (map pin stays)
+      box112.hidden = true;
+      formStatus.hidden = true;
+      refresh();
+      submitted = true;                                 // allows the #danke screen
+      location.replace("#danke");                       // <<< change this to go to a different screen
+    } catch (err) {
+      console.error("Senden fehlgeschlagen:", err);
+
+      document.getElementById("refId").textContent =
+        "Deine Meldung wurde lokal übernommen, konnte aber nicht an den Server übertragen werden.";
+
+      submitted = true;
+      location.replace("#danke");
+    } finally {
+      submitBtn.disabled = false;
+    }
+  });
+
+  /* =====================================================================
+     5. MAP (Leaflet + OpenStreetMap)
+        The map writes into the hidden fields lat / lng / standortQuelle and
+        into the address field, then calls refresh() — so it ends up in the JSON.
+     ===================================================================== */
+  const HAMELN = [51.1037, 9.3597];
+  const NOMINATIM = "https://nominatim.openstreetmap.org";
+  let map, marker, mapReady = false, addrDirty = false, revSeq = 0;
+  const mapStatus = document.getElementById("mapStatus");
+  const setStatus = t => { mapStatus.textContent = t; };
+
+  function setValue(name, value) { form.elements[name].value = value; }
+
+  function initMap() {
+    if (mapReady) { map.invalidateSize(); return; }
+    if (typeof L === "undefined") { setStatus("Karte konnte nicht geladen werden."); return; }
+    mapReady = true;
+    map = L.map("map").setView(HAMELN, 13);
+    L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+      { maxZoom: 19, attribution: "&copy; OpenStreetMap-Mitwirkende" }).addTo(map);
+    marker = L.marker(HAMELN, { draggable: true }).addTo(map);
+    marker.on("dragend", () => placeAt(marker.getLatLng(), "pin"));
+    map.on("click", e => placeAt(e.latlng, "pin"));
+    locate();
+  }
+
+  function placeAt(latlng, source, address) {
+    marker.setLatLng(latlng);
+    map.panTo(latlng);
+    setValue("lat", latlng.lat.toFixed(6));
+    setValue("lng", latlng.lng.toFixed(6));
+    setValue("standortQuelle", source);                 // "gps" | "adresse" | "pin"
+    if (source === "pin") addrDirty = false;            // user moved the pin on purpose
+    if (address) setAddress(address); else { refresh(); reverseGeocode(latlng); }
+  }
+  function setAddress(text) { addrInput.value = text; addrDirty = false; refresh(); }
+
+  function locate() {
+    if (!navigator.geolocation) return setStatus("Standort nicht unterstützt. Gib eine Adresse ein.");
+    setStatus("Standort wird ermittelt …");
+    navigator.geolocation.getCurrentPosition(
+      p => {
+        const ll = L.latLng(p.coords.latitude, p.coords.longitude);
+        map.setView(ll, 16);
+        placeAt(ll, "gps");
+        setStatus("Dein aktueller Standort. Du kannst den Pin verschieben.");
+      },
+      () => setStatus("Standort nicht verfügbar. Gib eine Adresse ein oder tippe auf die Karte."),
+      { enableHighAccuracy: true, timeout: 10000 });
+  }
+
+  async function searchAddress() {
+    const q = addrInput.value.trim();
+    if (!q || !mapReady) return;
+    setStatus("Suche …");
+    try {
+      const r = await fetch(`${NOMINATIM}/search?format=jsonv2&limit=1&countrycodes=de&accept-language=de&q=${encodeURIComponent(q)}`);
+      const d = await r.json();
+      if (!d.length) return setStatus("Adresse nicht gefunden.");
+      const ll = L.latLng(+d[0].lat, +d[0].lon);
+      map.setView(ll, 17);
+      placeAt(ll, "adresse", d[0].display_name);
+      setStatus("Adresse gefunden. Du kannst den Pin verschieben.");
+    } catch { setStatus("Suche fehlgeschlagen. Prüfe deine Verbindung."); }
+  }
+
+  async function reverseGeocode(ll) {                   // pin -> address text (best effort)
+    const mine = ++revSeq;
+    try {
+      const r = await fetch(`${NOMINATIM}/reverse?format=jsonv2&accept-language=de&lat=${ll.lat}&lon=${ll.lng}`);
+      const d = await r.json();
+      // never overwrite what the user typed, and ignore outdated answers
+      if (d.display_name && mine === revSeq && !addrDirty) setAddress(d.display_name);
+    } catch { /* keep whatever is in the field */ }
+  }
+
+  document.getElementById("searchBtn").addEventListener("click", searchAddress);
+  document.getElementById("locateBtn").addEventListener("click", () => { if (mapReady) { addrDirty = false; locate(); } });
+  addrInput.addEventListener("keydown", e => { if (e.key === "Enter") { e.preventDefault(); searchAddress(); } });
+  addrInput.addEventListener("input", () => {
+    addrDirty = true;
+    setStatus("Drücke „Suchen“, um den Pin auf diese Adresse zu setzen.");
+  });
+
+  /* =====================================================================
+     6. OPTIONAL PHOTO
+        The picked/taken image is scaled down and re-encoded as JPEG (this also
+        strips EXIF data such as GPS) and stored as a data URL in formData.foto.
+     ===================================================================== */
+  const photoCache  = {};                                  // field name -> data URL
+  const fotoInput   = document.getElementById("foto");
+  const fotoPreview = document.getElementById("fotoPreview");
+  const fotoRemove  = document.getElementById("fotoRemove");
+  const MAX_SIDE = 1280, JPEG_QUALITY = 0.8;
+
+  function loadImage(file) {
+    return new Promise((resolve, reject) => {
+      const url = URL.createObjectURL(file);
+      const img = new Image();
+      img.onload  = () => { URL.revokeObjectURL(url); resolve(img); };
+      img.onerror = () => { URL.revokeObjectURL(url); reject(new Error("unreadable image")); };
+      img.src = url;
+    });
+  }
+  async function compress(file) {
+    const img = await loadImage(file);
+    const scale = Math.min(1, MAX_SIDE / Math.max(img.naturalWidth, img.naturalHeight));
+    const c = document.createElement("canvas");
+    c.width  = Math.round(img.naturalWidth  * scale);
+    c.height = Math.round(img.naturalHeight * scale);
+    c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
+    return c.toDataURL("image/jpeg", JPEG_QUALITY);
+  }
+  function clearPhoto() {
+    delete photoCache.foto;
+    fotoInput.value = "";
+    fotoPreview.hidden = fotoRemove.hidden = true;
+    fotoPreview.removeAttribute("src");
+    document.getElementById("fotoBtn").textContent = "📷 Foto aufnehmen";
+    refresh();
+  }
+
+  document.getElementById("fotoBtn").addEventListener("click", () => fotoInput.click());
+  fotoRemove.addEventListener("click", clearPhoto);
+  fotoInput.addEventListener("change", async () => {
+    const file = fotoInput.files[0];
+    if (!file) return clearPhoto();
+    try {
+      photoCache.foto = await compress(file);
+      fotoPreview.src = photoCache.foto;
+      fotoPreview.hidden = fotoRemove.hidden = false;
+      document.getElementById("fotoBtn").textContent = "📷 Anderes Foto aufnehmen";
+      refresh();
+    } catch {
+      clearPhoto();
+      showStatus("Das Bild konnte nicht gelesen werden. Bitte versuche ein anderes.", false);
+    }
+  });
+  form.addEventListener("reset", () => setTimeout(clearPhoto));   // form.reset() after sending
+
+  refresh();
+  show();   // keep last: everything above must exist first
+</script>
+</body>
+</html>
