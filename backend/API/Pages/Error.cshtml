@@ -1,0 +1,15 @@
+@page
+@model API.Pages.ErrorModel
+
+@{
+  ViewData["Title"] = "Fehler";
+}
+
+<h1>Fehler</h1>
+<h2>Bei der Verarbeitung Ihrer Anfrage ist ein Fehler aufgetreten.</h2>
+@if (Model.ShowRequestId)
+{
+  <p>
+    <strong>Request-ID:</strong> <code>@Model.RequestId</code>
+  </p>
+}

@@ -194,6 +194,7 @@ builder.Services
     .AddScoped<RefreshTokenService>()
     .AddScoped<API.Features.Auth.KeyEscrow.KeyEscrowService>()
     .AddControllers().Services
+    .AddRazorPages().Services
     .UseConfigurationValidation()
     .ConfigureValidatableSetting<EnvironmentOptions>(builder.Configuration.GetSection("Environment"))
     .ConfigureValidatableSetting<JWTOptions>(builder.Configuration.GetSection("JWT"))
@@ -368,6 +369,10 @@ builder.Services.AddCors(options => options.AddDefaultPolicy(policy =>
 var app = builder.Build();
 app.Logger.LogInformation("Environment IsDevelopment :" + builder.Environment.IsDevelopment());
 app.Logger.LogInformation("Environment IsStaging :" + builder.Environment.IsStaging());
+if (!app.Environment.IsDevelopment()) {
+    app.UseExceptionHandler("/Error");
+    app.UseHsts();
+}
 app.UseSentryTracing();
 app.UseCors();
 app.UseAuthentication();
@@ -383,6 +388,7 @@ app.MapGraphQL().WithOptions(new GraphQLServerOptions {
     Tool = { Enable = app.Environment.IsDevelopment() || app.Environment.IsStaging() },
 });
 app.MapControllers();
+app.MapRazorPages();
 
 #if DEBUG
 app.UseSwagger();

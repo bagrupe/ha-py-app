@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>@ViewData["Title"] | Kommunal-App</title>
+</head>
+<body>
+<header>
+  <strong>Kommunal-App</strong>
+</header>
+<main>
+  @RenderBody()
+</main>
+<footer>
+  Kommunal-App
+</footer>
+
+@await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>
