@@ -8,33 +8,33 @@ using API.Features.Prozess.ProgrammatischeSchritte;
 namespace API.Seeders.LageHelfer;
 
 /// <summary>
-/// Prozess "Bürger:in meldet Ereignis": Lebensgefahr-Abfrage, Meldung mit Standort und Kategorie, Zuordnung zur
-/// Einsatzleitung über das Gebiet, danach Prüfung und Einsatz im Backoffice.
+/// Prozess "Bürger:in meldet Ereignis": Meldung mit Standort und Kategorie, Zuordnung zur Einsatzleitung über das
+/// gewählte Gebiet, danach Prüfung und Einsatz im Backoffice.
 /// </summary>
 /// <remarks>
-/// All Bürger steps come first so the app can submit them in one anonymous call (ausfuehrungCreateAnonym).
+/// The Bürger step comes first so the app can submit it in one anonymous call (ausfuehrungCreateAnonym). The
+/// life-threat question stays in the app: with danger to life it points to 112 and sends no report at all.
 /// </remarks>
 public static class EreignismeldungVorlage {
     /// <summary>Bump whenever the structure below changes, so the seeder publishes a new version.</summary>
-    private const int Revision = 2;
+    private const int Revision = 4;
 
-    public const string LebensgefahrSlot = "lebensgefahr";
     public const string StandortSlot = GebietEinsatzleitungZustaendigkeitSchritt.StandortSlotName;
     public const string KategorieSlot = "kategorie";
     public const string BeschreibungSlot = OpenMeldungen.BeschreibungSlot;
     public const string BilderSlot = "bilder";
     public const string RueckrufnummerSlot = "rueckrufnummer";
+    public const int MaxFotos = 3;
 
     public const string StatusEingegangen = "Meldung ist eingegangen";
-    public const string StatusHilfeUnterwegs = "Hilfe ist unterwegs";
+    public const string StatusHilfeUnterwegs = MeldungStatusErmittlung.StatusTextHilfeUnterwegs;
 
     public static string Fingerprint(LageHelferProzessSeed seed) {
         var content = $"{nameof(EreignismeldungVorlage)}:{Revision}:{string.Join('\u001f', seed.Kategorien)}";
         return Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(content)))[..16];
     }
 
-    // Constant on purpose: slot() throws for a missing slot, and the 112 branch never fills the Kategorie.
-    public static StringExpression Beschreibungstext => "Ereignismeldung";
+    public static StringExpression Beschreibungstext => new($"'Ereignismeldung: ' + slot('{KategorieSlot}')");
 
     public static (List<Schritt> Schritte, List<Verbindung> Verbindungen, List<ZustaendigkeitRolle> Rollen) Build(
         LageHelferProzessSeed seed, Guid prozessVersionId) {
@@ -47,40 +47,6 @@ public static class EreignismeldungVorlage {
             Art = ZustaendigkeitArt.Dynamisch,
             DynamischeArten = [ZustaendigkeitArt.Organisationseinheit],
             LiestRolle = einsatzleitung,
-        };
-
-        var lebensgefahr = new FormularSchritt {
-            Titel = "Ereignis melden",
-            NodePosition = new NodePosition { X = 0, Y = 100 },
-            SollZustaendigkeit = buerger(),
-            Felder = [
-                new StringFormularFeld {
-                    SlotName = LebensgefahrSlot,
-                    AngezeigterName = "Besteht Lebensgefahr für Mensch oder Tier?",
-                    Encrypted = false,
-                    Pflichtfeld = true,
-                    Order = 0,
-                    Options = [new("Ja"), new("Nein")],
-                },
-            ],
-        };
-
-        var notruf = new FormularSchritt {
-            Titel = "Notruf",
-            NodePosition = new NodePosition { X = 300, Y = 0 },
-            SollZustaendigkeit = buerger(),
-            Felder = [
-                new AnzeigeTextBlockFeld {
-                    SlotName = "notrufHinweis",
-                    Text = "Bitte wählen Sie sofort den Notruf 112.",
-                    Order = 0,
-                },
-            ],
-        };
-
-        var notrufEnde = new EndeSchritt {
-            NodePosition = new NodePosition { X = 600, Y = 0 },
-            SollZustaendigkeit = buerger(),
         };
 
         var meldung = new FormularSchritt {
@@ -116,8 +82,10 @@ public static class EreignismeldungVorlage {
                 new UploadFormularFeld {
                     SlotName = BilderSlot,
                     AngezeigterName = "Fotos",
+                    Anweisung = $"Freiwillig, bis zu {MaxFotos} Fotos.",
                     Encrypted = false,
                     Multi = true,
+                    MaxAnzahl = MaxFotos,
                     Order = 3,
                 },
                 // Encrypted: the only personal data in an otherwise anonymous report.
@@ -163,17 +131,8 @@ public static class EreignismeldungVorlage {
         };
 
         // Start must be first: the seeder sets ProzessVersion.Start from it.
-        var schritte = new List<Schritt> { lebensgefahr, notruf, notrufEnde, meldung, zuordnung, pruefung, einsatz, ende };
+        var schritte = new List<Schritt> { meldung, zuordnung, pruefung, einsatz, ende };
         var verbindungen = new List<Verbindung> {
-            new() {
-                Von = lebensgefahr, Nach = notruf,
-                IstRelevant = new BoolExpression($"slot('{LebensgefahrSlot}') == 'Ja'"),
-            },
-            new() {
-                Von = lebensgefahr, Nach = meldung,
-                IstRelevant = new BoolExpression($"slot('{LebensgefahrSlot}') == 'Nein'"),
-            },
-            new() { Von = notruf, Nach = notrufEnde },
             new() { Von = meldung, Nach = zuordnung, StatusAenderung = StatusEingegangen },
             new() { Von = zuordnung, Nach = pruefung },
             new() {

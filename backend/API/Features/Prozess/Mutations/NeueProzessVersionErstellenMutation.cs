@@ -692,7 +692,8 @@ public record UploadFormularFeldInput(
     bool Multi,
     bool Document,
     bool BrauchtFreigabe,
-    bool OeffentlichSichtbar
+    bool OeffentlichSichtbar,
+    int? MaxAnzahl = null
 ) : BaseFormularFeldInput(Id, SlotName, AngezeigterName, Anweisung, Order, Encrypted, InhaltsTag, IstRelevant, Pflichtfeld, OeffentlichSichtbar);
 
 /// <summary>

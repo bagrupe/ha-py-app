@@ -672,6 +672,18 @@ export default {
             },
             args: [],
           },
+          {
+            name: 'statusText',
+            type: {
+              kind: 'NON_NULL',
+              ofType: {
+                kind: 'SCALAR',
+                name: 'String',
+                ofType: null,
+              },
+            },
+            args: [],
+          },
         ],
         interfaces: [],
       },
@@ -2774,6 +2786,10 @@ export default {
           {
             kind: 'OBJECT',
             name: 'LageGebietNotLiveError',
+          },
+          {
+            kind: 'OBJECT',
+            name: 'ZuVieleDateienError',
           },
         ],
       },
@@ -7724,6 +7740,10 @@ export default {
           {
             kind: 'OBJECT',
             name: 'VereinbarteAnfragenError',
+          },
+          {
+            kind: 'OBJECT',
+            name: 'ZuVieleDateienError',
           },
         ],
       },
@@ -17863,9 +17883,23 @@ export default {
           {
             name: 'status',
             type: {
-              kind: 'SCALAR',
-              name: 'String',
-              ofType: null,
+              kind: 'NON_NULL',
+              ofType: {
+                kind: 'SCALAR',
+                name: 'Any',
+              },
+            },
+            args: [],
+          },
+          {
+            name: 'statusText',
+            type: {
+              kind: 'NON_NULL',
+              ofType: {
+                kind: 'SCALAR',
+                name: 'String',
+                ofType: null,
+              },
             },
             args: [],
           },
@@ -23029,6 +23063,15 @@ export default {
             args: [],
           },
           {
+            name: 'maxAnzahl',
+            type: {
+              kind: 'SCALAR',
+              name: 'Int',
+              ofType: null,
+            },
+            args: [],
+          },
+          {
             name: 'multi',
             type: {
               kind: 'NON_NULL',
@@ -25964,6 +26007,30 @@ export default {
           },
         ],
         interfaces: [],
+      },
+      {
+        kind: 'OBJECT',
+        name: 'ZuVieleDateienError',
+        fields: [
+          {
+            name: 'message',
+            type: {
+              kind: 'NON_NULL',
+              ofType: {
+                kind: 'SCALAR',
+                name: 'String',
+                ofType: null,
+              },
+            },
+            args: [],
+          },
+        ],
+        interfaces: [
+          {
+            kind: 'INTERFACE',
+            name: 'Error',
+          },
+        ],
       },
       {
         kind: 'OBJECT',

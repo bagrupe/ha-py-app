@@ -1776,6 +1776,9 @@ namespace API.Migrations
                     b.Property<bool>("Document")
                         .HasColumnType("boolean");
 
+                    b.Property<int?>("MaxAnzahl")
+                        .HasColumnType("integer");
+
                     b.Property<bool>("Multi")
                         .HasColumnType("boolean");
 

@@ -204,7 +204,9 @@ type AnonymeAusfuehrungResult {
 
 "Status eines anonym eingereichten Antrags."
 type AnonymeAusfuehrungStatus {
-  status: AusfuehrungStatus!
+  status: MeldungStatus!
+  "Anzeigetext zum Status, z. B. \"Hilfe ist unterwegs\"."
+  statusText: String!
   createdAt: Instant!
   abgeschlossenAm: Instant
   "Bürgerseitige Status-Historie, ohne Namen der Bearbeitenden: Die CorrelationId ist kein Login."
@@ -2272,8 +2274,9 @@ type PublicLage {
 
 "Noch nicht abgeschlossene Meldung einer Lage, etwa als Pin auf der Karte oder als Vorlage für eine eigene Meldung. Enthält bewusst keine Kennung und keine persönlichen Angaben."
 type PublicMeldung {
-  "Status, wie ihn auch die meldende Person sieht, z. B. \"Hilfe ist unterwegs\"."
-  status: String
+  status: MeldungStatus!
+  "Anzeigetext zum Status, z. B. \"Hilfe ist unterwegs\"."
+  statusText: String!
   description: String
   longitude: Float!
   latitude: Float!
@@ -2790,6 +2793,8 @@ type UploadFormularFeld implements FormularFeld {
   multi: Boolean!
   "Gibt an, ob es sich um ein Dokument handelt (z.B. PDF)."
   document: Boolean!
+  "Höchstzahl an Dateien, die hochgeladen werden dürfen. Null: unbegrenzt. Nur bei unverschlüsselten Feldern serverseitig geprüft, weil verschlüsselte Inhalte nicht gezählt werden können."
+  maxAnzahl: Int
   id: UUID!
   "Technischer Name des Slots, unter dem das Feld im Prozess und in Expressions referenziert wird."
   slotName: String!
@@ -3156,6 +3161,10 @@ type Wettermesspunktes @source(name: "Wettermesspunktes", schema: "BereichB") {
   totalPages: Int!
 }
 
+type ZuVieleDateienError implements Error {
+  message: String!
+}
+
 "Beschreibt, wer aktuell für die Bearbeitung eines Antrags zuständig ist. Kann Bürger, Organisationseinheit, Dienstleister oder dynamisch sein.Je nach Art der Zuständigkeit können unterschiedliche Eigenschaften gesetzt sein aus welchen die Zuständige Instanz ermittelt werden kann."
 type Zustaendigkeit {
   "Bürger, Organisationseinheit, Dienstleister oder dynamisch."
@@ -3203,7 +3212,7 @@ union AufbewahrungsEinstellungenAktualisierenError = NotAllowedError
 
 union AusfuehrungContinueError = AusfuehrungNotFoundError | NachrichtTooLongError
 
-union AusfuehrungCreateAnonymError = AnonymeEinreichungNichtErlaubtError | AnonymeEinreichungUnvollstaendigError | LageGebietNotLiveError | LageErforderlichError
+union AusfuehrungCreateAnonymError = AnonymeEinreichungNichtErlaubtError | AnonymeEinreichungUnvollstaendigError | LageGebietNotLiveError | LageErforderlichError | ZuVieleDateienError
 
 union AusfuehrungUpdateZugewiesenePersonError = AusfuehrungNotFoundError | UserNotFoundError | MismatchingKommuneError | UnauthorizedAccessError
 
@@ -6231,6 +6240,7 @@ input UploadFormularFeldInput {
   multi: Boolean!
   document: Boolean!
   brauchtFreigabe: Boolean!
+  maxAnzahl: Int
   id: UUID!
   slotName: String!
   angezeigterName: String
@@ -7355,6 +7365,18 @@ enum LoginResult {
 enum LogoutAllDevicesResult {
   LOGGED_OUT
   DEVICE_LOGIN_KEPT
+}
+
+"Stand einer Meldung, wie ihn die meldende Person sieht."
+enum MeldungStatus {
+  "Eingegangen, noch nicht von der Einsatzleitung übernommen."
+  EINGEGANGEN
+  "Von der Einsatzleitung übernommen und in Bearbeitung."
+  IN_BEARBEITUNG
+  "Die Einsatzleitung hat Hilfe eingeleitet."
+  HILFE_UNTERWEGS
+  "Abgeschlossen, es folgen keine weiteren Änderungen."
+  ABGESCHLOSSEN
 }
 
 enum NewsArtikel__status @source(name: "NewsArtikel__status", schema: "BereichB") {

@@ -180,17 +180,88 @@ public class PublicLageTests(BackendApiFactory factory) : GraphQLTests(factory) 
         ActAnonymously();
         var result = await ExecuteGraphqlAsync(null, """
             query ActiveLagen($kommuneId: UUID!) {
-              activeLagen(kommuneId: $kommuneId) { meldungen { status description longitude latitude } }
+              activeLagen(kommuneId: $kommuneId) { meldungen { status statusText description longitude latitude } }
             }
             """, new Dictionary<string, object?> { ["kommuneId"] = kommuneId });
 
         Assert.True(result.Errors is null, result.ToJson());
         var meldung = Assert.Single(JsonDocument.Parse(result.ToJson()).RootElement.GetProperty("data")
             .GetProperty("activeLagen")[0].GetProperty("meldungen").EnumerateArray());
-        Assert.Equal(EreignismeldungVorlage.StatusEingegangen, meldung.GetProperty("status").GetString());
+        Assert.Equal("EINGEGANGEN", meldung.GetProperty("status").GetString());
+        Assert.Equal("Meldung ist eingegangen", meldung.GetProperty("statusText").GetString());
         Assert.Equal("Keller überflutet", meldung.GetProperty("description").GetString());
         Assert.Equal(9.21, meldung.GetProperty("longitude").GetDouble());
         Assert.Equal(52.21, meldung.GetProperty("latitude").GetDouble());
+    }
+
+    [Fact]
+    public async Task Report_with_up_to_three_photos_is_stored() {
+        var (meldeprozess, auswahl) = await SeedLiveMeldeprozess();
+
+        var create = await CreateAnonym(meldeprozess, auswahl, 9.2, 52.2, fotos: [FakeFoto, FakeFoto, FakeFoto]);
+
+        Assert.True(create.Errors is null, create.ToJson());
+        Assert.DoesNotContain("Error\"", create.ToJson());
+        await using var scope = Factory.Services.CreateAsyncScope();
+        var fotos = await scope.ServiceProvider.GetRequiredService<DomainContext>().PlainSlotValues
+            .SingleAsync(sv => sv.SlotName == EreignismeldungVorlage.BilderSlot
+                && sv.Bearbeitung.Ausfuehrung.ProzessVersionId == meldeprozess.VersionId);
+        Assert.Equal(3, fotos.Value.GetArrayLength());
+    }
+
+    [Fact]
+    public async Task Report_with_more_than_three_photos_is_rejected() {
+        var (meldeprozess, auswahl) = await SeedLiveMeldeprozess();
+
+        var create = await CreateAnonym(meldeprozess, auswahl, 9.2, 52.2,
+            fotos: [FakeFoto, FakeFoto, FakeFoto, FakeFoto]);
+
+        Assert.Null(create.Errors);
+        Assert.Contains("ZuVieleDateienError", create.ToJson());
+        Assert.True(await NoAusfuehrungFor(meldeprozess.VersionId));
+    }
+
+    [Fact]
+    public async Task MeldungStatus_is_eingegangen_until_the_einsatzleitung_takes_the_report_over() {
+        var (meldeprozess, auswahl) = await SeedLiveMeldeprozess();
+        var create = await CreateAnonym(meldeprozess, auswahl, 9.2, 52.2);
+        var correlationId = JsonDocument.Parse(create.ToJson()).RootElement.GetProperty("data")
+            .GetProperty("ausfuehrungCreateAnonym").GetProperty("anonymeAusfuehrungResult")
+            .GetProperty("correlationId").GetGuid();
+        Assert.Equal("EINGEGANGEN", await AnonymerStatus(correlationId));
+
+        await using (var scope = Factory.Services.CreateAsyncScope()) {
+            var db = scope.ServiceProvider.GetRequiredService<DomainContext>();
+            var ausfuehrungId = await db.Ausfuehrungen.Where(a => a.CorrelationId == correlationId)
+                .Select(a => a.Id).SingleAsync();
+            db.VerlaufsEintraege.Add(new VerlaufsEintrag {
+                AusfuehrungId = ausfuehrungId,
+                Art = VerlaufsEreignisArt.Uebernahme,
+                CreatedAt = scope.ServiceProvider.GetRequiredService<IClock>().GetCurrentInstant(),
+            });
+            await db.SaveChangesAsync();
+        }
+
+        Assert.Equal("IN_BEARBEITUNG", await AnonymerStatus(correlationId));
+    }
+
+    private async Task<string?> AnonymerStatus(Guid correlationId) {
+        ActAnonymously();
+        var result = await ExecuteGraphqlAsync(null, """
+            query Status($correlationId: UUID!) { ausfuehrungStatusAnonym(correlationId: $correlationId) { status } }
+            """, new Dictionary<string, object?> { ["correlationId"] = correlationId });
+        Assert.True(result.Errors is null, result.ToJson());
+        return JsonDocument.Parse(result.ToJson()).RootElement.GetProperty("data")
+            .GetProperty("ausfuehrungStatusAnonym").GetProperty("status").GetString();
+    }
+
+    private const string FakeFoto = "/9j/4AAQSkZJRgABAQ==";
+
+    private async Task<(Meldeprozess Meldeprozess, LageSelectionInput Auswahl)> SeedLiveMeldeprozess() {
+        var (kommuneId, untereinheit) = await SeedKommuneMitUntereinheit();
+        var (west, _) = await SeedGebietMitEinsatzleitung(untereinheit, "West", West);
+        var lage = await lageSeeder.SeedLageForGebiet(west, Live);
+        return (await SeedMeldeprozess(kommuneId, lageErforderlich: true), new LageSelectionInput(lage.Id, west.Id));
     }
 
     [Fact]
@@ -222,8 +293,7 @@ public class PublicLageTests(BackendApiFactory factory) : GraphQLTests(factory) 
             .AnyAsync(a => a.ProzessVersionId == versionId);
     }
 
-    private record Meldeprozess(Guid VersionId, Schritt Start, Verbindung ZurMeldung, Schritt Meldung,
-        Verbindung ZurZuordnung);
+    private record Meldeprozess(Guid VersionId, Schritt Meldung, Verbindung ZurZuordnung);
 
     private async Task<Meldeprozess> SeedMeldeprozess(Guid kommuneId, bool lageErforderlich = false) {
         await using var scope = Factory.Services.CreateAsyncScope();
@@ -264,13 +334,11 @@ public class PublicLageTests(BackendApiFactory factory) : GraphQLTests(factory) 
         version.StartId = schritte[0].Id;
         await db.SaveChangesAsync();
 
-        var meldung = schritte.Single(s => s.Titel == "Angaben zum Ereignis");
-        return new Meldeprozess(versionId, schritte[0], verbindungen.Single(v => v.Von == schritte[0] && v.Nach == meldung),
-            meldung, verbindungen.Single(v => v.Von == meldung));
+        return new Meldeprozess(versionId, schritte[0], verbindungen.Single(v => v.Von == schritte[0]));
     }
 
     private async Task<IQueryResult> CreateAnonym(Meldeprozess prozess, LageSelectionInput? lage, double lng,
-        double lat, string beschreibung = "Baum blockiert Straße") {
+        double lat, string beschreibung = "Baum blockiert Straße", string[]? fotos = null) {
         ActAnonymously();
         return await ExecuteQuery(null, CreateAnonymMutation, new Dictionary<string, object?> {
             ["prozessVersionId"] = prozess.VersionId,
@@ -279,12 +347,12 @@ public class PublicLageTests(BackendApiFactory factory) : GraphQLTests(factory) 
                 ? null
                 : new Dictionary<string, object?> { ["lageId"] = lage.LageId, ["gebietId"] = lage.GebietId },
             ["bearbeitungen"] = new List<Dictionary<string, object?>> {
-                Bearbeitung(prozess.Start, prozess.ZurMeldung, (EreignismeldungVorlage.LebensgefahrSlot, "Nein")),
-                Bearbeitung(prozess.Meldung, prozess.ZurZuordnung,
+                Bearbeitung(prozess.Meldung, prozess.ZurZuordnung, new (string, object)[] {
                     (EreignismeldungVorlage.StandortSlot,
                         new { addressString = "Zuhause", coordinates = new[] { lng, lat } }),
                     (EreignismeldungVorlage.KategorieSlot, "Unwetter"),
-                    (EreignismeldungVorlage.BeschreibungSlot, beschreibung)),
+                    (EreignismeldungVorlage.BeschreibungSlot, beschreibung),
+                }.Concat(fotos is null ? [] : [(EreignismeldungVorlage.BilderSlot, fotos)]).ToArray()),
             },
         });
     }

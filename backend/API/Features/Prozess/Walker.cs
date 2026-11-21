@@ -1,3 +1,4 @@
+using System.Text.Json;
 using API.Features.Email;
 using API.Features.Email.Templates;
 using API.Features.EmailForwarder;
@@ -155,6 +156,7 @@ public class Walker : IDisposable, IAsyncDisposable {
         bool validateStep = true
     ) {
         EnsureAllSlotsFilled(CurrentSchritt, bearbeitungSlotValues);
+        EnsureUploadLimits(CurrentSchritt, bearbeitungSlotValues);
 
         if (CurrentVerbindungen.FirstOrDefault(v => v.Id == bearbeitungNextVerbindungId) is not { } verbindung) {
             throw new ArgumentException(
@@ -346,6 +348,24 @@ public class Walker : IDisposable, IAsyncDisposable {
         }
     }
 
+    private static void EnsureUploadLimits(Schritt schritt, IEnumerable<SlotValuesInput> values) {
+        if (schritt is not FormularSchritt formular) {
+            return;
+        }
+
+        foreach (var feld in formular.Felder.OfType<UploadFormularFeld>()) {
+            if (feld.MaxAnzahl is not { } maxAnzahl) {
+                continue;
+            }
+
+            // Encrypted uploads arrive as one cipher and cannot be counted here.
+            var dateien = values.FirstOrDefault(v => v.Name == feld.SlotName)?.Value.PlainValue;
+            if (dateien is { ValueKind: JsonValueKind.Array } && dateien.Value.GetArrayLength() > maxAnzahl) {
+                throw new ZuVieleDateienException(feld.AngezeigterName ?? feld.SlotName, maxAnzahl);
+            }
+        }
+    }
+
     /// <summary>
     /// Prüft, ob sich die Zuständigkeit ändert.
     /// </summary>
@@ -446,17 +466,15 @@ public class Walker : IDisposable, IAsyncDisposable {
 
     /// <summary>The navigation properties on <see cref="Zustaendigkeit"/> are not loaded, so the addresses are queried directly.</summary>
     private async Task<List<string>> ResolveRecipientEmails(Zustaendigkeit? zustaendigkeit) =>
-        zustaendigkeit switch {
-            { Art: ZustaendigkeitArt.Dienstleister, DienstleisterId: { } dienstleisterId } =>
-                await _domainContext.Dienstleister
-                    .Where(d => d.Id == dienstleisterId)
-                    .Select(d => d.EMailAdressen)
-                    .FirstOrDefaultAsync() ?? [],
-            { Art: ZustaendigkeitArt.Organisationseinheit, MitarbeiterGruppeId: { } mitarbeiterGruppeId } =>
-                await _domainContext.MitarbeiterGruppen
-                    .Where(m => m.Id == mitarbeiterGruppeId)
-                    .Select(m => m.EMailAdressen)
-                    .FirstOrDefaultAsync() ?? [],
+        zustaendigkeit switch { { Art: ZustaendigkeitArt.Dienstleister, DienstleisterId: { } dienstleisterId } =>
+                                    await _domainContext.Dienstleister
+                                        .Where(d => d.Id == dienstleisterId)
+                                        .Select(d => d.EMailAdressen)
+                                        .FirstOrDefaultAsync() ?? [], { Art: ZustaendigkeitArt.Organisationseinheit, MitarbeiterGruppeId: { } mitarbeiterGruppeId } =>
+                                                                          await _domainContext.MitarbeiterGruppen
+                                                                              .Where(m => m.Id == mitarbeiterGruppeId)
+                                                                              .Select(m => m.EMailAdressen)
+                                                                              .FirstOrDefaultAsync() ?? [],
             _ => [],
         };
 

@@ -20,8 +20,9 @@ public record PublicLage(
     "Noch nicht abgeschlossene Meldung einer Lage, etwa als Pin auf der Karte oder als Vorlage für eine eigene " +
     "Meldung. Enthält bewusst keine Kennung und keine persönlichen Angaben.")]
 public record PublicMeldung(
-    [property: GraphQLDescription("Status, wie ihn auch die meldende Person sieht, z. B. \"Hilfe ist unterwegs\".")]
-    string? Status,
+    MeldungStatus Status,
+    [property: GraphQLDescription("Anzeigetext zum Status, z. B. \"Hilfe ist unterwegs\".")]
+    string StatusText,
     string? Description,
     double Longitude,
     double Latitude);
@@ -90,13 +91,7 @@ public static class OpenMeldungen {
             .GroupBy(sv => (sv.AusfuehrungId, sv.SlotName))
             .ToDictionary(g => g.Key, g => g.MaxBy(sv => sv.CreatedAt)!.Value);
 
-        var status = (await db.Bearbeitungen
-                .Where(b => ids.Contains(b.AusfuehrungId)
-                    && b.NextVerbindung.StatusAenderung != null && b.NextVerbindung.StatusAenderung != "")
-                .Select(b => new { b.AusfuehrungId, b.CreatedAt, b.NextVerbindung.StatusAenderung })
-                .ToListAsync(ct))
-            .GroupBy(b => b.AusfuehrungId)
-            .ToDictionary(g => g.Key, g => g.MaxBy(b => b.CreatedAt)!.StatusAenderung);
+        var status = await MeldungStatusErmittlung.Ermittle(db, ids, ct);
 
         return meldungen
             .OrderByDescending(m => m.CreatedAt)
@@ -115,8 +110,8 @@ public static class OpenMeldungen {
                 && beschreibung.ValueKind == JsonValueKind.String
                     ? beschreibung.GetString()
                     : null;
-            return new PublicMeldung(status.GetValueOrDefault(id), description, coordinates[0].GetDouble(),
-                coordinates[1].GetDouble());
+            return new PublicMeldung(status[id], MeldungStatusErmittlung.Text(status[id]), description,
+                coordinates[0].GetDouble(), coordinates[1].GetDouble());
         }
     }
 }

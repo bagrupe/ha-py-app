@@ -91,6 +91,7 @@ public class AusfuehrungMutations {
     [Error(typeof(AnonymeEinreichungUnvollstaendigException))]
     [Error(typeof(LageGebietNotLiveException))]
     [Error(typeof(LageErforderlichException))]
+    [Error(typeof(ZuVieleDateienException))]
     [GraphQLDescription(
         "Reicht einen Antrag ohne Anmeldung ein. Nur für Prozesse mit dem Tag 'Anonym'. Alle Schritte der " +
         "antragstellenden Person müssen in diesem einen Aufruf enthalten sein, weil der Antrag danach niemandem " +

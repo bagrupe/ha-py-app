@@ -226,8 +226,7 @@ public class LageHelferSeederTest(LageHelferSeederApiFactory factory) : GraphQLT
         await SystemUser.EnsureSystemUserExists(db);
         var version = await db.ProzessVersionen.AsSplitQuery().Where(v => v.ProzessId == MeldeprozessId)
             .Include(v => v.Schritte).ThenInclude(s => s.Verbindungen).SingleAsync();
-        var lebensgefahr = version.Schritte.Single(s => s.Id == version.StartId);
-        var meldung = version.Schritte.OfType<FormularSchritt>().Single(s => s.Titel == "Angaben zum Ereignis");
+        var meldung = version.Schritte.Single(s => s.Id == version.StartId);
         var pruefung = version.Schritte.Single(s => s.Titel == "Meldung prüfen");
         var einsatz = version.Schritte.Single(s => s.Titel == "Einsatz läuft");
         var fluessenstadtGebiet = LageHelferSeedData.GebietId(ExampleDocument.IdNamespace, "Fluessenstadt");
@@ -245,8 +244,6 @@ public class LageHelferSeederTest(LageHelferSeederApiFactory factory) : GraphQLT
             ["sharedKeyEncryptedForKommune"] = "key",
             ["lage"] = new Dictionary<string, object?> { ["lageId"] = lage.Id, ["gebietId"] = fluessenstadtGebiet },
             ["bearbeitungen"] = new List<Dictionary<string, object?>> {
-                Bearbeitung(lebensgefahr, lebensgefahr.Verbindungen.Single(v => v.NachId == meldung.Id),
-                    (EreignismeldungVorlage.LebensgefahrSlot, "Nein")),
                 Bearbeitung(meldung, meldung.Verbindungen.Single(),
                     (EreignismeldungVorlage.StandortSlot, new Dictionary<string, object?> {
                         ["addressString"] = "Fluessenstadt",
@@ -282,12 +279,14 @@ public class LageHelferSeederTest(LageHelferSeederApiFactory factory) : GraphQLT
         var status = await ExecuteGraphqlAsync(null, """
             query Status($correlationId: UUID!) {
               ausfuehrungStatusAnonym(correlationId: $correlationId) {
+                status statusText
                 historie { createdAt statusAenderung statusAenderungBeschreibung nachricht }
               }
             }
             """, new Dictionary<string, object?> { ["correlationId"] = correlationId });
         Assert.True(status.Errors is null, status.ToJson());
         Assert.Contains(EreignismeldungVorlage.StatusHilfeUnterwegs, status.ToJson());
+        Assert.Contains("\"status\": \"HILFE_UNTERWEGS\"", status.ToJson());
         // The Superadmin clicked "Hilfe einleiten"; a CorrelationId must not reveal who that was.
         Assert.DoesNotContain("Superadmin", status.ToJson());
 

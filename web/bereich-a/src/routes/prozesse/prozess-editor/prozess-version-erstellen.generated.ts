@@ -472,6 +472,7 @@ export type UploadFormularFeldInput = {
   id: string;
   inhaltsTag?: string | null;
   istRelevant: BoolExpression;
+  maxAnzahl?: number | null;
   multi: boolean;
   oeffentlichSichtbar?: boolean;
   order: number;

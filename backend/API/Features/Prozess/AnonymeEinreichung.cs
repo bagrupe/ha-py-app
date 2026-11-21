@@ -22,7 +22,9 @@ public record AnonymeAusfuehrungResult(
 
 [GraphQLDescription("Status eines anonym eingereichten Antrags.")]
 public record AnonymeAusfuehrungStatus(
-    AusfuehrungStatus Status,
+    MeldungStatus Status,
+    [property: GraphQLDescription("Anzeigetext zum Status, z. B. \"Hilfe ist unterwegs\".")]
+    string StatusText,
     Instant CreatedAt,
     Instant? AbgeschlossenAm,
     [property: GraphQLDescription(

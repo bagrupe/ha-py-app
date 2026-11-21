@@ -194,6 +194,18 @@ export enum LogoutAllDevicesResult {
   LoggedOut = 'LOGGED_OUT',
 }
 
+/** Stand einer Meldung, wie ihn die meldende Person sieht. */
+export enum MeldungStatus {
+  /** Abgeschlossen, es folgen keine weiteren Änderungen. */
+  Abgeschlossen = 'ABGESCHLOSSEN',
+  /** Eingegangen, noch nicht von der Einsatzleitung übernommen. */
+  Eingegangen = 'EINGEGANGEN',
+  /** Die Einsatzleitung hat Hilfe eingeleitet. */
+  HilfeUnterwegs = 'HILFE_UNTERWEGS',
+  /** Von der Einsatzleitung übernommen und in Bearbeitung. */
+  InBearbeitung = 'IN_BEARBEITUNG',
+}
+
 export enum NewsArtikel__Status {
   Draft = 'draft',
   Published = 'published',

@@ -460,6 +460,11 @@ public class UploadFormularFeld : FormularFeld {
 
     [GraphQLDescription("Gibt an, ob es sich um ein Dokument handelt (z.B. PDF).")]
     public bool Document { get; init; } = false;
+
+    [GraphQLDescription(
+        "Höchstzahl an Dateien, die hochgeladen werden dürfen. Null: unbegrenzt. Nur bei unverschlüsselten " +
+        "Feldern serverseitig geprüft, weil verschlüsselte Inhalte nicht gezählt werden können.")]
+    public int? MaxAnzahl { get; init; }
 }
 
 

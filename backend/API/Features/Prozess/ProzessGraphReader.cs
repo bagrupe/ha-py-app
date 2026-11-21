@@ -74,7 +74,7 @@ public static class ProzessGraphReader {
             CheckboxListFormularFeldInput: null, StringFormularFeldInput: null,
             UploadFormularFeldInput: new UploadFormularFeldInput(
                 u.Id, u.SlotName, u.AngezeigterName, u.Anweisung, u.Order, u.Encrypted, u.InhaltsTag, u.IstRelevant, u.Pflichtfeld,
-                u.Multi, u.Document, u.BrauchtFreigabe, u.OeffentlichSichtbar),
+                u.Multi, u.Document, u.BrauchtFreigabe, u.OeffentlichSichtbar, u.MaxAnzahl),
             LocationFormularFeldInput: null, DateFormularFeldInput: null, SignatureFormularFeldInput: null,
             TimeFormularFeldInput: null, AnzeigeTextBlockFormularFeldInput: null),
         CheckboxListFormularFeld c => new FormularFeldInput(
