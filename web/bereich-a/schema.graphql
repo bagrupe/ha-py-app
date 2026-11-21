@@ -196,6 +196,29 @@ type AnfragenFuerEhrenamtsbankEintragCollectionSegment {
   totalCount: Int!
 }
 
+"Ergebnis einer anonymen Einreichung."
+type AnonymeAusfuehrungResult {
+  "Geheimnis für die Statusabfrage ohne Anmeldung. Nur einmal ausgeliefert, also auf dem Gerät speichern."
+  correlationId: UUID!
+}
+
+"Status eines anonym eingereichten Antrags."
+type AnonymeAusfuehrungStatus {
+  status: AusfuehrungStatus!
+  createdAt: Instant!
+  abgeschlossenAm: Instant
+  "Bürgerseitige Status-Historie, wie sie auch angemeldete Bürger:innen sehen."
+  historie: [Historie!]!
+}
+
+type AnonymeEinreichungNichtErlaubtError implements Error {
+  message: String!
+}
+
+type AnonymeEinreichungUnvollstaendigError implements Error {
+  message: String!
+}
+
 type AntragSoftLoeschenPayload {
   ausfuehrung: Ausfuehrung
   errors: [AntragSoftLoeschenError!]
@@ -453,6 +476,11 @@ type Ausfuehrung {
 type AusfuehrungContinuePayload {
   ausfuehrungResult: AusfuehrungResult
   errors: [AusfuehrungContinueError!]
+}
+
+type AusfuehrungCreateAnonymPayload {
+  anonymeAusfuehrungResult: AnonymeAusfuehrungResult
+  errors: [AusfuehrungCreateAnonymError!]
 }
 
 type AusfuehrungCreatePayload {
@@ -1708,6 +1736,8 @@ type Mutation {
   antragWiederherstellen(input: AntragWiederherstellenInput!): AntragWiederherstellenPayload! @authorize
   "Startet einen neuen Antrag (Ausführung) für eine Prozessversion. Initialisiert den Prozess und führt die ersten Bearbeitungsschritte aus."
   ausfuehrungCreate(input: AusfuehrungCreateInput!): AusfuehrungCreatePayload! @authorize
+  "Reicht einen Antrag ohne Anmeldung ein. Nur für Prozesse mit dem Tag 'Anonym'. Alle Schritte der antragstellenden Person müssen in diesem einen Aufruf enthalten sein, weil der Antrag danach niemandem mehr zum Fortsetzen gehört. Liefert die CorrelationId für die Statusabfrage."
+  ausfuehrungCreateAnonym(input: AusfuehrungCreateAnonymInput!): AusfuehrungCreateAnonymPayload! @allowAnonymous
   "Führt die Bearbeitung eines laufenden Antrags (Ausführung) fort. Überträgt die nächsten Schritte, Slot-Werte und ggf. Zuständigkeiten."
   ausfuehrungContinue(input: AusfuehrungContinueInput!): AusfuehrungContinuePayload! @authorize
   "Weist eine andere Person als zuständig für den Antrag zu (Antrag Übernehmen im Backoffice)."
@@ -2238,6 +2268,8 @@ type Query {
   gebiete(withoutEinsatzleitung: Boolean): [Gebiet!]! @authorize
   lagen(status: LageStatus): [Lage!]! @authorize
   lage(id: UUID!): Lage @authorize
+  "Status eines anonym eingereichten Antrags anhand der CorrelationId aus ausfuehrungCreateAnonym. Null, wenn es keinen solchen Antrag (mehr) gibt."
+  ausfuehrungStatusAnonym(correlationId: UUID!): AnonymeAusfuehrungStatus @allowAnonymous
   "Liefert eine paginierte Liste aller Anträge (Ausführungen), die für den angemeldeten Backoffice-Nutzer sichtbar sind. Optional filterbar nach Status, Zuweisung oder Prozess."
   ausfuehrungen(skip: Int take: Int status: AusfuehrungStatus zugewiesen: Boolean prozessId: UUID): AusfuehrungenCollectionSegment @authorize
   "Liefert eine einzelne Ausführung (Antrag) anhand der ID. Nur für berechtigte Backoffice-Nutzer oder den Antragsteller zugänglich."
@@ -3104,6 +3136,8 @@ union AufbewahrungsEinstellungenAktualisierenError = NotAllowedError
 
 union AusfuehrungContinueError = AusfuehrungNotFoundError | NachrichtTooLongError
 
+union AusfuehrungCreateAnonymError = AnonymeEinreichungNichtErlaubtError | AnonymeEinreichungUnvollstaendigError
+
 union AusfuehrungUpdateZugewiesenePersonError = AusfuehrungNotFoundError | UserNotFoundError | MismatchingKommuneError | UnauthorizedAccessError
 
 union AusfuehrungWeiterleitenError = AusfuehrungNotFoundError | UserNotFoundError | AntragWeiterleitenError | NotAllowedError | NachrichtTooLongError | NachrichtRequiredError
@@ -3601,6 +3635,12 @@ input AusfuehrungContinueInput {
   ausfuehrungId: UUID!
   bearbeitungen: [AusfuehrungBearbeitungInput!]!
   naechsteIstZustaendigkeit: SchrittSollZustaendigkeitInput
+}
+
+input AusfuehrungCreateAnonymInput {
+  prozessVersionId: UUID!
+  bearbeitungen: [AusfuehrungBearbeitungInput!]!
+  sharedKeyEncryptedForKommune: String!
 }
 
 input AusfuehrungCreateInput {

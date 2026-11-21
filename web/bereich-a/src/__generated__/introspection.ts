@@ -600,6 +600,130 @@ export default {
         interfaces: [],
       },
       {
+        kind: 'OBJECT',
+        name: 'AnonymeAusfuehrungResult',
+        fields: [
+          {
+            name: 'correlationId',
+            type: {
+              kind: 'NON_NULL',
+              ofType: {
+                kind: 'SCALAR',
+                name: 'UUID',
+                ofType: null,
+              },
+            },
+            args: [],
+          },
+        ],
+        interfaces: [],
+      },
+      {
+        kind: 'OBJECT',
+        name: 'AnonymeAusfuehrungStatus',
+        fields: [
+          {
+            name: 'abgeschlossenAm',
+            type: {
+              kind: 'SCALAR',
+              name: 'Instant',
+              ofType: null,
+            },
+            args: [],
+          },
+          {
+            name: 'createdAt',
+            type: {
+              kind: 'NON_NULL',
+              ofType: {
+                kind: 'SCALAR',
+                name: 'Instant',
+                ofType: null,
+              },
+            },
+            args: [],
+          },
+          {
+            name: 'historie',
+            type: {
+              kind: 'NON_NULL',
+              ofType: {
+                kind: 'LIST',
+                ofType: {
+                  kind: 'NON_NULL',
+                  ofType: {
+                    kind: 'OBJECT',
+                    name: 'Historie',
+                    ofType: null,
+                  },
+                },
+              },
+            },
+            args: [],
+          },
+          {
+            name: 'status',
+            type: {
+              kind: 'NON_NULL',
+              ofType: {
+                kind: 'SCALAR',
+                name: 'Any',
+              },
+            },
+            args: [],
+          },
+        ],
+        interfaces: [],
+      },
+      {
+        kind: 'OBJECT',
+        name: 'AnonymeEinreichungNichtErlaubtError',
+        fields: [
+          {
+            name: 'message',
+            type: {
+              kind: 'NON_NULL',
+              ofType: {
+                kind: 'SCALAR',
+                name: 'String',
+                ofType: null,
+              },
+            },
+            args: [],
+          },
+        ],
+        interfaces: [
+          {
+            kind: 'INTERFACE',
+            name: 'Error',
+          },
+        ],
+      },
+      {
+        kind: 'OBJECT',
+        name: 'AnonymeEinreichungUnvollstaendigError',
+        fields: [
+          {
+            name: 'message',
+            type: {
+              kind: 'NON_NULL',
+              ofType: {
+                kind: 'SCALAR',
+                name: 'String',
+                ofType: null,
+              },
+            },
+            args: [],
+          },
+        ],
+        interfaces: [
+          {
+            kind: 'INTERFACE',
+            name: 'Error',
+          },
+        ],
+      },
+      {
         kind: 'UNION',
         name: 'AntragSoftLoeschenError',
         possibleTypes: [
@@ -2567,6 +2691,51 @@ export default {
                 ofType: {
                   kind: 'UNION',
                   name: 'AusfuehrungContinueError',
+                  ofType: null,
+                },
+              },
+            },
+            args: [],
+          },
+        ],
+        interfaces: [],
+      },
+      {
+        kind: 'UNION',
+        name: 'AusfuehrungCreateAnonymError',
+        possibleTypes: [
+          {
+            kind: 'OBJECT',
+            name: 'AnonymeEinreichungNichtErlaubtError',
+          },
+          {
+            kind: 'OBJECT',
+            name: 'AnonymeEinreichungUnvollstaendigError',
+          },
+        ],
+      },
+      {
+        kind: 'OBJECT',
+        name: 'AusfuehrungCreateAnonymPayload',
+        fields: [
+          {
+            name: 'anonymeAusfuehrungResult',
+            type: {
+              kind: 'OBJECT',
+              name: 'AnonymeAusfuehrungResult',
+              ofType: null,
+            },
+            args: [],
+          },
+          {
+            name: 'errors',
+            type: {
+              kind: 'LIST',
+              ofType: {
+                kind: 'NON_NULL',
+                ofType: {
+                  kind: 'UNION',
+                  name: 'AusfuehrungCreateAnonymError',
                   ofType: null,
                 },
               },
@@ -7284,6 +7453,14 @@ export default {
           {
             kind: 'OBJECT',
             name: 'AnfrageStatusTransitionError',
+          },
+          {
+            kind: 'OBJECT',
+            name: 'AnonymeEinreichungNichtErlaubtError',
+          },
+          {
+            kind: 'OBJECT',
+            name: 'AnonymeEinreichungUnvollstaendigError',
           },
           {
             kind: 'OBJECT',
@@ -12591,6 +12768,29 @@ export default {
             ],
           },
           {
+            name: 'ausfuehrungCreateAnonym',
+            type: {
+              kind: 'NON_NULL',
+              ofType: {
+                kind: 'OBJECT',
+                name: 'AusfuehrungCreateAnonymPayload',
+                ofType: null,
+              },
+            },
+            args: [
+              {
+                name: 'input',
+                type: {
+                  kind: 'NON_NULL',
+                  ofType: {
+                    kind: 'SCALAR',
+                    name: 'Any',
+                  },
+                },
+              },
+            ],
+          },
+          {
             name: 'ausfuehrungFolgen',
             type: {
               kind: 'NON_NULL',
@@ -17461,6 +17661,27 @@ export default {
             args: [
               {
                 name: 'id',
+                type: {
+                  kind: 'NON_NULL',
+                  ofType: {
+                    kind: 'SCALAR',
+                    name: 'UUID',
+                    ofType: null,
+                  },
+                },
+              },
+            ],
+          },
+          {
+            name: 'ausfuehrungStatusAnonym',
+            type: {
+              kind: 'OBJECT',
+              name: 'AnonymeAusfuehrungStatus',
+              ofType: null,
+            },
+            args: [
+              {
+                name: 'correlationId',
                 type: {
                   kind: 'NON_NULL',
                   ofType: {

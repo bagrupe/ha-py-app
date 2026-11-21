@@ -86,6 +86,8 @@ public class AusfuehrungMutations {
 
 
     [AllowAnonymous]
+    [Error(typeof(AnonymeEinreichungNichtErlaubtException))]
+    [Error(typeof(AnonymeEinreichungUnvollstaendigException))]
     [GraphQLDescription(
         "Reicht einen Antrag ohne Anmeldung ein. Nur für Prozesse mit dem Tag 'Anonym'. Alle Schritte der " +
         "antragstellenden Person müssen in diesem einen Aufruf enthalten sein, weil der Antrag danach niemandem " +

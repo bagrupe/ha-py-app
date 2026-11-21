@@ -23,6 +23,9 @@ public class AnonymeEinreichungTest(BackendApiFactory factory) : GraphQLTests(fa
             anonymeAusfuehrungResult {
               correlationId
             }
+            errors {
+              __typename
+            }
           }
         }
         """;
@@ -96,7 +99,8 @@ public class AnonymeEinreichungTest(BackendApiFactory factory) : GraphQLTests(fa
         var create = await ExecuteQuery(null, CreateAnonymMutation,
             CreateInput(prozessVersionId, startSchritt.Id, verbindung.Id));
 
-        Assert.NotNull(create.Errors);
+        Assert.Null(create.Errors);
+        Assert.Contains("AnonymeEinreichungNichtErlaubtError", create.ToJson());
         await using var scope = Factory.Services.CreateAsyncScope();
         var db = scope.ServiceProvider.GetRequiredService<DomainContext>();
         Assert.False(await db.Ausfuehrungen.AnyAsync(a => a.ProzessVersionId == prozessVersionId));
@@ -113,7 +117,8 @@ public class AnonymeEinreichungTest(BackendApiFactory factory) : GraphQLTests(fa
             ["bearbeitungen"] = new List<Dictionary<string, object?>>(),
         });
 
-        Assert.NotNull(create.Errors);
+        Assert.Null(create.Errors);
+        Assert.Contains("AnonymeEinreichungUnvollstaendigError", create.ToJson());
         await using var scope = Factory.Services.CreateAsyncScope();
         var db = scope.ServiceProvider.GetRequiredService<DomainContext>();
         Assert.False(await db.Ausfuehrungen.AnyAsync(a => a.ProzessVersionId == prozessVersionId));
