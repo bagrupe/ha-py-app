@@ -43,6 +43,16 @@ export const UploadFormularFeld: FC<UploadFormularFeldProps> = ({
     (sv) => sv.slotName === slotName,
   );
 
+  // Optional uploads may be missing; an empty value would otherwise render as a broken image marked "Freigegeben".
+  if (!slotValue) {
+    return (
+      <div className='flex h-fit w-full flex-col gap-4 rounded-lg border border-gray-300 bg-gray-50 p-4'>
+        <p className='text-neutral-500'>Keine Datei hochgeladen.</p>
+        {anweisung && <p>{anweisung}</p>}
+      </div>
+    );
+  }
+
   return (
     <div
       className={twMerge(
@@ -50,7 +60,7 @@ export const UploadFormularFeld: FC<UploadFormularFeldProps> = ({
       )}
     >
       <div className='flex grow gap-4 '>
-        <SlotValue<string> value={slotValue ?? ''}>
+        <SlotValue<string> value={slotValue}>
           {(value) =>
             guessIsPdf(value) ? (
               <a
