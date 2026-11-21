@@ -196,7 +196,7 @@ public class KategorieOrtZustaendigkeitSchritt(
         return plainSlotValue.Value.GetString();
     }
 
-    private static EvaluatingVisitor.ParsedLocation GetLocationSlot(IReadOnlyDictionary<string, SlotValue> slotValues, string slotName) {
+    internal static EvaluatingVisitor.ParsedLocation GetLocationSlot(IReadOnlyDictionary<string, SlotValue> slotValues, string slotName) {
         if (!slotValues.TryGetValue(slotName, out var slotValue) ||
             slotValue is not PlainSlotValue { Value.ValueKind: JsonValueKind.Object } plainSlotValue) {
             throw new InvalidOperationException($"Slot '{slotName}' wird von diesem Schritt als Standort benötigt, wurde aber nicht gefunden oder hat ein falsches Format.");

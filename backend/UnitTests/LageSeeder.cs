@@ -36,6 +36,26 @@ public class LageSeeder(BackendApiFactory factory) {
         return lage;
     }
 
+    /// <param name="path">Transitions from Inactive for the already stored Gebiet, comma-separated.</param>
+    public async Task<Lage> SeedLageForGebiet(Gebiet gebiet, string path, bool closed = false) {
+        var now = factory.Services.GetRequiredService<IClock>().GetCurrentInstant();
+        var actorId = Guid.NewGuid();
+        var lage = Lage.Create(gebiet.UntereinheitId, $"Lage {Guid.NewGuid():N}", [gebiet], actorId, now);
+        foreach (var step in path.Split(',', StringSplitOptions.RemoveEmptyEntries)) {
+            lage.TransitionGebiet(gebiet.Id, Enum.Parse<LageGebietStatus>(step.Trim()), actorId, now);
+        }
+        if (closed) {
+            lage.Status = LageStatus.Closed;
+            lage.ClosedAt = now;
+            lage.ClosedById = actorId;
+        }
+
+        var db = NewDb();
+        db.Lagen.Add(lage);
+        await db.SaveChangesAsync();
+        return lage;
+    }
+
     public Task<Lage?> StoredLage(Guid id) =>
         NewDb().Lagen.Include(l => l.LageGebiete).SingleOrDefaultAsync(l => l.Id == id);
 
