@@ -5,10 +5,10 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 namespace API.Pages.lagehelfer;
 
 [AllowAnonymous]
-public class IndexModel(MeldungService meldungService) : PageModel {
+public class IndexModel(MeldungService meldungService) : LagehelferPageModel {
     public IReadOnlyList<PublicLage> Lagen { get; private set; } = [];
 
     public async Task OnGetAsync(CancellationToken ct) {
-        Lagen = await meldungService.LoadActiveLagenAsync(ct);
+        Lagen = await meldungService.LoadActiveLagenAsync(KommuneId, ct);
     }
 }

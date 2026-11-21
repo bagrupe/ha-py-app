@@ -43,21 +43,18 @@ public sealed class MeldungService(DomainContext db, IRequestExecutorResolver ex
         }
         """;
 
-    public async Task<IReadOnlyList<PublicLage>> LoadActiveLagenAsync(CancellationToken ct) {
-        var formular = await LoadFormularAsync(ct);
-        return formular is null ? [] : await LoadActiveLagenAsync(formular, ct);
-    }
+    public async Task<IReadOnlyList<PublicLage>> LoadActiveLagenAsync(Guid kommuneId, CancellationToken ct) =>
+        await PublicLageQueries.GetActiveLagen(kommuneId, db, ct);
 
-    public async Task<IReadOnlyList<PublicLage>> LoadActiveLagenAsync(MeldungFormular formular, CancellationToken ct) =>
-        await PublicLageQueries.GetActiveLagen(formular.KommuneId, db, ct);
-
-    public async Task<MeldungFormular?> LoadFormularAsync(CancellationToken ct) {
+    public async Task<MeldungFormular?> LoadFormularAsync(Guid kommuneId, CancellationToken ct) {
         var version = await db.ProzessVersionen.AsSplitQuery()
             .Include(v => v.Prozess)
             .Include(v => v.Schritte).ThenInclude(s => s.Verbindungen)
-            .Where(v => v.PublishedAt != null
+            .Where(v => v.Prozess.KommuneId == kommuneId
+                && v.PublishedAt != null
                 && v.Prozess.DeaktiviertAm == null
                 && v.Prozess.Tags.Any(t => t.Tag == AnonymeEinreichung.ProzessTagName)
+                && v.Prozess.Tags.Any(t => t.Tag == AnonymeEinreichung.LageHelferTagName)
                 && v.Start != null)
             .OrderByDescending(v => v.PublishedAt)
             .FirstOrDefaultAsync(ct);

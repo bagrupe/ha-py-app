@@ -60,7 +60,7 @@
         <div class="notice notice--danger" role="status">@Model.StatusMessage</div>
       }
       <button class="btn btn--block" type="submit">Meldung senden</button>
-      <a class="btn btn--ghost btn--block" asp-page="Index">Abbrechen</a>
+      <a class="btn btn--ghost btn--block" asp-page="Index" asp-route-kommuneId="@Model.KommuneId">Abbrechen</a>
     </div>
   </form>
   }

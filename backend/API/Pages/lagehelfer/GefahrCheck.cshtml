@@ -23,7 +23,7 @@
         </div>
       } else {
         <p class="card__meta" role="status" aria-live="polite">Bitte beantworte die Frage, um fortzufahren.</p>
-        <a class="btn btn--ghost btn--block" asp-page="Index">Zurück</a>
+        <a class="btn btn--ghost btn--block" asp-page="Index" asp-route-kommuneId="@Model.KommuneId">Zurück</a>
       }
     </form>
   </div>

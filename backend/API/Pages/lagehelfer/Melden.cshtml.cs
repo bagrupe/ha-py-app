@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 namespace API.Pages.lagehelfer;
 
 [AllowAnonymous]
-public class MeldenModel(MeldungService meldungService, ILogger<MeldenModel> logger) : PageModel {
+public class MeldenModel(MeldungService meldungService, ILogger<MeldenModel> logger) : LagehelferPageModel {
     public const string AdresseLabel = "Wo ist es passiert?";
     public const string KategorieLabel = "Um welche Art von Ereignis handelt es sich?";
     public const string BeschreibungLabel = "Was ist passiert?";
@@ -26,18 +26,18 @@ public class MeldenModel(MeldungService meldungService, ILogger<MeldenModel> log
         ModelState.TryGetValue($"{nameof(Input)}.{field}", out var entry) && entry.Errors.Count > 0;
 
     public async Task<IActionResult> OnGetAsync(CancellationToken ct) {
-        if (!PrecheckPassed) return RedirectToPage("GefahrCheck");
+        if (!PrecheckPassed) return RedirectToPage("GefahrCheck", KommuneRoute);
 
         var formularLoaded = await LoadFormularAsync(ct);
-        if (formularLoaded && !await HasActiveLagenAsync(ct)) return RedirectToPage("Index");
+        if (formularLoaded && !await HasActiveLagenAsync(ct)) return RedirectToPage("Index", KommuneRoute);
 
         return Page();
     }
 
     public async Task<IActionResult> OnPostAsync(CancellationToken ct) {
-        if (!PrecheckPassed) return RedirectToPage("GefahrCheck");
+        if (!PrecheckPassed) return RedirectToPage("GefahrCheck", KommuneRoute);
         if (!await LoadFormularAsync(ct)) return Page();
-        if (!await HasActiveLagenAsync(ct)) return RedirectToPage("Index");
+        if (!await HasActiveLagenAsync(ct)) return RedirectToPage("Index", KommuneRoute);
 
         if (Input.Kategorie is not null && Formular!.Kategorien.All(k => k.Key != Input.Kategorie)) {
             ModelState.AddModelError($"{nameof(Input)}.{nameof(Input.Kategorie)}", "unknown");
@@ -80,16 +80,16 @@ public class MeldenModel(MeldungService meldungService, ILogger<MeldenModel> log
 
         TempData[ConfirmationKey] = $"Meldungs-Nr. {correlationId}";
         TempData.Remove(GefahrCheckModel.PrecheckPassedKey);
-        return RedirectToPage("Danke");
+        return RedirectToPage("Danke", KommuneRoute);
     }
 
     private bool PrecheckPassed => TempData.Peek(GefahrCheckModel.PrecheckPassedKey) is true;
 
     private async Task<bool> HasActiveLagenAsync(CancellationToken ct) =>
-        (await meldungService.LoadActiveLagenAsync(Formular!, ct)).Count > 0;
+        (await meldungService.LoadActiveLagenAsync(KommuneId, ct)).Count > 0;
 
     private async Task<bool> LoadFormularAsync(CancellationToken ct) {
-        Formular = await meldungService.LoadFormularAsync(ct);
+        Formular = await meldungService.LoadFormularAsync(KommuneId, ct);
         if (Formular is null) StatusMessage = "Der Lagehelfer nimmt gerade keine Meldungen entgegen.";
         return Formular is not null;
     }

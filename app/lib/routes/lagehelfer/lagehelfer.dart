@@ -52,10 +52,10 @@ class _LagehelferPageState extends ConsumerState<LagehelferPage> {
   }
 
   Future<void> _loadLagehelfer() {
-    final backendUrl = ref.read(appConfigProvider).backendUrl;
+    final config = ref.read(appConfigProvider);
     final uri = Uri.parse(
-      '${backendUrl.replaceFirst(RegExp(r'/$'), '')}/lagehelfer',
-    );
+      '${config.backendUrl.replaceFirst(RegExp(r'/$'), '')}/lagehelfer',
+    ).replace(queryParameters: {'kommuneId': config.kommuneId});
     return _controller.loadRequest(uri);
   }
 

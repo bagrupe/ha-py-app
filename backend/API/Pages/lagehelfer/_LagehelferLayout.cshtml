@@ -1,5 +1,6 @@
 @{
   var activeTab = ViewData["Tab"] as string;
+  var kommuneId = ViewData["KommuneId"];
 }
 <!DOCTYPE html>
 <html lang="de">
@@ -21,11 +22,11 @@
   </main>
 
   <nav class="tab-bar" aria-label="Hauptnavigation">
-    <a class="tab" asp-page="/lagehelfer/Index" aria-current="@(activeTab == "start" ? "page" : null)">
+    <a class="tab" asp-page="/lagehelfer/Index" asp-route-kommuneId="@kommuneId" aria-current="@(activeTab == "start" ? "page" : null)">
       <span class="tab__icon icon-slot" aria-hidden="true"></span>
       Start
     </a>
-    <a class="tab" asp-page="/lagehelfer/GefahrCheck" aria-current="@(activeTab == "melden" ? "page" : null)">
+    <a class="tab" asp-page="/lagehelfer/GefahrCheck" asp-route-kommuneId="@kommuneId" aria-current="@(activeTab == "melden" ? "page" : null)">
       <span class="tab__icon icon-slot" aria-hidden="true"></span>
       Melden
     </a>

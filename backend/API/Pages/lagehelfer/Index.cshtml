@@ -37,7 +37,7 @@
     <div class="card" style="margin-top:8px">
       <div class="card__body">
         <p style="margin:0">Du möchtest einen Vorfall melden? Der Lagehelfer leitet dich an die richtige Stelle weiter.</p>
-        <a class="btn btn--block" asp-page="GefahrCheck" style="margin-top:8px">Vorfall melden</a>
+        <a class="btn btn--block" asp-page="GefahrCheck" asp-route-kommuneId="@Model.KommuneId" style="margin-top:8px">Vorfall melden</a>
       </div>
     </div>
   </section>
