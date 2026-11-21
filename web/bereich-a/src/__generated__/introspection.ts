@@ -2723,6 +2723,10 @@ export default {
           },
           {
             kind: 'OBJECT',
+            name: 'LageErforderlichError',
+          },
+          {
+            kind: 'OBJECT',
             name: 'LageGebietNotLiveError',
           },
         ],
@@ -7549,6 +7553,10 @@ export default {
           },
           {
             kind: 'OBJECT',
+            name: 'LageErforderlichError',
+          },
+          {
+            kind: 'OBJECT',
             name: 'LageGebietNotLiveError',
           },
           {
@@ -11414,6 +11422,30 @@ export default {
       {
         kind: 'OBJECT',
         name: 'LageClosedError',
+        fields: [
+          {
+            name: 'message',
+            type: {
+              kind: 'NON_NULL',
+              ofType: {
+                kind: 'SCALAR',
+                name: 'String',
+                ofType: null,
+              },
+            },
+            args: [],
+          },
+        ],
+        interfaces: [
+          {
+            kind: 'INTERFACE',
+            name: 'Error',
+          },
+        ],
+      },
+      {
+        kind: 'OBJECT',
+        name: 'LageErforderlichError',
         fields: [
           {
             name: 'message',
