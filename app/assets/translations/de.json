@@ -203,7 +203,8 @@
         "ideenmelder": "Ideenmelder",
         "maengelmelder": "Mängelmelder",
         "waste_calendar": "Abfuhrkalender",
-        "sensors": "Sensoren"
+        "sensors": "Sensoren",
+        "lagehelfer": "Lagehelfer"
       }
     },
     "version_compatibility": {

@@ -10,6 +10,7 @@ import 'package:app/routes/dev_console/dev_console.dart';
 import 'package:app/routes/error/not_found_error_page.dart';
 import 'package:app/routes/impressum.dart';
 import 'package:app/routes/karte/karte.dart';
+import 'package:app/routes/lagehelfer/lagehelfer.dart';
 import 'package:app/routes/matomo_router_observer.dart';
 import 'package:app/routes/onboarding/onboarding.dart';
 import 'package:app/routes/onboarding/onboarding_intro.dart';
@@ -73,6 +74,7 @@ final routerProvider = Provider((ref) {
       datenschutzIntroRoute(ref),
       datenschutzRoute(),
       impressumRoute(),
+      lagehelferRoute,
     ],
   );
 });

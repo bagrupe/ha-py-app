@@ -9,7 +9,7 @@ class AktuellesAktion extends StatelessWidget {
   const AktuellesAktion({
     required this.text,
     required this.icon,
-    required this.link,
+    this.link,
     super.key,
     this.onClick,
   });
@@ -20,8 +20,10 @@ class AktuellesAktion extends StatelessWidget {
   /// Icon displayed next to the label.
   final IconData icon;
 
-  /// Target route used when the action is tapped.
-  final String link;
+  /// Optional target route used when the action is tapped.
+  ///
+  /// Actions without an in-app destination can use [onClick] exclusively.
+  final String? link;
 
   /// Optional callback executed before navigation.
   final VoidCallback? onClick;
@@ -69,7 +71,7 @@ class AktuellesAktion extends StatelessWidget {
                 borderRadius: BorderRadius.circular(borderRadius),
                 onTap: () {
                   onClick?.call();
-                  context.go(link);
+                  if (link != null) context.go(link!);
                 },
               ),
             ),

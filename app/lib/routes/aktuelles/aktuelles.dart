@@ -1,5 +1,4 @@
 import 'dart:async';
-
 import 'package:app/common/design_tokens.dart';
 import 'package:app/common/extensions/text_theme.dart';
 import 'package:app/common/gemeinde_prefs.dart';
@@ -425,6 +424,14 @@ class _AktuellesOverviewState extends ConsumerState<_AktuellesOverview> {
                           .read(poiCategoryFilterProvider.notifier)
                           .ensureOnlySensorenSelected(),
                       link: '/karte',
+                    ),
+                  ),
+                  Padding(
+                    padding: padding,
+                    child: AktuellesAktion(
+                      text: 'application.news.actions.lagehelfer'.tr(),
+                      icon: Icons.fire_truck_outlined,
+                      link: '/lagehelfer',
                     ),
                   ),
                   const SizedBox(height: 20),
