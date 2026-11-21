@@ -2,12 +2,15 @@
 
 Stand 21.11.2026. Quelle: Mock „Lagehelfer – Dashboards Leitstelle & Einsatzleitung“ ([PDF](assets/mock-dashboards-und-buergerflow.pdf)). Deine Aufgabe sind **Seite 1 (Einsatzleitung) und Seite 2 (Leitstelle)**. Seiten 3–10 zeigen den Bürger-Flow und sind nur Kontext: Was die Leitstelle schaltet, sieht die Bürgerin dort (Button „Vorfall melden“, Meldung, Status).
 
+**Aktueller Mock:** „DEICH – Dashboards & Meldeflow“ (Link im Team erfragen), Boards „Einsatzleitung Nord“ und „Leitstelle (Super-Admin)“. Er ist neuer als PDF und Screenshots in `assets/` und ergänzt KI-Hinweise, Klassen, Ausrüstung und Notfall-Erkennung. Alles, was nur im aktuellen Mock steht, ist unten mit **(neu)** markiert.
+
 ## Kurzfassung
 
 - Gebaut wird im bestehenden Backoffice **`web/bereich-a`** (React 19, Vite, Tailwind 3, react-router 7, urql + GraphQL-Codegen, MapLibre). Dort gibt es unter `/lage` schon eine schlichte Lage-Verwaltung, an die du andocken kannst.
 - Zwei Ansichten, umschaltbar über „Ansicht“ oben rechts: **Einsatzleitung** (ein Zuständigkeitsgebiet, Ereignisse auf Einheiten verteilen) und **Leitstelle** (Gesamtlage, Lage steuern, abgegebene Ereignisse klären).
 - Die API deckt die Dashboards fast vollständig ab: Meldungen einer Lage mit Nummer, Status und +1-Zähler, Einheiten, Zuweisen, Klärung, Umverteilen, Verwerfen, Lage beenden und Bürger-Hinweis (Tabelle in Abschnitt 5). Nur der NINA-Status ist nicht im Backend.
 - Ziel ist ein klickbarer Prototyp für die Demo, kein Produktivcode: Drag & Drop, Statuswechsel und Klärung müssen sich echt anfühlen.
+- **(neu)** Der aktuelle Mock bringt Elemente, die das Backend noch nicht liefert: Klasse A–D und KI-Vorschlag je Ereignis, Ausrüstung der Einheiten mit Zuweisungs-Prüfung, KI-Lagebild, Notfall-Erkennung. Vorschlag zur Umsetzung in Abschnitt 5a; bis dahin im Frontend mit Mock-Werten anzeigen.
 
 ---
 
@@ -28,15 +31,17 @@ Der Umschalter „Ansicht“ im Mock ist ein Demo-Hilfsmittel. Im Prototyp reich
 
 ![Einsatzleitung](assets/mock-einsatzleitung.png)
 
-**Kopfzeile (beide Ansichten gleich):** Logo „Lagehelfer“, Breadcrumb „Backoffice · Einsatzleitung“, Lage-Pill „● Lage Sturm aktiv · seit 14:20“ (nur sichtbar, wenn eine Lage aktiv ist), Ansicht-Dropdown, „Aktualisiert 16:32“ (Zeitpunkt des letzten Datenabrufs).
+**Kopfzeile (beide Ansichten gleich):** Logo „Lagehelfer“ (im aktuellen Mock „DEICH“, Name noch offen), Breadcrumb „Backoffice · Einsatzleitung“, Lage-Pill „● Lage Sturm aktiv · seit 14:20“ (nur sichtbar, wenn eine Lage aktiv ist), Ansicht-Dropdown (*Einsatzleitung Nord*, *Einsatzleitung Süd*, *Leitstelle*), „Aktualisiert 16:32“ (Zeitpunkt des letzten Datenabrufs).
 
 **Titelzeile:** Name der Einsatzleitung + Liste der Gemeinden im Zuständigkeitsgebiet. Rechts vier Kennzahlen: *Neu, nicht zugewiesen* · *Zugewiesen* · *In Bearbeitung* · *Erledigt seit Lagebeginn*.
 
 **Spalte 1 – Eingang**
 - Nur Ereignisse im Status *eingegangen* (noch keiner Einheit zugewiesen).
-- Sortierung: zuerst nach +1-Anzahl absteigend, dann nach Wartezeit absteigend.
+- Sortierung: **(neu)** zuerst nach Klasse (A vor B vor C vor D), dann nach +1-Anzahl absteigend, dann nach Wartezeit absteigend.
 - Filter-Chips: *Alle* + je Kategorie (im Mock *Sturm*, *Überschwemmung*).
 - Karte je Ereignis: Kategorie-Badge (Farbe je Kategorie), ID (`E-1042`), +1-Zähler rechts, Titel, `Gemeinde · Ortsteil`, Fotoanzahl, Wartezeit. Wartezeit über einem Schwellwert farbig hervorheben (im Mock orange bei 2 h 10 min; Schwelle festlegen, Vorschlag 2 h).
+- **(neu)** Klassen-Badge neben der Kategorie, nach dem Eisenhower-Schema: *A · dringend + wichtig* (rot), *B · wichtig*, *C · dringend*, *D*.
+- **(neu)** Zeile „KI-Vorschlag“ unter dem Titel: Dringlichkeit und benötigte Ausrüstung, z. B. „Dringlichkeit hoch · braucht Kettensäge“.
 - Karten sind **ziehbar** (Drag-Quelle).
 
 **Spalte 2 – Karte**
@@ -46,8 +51,10 @@ Der Umschalter „Ansicht“ im Mock ist ein Demo-Hilfsmittel. Im Prototyp reich
 
 **Spalte 3 – Einheiten**
 - Kachel je Einheit: Name (z. B. „HLF 20 Hameln“), Status-Badge *frei* / *im Einsatz* (abgeleitet: im Einsatz, sobald mindestens ein Ereignis zugeordnet ist).
+- **(neu)** Unter dem Namen die Ausrüstung („Kettensäge, Pumpe, Absperrung“) und der Fahrzeugstatus „aus ELS“: *Status 2 · frei auf Wache* / *Status 4 · am Einsatzort*. Eine ELS-Anbindung gibt es nicht; den Status wie im Mock aus frei/im Einsatz ableiten.
 - Darin die zugeordneten Ereignisse mit ID, Kurztitel, Status (*zugewiesen* / *in Bearbeitung*) und Button **Erledigt**.
 - Drop-Zone „Ereignis hierher ziehen“. Drop ⇒ Ereignis wird *zugewiesen*, verschwindet aus dem Eingang.
+- **(neu)** Zuweisungs-Prüfung: Fehlt der Einheit Ausrüstung, die der KI-Vorschlag verlangt, erscheint oben in der Spalte ein Hinweis (`role="alert"`) statt der Zuweisung: „Zuweisung nicht möglich. E-1042 braucht eine Motorkettensäge. TLF 3000 Hessisch Oldendorf hat keine an Bord.“ Darunter passende freie Einheiten und die passenden, die im Einsatz sind. Ob das hart blockiert oder nur warnt, ist offen (Abschnitt 9).
 - Unten Drop-Zone **„An Leitstelle abgeben“**: Drop öffnet einen Dialog mit **Pflicht-Kommentar** (Beispiel „Kettensäge fehlt“). Danach Status *in Klärung*, Ereignis taucht in der Leitstelle unter „Klärung“ auf.
 
 Offen im Mock: Wie wird aus *zugewiesen* ein *in Bearbeitung*? Die API bietet dafür `meldungFortsetzen(HILFE_EINLEITEN)`; Vorschlag: Klick auf das Ereignis in der Einheit oder ein zweiter Button „Hilfe eingeleitet“. Bitte mit uns abstimmen.
@@ -60,9 +67,20 @@ Offen im Mock: Wie wird aus *zugewiesen* ein *in Bearbeitung*? Die API bietet da
 
 **Lage-Kachel (oben links)**
 - Titel „Lage Sturm“, Badge „aktiv seit 14:20 · 2 h 12 min“.
-- Drei Statusfelder: *Meldeweg* (offen/geschlossen), *Ha-Py Button* (sichtbar/ausgeblendet), *NINA-Hinweis* (versendet + Uhrzeit).
+- Statusfelder: *Meldeweg* (offen/geschlossen), *Ha-Py Button* (sichtbar/ausgeblendet), *NINA-Hinweis* (versendet + Uhrzeit), **(neu)** *B-Team* („4 Plätze besetzt“, Lagetelefon; gemockt).
 - **Lage beenden** (rot, mit Bestätigungsdialog). Text darunter beschreibt die Wirkung: keine neuen Meldungen, Button in der Bürger-App weg, offene Ereignisse bleiben bis zur Erledigung sichtbar.
 - **Hinweise für Bürger bearbeiten**: Dialog für den Text, den die Bürger-App im Lage-Banner zeigt (Mock Seite 3).
+- **(neu)** **NINA-Textvorlage anzeigen**: Dialog mit einem kopierbaren Warntext für NINA, gebaut aus Lage-Titel und Bürger-Hinweis. Reines Frontend.
+
+**(neu) KI-Lagebild (unter der Lage-Kachel, links, lila Rahmen)**
+- Badge „KI-Lagebild“, Überschrift „Stand 16:30 · automatisch alle 15 Minuten“.
+- Zwei, drei Sätze Fließtext: Schwerpunkte, Trends („+3 in 30 Minuten“), Engpässe („Pumpen im Gebiet Süd voll ausgelastet“).
+- Fußzeile: „Zusammenfassung durch KI, ohne Gewähr. Grundlage: 26 Meldungen dieser Lage.“
+
+**(neu) Möglicher Notfall (daneben, rot)**
+- Titel „1 möglicher Notfall erkannt“; je Treffer ID, Gemeinde, Zitat aus der Beschreibung („Baum aufs Haus gefallen, Nachbarin noch drin“) und „Bürger wurde zur 112 geleitet“.
+- Aktionen: **An ELS übergeben (EIDO)** (primär, rot) und **Geprüft, kein Notfall**. Beides nimmt den Treffer aus der Liste. Die EIDO-Übergabe ist für die Demo nur angedeutet (z. B. Toast „an ELS übergeben“).
+- Gemeint sind Meldungen, bei denen die Vorfragen im Wizard verneint wurden, der Freitext aber nach Gefahr für Leib und Leben klingt. Die Kachel nur zeigen, wenn es Treffer gibt.
 - Wünschenswert für die Demo: Ohne aktive Lage zeigt die Kachel „Lage ausrufen“ (Titel, Gebiete wählen). Das gibt es im Mock nicht, macht die Demo aber rund.
 
 **Kennzahlen (oben rechts):** *Neu, nicht zugewiesen* · *Zugewiesen / in Bearbeitung* · *In Klärung* (hervorgehoben, sobald > 0) · *Erledigt seit Lagebeginn* · je Einsatzleitung eine Kachel „5 neu · 2 von 4 Einheiten frei“.
@@ -129,10 +147,31 @@ Endpunkte, Token und Rezepte: Skill `.agents/skills/graphql-api` (vor allem `ref
 | **Hinweise für Bürger** | ✅ `updateLageWarningText(lageId, warningText)` | erscheint in `activeLagen.warningText` |
 | **NINA-Hinweis** | ❌ | rein anzeigen/mocken |
 | Live-Aktualisierung | ⚠️ keine Subscriptions | Polling, z. B. alle 15 s mit `requestPolicy: 'network-only'`, „Aktualisiert“ = letzter Abruf |
+| **(neu)** Klasse A–D | ❌ | Es gibt nur den verschlüsselten Slot `prioritaet` (Hoch/Niedrig), siehe 5a |
+| **(neu)** KI-Vorschlag (Dringlichkeit, Ausrüstung) | ❌ | siehe 5a |
+| **(neu)** Ausrüstung der Einheiten | ❌ | `Einheit` hat nur `name`, siehe 5a |
+| **(neu)** Zuweisungs-Prüfung | ❌ | im Client aus KI-Ausrüstung und Einheiten-Ausrüstung ableiten |
+| **(neu)** ELS-Fahrzeugstatus | ❌ | aus frei/im Einsatz ableiten (Status 2 / Status 4) |
+| **(neu)** KI-Lagebild | ❌ | siehe 5a |
+| **(neu)** Möglicher Notfall, EIDO-Übergabe | ❌ | Flag siehe 5a; EIDO nur andeuten |
+| **(neu)** B-Team-Plätze, NINA-Textvorlage | ❌ | mocken bzw. im Frontend aus Lage-Daten bauen |
 
 Alle Mutations liefern fachliche Fehler im Feld `errors` (z. B. `MeldungInKlaerungError`, `NotAllowedError`), immer `errors { __typename ... on Error { message } }` abfragen. Rollen: Admin und Superadmin gelten als Leitstelle, Nutzer mit Gruppe als deren Einsatzleitung. Alle brauchen das globale Recht `LageHelfer`.
 
 **Empfehlung:** Echte API verwenden; nur der NINA-Status bleibt gemockt. Falls das Backend in der Demo nicht läuft, eine dünne Datenschicht (`useLageDashboard()` o. ä.) mit Mock-Variante auf Basis der Daten in Abschnitt 7 vorsehen.
+
+### 5a. (neu) Vorschlag: Backend-Erweiterung für den aktuellen Mock
+
+Noch nicht gebaut, Namen sind Vorschläge. Bis es da ist, zeigt das Frontend die Felder mit Werten aus Abschnitt 7; die Datenschicht so schneiden, dass sie später nur die Quelle tauscht.
+
+| Was | Vorschlag |
+|---|---|
+| Ausrüstung | `Einheit.ausruestung: [String!]!` (freie Begriffe wie „Kettensäge“, „Pumpe“), Migration, `einheiten[].ausruestung` in `seed.json`, Parameter in `createEinheit` |
+| KI-Einschätzung je Meldung | Beim Eingang (`ausfuehrungCreateAnonym`) einmal klassifizieren und an der `Ausfuehrung` speichern: `kiDringlichkeit` (`HOCH`/`MITTEL`/`NIEDRIG`), `kiAusruestung: [String!]`, `kiKlasse` (`A`–`D`), `moeglicherNotfall: Boolean` |
+| Klasse | `klasse` = `kiKlasse`, bis die Einsatzleitung sie überschreibt (`meldungKlasseSetzen`). Verhältnis zum Slot `prioritaet` ist offen (Abschnitt 9) |
+| Notfall prüfen | `meldungNotfallPruefen(ausfuehrungId, ergebnis: AN_ELS_UEBERGEBEN \| KEIN_NOTFALL)`, speichert Ergebnis, Zeit und Bearbeiter; nur Leitstelle |
+| KI-Lagebild | Query `lageLagebild(lageId) { text erstelltAt anzahlMeldungen }`, höchstens alle 15 Minuten neu erzeugt, dazwischen gecacht |
+| KI-Aufruf | LLM-Aufruf im Backend, Schlüssel nur per Konfiguration. Für Demo und Tests ein regelbasierter Fallback ohne Schlüssel (Stichwörter wie „Baum“ → Kettensäge, „Keller“/„Wasser“ → Pumpe, „eingeklemmt“/„noch drin“ → möglicher Notfall) |
 
 ---
 
@@ -175,6 +214,24 @@ Alle Mutations liefern fachliche Fehler im Feld `errors` (z. B. `MeldungInKlaeru
 
 Die Kennzahlen im Mock (8 / 9 / 2 / 17 bzw. 5 / 3 / 2 / 11) passen nicht exakt zu den sichtbaren Zeilen. Im Prototyp aus den Daten berechnen, nicht hart codieren. Zum Auffüllen ein paar erledigte Ereignisse ergänzen.
 
+**(neu) Klasse und KI-Vorschlag (Eingang Nord):**
+
+| ID | Klasse | KI-Vorschlag |
+|---|---|---|
+| E-1042 | A | Dringlichkeit hoch · braucht Kettensäge |
+| E-1053 | B | Dringlichkeit mittel · braucht Pumpe |
+| E-1051 | B | Dringlichkeit mittel · Absperrung nötig |
+| E-1058 | C | Dringlichkeit niedrig · braucht Kettensäge |
+| E-1047 | C | Dringlichkeit mittel · braucht Pumpe |
+
+**(neu) Ausrüstung der Einheiten Nord:** HLF 20 Hameln: Kettensäge, Pumpe, Absperrung · TLF 3000 Hessisch Oldendorf: Pumpe, Absperrung · RW Bad Münder: Kettensäge, Seilwinde, Pumpe · MTW Coppenbrügge: Kettensäge. Demo-Fall für die Zuweisungs-Prüfung: E-1042 auf TLF 3000 ziehen ⇒ Hinweis, Vorschlag MTW Coppenbrügge.
+
+**(neu) Lage-Kachel:** B-Team 4 Plätze besetzt.
+
+**(neu) KI-Lagebild (Stand 16:30, 26 Meldungen):** „Schwerpunkt Hameln Nord: 4 umgestürzte Bäume, meist mit Kettensäge lösbar. Meldungen zu Wasser in Kellern nehmen in Aerzen und Emmerthal zu (+3 in 30 Minuten). Engpass: Pumpen im Gebiet Süd voll ausgelastet.“
+
+**(neu) Möglicher Notfall:** E-1063 · Bad Pyrmont · „Baum aufs Haus gefallen, Nachbarin noch drin“ · Bürger wurde zur 112 geleitet.
+
 ---
 
 ## 8. Abweichungen zwischen Mock und echten Seed-Daten
@@ -192,6 +249,10 @@ Die Kennzahlen im Mock (8 / 9 / 2 / 17 bzw. 5 / 3 / 2 / 11) passen nicht exakt z
 - Darf eine Einsatzleitung Ereignisse zwischen eigenen Einheiten umhängen oder zurück in den Eingang ziehen?
 - Soll die Leitstelle auch Einheiten sehen/verschieben können oder nur Einsatzleitungen?
 - Schwellwert für die Wartezeit-Hervorhebung?
+- **(neu)** Ersetzt die Klasse A–D den Slot `prioritaet` (Hoch/Niedrig), oder gibt es beides? Darf die Einsatzleitung die KI-Klasse überschreiben?
+- **(neu)** Zuweisungs-Prüfung: hart blockieren (Mock: „nicht möglich“) oder nur warnen und trotzdem zuweisen lassen?
+- **(neu)** KI in der Demo: echter LLM-Aufruf oder regelbasierter Fallback?
+- **(neu)** Produktname: „Lagehelfer“ oder „DEICH“?
 
 ---
 
@@ -206,3 +267,8 @@ Die Kennzahlen im Mock (8 / 9 / 2 / 17 bzw. 5 / 3 / 2 / 11) passen nicht exakt z
 - [ ] Leitstelle: „Lage beenden“ mit Bestätigung → Pill und Lage-Kachel zeigen beendet, Meldeweg geschlossen, offene Ereignisse bleiben sichtbar.
 - [ ] Karten zeigen echte Gebietspolygone aus `gebiete.geometry`; Marker je Ereignis mit Kategoriefarbe und +1-Zahl.
 - [ ] Daten kommen aus der API (`lageMeldungen`, `einheiten`, Mutations aus Abschnitt 4); gemockt ist nur der NINA-Status.
+- [ ] **(neu)** Einsatzleitung: Klassen-Badge und KI-Vorschlag je Ereignis, Eingang nach Klasse sortiert; Einheiten zeigen Ausrüstung und ELS-Status.
+- [ ] **(neu)** Einsatzleitung: E-1042 auf eine Einheit ohne Kettensäge ziehen ⇒ Hinweis „Zuweisung nicht möglich“ mit passender freier Einheit.
+- [ ] **(neu)** Leitstelle: KI-Lagebild mit Stand und Anzahl Meldungen; Notfall-Kachel mit „An ELS übergeben (EIDO)“ und „Geprüft, kein Notfall“, beide nehmen den Treffer aus der Liste.
+- [ ] **(neu)** Leitstelle: B-Team-Feld in der Lage-Kachel, Dialog „NINA-Textvorlage anzeigen“.
+- [ ] **(neu)** Felder ohne Backend (Abschnitt 5a) laufen über die Datenschicht und lassen sich später auf die API umstellen.
