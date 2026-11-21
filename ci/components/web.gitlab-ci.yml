@@ -224,11 +224,24 @@ package:web-bereich-a:
   tags:
     - docker-build-new
   extends: [.package-template]
-  needs:
-    - job: build:web-bereich-a
+  needs: []
+  environment:
+    name: $TARGET_ENV
+    action: prepare
   script:
     - echo "Building version web-bereich-a-${IMAGE_TAG#*-}"
-    - docker build -t $CI_REGISTRY_IMAGE/web-bereich-a:web-bereich-a-"${IMAGE_TAG#*-}" -f web/bereich-a/Dockerfile web/bereich-a
+    - >-
+      DOCKER_BUILDKIT=1 docker build
+      --build-arg CI_COMMIT_REF_SLUG
+      --build-arg CI_COMMIT_SHA
+      --build-arg SENTRY_ENVIRONMENT
+      --build-arg SENTRY_ORG
+      --build-arg SENTRY_PROJECT
+      --build-arg SENTRY_URL
+      --secret id=SENTRY_AUTH,env=SENTRY_AUTH
+      --secret id=deployment_env,src="$DEPLOYMENT_ENV_FILE"
+      --build-arg DEPLOYMENT_CONFIG_VERSION="$CI_JOB_ID"
+      -t "$CI_REGISTRY_IMAGE/web-bereich-a:web-bereich-a-${IMAGE_TAG#*-}" -f web/bereich-a/Dockerfile web
   rules:
     - if: $TARGET_ENV == "feature"
       when: never
@@ -240,11 +253,22 @@ package:web-bereich-b:
   tags:
     - docker-build-new
   extends: [.package-template]
-  needs:
-    - job: build:web-bereich-b
+  needs: []
+  environment:
+    name: $TARGET_ENV
+    action: prepare
   script:
     - echo "Building version web-bereich-b-${IMAGE_TAG#*-}"
-    - docker build -t $CI_REGISTRY_IMAGE/web-bereich-b:web-bereich-b-"${IMAGE_TAG#*-}" -f web/bereich-b/Dockerfile web/bereich-b
+    - >-
+      DOCKER_BUILDKIT=1 docker build
+      --build-arg CI_COMMIT_REF_SLUG
+      --build-arg SENTRY_ENVIRONMENT
+      --build-arg SENTRY_ORG
+      --build-arg SENTRY_PROJECT
+      --build-arg SENTRY_URL
+      --secret id=SENTRY_AUTH,env=SENTRY_AUTH
+      --build-arg NEXT_PUBLIC_SERVER_URL
+      -t "$CI_REGISTRY_IMAGE/web-bereich-b:web-bereich-b-${IMAGE_TAG#*-}" -f web/bereich-b/Dockerfile web
   rules:
     - if: $TARGET_ENV == "feature"
       when: never

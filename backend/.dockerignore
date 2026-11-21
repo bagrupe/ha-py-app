@@ -24,3 +24,4 @@ Dockerfile
 **/appsettings.Development.json
 LICENSE
 README.md
+out
