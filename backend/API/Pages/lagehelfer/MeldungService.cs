@@ -1,6 +1,7 @@
 using System.Security.Cryptography;
 using System.Text.Json;
 using API.Features;
+using API.Features.Lage;
 using API.Features.Lage.Queries;
 using API.Features.Prozess;
 using API.Seeders.LageHelfer;
@@ -42,6 +43,14 @@ public sealed class MeldungService(DomainContext db, IRequestExecutorResolver ex
         }
         """;
 
+    public async Task<IReadOnlyList<PublicLage>> LoadActiveLagenAsync(CancellationToken ct) {
+        var formular = await LoadFormularAsync(ct);
+        return formular is null ? [] : await LoadActiveLagenAsync(formular, ct);
+    }
+
+    public async Task<IReadOnlyList<PublicLage>> LoadActiveLagenAsync(MeldungFormular formular, CancellationToken ct) =>
+        await PublicLageQueries.GetActiveLagen(formular.KommuneId, db, ct);
+
     public async Task<MeldungFormular?> LoadFormularAsync(CancellationToken ct) {
         var version = await db.ProzessVersionen.AsSplitQuery()
             .Include(v => v.Prozess)
@@ -69,6 +78,7 @@ public sealed class MeldungService(DomainContext db, IRequestExecutorResolver ex
     public async Task<MeldungErgebnis> SendAsync(MeldungFormular formular, Meldung meldung, CancellationToken ct) {
         var vorschlaege = await PublicLageQueries.GetSuggestedGebiete(formular.KommuneId, meldung.Lng, meldung.Lat, db, ct);
         var lage = vorschlaege.FirstOrDefault();
+        if (lage is null) return new MeldungErgebnis(null, MeldungFehler.KeineLageAmStandort);
 
         var publicKey = await db.Kommunen.Where(k => k.Id == formular.KommuneId).Select(k => k.PublicKey)
             .SingleAsync(ct);
@@ -86,9 +96,7 @@ public sealed class MeldungService(DomainContext db, IRequestExecutorResolver ex
         var input = new Dictionary<string, object?> {
             ["prozessVersionId"] = formular.ProzessVersionId,
             ["sharedKeyEncryptedForKommune"] = WrapNewSharedKey(publicKey),
-            ["lage"] = lage is null
-                ? null
-                : new Dictionary<string, object?> { ["lageId"] = lage.LageId, ["gebietId"] = lage.GebietId },
+            ["lage"] = new Dictionary<string, object?> { ["lageId"] = lage.LageId, ["gebietId"] = lage.GebietId },
             ["bearbeitungen"] = new[] {
                 Bearbeitung(formular.MeldungSchrittId, formular.ZurZuordnungVerbindungId, meldungSlots),
             },

@@ -28,13 +28,16 @@ public class MeldenModel(MeldungService meldungService, ILogger<MeldenModel> log
     public async Task<IActionResult> OnGetAsync(CancellationToken ct) {
         if (!PrecheckPassed) return RedirectToPage("GefahrCheck");
 
-        await LoadFormularAsync(ct);
+        var formularLoaded = await LoadFormularAsync(ct);
+        if (formularLoaded && !await HasActiveLagenAsync(ct)) return RedirectToPage("Index");
+
         return Page();
     }
 
     public async Task<IActionResult> OnPostAsync(CancellationToken ct) {
         if (!PrecheckPassed) return RedirectToPage("GefahrCheck");
         if (!await LoadFormularAsync(ct)) return Page();
+        if (!await HasActiveLagenAsync(ct)) return RedirectToPage("Index");
 
         if (Input.Kategorie is not null && Formular!.Kategorien.All(k => k.Key != Input.Kategorie)) {
             ModelState.AddModelError($"{nameof(Input)}.{nameof(Input.Kategorie)}", "unknown");
@@ -81,6 +84,9 @@ public class MeldenModel(MeldungService meldungService, ILogger<MeldenModel> log
     }
 
     private bool PrecheckPassed => TempData.Peek(GefahrCheckModel.PrecheckPassedKey) is true;
+
+    private async Task<bool> HasActiveLagenAsync(CancellationToken ct) =>
+        (await meldungService.LoadActiveLagenAsync(Formular!, ct)).Count > 0;
 
     private async Task<bool> LoadFormularAsync(CancellationToken ct) {
         Formular = await meldungService.LoadFormularAsync(ct);
