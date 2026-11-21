@@ -1,0 +1,140 @@
+fragment LageListItem on Lage {
+  id
+  untereinheitId
+  title
+  status
+  createdAt
+  gebiete {
+    id
+    gebietId
+    status
+    gebiet {
+      id
+      name
+    }
+  }
+}
+
+fragment LageDetail on Lage {
+  id
+  untereinheitId
+  title
+  note
+  warningText
+  status
+  createdAt
+  updatedAt
+  closedAt
+  gebiete {
+    id
+    gebietId
+    status
+    calledOutAt
+    readyAt
+    liveAt
+    endedAt
+    doneAt
+    gebiet {
+      id
+      name
+      einsatzleitungen {
+        id
+        name
+      }
+    }
+  }
+}
+
+fragment GebietOption on Gebiet {
+  id
+  untereinheitId
+  name
+}
+
+query Lagen($status: LageStatus) {
+  lagen(status: $status) {
+    ...LageListItem
+  }
+}
+
+query LageById($id: UUID!) {
+  lage(id: $id) {
+    ...LageDetail
+  }
+  gebiete {
+    ...GebietOption
+  }
+}
+
+query LageErstellenOptionen {
+  gebiete {
+    ...GebietOption
+  }
+  my {
+    ... on BackofficeUser {
+      kommune {
+        id
+        untereinheiten {
+          id
+          name
+        }
+      }
+    }
+  }
+}
+
+mutation CreateLage($input: CreateLageInput!) {
+  createLage(input: $input) {
+    lage {
+      id
+    }
+    errors {
+      __typename
+      ... on Error {
+        message
+      }
+    }
+  }
+}
+
+mutation UpdateLage($input: UpdateLageInput!) {
+  updateLage(input: $input) {
+    lage {
+      ...LageDetail
+    }
+    errors {
+      __typename
+      ... on Error {
+        message
+      }
+    }
+  }
+}
+
+mutation AddGebieteToLage($input: AddGebieteToLageInput!) {
+  addGebieteToLage(input: $input) {
+    lage {
+      ...LageDetail
+    }
+    errors {
+      __typename
+      ... on Error {
+        message
+      }
+    }
+  }
+}
+
+mutation SetLageGebietStatus($input: SetLageGebietStatusInput!) {
+  setLageGebietStatus(input: $input) {
+    lage {
+      ...LageDetail
+    }
+    errors {
+      __typename
+      ... on Error {
+        message
+      }
+    }
+  }
+}

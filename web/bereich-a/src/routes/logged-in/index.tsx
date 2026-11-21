@@ -7,6 +7,7 @@ import {hasFunktionsberechtigungInAnyOrganisationseinheit} from '../../lib/funkt
 import {antraegeRoute} from '../antraege';
 import {archivRoute} from '../archiv';
 import {einstellungenRoute} from '../einstellungen';
+import {lageRoute} from '../lage';
 import {nutzendenverwaltungRoute} from '../nutzendenverwaltung';
 import {papierkorbRoute} from '../papierkorb';
 import {profileRoutes} from '../profile/index.tsx';
@@ -65,6 +66,7 @@ export const loggedInRoute: RouteObject = {
     antraegeRoute,
     prozesseRoute,
     nutzendenverwaltungRoute,
+    lageRoute,
     prozesseVerwaltenRoute,
     einstellungenRoute,
     archivRoute,

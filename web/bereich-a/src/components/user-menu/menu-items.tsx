@@ -17,6 +17,7 @@ import {
   MdLogout,
   MdMenu,
   MdOutlineEditNote,
+  MdReportProblem,
   MdSettings,
 } from 'react-icons/md';
 import {RiShieldKeyholeLine} from 'react-icons/ri';
@@ -48,6 +49,12 @@ export const mainMenuItems: {
     icon: <MdAccountCircle />,
     funktionsberechtigung:
       FunktionsberechtigungInOrganisationseinheit.BackofficeNutzendenverwaltung,
+  },
+  {
+    label: 'Lagen',
+    href: '/lage',
+    icon: <MdReportProblem />,
+    funktionsberechtigung: GlobaleFunktionsberechtigung.LageHelfer,
   },
   {
     label: 'Archiv',
