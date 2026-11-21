@@ -185,6 +185,7 @@ builder.Services
     .AddScoped<AusfuehrungZustaendigkeitService>()
     .AddScoped<AusfuehrungWeiterleitenService>()
     .AddScoped<VorgangsverlaufService>()
+    .AddScoped<API.Pages.lagehelfer.MeldungService>()
     .AddScoped<EhrenamtsbankAuthService>()
     .AddScoped<BuergerAccountDeletionService>()
     .AddSingleton<IKeycloakTokenValidator, KeycloakTokenValidator>()
@@ -374,6 +375,7 @@ if (!app.Environment.IsDevelopment()) {
 }
 app.UseSentryTracing();
 app.UseCors();
+app.UseStaticFiles();
 app.UseAuthentication();
 app.UseAuthorization();
 

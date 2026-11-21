@@ -1,0 +1,45 @@
+@{
+  var activeTab = ViewData["Tab"] as string;
+}
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>@ViewData["Title"] – Lagehelfer</title>
+  <link rel="stylesheet" href="~/lagehelfer/styles.css" asp-append-version="true">
+  <link rel="stylesheet" href="~/lagehelfer/app.css" asp-append-version="true">
+  @await RenderSectionAsync("Head", required: false)
+</head>
+<body>
+<div class="app">
+
+  <header class="app-bar">
+    <span class="brand-logo-slot">
+      <img src="~/lagehelfer/hapy-logo.svg" style="height: 40px; width: auto; margin-right: 8px;" alt="Logo">
+    </span>
+    <span class="app-bar__title">Lagehelfer</span>
+    <span class="badge" style="padding:2px; background-color: #d7ffda; color: #000;">Temperatur: 6 °C</span>
+    <span class="badge" style="padding:2px; background-color: #d7ffda; color: #000;">Hochwasser: 2,41 m</span>
+  </header>
+
+  <main class="app-content">
+    <div class="view">
+      @RenderBody()
+    </div>
+  </main>
+
+  <nav class="tab-bar" aria-label="Hauptnavigation">
+    <a class="tab" asp-page="/lagehelfer/Index" aria-current="@(activeTab == "start" ? "page" : null)">
+      <span class="tab__icon icon-slot" aria-hidden="true"></span>
+      Start
+    </a>
+    <a class="tab" asp-page="/lagehelfer/GefahrCheck" aria-current="@(activeTab == "melden" ? "page" : null)">
+      <span class="tab__icon icon-slot" aria-hidden="true"></span>
+      Melden
+    </a>
+  </nav>
+</div>
+@await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

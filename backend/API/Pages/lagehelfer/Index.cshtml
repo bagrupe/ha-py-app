@@ -1,8 +1,23 @@
 @page
-@model Lagehelfer
-
+@model IndexModel
 @{
-  Layout = null;
+  ViewData["Title"] = "Start";
+  ViewData["Tab"] = "start";
 }
 
-  MIEPCHEN!!!!
+<section>
+  <div class="section-title"><h2>Aktuelle Wetterlage</h2></div>
+  <div class="card" style="margin-top:8px"><ul class="list">
+    <li class="list__item"><div class="list__main"><strong>Hameln</strong><span class="list__sub">vor 2 Stunden</span></div><span class="badge badge--work">Unwetterwarnung</span></li>
+    <li class="list__item"><div class="list__main"><strong>Aerzen</strong><span class="list__sub">vor 8 Stunden</span></div><span class="badge badge--done">Wetterlage stabil</span></li>
+  </ul></div>
+</section>
+<section>
+  <div class="section-title"><h2>Vorfall melden</h2></div>
+  <div class="card" style="margin-top:8px">
+    <div class="card__body">
+      <p style="margin:0">Du möchtest einen Vorfall melden? Der Lagehelfer leitet dich an die richtige Stelle weiter.</p>
+      <a class="btn btn--block" asp-page="GefahrCheck" style="margin-top:8px">Vorfall melden</a>
+    </div>
+  </div>
+</section>

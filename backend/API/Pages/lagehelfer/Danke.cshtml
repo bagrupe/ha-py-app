@@ -1,0 +1,17 @@
+@page "/lagehelfer/danke"
+@model DankeModel
+@{
+  ViewData["Title"] = "Danke";
+}
+
+<section>
+  <div class="card" style="margin-top:8px">
+    <div class="card__body" style="align-items:center;text-align:center;gap:10px">
+      <div style="font-size:3rem">✅</div>
+      <h2>Danke, deine Meldung ist eingegangen.</h2>
+      <p class="card__meta" style="margin:0">@Model.Confirmation</p>
+      <a class="btn btn--block" asp-page="Index" style="margin-top:8px">Zur Startseite</a>
+      <a class="btn btn--ghost btn--block" asp-page="GefahrCheck">Weitere Meldung</a>
+    </div>
+  </div>
+</section>

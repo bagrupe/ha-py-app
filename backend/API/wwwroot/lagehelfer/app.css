@@ -1,0 +1,7 @@
+.invalid .input, .invalid .choice__opt span { border-color: var(--bad); }
+.invalid > label, .invalid > legend { color: var(--bad); }
+.btn[hidden] { display: none; }
+
+button.choice__opt { padding: 0; border: 0; background: none; color: inherit; font: inherit; cursor: pointer; }
+button.choice__opt:hover span { border-color: var(--brand); }
+button.choice__opt--danger:hover span { border-color: var(--bad); }

@@ -1,0 +1,72 @@
+@page "/lagehelfer/melden"
+@model MeldenModel
+@{
+  ViewData["Title"] = "Melden";
+  ViewData["Tab"] = "melden";
+}
+
+@section Head {
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+}
+
+<section>
+  <div class="section-title"><h2>Notlage melden</h2></div>
+
+  @if (Model.Formular is null) {
+    <div class="notice notice--danger" role="status" style="margin-top:8px">@Model.StatusMessage</div>
+  } else {
+  <form class="card" style="margin-top:8px" method="post" enctype="multipart/form-data" novalidate>
+    <div class="card__body" style="gap:14px">
+
+      <div class="field @(Model.IsInvalid(nameof(Model.Input.Adresse)) || Model.HasMissingLocation ? "invalid" : null)">
+        <label for="adresse">@MeldenModel.AdresseLabel</label>
+        <div class="input-row">
+          <input class="input" id="adresse" asp-for="Input.Adresse" type="search" autocomplete="off" required placeholder="Straße, Hausnummer, Ort">
+          <button class="btn btn--soft" type="button" id="searchBtn">Suchen</button>
+        </div>
+        <div class="map" id="map" role="application" aria-label="Karte zur Standortwahl"></div>
+        <span class="card__meta" id="mapStatus" role="status"></span>
+        <button class="btn btn--ghost" type="button" id="locateBtn">📍 Meinen Standort verwenden</button>
+        <input type="hidden" id="lat" asp-for="Input.Lat">
+        <input type="hidden" id="lng" asp-for="Input.Lng">
+        <input type="hidden" id="standortQuelle" asp-for="Input.StandortQuelle">
+      </div>
+
+      <div class="field @(Model.IsInvalid(nameof(Model.Input.Kategorie)) ? "invalid" : null)">
+        <label for="kategorie">@MeldenModel.KategorieLabel</label>
+        <select class="input" id="kategorie" asp-for="Input.Kategorie" required>
+          <option value="">Bitte wählen</option>
+          @foreach (var (key, label) in Model.Formular!.Kategorien) {
+            <option value="@key" selected="@(Model.Input.Kategorie == key)">@label</option>
+          }
+        </select>
+      </div>
+
+      <div class="field @(Model.IsInvalid(nameof(Model.Input.Beschreibung)) ? "invalid" : null)">
+        <label for="beschreibung">@MeldenModel.BeschreibungLabel</label>
+        <textarea class="input" id="beschreibung" asp-for="Input.Beschreibung" required placeholder="z. B. Umgefallener Baum auf der Straße"></textarea>
+      </div>
+
+      <div class="field @(Model.IsInvalid(nameof(Model.Input.Foto)) ? "invalid" : null)">
+        <label for="fotoBtn">Foto (optional)</label>
+        <input type="file" id="foto" asp-for="Input.Foto" accept="image/*" capture="environment" hidden>
+        <button class="btn btn--ghost" type="button" id="fotoBtn">📷 Foto aufnehmen</button>
+        <img id="fotoPreview" alt="Vorschau des Fotos" hidden
+             style="width:100%;max-height:240px;object-fit:cover;border-radius:var(--r-md);border:1px solid var(--line)">
+        <button class="btn btn--soft" type="button" id="fotoRemove" hidden>Foto entfernen</button>
+      </div>
+
+      @if (Model.StatusMessage is not null) {
+        <div class="notice notice--danger" role="status">@Model.StatusMessage</div>
+      }
+      <button class="btn btn--block" type="submit">Meldung senden</button>
+      <a class="btn btn--ghost btn--block" asp-page="Index">Abbrechen</a>
+    </div>
+  </form>
+  }
+</section>
+
+@section Scripts {
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="~/lagehelfer/melden.js" asp-append-version="true"></script>
+}
