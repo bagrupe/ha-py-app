@@ -111,7 +111,18 @@ echo "" >&2
 
 task docs:build
 
-git add docs/doku.html docs/doku-anwender.html docs/doku-anwender.pdf
+# Checkouts that gitignore the outputs (e.g. the public snapshot) would make `git add` fail and abort the commit.
+staged_outputs=0
+for output in docs/doku.html docs/doku-anwender.html docs/doku-anwender.pdf; do
+	if [[ -f "$output" ]] && ! git check-ignore -q "$output"; then
+		git add "$output"
+		staged_outputs=$((staged_outputs + 1))
+	fi
+done
 
 echo "" >&2
-echo "Documentation outputs regenerated and staged (docs/*.html, docs/doku-anwender.pdf)." >&2
+if [[ "$staged_outputs" -gt 0 ]]; then
+	echo "Documentation outputs regenerated and staged (docs/*.html, docs/doku-anwender.pdf)." >&2
+else
+	echo "Documentation outputs regenerated locally; they are gitignored here, so nothing was staged." >&2
+fi
