@@ -4,18 +4,10 @@
   ViewData["Title"] = "Notfallprüfung";
 }
 
-@if (Model.DangerReported) {
-  <div class="notice notice--danger danger-check-emergency" role="alert">
-    <strong>Bitte rufe jetzt den<br>Notruf 112 an.</strong>
-    <a class="btn btn--danger btn--block" href="tel:112">112 anrufen</a>
-    <p style="margin:0; font-size:70%; color:var(--text-dim)"><strong>Über die App kannst du einen<br>Vorfall melden, wenn niemand in<br>akuter Lebensgefahr ist.</strong></p>
-  </div>
-} else {
-  <section class="danger-check-section">
+<section class="danger-check-section">
     <div class="card">
       <form class="card__body danger-check" method="post">
         <partial name="_GefahrCheckFrage" />
       </form>
     </div>
   </section>
-}

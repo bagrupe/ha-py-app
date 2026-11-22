@@ -5,12 +5,16 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
 /// Displays the Lagehelfer application hosted by the configured backend.
 class LagehelferPage extends ConsumerStatefulWidget {
   /// Creates the embedded Lagehelfer page.
-  const LagehelferPage({super.key});
+  const LagehelferPage({super.key, this.lageId});
+
+  /// Active incident selected on the front page.
+  final String? lageId;
 
   @override
   ConsumerState<LagehelferPage> createState() => _LagehelferPageState();
@@ -31,6 +35,28 @@ class _LagehelferPageState extends ConsumerState<LagehelferPage> {
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
       ..setNavigationDelegate(
         NavigationDelegate(
+          onNavigationRequest: (request) async {
+            if (request.url != 'tel:112') return NavigationDecision.navigate;
+            var opened = false;
+            try {
+              opened = await launchUrl(
+                Uri.parse(request.url),
+                mode: LaunchMode.externalApplication,
+              );
+            } on Exception {
+              opened = false;
+            }
+            if (!opened && mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(
+                    'application.news.actions.dial_112_manually'.tr(),
+                  ),
+                ),
+              );
+            }
+            return NavigationDecision.prevent;
+          },
           onPageStarted: (_) {
             if (!mounted) return;
             setState(() {
@@ -68,8 +94,7 @@ class _LagehelferPageState extends ConsumerState<LagehelferPage> {
   Future<void> _applyBrightness() async {
     final media = _brightness == Brightness.dark ? 'all' : 'not all';
     try {
-      await _controller.runJavaScript(
-        '''
+      await _controller.runJavaScript('''
         (() => {
           const darkTheme = document.getElementById("lagehelfer-dark-theme");
           if (darkTheme) {
@@ -88,8 +113,7 @@ class _LagehelferPageState extends ConsumerState<LagehelferPage> {
             }
           }
         })();
-        ''',
-      );
+        ''');
     } on Exception {
       return;
     }
@@ -98,9 +122,17 @@ class _LagehelferPageState extends ConsumerState<LagehelferPage> {
   /// Opens the reporting start page for the configured municipality.
   Future<void> _loadLagehelfer() {
     final config = ref.read(appConfigProvider);
-    final uri = Uri.parse(
-      '${config.backendUrl.replaceFirst(RegExp(r'/$'), '')}/lagehelfer',
-    ).replace(queryParameters: {'kommuneId': config.kommuneId});
+    final lageId = widget.lageId;
+    final path = lageId == null ? '/lagehelfer' : '/lagehelfer/Erklaerung';
+    final uri =
+        Uri.parse(
+          '${config.backendUrl.replaceFirst(RegExp(r'/$'), '')}$path',
+        ).replace(
+          queryParameters: {
+            'kommuneId': config.kommuneId,
+            if (lageId != null) 'lageId': lageId,
+          },
+        );
     return _controller.loadRequest(uri);
   }
 
@@ -134,6 +166,7 @@ class _LagehelferPageState extends ConsumerState<LagehelferPage> {
 final lagehelferRoute = GoRoute(
   path: '/lagehelfer',
   pageBuilder: TransitionPageBuilders.sliding(
-    builder: (_, __) => const LagehelferPage(),
+    builder: (_, state) =>
+        LagehelferPage(lageId: state.uri.queryParameters['lageId']),
   ),
 );

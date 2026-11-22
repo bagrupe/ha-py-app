@@ -1,0 +1,19 @@
+@page
+@model UmgebungModel
+@{ ViewData["Title"] = "Schon gemeldet?"; }
+<p>Schritt 2 von 4</p>
+<h1>Wurde das schon gemeldet?</h1>
+@if (Model.Trefferliste.Count == 0) { <p>Im Umkreis von 500 Metern liegen keine passenden Meldungen vor.</p> }
+@foreach (var t in Model.Trefferliste) {
+    <article class="card"><div class="card__body">
+        <strong>@t.Meldung.Description</strong>
+        <p>@t.Meter m entfernt · @t.Meldung.AnzahlBestaetigungen Bestätigungen</p>
+        @if (Model.Bestaetigt == t.Meldung.Id) {
+            <strong>Danke, bestätigt.</strong>
+            <a asp-page="Danke" asp-route-bestaetigt="true" asp-route-kommuneId="@Model.KommuneId">Fertig</a>
+        } else {
+            <form method="post"><button class="btn" name="id" value="@t.Meldung.Id">+1 · Sehe ich auch</button></form>
+        }
+    </div></article>
+}
+<a class="btn btn--primary" asp-page="Melden" asp-route-kommuneId="@Model.KommuneId" asp-route-lat="@Model.Lat" asp-route-lng="@Model.Lng" asp-route-adresse="@Model.Adresse">Etwas anderes melden</a>

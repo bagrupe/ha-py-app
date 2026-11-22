@@ -1,6 +1,11 @@
 using System.Security.Claims;
 using System.Text.Json;
 using API.Features;
+using API.Pages.lagehelfer;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.AspNetCore.Mvc.ViewFeatures;
+using NodaTime;
 using API.Features.Auth;
 using API.Features.Funktionsberechtigungen;
 using API.Features.Lage;
@@ -98,6 +103,72 @@ public class LageDashboardTests(BackendApiFactory factory) : LageMeldungTestBase
         var result = await ExecuteGraphqlAsync(caller, query, variables);
         Assert.True(result.Errors is null, result.ToJson());
         return JsonDocument.Parse(result.ToJson()).RootElement.GetProperty("data").Clone();
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task RueckrufVomKontaktformularBisZumAbschluss(bool mitMeldung) {
+        var s = await SeedSzenario();
+        await using var scope = Factory.Services.CreateAsyncScope();
+        var db = scope.ServiceProvider.GetRequiredService<DomainContext>();
+        var publicId = await db.Ausfuehrungen.Where(a => a.Id == s.AusfuehrungId)
+            .Select(a => a.PublicId).SingleAsync();
+        var url = $"/lagehelfer/Kontakt?kommuneId={KommuneSeeder.LandkreisHaPy.Id}&rueckruf=true" +
+            (mitMeldung ? $"&meldungId={publicId}" : $"&lageId={s.LageId}");
+        using var client = Factory.CreateClient();
+        var formular = await client.GetStringAsync(url);
+        string Feld(string name) {
+            var match = System.Text.RegularExpressions.Regex.Match(formular,
+                $"<input[^>]*name=\"{name}\"[^>]*value=\"([^\"]+)\"");
+            Assert.True(match.Success, name);
+            return System.Net.WebUtility.HtmlDecode(match.Groups[1].Value);
+        }
+        var vorgang = Feld("Vorgang");
+        using var antwort = await client.PostAsync(url, new FormUrlEncodedContent(new Dictionary<string, string> {
+            ["Vorgang"] = vorgang, ["Nummer"] = "05151 12345",
+            ["__RequestVerificationToken"] = Feld("__RequestVerificationToken"),
+        }));
+        antwort.EnsureSuccessStatusCode();
+        Assert.Contains("bei der Leitstelle eingegangen", await antwort.Content.ReadAsStringAsync());
+        const string liste = "query($id: UUID!) { lageKontakte(lageId: $id, offeneRueckrufe: true) { id meldungId telefonnummer } }";
+        var variables = new Dictionary<string, object?> { ["id"] = s.LageId };
+        var eintrag = Assert.Single((await Data(s.Leitstelle, liste, variables)).GetProperty("lageKontakte").EnumerateArray());
+        Assert.Equal(Guid.Parse(vorgang), eintrag.GetProperty("id").GetGuid());
+        Assert.Equal("0515112345", eintrag.GetProperty("telefonnummer").GetString());
+        if (mitMeldung) Assert.Equal(publicId, eintrag.GetProperty("meldungId").GetGuid());
+        else Assert.Equal(JsonValueKind.Null, eintrag.GetProperty("meldungId").ValueKind);
+        await Data(s.Leitstelle, "mutation($id: UUID!) { rueckrufAbschliessen(input: {id: $id}) { __typename } }",
+            new Dictionary<string, object?> { ["id"] = Guid.Parse(vorgang) });
+        Assert.Empty((await Data(s.Leitstelle, liste, variables)).GetProperty("lageKontakte").EnumerateArray());
+    }
+
+    [Fact]
+    public async Task FreiwilligeNummerWirdZurMeldungGespeichertOhneRueckrufticket() {
+        var s = await SeedSzenario();
+        await using var scope = Factory.Services.CreateAsyncScope();
+        var services = scope.ServiceProvider;
+        var db = services.GetRequiredService<DomainContext>();
+        var meldung = await db.Ausfuehrungen.SingleAsync(a => a.Id == s.AusfuehrungId);
+        var context = new DefaultHttpContext { RequestServices = services };
+        var kontakt = new KontaktModel(db, services.GetRequiredService<IClock>()) {
+            PageContext = new PageContext { HttpContext = context },
+            TempData = new TempDataDictionary(context, services.GetRequiredService<ITempDataProvider>()),
+            KommuneId = KommuneSeeder.LandkreisHaPy.Id,
+            Vorgang = Guid.NewGuid(),
+            MeldungId = meldung.PublicId,
+            Nummer = "05151 12345",
+        };
+        kontakt.TempData[MeldenModel.ConfirmationKey] = $"Meldungs-Nr. {meldung.CorrelationId}";
+        await kontakt.OnPostAsync(CancellationToken.None);
+        Assert.True(kontakt.Gespeichert);
+        var gespeichert = await db.LageKontakte.SingleAsync(k => k.Id == kontakt.Vorgang);
+        Assert.Equal(meldung.PublicId, gespeichert.MeldungId);
+        Assert.False(gespeichert.Rueckruf);
+        var liste = await Data(s.Leitstelle,
+            "query($id: UUID!) { lageKontakte(lageId: $id, offeneRueckrufe: true) { id } }",
+            new Dictionary<string, object?> { ["id"] = s.LageId });
+        Assert.Empty(liste.GetProperty("lageKontakte").EnumerateArray());
     }
 
     private Task<JsonElement> EinheitZuweisen(ClaimsPrincipal caller, Guid ausfuehrungId, Guid? einheitId) =>

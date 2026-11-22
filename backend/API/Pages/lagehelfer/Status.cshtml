@@ -1,0 +1,10 @@
+@page
+@model StatusModel
+@{ ViewData["Title"] = "Status Ihrer Meldung"; }
+<section class="card"><div class="card__body">
+<h1>Status Ihrer Meldung</h1>
+<p>Meldungsnummer @Model.Nummer</p>
+<strong>@Model.StatusText</strong>
+<a class="btn btn--danger" asp-page="Notruf" asp-route-kommuneId="@Model.KommuneId">Es wird schlimmer</a>
+<a asp-page="Kontakt" asp-route-kommuneId="@Model.KommuneId" asp-route-meldungId="@Request.Query["id"]" asp-route-rueckruf="true">Unsicher? Rückruf anfordern</a>
+</div></section>

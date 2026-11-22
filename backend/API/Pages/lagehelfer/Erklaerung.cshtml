@@ -1,0 +1,14 @@
+@page
+@model ErklaerungModel
+@{
+    ViewData["Title"] = "Warum hier melden?";
+    var lage = Model.Lage;
+}
+    <section class="card"><div class="card__body">
+        <h1>@lage.Title</h1>
+        <p>Hier können Sie Schäden während dieser Lage melden. So bleibt der Notruf für Menschen in akuter Gefahr erreichbar.</p>
+        <h2>Sind Sie an einem sicheren Ort?</h2>
+        <p>Halten Sie Abstand zu Gefahrenstellen. Machen Sie Fotos nur aus sicherer Entfernung.</p>
+        <a class="btn btn--primary btn--block" asp-page="GefahrCheck" asp-route-kommuneId="@Model.KommuneId">Ich bin sicher, weiter</a>
+<a asp-page="Kontakt" asp-route-kommuneId="@Model.KommuneId" asp-route-lageId="@lage.Id" asp-route-rueckruf="true">Unsicher? Rückruf anfordern</a>
+    </div></section>

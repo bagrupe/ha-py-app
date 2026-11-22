@@ -12,13 +12,20 @@
   <div class="card" style="margin-top:8px">
     <div class="card__body" style="align-items:center;text-align:center;gap:10px">
       <div aria-hidden="true" style="font-size:3rem">✅</div>
-      <h2>Deine Meldung ist eingegangen.</h2>
-      <p class="report-confirmation__message">Danke, dass du Bescheid gesagt hast. Wir kümmern uns um deine Meldung.<br>Du musst nichts mehr tun.</p>
+      <p>Schritt 4 von 4</p>
+      <h2>Ihre Meldung ist eingegangen.</h2>
+      <p class="report-confirmation__message">Vielen Dank. Wir kümmern uns um Ihre Meldung.<br>Sie müssen nichts weiter tun.</p>
       <p class="card__meta" style="margin:0">Meldungs-Nr.<br><span style="white-space:nowrap">@confirmationNumber</span></p>
+    @if (Model.PublicId.HasValue) {
+@if (Request.Query["bestaetigt"] != "true") {
+        <a asp-page="Kontakt" asp-route-kommuneId="@Model.KommuneId" asp-route-meldungId="@Model.PublicId">Telefonnummer für Rückfragen (optional)</a>
+        }
+        <a class="btn btn--primary" asp-page="Status" asp-route-id="@Model.PublicId" asp-route-kommuneId="@Model.KommuneId">Status meiner Meldung</a>
+      }
     </div>
   </div>
 </section>
 
 @section FooterActions {
-  <a class="lagehelfer-footer__next lagehelfer-footer__link" asp-page="GefahrCheck" asp-route-kommuneId="@Model.KommuneId">Weitere Meldung</a>
+  <a class="lagehelfer-footer__next lagehelfer-footer__link" asp-page="Index" asp-route-kommuneId="@Model.KommuneId">Weitere Meldung</a>
 }

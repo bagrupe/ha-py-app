@@ -48,6 +48,18 @@ public record MeldungBestaetigenResult(
 [MutationType]
 public class LageMeldungMutations {
     [Authorize]
+    public async Task<bool> RueckrufAbschliessen(Guid id, DomainContext db, CurrentUserAccessor currentUserAccessor,
+        IClock clock, CancellationToken ct) {
+        var (user, rechte) = await currentUserAccessor.EnsureBackofficeUser();
+        rechte.Global(GlobaleFunktionsberechtigung.LageHelfer).Fordern();
+        if (!LageMeldungen.IstLeitstelle(user)) throw new NotAllowedException("Nur für die Leitstelle.");
+        var jetzt = clock.GetCurrentInstant();
+        return await db.LageKontakte.Where(k => k.Id == id && k.Rueckruf && k.Erledigt == null
+                && k.Lage.Untereinheit.KommuneId == user.KommuneId)
+            .ExecuteUpdateAsync(set => set.SetProperty(k => k.Erledigt, jetzt), ct) == 1;
+    }
+
+    [Authorize]
     [GraphQLDescription("Legt eine Einheit einer Einsatzleitung an.")]
     [Error(typeof(NotAllowedException))]
     [Error(typeof(MitarbeiterGruppeNotFoundException))]

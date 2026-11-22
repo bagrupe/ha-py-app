@@ -19,6 +19,7 @@
 
   @if (ViewData["HideBackFooter"] is not true) {
     <footer class="lagehelfer-footer">
+      <a href="tel:112">112 anrufen</a>
       <a class="lagehelfer-footer__back" asp-page="/lagehelfer/Index" asp-route-kommuneId="@(ViewData["KommuneId"])">Zurück</a>
       @await RenderSectionAsync("FooterActions", required: false)
     </footer>

@@ -1,0 +1,16 @@
+@page
+@model KontaktModel
+@{ ViewData["Title"] = Model.Rueckruf ? "Rückruf anfordern" : "Telefonnummer für Rückfragen"; }
+<h1>@ViewData["Title"]</h1>
+@if (Model.Gespeichert) {
+    <p role="status">@(Model.Rueckruf ? "Ihre Rückrufanfrage ist bei der Leitstelle eingegangen." : "Ihre Telefonnummer wurde zur Meldung gespeichert.")</p>
+} else {
+    <form class="card__body" method="post" asp-page="Kontakt" asp-route-kommuneId="@Model.KommuneId"
+          asp-route-lageId="@Model.LageId" asp-route-meldungId="@Model.MeldungId" asp-route-rueckruf="@Model.Rueckruf">
+        <input type="hidden" asp-for="Vorgang">
+        <label asp-for="Nummer">Unter welcher Telefonnummer sind Sie erreichbar?</label>
+        <input class="input" asp-for="Nummer" type="tel" autocomplete="tel" maxlength="40" required>
+        <span asp-validation-for="Nummer"></span>
+        <button class="btn btn--primary">@(Model.Rueckruf ? "Rückruf anfordern" : "Nummer speichern")</button>
+    </form>
+}

@@ -1,7 +1,21 @@
-<div class="choice" role="group" aria-labelledby="danger-check-question">
-  <h2 id="danger-check-question">Ist ein Mensch in unmittelbarer Lebensgefahr?</h2>
-  <div class="choice__row">
-    <button class="choice__opt choice__opt--danger" type="submit" name="answer" value="ja"><span>Ja</span></button>
-    <button class="choice__opt choice__opt--continue" type="submit" name="answer" value="nein"><span>Nein</span></button>
-  </div>
-</div>
+<p>Schritt 1 von 4</p>
+<h1>Ist jemand in Gefahr?</h1>
+@{
+    var fragen = new[] { "Ist jemand verletzt oder eingeklemmt?", "Liegt eine Stromleitung am Boden?", "Brennt oder raucht etwas?" };
+}
+@for (var i = 0; i < fragen.Length; i++) {
+    <fieldset>
+        <legend>@fragen[i]</legend>
+        <label><input type="radio" name="answers[@i]" value="ja" required> Ja</label>
+        <label><input type="radio" name="answers[@i]" value="nein" required> Nein</label>
+    </fieldset>
+}
+<button class="btn btn--primary btn--block" type="submit">Weiter</button>
+<script>
+document.currentScript.closest("form").addEventListener("change", function (event) {
+    if (event.target.value === "ja") {
+        this.noValidate = true;
+        this.submit();
+    }
+});
+</script>

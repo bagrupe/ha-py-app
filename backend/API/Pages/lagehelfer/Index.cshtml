@@ -11,7 +11,7 @@
     <div class="notice notice--info" role="status" style="margin-top:8px">
       <div>
         <strong>Aktuell ist keine Lage aktiv.</strong><br>
-        Meldungen sind deshalb gerade nicht möglich. Bei akuter Gefahr wähle den Notruf 112.
+        Meldungen sind deshalb gerade nicht möglich. Bei akuter Gefahr wählen Sie den Notruf 112.
       </div>
     </div>
     <a class="btn btn--danger btn--block" href="tel:112" style="margin-top:8px">112 anrufen</a>
@@ -26,18 +26,9 @@
           @if (!string.IsNullOrWhiteSpace(lage.WarningText)) {
             <span class="badge badge--work">@lage.WarningText</span>
           }
+          <a class="btn btn--primary" asp-page="Erklaerung" asp-route-kommuneId="@Model.KommuneId" asp-route-lageId="@lage.Id">Vorfall melden</a>
         </li>
       }
     </ul></div>
   }
 </section>
-@if (Model.Lagen.Count > 0) {
-  <section class="danger-check-section">
-    <div class="section-title"><h2>Vorfall melden</h2></div>
-    <div class="card" style="margin-top:8px">
-      <form class="card__body danger-check" method="post" asp-page="GefahrCheck" asp-route-kommuneId="@Model.KommuneId">
-        <partial name="_GefahrCheckFrage" />
-      </form>
-    </div>
-  </section>
-}

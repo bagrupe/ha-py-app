@@ -1,0 +1,10 @@
+@page
+@model NotrufModel
+@{ ViewData["Title"] = "Notruf"; }
+  <div class="notice notice--danger danger-check-emergency" role="alert">
+    <strong>Bitte rufen Sie jetzt den Notruf an.</strong>
+    <a class="btn btn--danger btn--block" href="tel:112">112 anrufen</a>
+    <p>Bringen Sie sich selbst nicht in Gefahr.</p>
+    <p>Sie können nicht sprechen? Zur <a href="https://www.nora-notruf.de/">Notruf-App nora</a>.</p>
+    <a asp-page="GefahrCheck" asp-route-kommuneId="@Model.KommuneId">Zurück zu den Fragen</a>
+  </div>

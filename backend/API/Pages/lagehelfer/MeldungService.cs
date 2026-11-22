@@ -23,7 +23,7 @@ public sealed record Meldung(
     string Beschreibung,
     double Lat,
     double Lng,
-    byte[]? Foto);
+    IReadOnlyList<byte[]> Fotos);
 
 public enum MeldungFehler {
     KeineLageAmStandort,
@@ -72,9 +72,9 @@ public sealed class MeldungService(DomainContext db, IRequestExecutorResolver ex
         return new MeldungFormular(version.Prozess.KommuneId, version.Id, meldung.Id, zurZuordnung.Id, kategorien);
     }
 
-    public async Task<MeldungErgebnis> SendAsync(MeldungFormular formular, Meldung meldung, CancellationToken ct) {
+    public async Task<MeldungErgebnis> SendAsync(MeldungFormular formular, Meldung meldung, CancellationToken ct, Guid? lageId = null) {
         var vorschlaege = await PublicLageQueries.GetSuggestedGebiete(formular.KommuneId, meldung.Lng, meldung.Lat, db, ct);
-        var lage = vorschlaege.FirstOrDefault();
+        var lage = vorschlaege.FirstOrDefault(v => lageId == null || v.LageId == lageId);
         if (lage is null) return new MeldungErgebnis(null, MeldungFehler.KeineLageAmStandort);
 
         var publicKey = await db.Kommunen.Where(k => k.Id == formular.KommuneId).Select(k => k.PublicKey)
@@ -86,8 +86,8 @@ public sealed class MeldungService(DomainContext db, IRequestExecutorResolver ex
             Slot(EreignismeldungVorlage.KategorieSlot, meldung.Kategorie),
             Slot(EreignismeldungVorlage.BeschreibungSlot, meldung.Beschreibung),
         };
-        if (meldung.Foto is not null) {
-            meldungSlots.Add(Slot(EreignismeldungVorlage.BilderSlot, new[] { Convert.ToBase64String(meldung.Foto) }));
+        if (meldung.Fotos.Count > 0) {
+            meldungSlots.Add(Slot(EreignismeldungVorlage.BilderSlot, meldung.Fotos.Select(photo => Convert.ToBase64String(photo)).ToArray()));
         }
 
         var input = new Dictionary<string, object?> {

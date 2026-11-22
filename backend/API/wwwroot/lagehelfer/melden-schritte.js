@@ -38,7 +38,12 @@
       address.removeAttribute("aria-invalid");
       address.removeAttribute("aria-describedby");
     }
-    showDetails(true);
+    const url = new URL(form.dataset.nearby, window.location.href);
+    url.searchParams.set("lat", form.querySelector("#lat").value);
+    url.searchParams.set("lng", form.querySelector("#lng").value);
+    url.searchParams.set("adresse", address.value);
+    window.location.assign(url);
+
   }
 
   showDetails(form.dataset.startDetails === "true", false);
