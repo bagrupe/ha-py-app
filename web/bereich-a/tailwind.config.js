@@ -10,6 +10,56 @@ export default {
           DEFAULT: 'rgb(var(--color-primary) / <alpha-value>)',
           light: 'rgb(var(--color-primary-light) / <alpha-value>)',
         },
+        danger: {
+          DEFAULT: 'rgb(var(--color-danger) / <alpha-value>)',
+          surface: 'rgb(var(--color-danger-surface) / <alpha-value>)',
+          text: 'rgb(var(--color-danger-text) / <alpha-value>)',
+        },
+        warning: {
+          DEFAULT: 'rgb(var(--color-warning) / <alpha-value>)',
+          surface: 'rgb(var(--color-warning-surface) / <alpha-value>)',
+          text: 'rgb(var(--color-warning-text) / <alpha-value>)',
+        },
+        success: {
+          DEFAULT: 'rgb(var(--color-success) / <alpha-value>)',
+          surface: 'rgb(var(--color-success-surface) / <alpha-value>)',
+          text: 'rgb(var(--color-success-text) / <alpha-value>)',
+        },
+        'klasse-b': {
+          DEFAULT: 'rgb(var(--color-klasse-b) / <alpha-value>)',
+          surface: 'rgb(var(--color-klasse-b-surface) / <alpha-value>)',
+          text: 'rgb(var(--color-klasse-b-text) / <alpha-value>)',
+        },
+        'klasse-c': {
+          DEFAULT: 'rgb(var(--color-klasse-c) / <alpha-value>)',
+          surface: 'rgb(var(--color-klasse-c-surface) / <alpha-value>)',
+          text: 'rgb(var(--color-klasse-c-text) / <alpha-value>)',
+        },
+        bedarf: {
+          DEFAULT: 'rgb(var(--color-bedarf) / <alpha-value>)',
+          surface: 'rgb(var(--color-bedarf-surface) / <alpha-value>)',
+          text: 'rgb(var(--color-bedarf-text) / <alpha-value>)',
+        },
+        'kategorie-1': {
+          DEFAULT: 'rgb(var(--color-kategorie-1) / <alpha-value>)',
+          surface: 'rgb(var(--color-kategorie-1-surface) / <alpha-value>)',
+          text: 'rgb(var(--color-kategorie-1-text) / <alpha-value>)',
+        },
+        'kategorie-2': {
+          DEFAULT: 'rgb(var(--color-kategorie-2) / <alpha-value>)',
+          surface: 'rgb(var(--color-kategorie-2-surface) / <alpha-value>)',
+          text: 'rgb(var(--color-kategorie-2-text) / <alpha-value>)',
+        },
+        'kategorie-3': {
+          DEFAULT: 'rgb(var(--color-kategorie-3) / <alpha-value>)',
+          surface: 'rgb(var(--color-kategorie-3-surface) / <alpha-value>)',
+          text: 'rgb(var(--color-kategorie-3-text) / <alpha-value>)',
+        },
+        'kategorie-4': {
+          DEFAULT: 'rgb(var(--color-kategorie-4) / <alpha-value>)',
+          surface: 'rgb(var(--color-kategorie-4-surface) / <alpha-value>)',
+          text: 'rgb(var(--color-kategorie-4-text) / <alpha-value>)',
+        },
         gray: {
           50: '#FBFBFB',
           100: '#F1F1F1',

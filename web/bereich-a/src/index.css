@@ -4,6 +4,38 @@
 
 :root {
   --color-primary: 0 134 203;
+
+  /* Semantic colors, independent of the Kommune's primary color. Surface / text / accent. */
+  --color-danger-surface: 253 236 234;
+  --color-danger-text: 138 28 18;
+  --color-danger: 180 35 24;
+  --color-warning-surface: 255 248 240;
+  --color-warning-text: 122 58 0;
+  --color-warning: 194 65 12;
+  --color-success-surface: 227 244 232;
+  --color-success-text: 18 69 42;
+  --color-success: 29 107 54;
+  --color-klasse-b-surface: 253 240 225;
+  --color-klasse-b-text: 122 58 0;
+  --color-klasse-b: 194 65 12;
+  --color-klasse-c-surface: 251 243 208;
+  --color-klasse-c-text: 94 75 0;
+  --color-klasse-c: 161 128 0;
+  --color-bedarf-surface: 239 233 251;
+  --color-bedarf-text: 75 42 153;
+  --color-bedarf: 122 90 214;
+  --color-kategorie-1-surface: 232 235 251;
+  --color-kategorie-1-text: 42 54 153;
+  --color-kategorie-1: 59 76 202;
+  --color-kategorie-2-surface: 223 242 244;
+  --color-kategorie-2-text: 11 87 97;
+  --color-kategorie-2: 14 110 122;
+  --color-kategorie-3-surface: 253 235 243;
+  --color-kategorie-3-text: 142 31 85;
+  --color-kategorie-3: 184 50 122;
+  --color-kategorie-4-surface: 238 242 226;
+  --color-kategorie-4-text: 63 82 20;
+  --color-kategorie-4: 94 122 31;
 }
 
 .material-symbols-outlined {
