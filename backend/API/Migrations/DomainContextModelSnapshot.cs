@@ -711,6 +711,10 @@ namespace API.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.PrimitiveCollection<List<string>>("Ausruestung")
+                        .IsRequired()
+                        .HasColumnType("text[]");
+
                     b.Property<Guid>("MitarbeiterGruppeId")
                         .HasColumnType("uuid");
 
@@ -788,6 +792,12 @@ namespace API.Migrations
 
                     b.Property<Instant?>("DeletedAt")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<Instant?>("MeldewegPausiertSeit")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("MeldewegPausiertVonId")
+                        .HasColumnType("uuid");
 
                     b.Property<string>("Note")
                         .HasColumnType("text");
@@ -979,6 +989,9 @@ namespace API.Migrations
                     b.Property<Instant?>("AbgeschlossenAm")
                         .HasColumnType("timestamp with time zone");
 
+                    b.PrimitiveCollection<List<string>>("BenoetigteAusruestung")
+                        .HasColumnType("text[]");
+
                     b.Property<Guid?>("CorrelationId")
                         .HasColumnType("uuid");
 
@@ -988,17 +1001,29 @@ namespace API.Migrations
                     b.Property<Guid?>("EinheitId")
                         .HasColumnType("uuid");
 
+                    b.Property<string>("ExternKommentar")
+                        .HasColumnType("text");
+
+                    b.Property<int?>("ExterneStelle")
+                        .HasColumnType("integer");
+
                     b.Property<Instant?>("GeloeschtAm")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<Guid?>("GeloeschtVonId")
                         .HasColumnType("uuid");
 
+                    b.Property<int?>("KlaerungGrund")
+                        .HasColumnType("integer");
+
                     b.Property<string>("KlaerungKommentar")
                         .HasColumnType("text");
 
                     b.Property<Instant?>("KlaerungSeit")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<int?>("Klasse")
+                        .HasColumnType("integer");
 
                     b.Property<Guid?>("LageGebietId")
                         .HasColumnType("uuid");
@@ -1010,6 +1035,12 @@ namespace API.Migrations
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<int?>("Meldungsnummer")
+                        .HasColumnType("integer");
+
+                    b.Property<bool>("MoeglicherNotfall")
+                        .HasColumnType("boolean");
+
+                    b.Property<int?>("NotfallPruefung")
                         .HasColumnType("integer");
 
                     b.Property<Guid>("ProzessVersionId")

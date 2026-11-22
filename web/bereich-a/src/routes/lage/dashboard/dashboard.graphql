@@ -1,0 +1,257 @@
+fragment DashboardMeldung on Ausfuehrung {
+  id
+  meldungsnummer
+  createdAt
+  abgeschlossenAm
+  ereignisStatus
+  klasse
+  benoetigteAusruestung
+  moeglicherNotfall
+  notfallPruefung
+  klaerungSeit
+  klaerungGrund
+  klaerungKommentar
+  verwerfenGrund
+  externeStelle
+  externKommentar
+  anzahlBestaetigungen
+  lage {
+    gebietId
+    gebietName
+  }
+  einheit {
+    id
+  }
+  istZustaendigkeit {
+    mitarbeiterGruppeId
+  }
+  slotValues(
+    where: {slotName: {in: ["kategorie", "beschreibung", "adresse"]}}
+  ) {
+    slotName
+    ... on PlainSlotValue {
+      value
+    }
+  }
+}
+
+fragment DashboardLage on Lage {
+  id
+  title
+  status
+  warningText
+  meldewegPausiertSeit
+  gebiete {
+    id
+    gebietId
+    status
+    liveAt
+  }
+}
+
+fragment DashboardGebiet on Gebiet {
+  id
+  name
+  geometry
+  einsatzleitungen {
+    id
+    name
+  }
+}
+
+fragment DashboardEinheit on Einheit {
+  id
+  name
+  ausruestung
+  mitarbeiterGruppeId
+}
+
+query DashboardStammdaten {
+  lagen {
+    ...DashboardLage
+  }
+  gebiete {
+    ...DashboardGebiet
+  }
+  einheiten {
+    ...DashboardEinheit
+  }
+}
+
+query DashboardMeldungen($lageId: UUID!, $offen: Boolean) {
+  lageMeldungen(lageId: $lageId, offen: $offen) {
+    ...DashboardMeldung
+  }
+}
+
+mutation DashboardEinheitZuweisen($input: MeldungEinheitZuweisenInput!) {
+  meldungEinheitZuweisen(input: $input) {
+    ausfuehrung {
+      ...DashboardMeldung
+    }
+    errors {
+      __typename
+      ... on Error {
+        message
+      }
+    }
+  }
+}
+
+mutation DashboardFortsetzen($input: MeldungFortsetzenInput!) {
+  meldungFortsetzen(input: $input) {
+    ausfuehrung {
+      ...DashboardMeldung
+    }
+    errors {
+      __typename
+      ... on Error {
+        message
+      }
+    }
+  }
+}
+
+mutation DashboardAnLeitstelleAbgeben(
+  $input: MeldungAnLeitstelleAbgebenInput!
+) {
+  meldungAnLeitstelleAbgeben(input: $input) {
+    ausfuehrung {
+      ...DashboardMeldung
+    }
+    errors {
+      __typename
+      ... on Error {
+        message
+      }
+    }
+  }
+}
+
+mutation DashboardUmverteilen($input: MeldungUmverteilenInput!) {
+  meldungUmverteilen(input: $input) {
+    ausfuehrung {
+      ...DashboardMeldung
+    }
+    errors {
+      __typename
+      ... on Error {
+        message
+      }
+    }
+  }
+}
+
+mutation DashboardExternUebergeben($input: MeldungExternUebergebenInput!) {
+  meldungExternUebergeben(input: $input) {
+    ausfuehrung {
+      ...DashboardMeldung
+    }
+    errors {
+      __typename
+      ... on Error {
+        message
+      }
+    }
+  }
+}
+
+mutation DashboardVerwerfen($input: MeldungVerwerfenInput!) {
+  meldungVerwerfen(input: $input) {
+    ausfuehrung {
+      ...DashboardMeldung
+    }
+    errors {
+      __typename
+      ... on Error {
+        message
+      }
+    }
+  }
+}
+
+mutation DashboardNotfallPruefen($input: MeldungNotfallPruefenInput!) {
+  meldungNotfallPruefen(input: $input) {
+    ausfuehrung {
+      ...DashboardMeldung
+    }
+    errors {
+      __typename
+      ... on Error {
+        message
+      }
+    }
+  }
+}
+
+mutation DashboardEinschaetzungSetzen(
+  $input: MeldungEinschaetzungSetzenInput!
+) {
+  meldungEinschaetzungSetzen(input: $input) {
+    ausfuehrung {
+      ...DashboardMeldung
+    }
+    errors {
+      __typename
+      ... on Error {
+        message
+      }
+    }
+  }
+}
+
+mutation DashboardMeldeweg($input: SetLageMeldewegInput!) {
+  setLageMeldeweg(input: $input) {
+    lage {
+      ...DashboardLage
+    }
+    errors {
+      __typename
+      ... on Error {
+        message
+      }
+    }
+  }
+}
+
+mutation DashboardEinheitAnlegen($input: CreateEinheitInput!) {
+  createEinheit(input: $input) {
+    einheit {
+      ...DashboardEinheit
+    }
+    errors {
+      __typename
+      ... on Error {
+        message
+      }
+    }
+  }
+}
+
+mutation DashboardEinheitAendern($input: UpdateEinheitInput!) {
+  updateEinheit(input: $input) {
+    einheit {
+      ...DashboardEinheit
+    }
+    errors {
+      __typename
+      ... on Error {
+        message
+      }
+    }
+  }
+}
+
+mutation DashboardEinheitLoeschen($input: DeleteEinheitInput!) {
+  deleteEinheit(input: $input) {
+    einheit {
+      ...DashboardEinheit
+    }
+    errors {
+      __typename
+      ... on Error {
+        message
+      }
+    }
+  }
+}

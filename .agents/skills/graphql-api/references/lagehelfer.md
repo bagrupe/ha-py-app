@@ -56,6 +56,7 @@ Fixed ids (stable across reseeds):
 | `updateLage` | Replace `title` and `note` |
 | `updateLageWarningText` | Set or clear the citizen notice |
 | `closeLage` | End all running Gebiete and close the Lage |
+| `setLageMeldeweg(lageId, offen)` | Leitstelle only: take reporting offline (`meldewegPausiertSeit` set; no new reports or confirmations, hidden from `activeLagen`) or back online. Gebiete stay `LIVE` |
 | `addGebieteToLage` | Add Gebiete as `INACTIVE` |
 | `setLageGebietStatus` | Move one Gebiet to the next status |
 | `addGebietEinsatzleitung` / `removeGebietEinsatzleitung` | Link or unlink a MitarbeiterGruppe and a Gebiet |
@@ -64,21 +65,26 @@ Fixed ids (stable across reseeds):
 
 A report is an `Ausfuehrung` of the process "Ereignis melden" with `lage` set. Admins and Superadmins act as Leitstelle and see every report of their Kommune; other users see the reports whose `istZustaendigkeit.mitarbeiterGruppeId` is one of their groups. All operations need the global `LageHelfer` permission.
 
-Fields on `Ausfuehrung`: `meldungsnummer` (from 1000, shown as "E-1042"), `ereignisStatus`, `einheit`, `klaerungSeit`, `klaerungKommentar`, `verwerfenGrund`, `anzahlBestaetigungen`, `bestaetigungen { createdAt fotos }`.
+Fields on `Ausfuehrung`: `meldungsnummer` (from 1000, shown as "E-1042"), `ereignisStatus`, `einheit`, `klaerungSeit`, `klaerungGrund`, `klaerungKommentar`, `verwerfenGrund`, `externeStelle`, `externKommentar`, `klasse` (`A`–`D`), `benoetigteAusruestung`, `moeglicherNotfall`, `notfallPruefung`, `anzahlBestaetigungen`, `bestaetigungen { createdAt fotos }`.
 
-`EreignisStatus`: `EINGEGANGEN → ZUGEWIESEN → IN_BEARBEITUNG → ERLEDIGT`, plus `IN_KLAERUNG` and `VERWORFEN`.
+`klasse`, `benoetigteAusruestung` and `moeglicherNotfall` are set by keyword rules when the report comes in (`Features/Lage/MeldungEinschaetzung.cs`, no LLM). `Einheit.ausruestung` lists the equipment on board; without an explicit list it is the standard of the vehicle type in the name (HLF, LF, TLF, DLK, RW, MTW, GW-L, RL).
+
+`EreignisStatus`: `EINGEGANGEN → ZUGEWIESEN → IN_BEARBEITUNG → ERLEDIGT`, plus `IN_KLAERUNG`, `VERWORFEN` and `EXTERN_UEBERGEBEN`.
 
 | Operation | Does | Who |
 |---|---|---|
 | `lageMeldungen(lageId, offen)` | Reports of a Lage, oldest first; `offen: false` = closed ones | both |
 | `einheiten(mitarbeiterGruppeId)` | Units of the Kommune or of one Einsatzleitung | both |
-| `createEinheit` / `deleteEinheit` | Maintain units; deleting returns their open reports to the inbox | Leitstelle or the group itself |
+| `createEinheit(name, mitarbeiterGruppeId, ausruestung)` / `updateEinheit(einheitId, name, ausruestung)` / `deleteEinheit` | Maintain units (null in `updateEinheit` keeps the value); deleting returns their open reports to the inbox | Leitstelle or the group itself |
 | `meldungEinheitZuweisen(ausfuehrungId, einheitId)` | Assign to a unit of the responsible group; `null` = back to inbox | both |
 | `meldungFortsetzen(ausfuehrungId, aktion)` | `HILFE_EINLEITEN` or `EINSATZ_ABSCHLIESSEN` (initiates help first if needed); walks the process edges, so the citizen status follows | both |
-| `meldungAnLeitstelleAbgeben(ausfuehrungId, kommentar)` | Hand over to the Leitstelle (`IN_KLAERUNG`), comment required, unit released | both |
+| `meldungAnLeitstelleAbgeben(ausfuehrungId, grund, kommentar)` | Hand over to the Leitstelle (`IN_KLAERUNG`); `grund` is an `AbgabeGrund`, comment required only for `SONSTIGES`; unit released | both |
+| `meldungEinschaetzungSetzen(ausfuehrungId, klasse, benoetigteAusruestung)` | Correct the rule-based class and equipment; omitted values stay | both |
 | `meldungUmverteilen(ausfuehrungId, mitarbeiterGruppeId)` | Give to another Einsatzleitung; clears unit, assignee and Klärung | Leitstelle |
 | `meldungVerwerfen(ausfuehrungId, begruendung)` | Close without an operation (`VERWORFEN`), reason required | Leitstelle |
-| `meldungBestaetigen(publicId, fotos)` | "+1 · Sehe ich auch", anonymous; `publicId` is `activeLagen.meldungen.id`; only while the Gebiet is `LIVE`; at most 3 photos | anyone |
+| `meldungExternUebergeben(ausfuehrungId, stelle, kommentar)` | Hand to `BAUHOF`, `THW` or `ELS` and close (`EXTERN_UEBERGEBEN`) | Leitstelle |
+| `meldungNotfallPruefen(ausfuehrungId, ergebnis)` | Resolve `moeglicherNotfall`: `KEIN_NOTFALL` keeps the report open, `AN_ELS_UEBERGEBEN` closes it as handed to `ELS` | Leitstelle |
+| `meldungBestaetigen(publicId, fotos)` | "+1 · Sehe ich auch", anonymous; `publicId` is `activeLagen.meldungen.id`; only while the Gebiet is `LIVE` and the Meldeweg is online; at most 3 photos | anyone |
 
 Citizen side: `activeLagen.meldungen` has `id`, `kategorie`, `anzahlBestaetigungen`; `ausfuehrungCreateAnonym` and `ausfuehrungStatusAnonym` return `meldungsnummer`.
 

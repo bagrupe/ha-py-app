@@ -17,7 +17,7 @@ namespace API.Seeders.LageHelfer;
 /// </remarks>
 public static class EreignismeldungVorlage {
     /// <summary>Bump whenever the structure below changes, so the seeder publishes a new version.</summary>
-    private const int Revision = 5;
+    private const int Revision = 6;
 
     public const string StandortSlot = GebietEinsatzleitungZustaendigkeitSchritt.StandortSlotName;
     public const string KategorieSlot = "kategorie";
@@ -25,7 +25,6 @@ public static class EreignismeldungVorlage {
     public const string BilderSlot = "bilder";
     public const string RueckrufnummerSlot = "rueckrufnummer";
     public const int MaxFotos = 3;
-    public const string PrioritaetSlot = "prioritaet";
     public const string InterneNotizSlot = "interneNotiz";
     public const string VerbindungSpeichern = "Speichern";
     public const string VerbindungHilfeEinleiten = "Hilfe einleiten";
@@ -113,21 +112,15 @@ public static class EreignismeldungVorlage {
                 typeof(GebietEinsatzleitungZustaendigkeitSchritt).AssemblyQualifiedName!,
         };
 
-        // Leitstelle-only fields. Encrypted because the Backoffice encrypts every value it submits; they never
-        // appear in the citizen-facing status or in activeLagen.
+        // Leitstelle-only field. Encrypted because the Backoffice encrypts every value it submits; it never appears
+        // in the citizen-facing status or in activeLagen. The priority lives in Ausfuehrung.Klasse instead of a slot.
         var einschaetzung = () => new List<FormularFeld> {
-            new StringFormularFeld {
-                SlotName = PrioritaetSlot,
-                AngezeigterName = "Priorität",
-                Options = [new("Hoch"), new("Niedrig")],
-                Order = 0,
-            },
             new StringFormularFeld {
                 SlotName = InterneNotizSlot,
                 AngezeigterName = "Interne Notiz",
                 Anweisung = "Nur für Leitstelle und Einsatzleitung sichtbar.",
                 Multiline = true,
-                Order = 1,
+                Order = 0,
             },
         };
 

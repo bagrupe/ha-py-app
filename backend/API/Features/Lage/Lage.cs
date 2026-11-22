@@ -26,6 +26,22 @@ public class Lage {
     public Instant? ArchivedAt { get; set; }
     [GraphQLIgnore] public Instant? DeletedAt { get; set; }
 
+    [GraphQLDescription(
+        "Seit wann die Leitstelle den Meldeweg offline genommen hat. Null = Meldeweg offen, solange ein Gebiet LIVE ist.")]
+    public Instant? MeldewegPausiertSeit { get; set; }
+
+    [GraphQLIgnore] public Guid? MeldewegPausiertVonId { get; set; }
+
+    /// <summary>Pausing keeps every Gebiet LIVE so going back online needs no new call-out round.</summary>
+    public void SetMeldeweg(bool offen, Guid byId, Instant at) {
+        if (Status == LageStatus.Closed) {
+            throw new InvalidOperationException($"Lage {Id} is closed.");
+        }
+        MeldewegPausiertSeit = offen ? null : MeldewegPausiertSeit ?? at;
+        MeldewegPausiertVonId = offen ? null : MeldewegPausiertVonId ?? byId;
+        UpdatedAt = at;
+    }
+
     /// <summary>Every pass of every Gebiet, including ended ones superseded by a re-add.</summary>
     [GraphQLIgnore]
     public ICollection<LageGebiet> LageGebiete { get; set; } = new HashSet<LageGebiet>();

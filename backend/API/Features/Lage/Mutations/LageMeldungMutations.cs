@@ -66,7 +66,9 @@ public class LageMeldungMutations {
     [Error(typeof(EinheitNameVergebenException))]
     [Error(typeof(EinheitNameErforderlichException))]
     public async Task<Einheit> CreateEinheit(DomainContext db, CurrentUserAccessor currentUserAccessor,
-        string name, Guid mitarbeiterGruppeId, CancellationToken ct) {
+        string name, Guid mitarbeiterGruppeId,
+        [GraphQLDescription("Ausrüstung an Bord. Null = Standard des Fahrzeugtyps aus dem Namen (z. B. \"HLF\").")]
+        List<string>? ausruestung, CancellationToken ct) {
         var user = await LageHelferUser(currentUserAccessor);
         EnsureLeitstelleOderMitglied(user, mitarbeiterGruppeId);
         var trimmed = string.IsNullOrWhiteSpace(name) ? throw new EinheitNameErforderlichException() : name.Trim();
@@ -79,8 +81,43 @@ public class LageMeldungMutations {
             throw new EinheitNameVergebenException();
         }
 
-        var einheit = new Einheit { Id = Guid.NewGuid(), Name = trimmed, MitarbeiterGruppeId = mitarbeiterGruppeId };
+        var einheit = new Einheit {
+            Id = Guid.NewGuid(),
+            Name = trimmed,
+            MitarbeiterGruppeId = mitarbeiterGruppeId,
+            Ausruestung = ausruestung?.Select(a => a.Trim()).Where(a => a.Length > 0).Distinct().ToList()
+                ?? Fahrzeugausstattung.Standard(trimmed),
+        };
         db.Einheiten.Add(einheit);
+        await db.SaveChangesAsync(ct);
+        return einheit;
+    }
+
+    [Authorize]
+    [GraphQLDescription("Benennt eine Einheit um oder ändert ihre Ausrüstung. Null lässt den Wert unverändert.")]
+    [Error(typeof(NotAllowedException))]
+    [Error(typeof(EinheitNotFoundException))]
+    [Error(typeof(EinheitNameVergebenException))]
+    [Error(typeof(EinheitNameErforderlichException))]
+    public async Task<Einheit> UpdateEinheit(DomainContext db, CurrentUserAccessor currentUserAccessor,
+        Guid einheitId, string? name, List<string>? ausruestung, CancellationToken ct) {
+        var user = await LageHelferUser(currentUserAccessor);
+        var einheit = await db.Einheiten.AsTracking()
+            .SingleOrDefaultAsync(e => e.Id == einheitId && e.MitarbeiterGruppe.KommuneId == user.KommuneId, ct)
+            ?? throw new EinheitNotFoundException();
+        EnsureLeitstelleOderMitglied(user, einheit.MitarbeiterGruppeId);
+
+        if (name is not null) {
+            var trimmed = string.IsNullOrWhiteSpace(name) ? throw new EinheitNameErforderlichException() : name.Trim();
+            if (await db.Einheiten.AnyAsync(e => e.MitarbeiterGruppeId == einheit.MitarbeiterGruppeId
+                    && e.Id != einheit.Id && e.Name == trimmed, ct)) {
+                throw new EinheitNameVergebenException();
+            }
+            einheit.Name = trimmed;
+        }
+        if (ausruestung is not null) {
+            einheit.Ausruestung = ausruestung.Select(a => a.Trim()).Where(a => a.Length > 0).Distinct().ToList();
+        }
         await db.SaveChangesAsync(ct);
         return einheit;
     }
@@ -178,8 +215,8 @@ public class LageMeldungMutations {
 
     [Authorize]
     [GraphQLDescription(
-        "Gibt eine Meldung an die Leitstelle ab, die die Einsatzleitung nicht bearbeiten kann (z. B. \"Kettensäge " +
-        "fehlt\"). Der Kommentar ist Pflicht; die Einheit wird gelöst.")]
+        "Gibt eine Meldung an die Leitstelle ab, die die Einsatzleitung nicht bearbeiten kann. Der Grund ist Pflicht, " +
+        "der Kommentar nur bei SONSTIGES (z. B. \"Radlader nötig\"); die Einheit wird gelöst.")]
     [Error(typeof(NotAllowedException))]
     [Error(typeof(MeldungNotFoundException))]
     [Error(typeof(MeldungAbgeschlossenException))]
@@ -187,16 +224,19 @@ public class LageMeldungMutations {
     [Error(typeof(BegruendungErforderlichException))]
     public async Task<Ausfuehrung> MeldungAnLeitstelleAbgeben(DomainContext db,
         CurrentUserAccessor currentUserAccessor, IClock clock, [Service] VorgangsverlaufService verlaufService,
-        Guid ausfuehrungId, string kommentar, CancellationToken ct) {
+        Guid ausfuehrungId, AbgabeGrund grund, string? kommentar, CancellationToken ct) {
         var user = await LageHelferUser(currentUserAccessor);
-        var text = LageMeldungen.PflichtText(kommentar);
+        var text = grund == AbgabeGrund.Sonstiges ? LageMeldungen.PflichtText(kommentar)
+            : string.IsNullOrWhiteSpace(kommentar) ? null : kommentar.Trim();
         var meldung = await LageMeldungen.TrackedOffeneMeldung(db, user, ausfuehrungId, nurLeitstelle: false, ct);
         if (meldung.KlaerungSeit is not null) throw new MeldungInKlaerungException();
 
         meldung.KlaerungSeit = clock.GetCurrentInstant();
+        meldung.KlaerungGrund = grund;
         meldung.KlaerungKommentar = text;
         meldung.EinheitId = null;
-        verlaufService.RecordZustaendigkeitswechsel(db, meldung.Id, user, $"Leitstelle (Klärung): {text}");
+        var verlauf = text is null ? AbgabeGruende.Text(grund) : $"{AbgabeGruende.Text(grund)}: {text}";
+        verlaufService.RecordZustaendigkeitswechsel(db, meldung.Id, user, $"Leitstelle (Klärung): {verlauf}");
         await db.SaveChangesAsync(ct);
         return meldung;
     }
@@ -240,6 +280,7 @@ public class LageMeldungMutations {
         meldung.IstZustaendigkeit.DienstleisterId = null;
         meldung.EinheitId = null;
         meldung.KlaerungSeit = null;
+        meldung.KlaerungGrund = null;
         meldung.KlaerungKommentar = null;
         await verlaufService.ProtokolliereZustaendigkeitswechsel(db, meldung, alteZustaendigkeit, user);
         await db.SaveChangesAsync(ct);
@@ -261,14 +302,90 @@ public class LageMeldungMutations {
         var text = LageMeldungen.PflichtText(begruendung);
         var meldung = await LageMeldungen.TrackedOffeneMeldung(db, user, ausfuehrungId, nurLeitstelle: true, ct);
 
-        var now = clock.GetCurrentInstant();
         meldung.VerwerfenGrund = text;
+        Abschliessen(db, verlaufService, meldung, user, clock.GetCurrentInstant());
+        await db.SaveChangesAsync(ct);
+        return meldung;
+    }
+
+    [Authorize]
+    [GraphQLDescription(
+        "Nur Leitstelle: übergibt eine Meldung an eine Stelle außerhalb der Einsatzleitungen (Bauhof, THW, ELS) und " +
+        "schließt sie damit. Bürger:innen sehen \"Abgeschlossen\".")]
+    [Error(typeof(NotAllowedException))]
+    [Error(typeof(MeldungNotFoundException))]
+    [Error(typeof(MeldungAbgeschlossenException))]
+    public async Task<Ausfuehrung> MeldungExternUebergeben(DomainContext db, CurrentUserAccessor currentUserAccessor,
+        IClock clock, [Service] VorgangsverlaufService verlaufService, Guid ausfuehrungId, ExterneStelle stelle,
+        string? kommentar, CancellationToken ct) {
+        var user = await LageHelferUser(currentUserAccessor);
+        var meldung = await LageMeldungen.TrackedOffeneMeldung(db, user, ausfuehrungId, nurLeitstelle: true, ct);
+
+        UebergebeExtern(db, verlaufService, meldung, user, stelle, kommentar, clock.GetCurrentInstant());
+        await db.SaveChangesAsync(ct);
+        return meldung;
+    }
+
+    [Authorize]
+    [GraphQLDescription(
+        "Nur Leitstelle: erledigt den Hinweis \"möglicher Notfall\". AN_ELS_UEBERGEBEN übergibt die Meldung an das " +
+        "Einsatzleitsystem und schließt sie; KEIN_NOTFALL lässt sie im normalen Ablauf.")]
+    [Error(typeof(NotAllowedException))]
+    [Error(typeof(MeldungNotFoundException))]
+    [Error(typeof(MeldungAbgeschlossenException))]
+    public async Task<Ausfuehrung> MeldungNotfallPruefen(DomainContext db, CurrentUserAccessor currentUserAccessor,
+        IClock clock, [Service] VorgangsverlaufService verlaufService, Guid ausfuehrungId, NotfallPruefung ergebnis,
+        CancellationToken ct) {
+        var user = await LageHelferUser(currentUserAccessor);
+        var meldung = await LageMeldungen.TrackedOffeneMeldung(db, user, ausfuehrungId, nurLeitstelle: true, ct);
+
+        meldung.NotfallPruefung = ergebnis;
+        if (ergebnis == NotfallPruefung.AnElsUebergeben) {
+            UebergebeExtern(db, verlaufService, meldung, user, ExterneStelle.Els, "Möglicher Notfall",
+                clock.GetCurrentInstant());
+        }
+        await db.SaveChangesAsync(ct);
+        return meldung;
+    }
+
+    [Authorize]
+    [GraphQLDescription(
+        "Korrigiert Klasse und benötigte Ausrüstung einer offenen Meldung. Nicht angegebene Werte bleiben, wie sie sind.")]
+    [Error(typeof(NotAllowedException))]
+    [Error(typeof(MeldungNotFoundException))]
+    [Error(typeof(MeldungAbgeschlossenException))]
+    public async Task<Ausfuehrung> MeldungEinschaetzungSetzen(DomainContext db,
+        CurrentUserAccessor currentUserAccessor, Guid ausfuehrungId, MeldungKlasse? klasse,
+        List<string>? benoetigteAusruestung, CancellationToken ct) {
+        var user = await LageHelferUser(currentUserAccessor);
+        var meldung = await LageMeldungen.TrackedOffeneMeldung(db, user, ausfuehrungId, nurLeitstelle: false, ct);
+
+        if (klasse is not null) meldung.Klasse = klasse;
+        if (benoetigteAusruestung is not null) {
+            meldung.BenoetigteAusruestung = benoetigteAusruestung.Select(a => a.Trim()).Where(a => a.Length > 0)
+                .Distinct().ToList();
+        }
+        await db.SaveChangesAsync(ct);
+        return meldung;
+    }
+
+    private static void UebergebeExtern(DomainContext db, VorgangsverlaufService verlaufService,
+        Ausfuehrung meldung, BackofficeUser user, ExterneStelle stelle, string? kommentar, Instant now) {
+        meldung.ExterneStelle = stelle;
+        meldung.ExternKommentar = string.IsNullOrWhiteSpace(kommentar) ? null : kommentar.Trim();
+        meldung.EinheitId = null;
+        meldung.KlaerungSeit = null;
+        verlaufService.RecordZustaendigkeitswechsel(db, meldung.Id, user,
+            $"Übergeben an {AbgabeGruende.Text(stelle)}");
+        Abschliessen(db, verlaufService, meldung, user, now);
+    }
+
+    private static void Abschliessen(DomainContext db, VorgangsverlaufService verlaufService, Ausfuehrung meldung,
+        BackofficeUser user, Instant now) {
         meldung.Status = AusfuehrungStatus.Abgeschlossen;
         meldung.ManuellAbgeschlossen = now;
         meldung.AbgeschlossenAm = now;
         verlaufService.RecordAbschluss(db, meldung.Id, user);
-        await db.SaveChangesAsync(ct);
-        return meldung;
     }
 
     [AllowAnonymous]
@@ -284,10 +401,17 @@ public class LageMeldungMutations {
         JsonElement? fotos, CancellationToken ct) {
         var meldung = await db.Ausfuehrungen.NotDeleted()
             .Where(a => a.PublicId == publicId)
-            .Select(a => new { a.Id, a.Status, PassStatus = a.LageGebiet!.Status, LageStatus = a.LageGebiet.Lage.Status })
+            .Select(a => new {
+                a.Id,
+                a.Status,
+                PassStatus = a.LageGebiet!.Status,
+                LageStatus = a.LageGebiet.Lage.Status,
+                a.LageGebiet.Lage.MeldewegPausiertSeit,
+            })
             .SingleOrDefaultAsync(ct) ?? throw new MeldungNotFoundException();
         if (meldung.Status == AusfuehrungStatus.Abgeschlossen) throw new MeldungAbgeschlossenException();
-        if (meldung.LageStatus == LageStatus.Closed || !LageGebietStateMachine.AcceptsMeldungen(meldung.PassStatus)) {
+        if (meldung.LageStatus == LageStatus.Closed || meldung.MeldewegPausiertSeit is not null
+            || !LageGebietStateMachine.AcceptsMeldungen(meldung.PassStatus)) {
             throw new LageGebietNotLiveException();
         }
 

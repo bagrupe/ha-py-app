@@ -230,6 +230,36 @@ public class LageMutations {
         return lage;
     }
 
+    [Authorize]
+    [GraphQLDescription(
+        "Nur Leitstelle: nimmt den Meldeweg einer Lage offline (offen: false) oder wieder online (offen: true). " +
+        "Offline nimmt keine neuen Meldungen und keine Bestätigungen an und blendet die Lage in activeLagen aus; " +
+        "die Gebiete bleiben LIVE, offene Meldungen bleiben bearbeitbar.")]
+    [Error(typeof(NotAllowedException))]
+    [Error(typeof(LageNotFoundException))]
+    [Error(typeof(LageClosedException))]
+    public async Task<Lage> SetLageMeldeweg(
+        DomainContext db,
+        CurrentUserAccessor currentUserAccessor,
+        IClock clock,
+        Guid lageId,
+        bool offen,
+        CancellationToken ct) {
+        var (user, berechtigungen) = await currentUserAccessor.EnsureBackofficeUser();
+        berechtigungen.Global(GlobaleFunktionsberechtigung.LageHelfer).Fordern();
+        if (!LageMeldungen.IstLeitstelle(user)) {
+            throw new NotAllowedException("Nur die Leitstelle kann den Meldeweg schalten.");
+        }
+
+        var lage = await TrackedLageOfKommune(db, lageId, user.KommuneId, ct);
+        if (lage.Status == LageStatus.Closed) throw new LageClosedException();
+
+        lage.SetMeldeweg(offen, user.Id, clock.GetCurrentInstant());
+        await db.SaveChangesAsync(ct);
+
+        return lage;
+    }
+
     private static async Task<Lage> TrackedLageOfKommune(DomainContext db, Guid lageId, Guid kommuneId,
         CancellationToken ct) =>
         await db.Lagen.AsTracking()

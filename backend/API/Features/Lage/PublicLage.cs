@@ -63,7 +63,8 @@ public static class LiveLageGebiete {
             .ToListAsync(ct)).SingleOrDefault();
 
     private static IQueryable<LageGebiet> OpenPasses(DomainContext db) =>
-        db.LageGebiete.Where(lg => lg.Lage.Status != LageStatus.Closed && lg.Lage.DeletedAt == null);
+        db.LageGebiete.Where(lg => lg.Lage.Status != LageStatus.Closed && lg.Lage.DeletedAt == null
+            && lg.Lage.MeldewegPausiertSeit == null);
 
     private static IQueryable<Pass> Project(IQueryable<LageGebiet> passes) =>
         passes.Select(lg => new Pass(lg.Id, lg.LageId, lg.Lage.Title, lg.Lage.WarningText, lg.GebietId,

@@ -24,6 +24,51 @@ public enum EreignisStatus {
 
     [GraphQLDescription("Von der Leitstelle mit Begründung verworfen.")]
     Verworfen,
+
+    [GraphQLDescription("Von der Leitstelle an eine externe Stelle (Bauhof, THW, ELS) übergeben und damit abgeschlossen.")]
+    ExternUebergeben,
+}
+
+[GraphQLDescription("Warum die Einsatzleitung eine Meldung an die Leitstelle abgibt.")]
+public enum AbgabeGrund {
+    AusruestungFehlt,
+    KeineEinheitFrei,
+    NichtUnserGebiet,
+    KeinFallFuerFeuerwehr,
+    Sonstiges,
+}
+
+[GraphQLDescription("Stelle außerhalb der Einsatzleitungen, die eine Meldung übernimmt.")]
+public enum ExterneStelle {
+    Bauhof,
+    Thw,
+
+    [GraphQLDescription("Einsatzleitsystem der 112 (Übergabe als EIDO).")]
+    Els,
+}
+
+[GraphQLDescription("Ergebnis der Notfall-Prüfung durch die Leitstelle.")]
+public enum NotfallPruefung {
+    [GraphQLDescription("An das Einsatzleitsystem übergeben; die Meldung ist damit für den Meldeweg abgeschlossen.")]
+    AnElsUebergeben,
+
+    KeinNotfall,
+}
+
+public static class AbgabeGruende {
+    public static string Text(AbgabeGrund grund) => grund switch {
+        AbgabeGrund.AusruestungFehlt => "Benötigte Ausrüstung fehlt",
+        AbgabeGrund.KeineEinheitFrei => "Keine Einheit frei",
+        AbgabeGrund.NichtUnserGebiet => "Nicht unser Gebiet",
+        AbgabeGrund.KeinFallFuerFeuerwehr => "Kein Fall für die Feuerwehr",
+        _ => "Sonstiges",
+    };
+
+    public static string Text(ExterneStelle stelle) => stelle switch {
+        ExterneStelle.Bauhof => "Bauhof",
+        ExterneStelle.Thw => "THW",
+        _ => "ELS",
+    };
 }
 
 public class MeldungNotFoundException()
@@ -84,7 +129,7 @@ public static class LageMeldungen {
         IReadOnlyCollection<Guid> ausfuehrungIds, CancellationToken ct) {
         var meldungen = await db.Ausfuehrungen
             .Where(a => ausfuehrungIds.Contains(a.Id))
-            .Select(a => new { a.Id, a.Status, a.VerwerfenGrund, a.KlaerungSeit, a.EinheitId })
+            .Select(a => new { a.Id, a.Status, a.VerwerfenGrund, a.ExterneStelle, a.KlaerungSeit, a.EinheitId })
             .ToListAsync(ct);
         var hilfeUnterwegs = (await db.Bearbeitungen
                 .Where(b => ausfuehrungIds.Contains(b.AusfuehrungId)
@@ -94,7 +139,8 @@ public static class LageMeldungen {
             .ToHashSet();
 
         return meldungen.ToDictionary(m => m.Id, m =>
-            m.VerwerfenGrund is not null ? EreignisStatus.Verworfen
+            m.ExterneStelle is not null ? EreignisStatus.ExternUebergeben
+            : m.VerwerfenGrund is not null ? EreignisStatus.Verworfen
             : m.Status == AusfuehrungStatus.Abgeschlossen ? EreignisStatus.Erledigt
             : m.KlaerungSeit is not null ? EreignisStatus.InKlaerung
             : hilfeUnterwegs.Contains(m.Id) ? EreignisStatus.InBearbeitung

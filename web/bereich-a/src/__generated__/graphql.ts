@@ -14,6 +14,15 @@ export type Incremental<T> =
   | T
   | {[P in keyof T]?: P extends ' $fragmentName' | '__typename' ? T[P] : never};
 
+/** Warum die Einsatzleitung eine Meldung an die Leitstelle abgibt. */
+export enum AbgabeGrund {
+  AusruestungFehlt = 'AUSRUESTUNG_FEHLT',
+  KeineEinheitFrei = 'KEINE_EINHEIT_FREI',
+  KeinFallFuerFeuerwehr = 'KEIN_FALL_FUER_FEUERWEHR',
+  NichtUnserGebiet = 'NICHT_UNSER_GEBIET',
+  Sonstiges = 'SONSTIGES',
+}
+
 export enum ApplyPolicy {
   AfterResolver = 'AFTER_RESOLVER',
   BeforeResolver = 'BEFORE_RESOLVER',
@@ -111,6 +120,8 @@ export enum EreignisStatus {
   Eingegangen = 'EINGEGANGEN',
   /** Einsatz abgeschlossen. */
   Erledigt = 'ERLEDIGT',
+  /** Von der Leitstelle an eine externe Stelle (Bauhof, THW, ELS) übergeben und damit abgeschlossen. */
+  ExternUebergeben = 'EXTERN_UEBERGEBEN',
   /** Hilfe eingeleitet (Bürger:innen sehen "Hilfe ist unterwegs"). */
   InBearbeitung = 'IN_BEARBEITUNG',
   /** Von der Einsatzleitung an die Leitstelle abgegeben. */
@@ -119,6 +130,14 @@ export enum EreignisStatus {
   Verworfen = 'VERWORFEN',
   /** Einer Einheit zugewiesen, Hilfe noch nicht eingeleitet. */
   Zugewiesen = 'ZUGEWIESEN',
+}
+
+/** Stelle außerhalb der Einsatzleitungen, die eine Meldung übernimmt. */
+export enum ExterneStelle {
+  Bauhof = 'BAUHOF',
+  /** Einsatzleitsystem der 112 (Übergabe als EIDO). */
+  Els = 'ELS',
+  Thw = 'THW',
 }
 
 export enum FallbackLocaleInputType {
@@ -218,6 +237,18 @@ export enum MeldungAktion {
   HilfeEinleiten = 'HILFE_EINLEITEN',
 }
 
+/** Klasse einer Meldung nach dem Eisenhower-Schema. */
+export enum MeldungKlasse {
+  /** Dringend und wichtig. */
+  A = 'A',
+  /** Wichtig, nicht dringend. */
+  B = 'B',
+  /** Dringend, nicht wichtig. */
+  C = 'C',
+  /** Weder dringend noch wichtig. */
+  D = 'D',
+}
+
 /** Stand einer Meldung, wie ihn die meldende Person sieht. */
 export enum MeldungStatus {
   /** Abgeschlossen, es folgen keine weiteren Änderungen. */
@@ -238,6 +269,13 @@ export enum NewsArtikel__Status {
 export enum NewsArtikel__Status_Input {
   Draft = 'draft',
   Published = 'published',
+}
+
+/** Ergebnis der Notfall-Prüfung durch die Leitstelle. */
+export enum NotfallPruefung {
+  /** An das Einsatzleitsystem übergeben; die Meldung ist damit für den Meldeweg abgeschlossen. */
+  AnElsUebergeben = 'AN_ELS_UEBERGEBEN',
+  KeinNotfall = 'KEIN_NOTFALL',
 }
 
 export enum PasswordConfirmationResult {
