@@ -21,6 +21,11 @@ STATUS.md
 .cursor/
 .zed
 
+# Lokale Playwright-Ausgaben und Git-Bundles
+.playwright/
+.playwright-mcp/
+*.bundle
+
 # BundID: private Schlüssel/Zertifikate/JARs, niemals einchecken.
 bundid-secrets/*
 !bundid-secrets/keycloak

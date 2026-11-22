@@ -1,6 +1,9 @@
 @page
 @model KontaktModel
-@{ ViewData["Title"] = Model.Rueckruf ? "Rückruf anfordern" : "Telefonnummer für Rückfragen"; }
+@{
+    ViewData["Title"] = Model.Rueckruf ? "Rückruf anfordern" : "Telefonnummer für Rückfragen";
+    ViewData["FlowHideHeader"] = true;
+}
 <h1>@ViewData["Title"]</h1>
 @if (Model.Gespeichert) {
     <p role="status">@(Model.Rueckruf ? "Ihre Rückrufanfrage ist bei der Leitstelle eingegangen." : "Ihre Telefonnummer wurde zur Meldung gespeichert.")</p>

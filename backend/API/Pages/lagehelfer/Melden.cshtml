@@ -30,7 +30,10 @@
     }
     <div data-report-location class="card__body" style="gap:14px">
       <h1 tabindex="-1">Wo ist es passiert?</h1>
-      <button class="btn btn--soft btn--block" type="button" id="locateBtn">Meinen Standort verwenden</button>
+      <button class="btn btn--soft btn--block" type="button" id="locateBtn">
+        <span class="flow-location-icon" aria-hidden="true"></span>
+        Meinen Standort verwenden
+      </button>
 
       <div class="field @(Model.IsInvalid(nameof(Model.Input.Adresse)) || Model.HasMissingLocation ? "invalid" : null)">
         <label for="adresse">oder Adresse eingeben</label>

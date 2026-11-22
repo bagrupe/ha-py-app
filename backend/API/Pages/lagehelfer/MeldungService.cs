@@ -66,8 +66,9 @@ public sealed class MeldungService(DomainContext db, IRequestExecutorResolver ex
 
         var kategorien = meldung.Felder.OfType<StringFormularFeld>()
             .FirstOrDefault(f => f.SlotName == EreignismeldungVorlage.KategorieSlot)?
-            .Options.Select(o => (o.Key, o.Value)).ToList();
-        if (kategorien is null) return null;
+            .Options.Where(o => !string.Equals(o.Value, "Großbrand", StringComparison.OrdinalIgnoreCase))
+            .Select(o => (o.Key, o.Value)).ToList();
+        if (kategorien is null or { Count: 0 }) return null;
 
         return new MeldungFormular(version.Prozess.KommuneId, version.Id, meldung.Id, zurZuordnung.Id, kategorien);
     }

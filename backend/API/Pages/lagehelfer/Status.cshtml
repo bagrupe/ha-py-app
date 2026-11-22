@@ -3,7 +3,7 @@
 @using API.Features.Prozess
 @{
     ViewData["Title"] = "Status Ihrer Meldung";
-    ViewData["FlowHeader"] = Model.Nummer is { } number ? $"Meldung E-{number}" : "Meldungsstatus";
+    ViewData["FlowHideHeader"] = true;
     ViewData["HideBackFooter"] = true;
     var current = Model.Status switch {
         MeldungStatus.Eingegangen => 0,
@@ -17,7 +17,12 @@
     };
 }
 <section class="flow-screen">
-    <h1>Status Ihrer Meldung</h1>
+    <div class="flow-header__row flow-status-heading">
+        <h1>Status Ihrer Meldung</h1>
+        @if (Model.Nummer is { } number) {
+            <span class="flow-badge">@($"E-{number}")</span>
+        }
+    </div>
     <div class="card card__body">
         @if (Model.LageTitel is { } lage) { <span class="flow-badge">@lage</span> }
         <h2>@(Model.Beschreibung ?? "Ihre Meldung")</h2>

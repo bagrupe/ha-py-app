@@ -6,6 +6,7 @@
   background: var(--surface);
 }
 .flow-header__row { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.flow-status-heading { flex-wrap: wrap; }
 .flow-badge {
   align-self: flex-start;
   border-radius: var(--r-sm);
@@ -83,6 +84,23 @@ p.flow-notice, .flow-screen p.card__body { display: block; }
 .flow-form > .card__body { padding-inline: 0; }
 .flow-form [data-report-location]:not([hidden]) { flex: 1; padding-bottom: 0; }
 .flow-form .map { height: clamp(175px, 29svh, 235px); }
+.flow-location-icon {
+  position: relative;
+  flex: 0 0 18px;
+  height: 18px;
+  background:
+    linear-gradient(currentColor, currentColor) center top / 2px 4px no-repeat,
+    linear-gradient(currentColor, currentColor) center bottom / 2px 4px no-repeat,
+    linear-gradient(currentColor, currentColor) left center / 4px 2px no-repeat,
+    linear-gradient(currentColor, currentColor) right center / 4px 2px no-repeat;
+}
+.flow-location-icon::before {
+  content: "";
+  position: absolute;
+  inset: 5px;
+  border: 2px solid currentColor;
+  border-radius: 50%;
+}
 .flow-form .report-description textarea { min-height: 105px; }
 .flow-form [data-report-next] { margin-top: auto; }
 .flow-photos { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
