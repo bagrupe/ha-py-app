@@ -607,7 +607,13 @@ export const AntragDetail: FC = () => {
         />
         <div className='flex flex-col items-start gap-4'>
           {ausfuehrung.bearbeitungen
-            .filter((b) => b.schritt.titel && b.schritt.id != currentSchritt.id)
+            // Programmatic steps (routing, Weichen) collect no data, so their accordion would open empty.
+            .filter(
+              (b) =>
+                b.schritt.titel &&
+                b.schritt.id != currentSchritt.id &&
+                b.schritt.__typename !== 'ProgrammatischerSchritt',
+            )
             .map((b, index) => {
               const mitarbeiter =
                 b.user?.__typename === 'BackofficeUser' ? b.user : undefined;
