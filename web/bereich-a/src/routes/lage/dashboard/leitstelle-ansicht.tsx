@@ -14,7 +14,12 @@ import {
   ZielOptionen,
   parseZiel,
 } from './dialoge.tsx';
-import {type KartenMarker, LageKarte} from './lage-karte.tsx';
+import {
+  GebietLegende,
+  type KartenMarker,
+  LageKarte,
+  liveGebietIds,
+} from './lage-karte.tsx';
 import {
   LANGE_WARTEZEIT_MS,
   type Meldung,
@@ -52,6 +57,7 @@ export const LeitstelleAnsicht: FC<{
   const [elFilter, setElFilter] = useState(ALLE);
   const [dialog, setDialog] = useState<OffenerDialog>(null);
   const {meldungen, einsatzleitungen, einheiten} = data;
+  const live = useMemo(() => liveGebietIds(data.lage), [data.lage]);
 
   const farbe = useMemo(
     () => kategorieFarben(meldungen.map(kategorie)),
@@ -261,13 +267,17 @@ export const LeitstelleAnsicht: FC<{
         <Panel
           labelledBy='gesamtlage'
           title='Gesamtlage'
-          hinweis='OpenStreetMap · alle Gebiete mit Einsatzleitung'
+          hinweis='OpenStreetMap · Gebiete mit Einsatzleitung oder aktiver Lage'
         >
           <LageKarte
-            gebiete={data.gebiete.filter((g) => g.einsatzleitungen.length > 0)}
+            gebiete={data.gebiete.filter(
+              (g) => g.einsatzleitungen.length > 0 || live.has(g.id),
+            )}
+            live={live}
             marker={marker}
           />
           <div className='flex flex-wrap gap-4 text-xs text-gray-700'>
+            <GebietLegende />
             {[...new Set(offen.map(kategorie))].sort().map((k) => (
               <span key={k} className='flex items-center gap-1.5'>
                 <span
