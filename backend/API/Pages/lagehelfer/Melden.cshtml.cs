@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.Globalization;
+using API.Features.Lage;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -7,8 +8,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 namespace API.Pages.lagehelfer;
 
 [AllowAnonymous]
-public class MeldenModel(MeldungService meldungService, ILogger<MeldenModel> logger,
-    INotfallhinweisPruefung? notfallpruefung = null) : LagehelferPageModel {
+public class MeldenModel(MeldungService meldungService, ILogger<MeldenModel> logger) : LagehelferPageModel {
     public const string AdresseLabel = "Wo ist es passiert?";
     public const string KategorieLabel = "Um welche Art von Ereignis handelt es sich?";
     public const string BeschreibungLabel = "Was ist passiert?";
@@ -42,6 +42,9 @@ public class MeldenModel(MeldungService meldungService, ILogger<MeldenModel> log
 
     public async Task<IActionResult> OnPostAsync(CancellationToken ct) {
         if (!PrecheckPassed) return RedirectToPage("GefahrCheck", KommuneRoute);
+        if (MeldungEinschaetzung.Einschaetzen(null, Input.Beschreibung).MoeglicherNotfall)
+            return RedirectToPage("Notruf", KommuneRoute);
+
         if (!await LoadFormularAsync(ct)) return Page();
         if (!await HasActiveLagenAsync(ct)) return RedirectToPage("Index", KommuneRoute);
 
@@ -75,15 +78,6 @@ public class MeldenModel(MeldungService meldungService, ILogger<MeldenModel> log
             ParseCoordinate(Input.Lat)!.Value,
             ParseCoordinate(Input.Lng)!.Value,
             photos);
-
-        if (notfallpruefung is not null) {
-            try {
-                if (await notfallpruefung.EnthaeltNotfallhinweisAsync(Input.Beschreibung!, ct))
-                    return RedirectToPage("Notruf", KommuneRoute);
-            } catch (Exception ex) when (ex is not OperationCanceledException) {
-                logger.LogWarning("Optionale Notfallhinweisprüfung nicht verfügbar");
-            }
-        }
 
         MeldungErgebnis ergebnis;
         try {
