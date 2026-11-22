@@ -24,6 +24,7 @@ Der Prototyp ist gebaut und lokal durchgeklickt.
 | Dashboards | `6f816d1` | `web/bereich-a/src/routes/lage/dashboard/`, Menüpunkt „Lagebild“ |
 | Farb-Tokens | `6f816d1` | `web/bereich-a/src/index.css`, `tailwind.config.js` (und lokal `kommuna-ds/app.css`, nicht im Repo) |
 | Demo-Daten | dieser Ordner | [`demo-daten.py`](demo-daten.py) |
+| Live-Demo | dieser Ordner | [`live-demo.py`](live-demo.py) |
 
 **Aufrufen:** Backoffice → Menü „Lagebild“ (`/lage/dashboard`). Admins und Superadmins landen in der Leitstelle (`/lage/leitstelle`), alle anderen in ihrer Einsatzleitung (`/lage/einsatzleitung/<gruppeId>`). Die Leitstelle kann über „Ansicht“ in jede Einsatzleitung der Lage schauen und dort auch handeln.
 
@@ -31,6 +32,7 @@ Der Prototyp ist gebaut und lokal durchgeklickt.
 1. KRL-Seed lokal einspielen ([lagehelfer-seeding-lokal.md](../lagehelfer-seeding-lokal.md)). In `seed.json` unter `prozesse[0].kategorien` zusätzlich „Sturm“ und „Überschwemmung“ eintragen, Backend neu starten.
 2. Eine aktive Lage in Hameln-Pyrmont anlegen (`/lage`), mindestens ein Gebiet live.
 3. `python3 docs/hackathon/uebergabe-dashboards/demo-daten.py backend/API/Seeders/LageHelfer/Data/krl/seed.json` schaltet alle Gebiete mit Einsatzleitung live, legt Einheiten an (u. a. DLK 23/12 Hameln) und reicht 16 Meldungen aus dem Mock ein, in allen Ständen. Mehrfach ausführbar.
+4. Für die Live-Demo: `python3 docs/hackathon/uebergabe-dashboards/live-demo.py` spielt ein Sturm-Szenario ein, bei dem alle paar Sekunden eine neue Meldung eintrifft, mit drei Notfällen und gelegentlichen Bestätigungen. Nach 50 Meldungen endet es von selbst (`--count`, `--interval`, `--api`, `--dry-run`). Es braucht Schritt 3 und fügt bei jedem Lauf neue Meldungen hinzu.
 
 **Geprüft:** alle Backend-Tests (vollständig auf frischer Test-DB), Frontend `vitest`, `tsc`, ESLint. Im Browser: Auswahl und Passt-Anzeige, Zuweisen per Klick und per Drag & Drop, Rückfrage bei fehlender Ausrüstung, „Läuft“, Zurückziehen in den Eingang, Abgabe mit Grund, Meldeweg offline/online, Klärung an Bauhof, Tabelle offen/Archiv, Einheiten anlegen/ändern/löschen (inkl. doppelter Name).
 
