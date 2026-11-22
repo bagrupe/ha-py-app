@@ -511,7 +511,7 @@ const KlaerungKarte: FC<{
 }) => {
   const abgebend = meldung.istZustaendigkeit.mitarbeiterGruppeId;
   const [ziel, setZiel] = useState(
-    einsatzleitungen.find((el) => el.id !== abgebend)?.id ?? '',
+    einsatzleitungen.find((el) => el.id !== abgebend)?.id ?? abgebend ?? '',
   );
   const seit = meldung.klaerungSeit ? now - meldung.klaerungSeit.getTime() : 0;
   return (
@@ -551,7 +551,7 @@ const KlaerungKarte: FC<{
           >
             <ZielOptionen
               einsatzleitungen={einsatzleitungen}
-              ausser={abgebend}
+              zurueck={abgebend}
             />
           </select>
         </label>

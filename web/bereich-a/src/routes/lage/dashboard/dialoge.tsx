@@ -35,14 +35,16 @@ export const parseZiel = (value: string): Ziel =>
 export const ZielOptionen: FC<{
   einsatzleitungen: Einsatzleitung[];
   ausser?: string | null;
-}> = ({einsatzleitungen, ausser}) => (
+  /** The Einsatzleitung a report came back from: still selectable, marked as sending it back. */
+  zurueck?: string | null;
+}> = ({einsatzleitungen, ausser, zurueck}) => (
   <>
     <optgroup label='Einsatzleitung'>
       {einsatzleitungen
         .filter((el) => el.id !== ausser)
         .map((el) => (
           <option key={el.id} value={el.id}>
-            {el.name}
+            {el.id === zurueck ? `${el.name} (zurück)` : el.name}
           </option>
         ))}
     </optgroup>
