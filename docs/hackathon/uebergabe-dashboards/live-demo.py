@@ -23,6 +23,7 @@ import json
 import os
 import pathlib
 import random
+import re
 import subprocess
 import sys
 import tempfile
@@ -66,9 +67,31 @@ STORYLINE = [
     ("Hameln", "Hastenbeck", "Unwetter", "Keller vollgelaufen, Heizung aus", False),
 ]
 
+COPY_PADDING = re.compile(r"^[\s\u200b\u2060\ufeff]+|[\s\u200b\u2060\ufeff]+$")
+
+
+def parse_api_url(value):
+    url = COPY_PADDING.sub("", value)
+    markdown_link = re.fullmatch(r"\[[^\]\r\n]*\]\((.+)\)", url)
+    if markdown_link:
+        url = COPY_PADDING.sub("", markdown_link[1])
+    if re.search(r"[^\x21-\x7e]", url):
+        raise argparse.ArgumentTypeError("API-URL enthält Leerzeichen oder nicht URL-kodierte Zeichen.")
+    try:
+        parsed = urllib.parse.urlsplit(url)
+        if parsed.scheme in ("http", "https") and parsed.hostname:
+            # Accessing the port also validates its syntax and range.
+            parsed.port
+            return url
+    except ValueError:
+        pass
+    raise argparse.ArgumentTypeError("HTTP(S)-URL erwartet, z. B. https://example.org/graphql")
+
+
 args_parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
 args_parser.add_argument("seed", nargs="?", default=str(ROOT / "backend/API/Seeders/LageHelfer/Data/krl/seed.json"))
-args_parser.add_argument("--api", default=os.environ.get("GRAPHQL_URL", "http://localhost:5000/graphql"))
+args_parser.add_argument("--api", type=parse_api_url,
+                         default=os.environ.get("GRAPHQL_URL", "http://localhost:5000/graphql"))
 args_parser.add_argument("--interval", type=float, default=5, help="mean seconds between Meldungen (default 5)")
 args_parser.add_argument("--count", type=int, default=50, help="stop after this many Meldungen (default 50)")
 args_parser.add_argument("--confirm-chance", type=float, default=0.35,
