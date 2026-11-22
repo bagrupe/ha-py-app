@@ -8,10 +8,45 @@ PDF und Screenshots in `assets/` zeigen einen **älteren Stand** (u. a. noch mit
 
 - Gebaut wird im bestehenden Backoffice **`web/bereich-a`** (React 19, Vite, Tailwind 3, react-router 7, urql + GraphQL-Codegen, MapLibre). Dort gibt es unter `/lage` schon eine schlichte Lage-Verwaltung, an die du andocken kannst.
 - Zwei Ansichten, umschaltbar über „Ansicht“ oben rechts: **Einsatzleitung** (ein Zuständigkeitsgebiet, Ereignisse auf passende Einheiten verteilen) und **Leitstelle** (Gesamtlage, Meldeweg schalten, abgegebene Ereignisse klären).
-- Die API deckt den Kern ab: Meldungen einer Lage mit Nummer, Status und +1-Zähler, Einheiten, Zuweisen, Klärung, Umverteilen, Verwerfen (Tabelle in Abschnitt 5).
-- Noch nicht im Backend: Meldeweg pausieren, Grund der Abgabe, externe Übergabe (Bauhof/THW), Klasse, benötigte Ausrüstung, Ausrüstung der Einheiten, Notfall-Erkennung. Vorschlag in Abschnitt 5a; bis dahin im Frontend mit Werten aus Abschnitt 7.
+- Die API deckt alles ab, was der Mock braucht, außer B-Team-Zahlen und echter EIDO-Übertragung (Tabelle in Abschnitt 5, Erweiterung in 5a).
 - Farben und Schrift kommen aus dem Design System von bereich-a, nicht aus dem Mock (Abschnitt 6a).
 - Ziel ist ein klickbarer Prototyp für die Demo, kein Produktivcode: Drag & Drop, Statuswechsel und Klärung müssen sich echt anfühlen.
+
+---
+
+## 0. Stand der Umsetzung (22.11.2026)
+
+Der Prototyp ist gebaut und lokal durchgeklickt.
+
+| Teil | Commit | Wo |
+|---|---|---|
+| Backend (5a), Migration, Tests, Schema | `de31577` | `backend/API/Features/Lage/`, `MeldungEinschaetzung.cs`, `backend/UnitTests/LageDashboardTests.cs`, `MeldungEinschaetzungTest.cs` |
+| Dashboards | `6f816d1` | `web/bereich-a/src/routes/lage/dashboard/`, Menüpunkt „Lagebild“ |
+| Farb-Tokens | `6f816d1` | `web/bereich-a/src/index.css`, `tailwind.config.js` (und lokal `kommuna-ds/app.css`, nicht im Repo) |
+| Demo-Daten | dieser Ordner | [`demo-daten.py`](demo-daten.py) |
+
+**Aufrufen:** Backoffice → Menü „Lagebild“ (`/lage/dashboard`). Admins und Superadmins landen in der Leitstelle (`/lage/leitstelle`), alle anderen in ihrer Einsatzleitung (`/lage/einsatzleitung/<gruppeId>`). Die Leitstelle kann über „Ansicht“ in jede Einsatzleitung der Lage schauen und dort auch handeln.
+
+**Demo vorbereiten:**
+1. KRL-Seed lokal einspielen ([lagehelfer-seeding-lokal.md](../lagehelfer-seeding-lokal.md)). In `seed.json` unter `prozesse[0].kategorien` zusätzlich „Sturm“ und „Überschwemmung“ eintragen, Backend neu starten.
+2. Eine aktive Lage in Hameln-Pyrmont anlegen (`/lage`), mindestens ein Gebiet live.
+3. `python3 docs/hackathon/uebergabe-dashboards/demo-daten.py backend/API/Seeders/LageHelfer/Data/krl/seed.json` schaltet alle Gebiete mit Einsatzleitung live, legt Einheiten an (u. a. DLK 23/12 Hameln) und reicht 16 Meldungen aus dem Mock ein, in allen Ständen. Mehrfach ausführbar.
+
+**Geprüft:** alle Backend-Tests (vollständig auf frischer Test-DB), Frontend `vitest`, `tsc`, ESLint. Im Browser: Auswahl und Passt-Anzeige, Zuweisen per Klick und per Drag & Drop, Rückfrage bei fehlender Ausrüstung, „Läuft“, Zurückziehen in den Eingang, Abgabe mit Grund, Meldeweg offline/online, Klärung an Bauhof, Tabelle offen/Archiv.
+
+### Offene Punkte
+
+- **Primärfarbe der KRL ist Rot** (`data-kommune` Weserbergland). Dadurch sehen „Zuweisen“ und der Auswahlrahmen nach Warnung aus. Die Dashboards nutzen für Auswahl schon Grau; für Primäraktionen bräuchte es eine feste Aktionsfarbe oder eine andere KRL-Farbe.
+- **Regeln sind grob.** Beispiele: „ohne Lebensgefahr“ wird als möglicher Notfall erkannt (Verneinung nur bei „verletzt“ berücksichtigt); „Straße überflutet“ wird A statt B wie im Mock. Die Einsatzleitung bzw. Leitstelle korrigiert über „Bearbeiten“.
+- **Bearbeiten** ändert nur Klasse und benötigte Ausrüstung. Kategorie, Beschreibung und Ort stammen aus der Bürgermeldung und sind nicht änderbar.
+- **Ausrüstungs-Prüfung** läuft nur im Client (Rückfrage). Das Backend nimmt jede Einheit der zuständigen Einsatzleitung an.
+- **Ausrüstung der Einheiten** ist nicht pflegbar, außer beim Anlegen (`createEinheit(ausruestung)`). Kein UI zum Anlegen oder Bearbeiten von Einheiten.
+- **B-Team** („4 Plätze besetzt“, „≈ 4–5 Notrufplätze entlastet“) ist fest im Frontend. Die Maske „B-Team · Telefonerfassung“ aus dem Mock ist nicht gebaut.
+- **ELS-Status** (Status 2/4) ist abgeleitet; **EIDO** wird nicht übertragen, die Meldung wird nur als „an ELS übergeben“ geschlossen.
+- **Kategorien „Sturm“/„Überschwemmung“** stehen nur im lokalen, ignorierten `Data/krl/seed.json`. `Dokumente/seed.json` im Team-Ordner hat sie nicht.
+- **Hinweise für Bürger** (`updateLageWarningText`) hat im Dashboard keinen Button mehr (wie im Mock); in `/lage` auch nicht. Bei Bedarf dort ergänzen.
+- **Flutter-App:** Nur das Schema ist aktualisiert. Die App nutzt keine der geänderten Mutations.
+- Mehrere Einsatzleitungen mit Dutzenden Gebieten machen die Kennzahlen-Zeile der Leitstelle lang; die Liste zeigt nur Einsatzleitungen mit neuen Ereignissen oder Einheiten.
 
 ---
 
@@ -95,7 +130,7 @@ Offen: Wie wird aus *zugewiesen* ein *in Bearbeitung*? Die API bietet `meldungFo
 
 ## 4. Statusmodell eines Ereignisses
 
-Das Backend liefert den Stand direkt als `Ausfuehrung.ereignisStatus` (`EreignisStatus`). Die Aktionen sind eigene Mutations; *kursiv* = noch nicht gebaut (Abschnitt 5a):
+Das Backend liefert den Stand direkt als `Ausfuehrung.ereignisStatus` (`EreignisStatus`). Die Aktionen sind eigene Mutations:
 
 ```
 EINGEGANGEN ──meldungEinheitZuweisen──▶ ZUGEWIESEN ──meldungFortsetzen(HILFE_EINLEITEN)──▶ IN_BEARBEITUNG
@@ -111,8 +146,9 @@ EINGEGANGEN ──meldungEinheitZuweisen──▶ ZUGEWIESEN ──meldungFortse
 - `meldungEinheitZuweisen(einheitId: null)` legt die Meldung zurück in den Eingang.
 - `meldungFortsetzen(EINSATZ_ABSCHLIESSEN)` geht bei Bedarf vorher automatisch „Hilfe einleiten“. Der Button „Erledigt“ funktioniert also auch bei *zugewiesen*.
 - „Verwerfen“ (Tabelle) und „Schließen mit Begründung“ (Klärung) sind dieselbe Mutation `meldungVerwerfen`.
-- *`grund` bei `meldungAnLeitstelleAbgeben` und `meldungExternUebergeben` / `EXTERN_UEBERGEBEN` gibt es noch nicht.* Heute nimmt die Mutation nur `kommentar` (Pflicht).
-- Bürgerseite (`ausfuehrungStatusAnonym`, `MeldungStatus`): ZUGEWIESEN → `IN_BEARBEITUNG`, IN_BEARBEITUNG → `HILFE_UNTERWEGS`, ERLEDIGT und VERWORFEN → `ABGESCHLOSSEN`. Die Begründung sehen Bürger:innen nicht. Für EXTERN_UEBERGEBEN Vorschlag: ebenfalls `ABGESCHLOSSEN`.
+- `meldungAnLeitstelleAbgeben` braucht einen `grund` (`AbgabeGrund`); der Kommentar ist nur bei `SONSTIGES` Pflicht.
+- `meldungExternUebergeben` (Bauhof, THW) und `meldungNotfallPruefen(AN_ELS_UEBERGEBEN)` schließen die Meldung als `EXTERN_UEBERGEBEN`.
+- Bürgerseite (`ausfuehrungStatusAnonym`, `MeldungStatus`): ZUGEWIESEN → `IN_BEARBEITUNG`, IN_BEARBEITUNG → `HILFE_UNTERWEGS`, ERLEDIGT, VERWORFEN und EXTERN_UEBERGEBEN → `ABGESCHLOSSEN`. Begründungen sehen Bürger:innen nicht.
 
 ---
 
@@ -123,13 +159,13 @@ Endpunkte, Token und Rezepte: Skill `.agents/skills/graphql-api` (vor allem `ref
 | UI-Element | Quelle | Hinweis |
 |---|---|---|
 | Lage-Pill, Titel, „seit“ | ✅ `lagen(status: ACTIVE)` → `title`, `gebiete[].liveAt` | „seit“ = frühestes `liveAt` |
-| Meldeweg offen (Pill aktiv) | ✅ abgeleitet | offen, solange mindestens ein `LageGebiet` `LIVE` ist |
-| **Offline / Online nehmen** | ❌ | `closeLage` ist endgültig, `LIVE` kann nur nach `ENDED`. Siehe 5a |
+| Meldeweg offen (Pill aktiv) | ✅ abgeleitet | offen, solange mindestens ein `LageGebiet` `LIVE` ist und `meldewegPausiertSeit` leer |
+| Offline / Online nehmen | ✅ `setLageMeldeweg(lageId, offen)`, `Lage.meldewegPausiertSeit` | nur Leitstelle; Gebiete bleiben `LIVE` |
 | Gebiete, Polygone, Einsatzleitung je Gebiet | ✅ `gebiete { geometry einsatzleitungen { id name } }` | `geometry` ist ein GeoJSON-String → `JSON.parse` |
 | Ereignisse einer Lage | ✅ `lageMeldungen(lageId, offen)` | Leitstelle (Admin/Superadmin) sieht alle, Einsatzleitung nur die ihrer Gruppen. `offen: false` = Archiv |
 | Kurz-ID `E-1042` | ✅ `meldungsnummer` | Zahl ab 1000, Präfix „E-“ setzt das Frontend. Auch in `ausfuehrungCreateAnonym` und `ausfuehrungStatusAnonym` |
 | Status-Badge | ✅ `ereignisStatus` | siehe Abschnitt 4 |
-| Kategorie, Beschreibung, Fotos, Standort | ✅ `slotValues` (Slots `kategorie`, `beschreibung`, `bilder`, `adresse`) | unverschlüsselt (`PlainSlotValue`). Verschlüsselt sind nur `rueckrufnummer`, `prioritaet`, `interneNotiz`; Entschlüsseln wie in `components/ui/decrypt-value.tsx` |
+| Kategorie, Beschreibung, Fotos, Standort | ✅ `slotValues` (Slots `kategorie`, `beschreibung`, `bilder`, `adresse`) | unverschlüsselt (`PlainSlotValue`). Verschlüsselt sind nur `rueckrufnummer` und `interneNotiz` (`prioritaet` ist entfernt); Entschlüsseln wie in `components/ui/decrypt-value.tsx` |
 | Gemeinde | ✅ `Ausfuehrung.lage.gebietName` | Ortsteil („Wohngebiet Nord“) gibt es nicht, ggf. aus Adresse |
 | Einsatzleitung eines Ereignisses | ✅ `istZustaendigkeit.mitarbeiterGruppe` | |
 | Wartezeit | ✅ `createdAt` | |
@@ -137,36 +173,34 @@ Endpunkte, Token und Rezepte: Skill `.agents/skills/graphql-api` (vor allem `ref
 | Einheiten | ✅ `einheiten(mitarbeiterGruppeId)`, `createEinheit`, `deleteEinheit`, `Ausfuehrung.einheit` | Status 2/4 aus den offenen Meldungen je Einheit ableiten. Demo-Einheiten über `einheiten` je Bereich in `seed.json` |
 | Ereignis auf Einheit ziehen | ✅ `meldungEinheitZuweisen` | nur Einheiten der zuständigen Einsatzleitung |
 | „Erledigt“ / in Bearbeitung | ✅ `meldungFortsetzen(aktion)` | geht die Prozess-Kanten, Bürger:innen sehen den neuen Stand |
-| An Leitstelle abgeben, Klärung | ⚠️ `meldungAnLeitstelleAbgeben(kommentar)`, `klaerungSeit`, `klaerungKommentar` | **Grund fehlt**, Kommentar heute Pflicht. Siehe 5a |
+| An Leitstelle abgeben, Klärung | ✅ `meldungAnLeitstelleAbgeben(grund, kommentar)`, `klaerungSeit`, `klaerungGrund`, `klaerungKommentar` | Kommentar nur bei `SONSTIGES` Pflicht |
 | Neu zuweisen / Umverteilen an Einsatzleitung | ✅ `meldungUmverteilen(mitarbeiterGruppeId)` | nur Leitstelle |
-| **Zuweisen an Bauhof / THW** | ❌ | siehe 5a |
+| Zuweisen an Bauhof / THW | ✅ `meldungExternUebergeben(stelle, kommentar)`, `externeStelle`, `externKommentar` | nur Leitstelle, schließt die Meldung |
 | Verwerfen / Schließen mit Begründung | ✅ `meldungVerwerfen(begruendung)`, `verwerfenGrund` | nur Leitstelle |
 | Lage endgültig beenden | ✅ `closeLage(lageId)` | nur in `/lage`, nicht im Dashboard |
 | Hinweise für Bürger | ✅ `updateLageWarningText(lageId, warningText)` | erscheint in `activeLagen.warningText`; im Dashboard-Mock kein Button mehr, ggf. in `/lage` |
-| **Klasse A–D** | ❌ | Es gibt nur den verschlüsselten Slot `prioritaet` (Hoch/Niedrig). Siehe 5a |
-| **Braucht (Ausrüstung je Ereignis)** | ❌ | siehe 5a |
-| **Ausrüstung der Einheiten, Passt-Anzeige** | ❌ | `Einheit` hat nur `name`. Abgleich im Client: benötigt ⊆ an Bord |
-| **Möglicher Notfall, EIDO** | ❌ | Flag siehe 5a; EIDO nur andeuten |
-| B-Team-Plätze, entlastete Notrufplätze | ❌ | mocken |
+| Klasse A–D | ✅ `klasse`, Korrektur mit `meldungEinschaetzungSetzen` | beim Eingang regelbasiert gesetzt |
+| Braucht (Ausrüstung je Ereignis) | ✅ `benoetigteAusruestung`, Korrektur mit `meldungEinschaetzungSetzen` | beim Eingang regelbasiert gesetzt |
+| Ausrüstung der Einheiten, Passt-Anzeige | ✅ `Einheit.ausruestung`, `createEinheit(ausruestung)` | ohne Angabe Standard des Fahrzeugtyps (HLF, TLF, DLK, RW, MTW …); Abgleich im Client |
+| Möglicher Notfall, EIDO | ✅ `moeglicherNotfall`, `notfallPruefung`, `meldungNotfallPruefen` | EIDO wird nicht wirklich übertragen |
+| B-Team-Plätze, entlastete Notrufplätze | ❌ | fest im Frontend, als Beispielwert markiert |
 | Live-Aktualisierung | ⚠️ keine Subscriptions | Polling, z. B. alle 15 s mit `requestPolicy: 'network-only'` |
 
 Alle Mutations liefern fachliche Fehler im Feld `errors` (z. B. `MeldungInKlaerungError`, `NotAllowedError`), immer `errors { __typename ... on Error { message } }` abfragen. Rollen: Admin und Superadmin gelten als Leitstelle, Nutzer mit Gruppe als deren Einsatzleitung. Alle brauchen das globale Recht `LageHelfer`.
 
-**Empfehlung:** Echte API verwenden, wo sie existiert. Eine dünne Datenschicht (`useLageDashboard()` o. ä.) liefert die fehlenden Felder aus Abschnitt 7, bis 5a gebaut ist, und dient als Fallback, falls das Backend in der Demo nicht läuft.
+Die Dashboards nutzen ausschließlich die echte API (`routes/lage/dashboard/use-lage-dashboard.ts`), Polling alle 15 s.
 
-### 5a. Backend-Erweiterung (entschieden 22.11., noch nicht gebaut)
+### 5a. Backend-Erweiterung (umgesetzt 22.11.)
 
-Namen sind Vorschläge.
-
-| Was | Vorschlag |
+| Was | Umsetzung |
 |---|---|
-| Meldeweg pausieren | Neuer `LageGebietStatus.PAUSED` mit `LIVE → PAUSED`, `PAUSED → LIVE`, `PAUSED → ENDED`. Komfort-Mutation `setLageMeldeweg(lageId, offen: Boolean)` schaltet alle laufenden Gebiete der Lage. `AcceptsMeldungen` bleibt nur `LIVE`, `activeLagen` blendet pausierte Gebiete aus. `Lage.status` bleibt `ACTIVE`; `closeLage` muss auch `PAUSED` beenden |
+| Meldeweg pausieren | Statt eines neuen Gebietsstatus ein Feld an der Lage: `Lage.meldewegPausiertSeit`. `setLageMeldeweg(lageId, offen)` setzt oder leert es (nur Leitstelle). Pausiert: keine neuen Meldungen, keine Bestätigungen, Lage nicht in `activeLagen`. Gebiete bleiben `LIVE`, deshalb kein neuer Aufruf-Durchlauf beim Wieder-Online-Gehen |
 | Grund der Abgabe | Enum `AbgabeGrund { AUSRUESTUNG_FEHLT, KEINE_EINHEIT_FREI, NICHT_UNSER_GEBIET, KEIN_FALL_FUER_FEUERWEHR, SONSTIGES }`. `meldungAnLeitstelleAbgeben(ausfuehrungId, grund, kommentar)`: Grund Pflicht, Kommentar nur bei `SONSTIGES` Pflicht. Feld `klaerungGrund` an der `Ausfuehrung` |
-| Externe Übergabe | Neuer Endstatus `EreignisStatus.EXTERN_UEBERGEBEN`. `meldungExternUebergeben(ausfuehrungId, stelle, kommentar)` mit `stelle` als Enum `ExterneStelle { BAUHOF, THW }` (später konfigurierbar je Kommune). Felder `externeStelle`, `externUebergebenAt`. Nur Leitstelle, erlaubt aus jedem offenen Status. Erscheint in `lageMeldungen(offen: false)`, Bürgerstatus `ABGESCHLOSSEN` |
-| Ausrüstung der Einheit | `Einheit.ausruestung: [String!]!` (Begriffe wie „Motorkettensäge“, „Drehleiter“, „Pumpe“, „Absperrung“), Migration, `einheiten[].ausruestung` in `seed.json`, Parameter in `createEinheit` |
-| Einschätzung je Meldung | Beim Eingang (`ausfuehrungCreateAnonym`) einmal bestimmen und an der `Ausfuehrung` speichern: `benoetigteAusruestung: [String!]`, `klasse` (`A`–`D`), `moeglicherNotfall: Boolean`. `meldungKlasseSetzen` und `meldungAusruestungSetzen` für Korrekturen der Einsatzleitung oder Leitstelle |
-| Notfall prüfen | `meldungNotfallPruefen(ausfuehrungId, ergebnis: AN_ELS_UEBERGEBEN \| KEIN_NOTFALL)`, speichert Ergebnis, Zeit und Bearbeiter; nur Leitstelle |
-| Bestimmung | LLM-Aufruf im Backend, Schlüssel nur per Konfiguration. Für Demo und Tests ein regelbasierter Fallback ohne Schlüssel (Stichwörter wie „Baum“/„Ast“ → Motorkettensäge, „Dach“ → Drehleiter + Absperrung, „Keller“/„überflutet“ → Pumpe, „eingeklemmt“/„noch drin“ → möglicher Notfall) |
+| Externe Übergabe | Neuer Endstatus `EreignisStatus.EXTERN_UEBERGEBEN`. `meldungExternUebergeben(ausfuehrungId, stelle, kommentar)` mit `stelle` als Enum `ExterneStelle { BAUHOF, THW }` (später konfigurierbar je Kommune). Felder `externeStelle`, `externKommentar`; Zeitpunkt in `abgeschlossenAm`. `ExterneStelle` hat zusätzlich `ELS` für die Notfall-Übergabe. Nur Leitstelle, erlaubt aus jedem offenen Status. Erscheint in `lageMeldungen(offen: false)`, Bürgerstatus `ABGESCHLOSSEN` |
+| Ausrüstung der Einheit | `Einheit.ausruestung: [String!]!`, Parameter in `createEinheit`. Ohne Angabe und im Seeder: Standard des Fahrzeugtyps aus dem Namen (`Fahrzeugausstattung` in `Features/Lage/MeldungEinschaetzung.cs`) |
+| Einschätzung je Meldung | Beim Eingang (`ausfuehrungCreateAnonym`) einmal bestimmen und an der `Ausfuehrung` speichern: `benoetigteAusruestung: [String!]`, `klasse` (`A`–`D`), `moeglicherNotfall: Boolean`. `meldungEinschaetzungSetzen(klasse, benoetigteAusruestung)` für Korrekturen. Ältere Meldungen holt der LageHelfer-Seeder beim Start nach |
+| Notfall prüfen | `meldungNotfallPruefen(ausfuehrungId, ergebnis: AN_ELS_UEBERGEBEN \| KEIN_NOTFALL)`, speichert das Ergebnis; `AN_ELS_UEBERGEBEN` schließt als externe Übergabe an `ELS`; nur Leitstelle |
+| Bestimmung | Nur Regeln (`MeldungEinschaetzung`), kein LLM: Stichwörter wie „Baum“/„Ast“ → Motorkettensäge, „Dach“/„aufs Haus“ → Drehleiter, „Keller“/„überflutet“ → Pumpe, „Gehweg“/„lose“ → Absperrung, „Waldweg“/„mehrere Bäume“ → Radlader, „eingeklemmt“/„noch drin“ → möglicher Notfall. Klasse aus „dringend“- und „wichtig“-Stichwörtern, Notfall immer A |
 
 Gestrichen gegenüber dem Stand vom 21.11.: KI-Lagebild, Dringlichkeit je Meldung, NINA-Textvorlage im Dashboard.
 
@@ -188,7 +222,7 @@ Gestrichen gegenüber dem Stand vom 21.11.: KI-Lagebild, Dringlichkeit je Meldun
 
 Der Mock nutzt Inter und eigene Hex-Werte. **Nicht übernehmen**: Gebaut wird mit den Tokens von bereich-a (`src/index.css`, `tailwind.config.js`), die auch im gemeinsamen Design System `kommuna-ds/app.css` stehen.
 
-- **Schrift:** `font-sans` = Century Gothic, kein Inter.
+- **Schrift:** die Schrift von bereich-a, kein Inter. (bereich-a lädt Century Gothic aus `kommuna-ds` derzeit nicht; das betrifft die ganze App, nicht nur die Dashboards.)
 - **Grautöne:** Mock `#15191F` / `#59616E` / `#DDE1E7` / `#F3F4F6` → `gray-900` / `gray-700` / `gray-300` / `gray-100`.
 - **Primäraktionen** (Zuweisen, Auswahlrahmen, aktiver Filter): `primary`. Achtung, `primary` wechselt je Kommune (`data-kommune`: Hameln-Pyrmont grün, Weserbergland rot). Deshalb darf **keine Status- oder Bedeutungsfarbe** von `primary` abhängen.
 
@@ -204,6 +238,8 @@ Der Mock nutzt Inter und eigene Hex-Werte. **Nicht übernehmen**: Gebaut wird mi
 | `bedarf` | `#EFE9FB` / `#4B2A99` | Chip „Braucht“ |
 | `kategorie-1` | `#E8EBFB` / `#2A3699` / `#3B4CCA` | im Mock Sturm (Badge, Marker) |
 | `kategorie-2` | `#DFF2F4` / `#0B5761` / `#0E6E7A` | im Mock Überschwemmung |
+| `kategorie-3` | `#FDEBF3` / `#8E1F55` / `#B8327A` | weitere Kategorie |
+| `kategorie-4` | `#EEF2E2` / `#3F5214` / `#5E7A1F` | weitere Kategorie |
 
 Kategorien kommen aus den Prozessdaten (Abschnitt 8), deshalb nummerierte Kategorie-Tokens und eine Zuordnung Kategorie → Token im Frontend statt fester Namen. Kontraste der Textfarben auf ihren Flächen vor dem Commit prüfen (WCAG AA).
 
@@ -285,15 +321,15 @@ Die Umsetzung des Prototyps läuft in derselben Session wie diese Übergabe (Ful
 
 ## 10. Fertig, wenn …
 
-- [ ] Beide Ansichten entsprechen dem Mock in Aufbau und Verhalten, mit Schrift und Farben aus dem Design System (6a), und sind über „Ansicht“ umschaltbar, eingeloggt mit einem KRL-Demo-User.
-- [ ] Einsatzleitung: Eingang nach Klasse, +1 und Wartezeit sortiert; Filter Alle / Klasse A / Kategorie / +1 ab 3 funktionieren.
-- [ ] Einsatzleitung: Ereignis anklicken oder ziehen → Einheiten zeigen „✓ passt“ / „✗ fehlt: …“; Kopf zeigt „Gezogen: E-… · braucht …“.
-- [ ] Einsatzleitung: Ereignis auf eine Einheit ziehen → Eingang, Einheit (Status 4), Kennzahlen und Karte aktualisieren sich.
-- [ ] Einsatzleitung: „Erledigt“ → verschwindet aus der Einheit, Zähler „erledigt“ steigt, Einheit wird Status 2, wenn leer.
-- [ ] Einsatzleitung: „An Leitstelle abgeben“ → Inline-Formular mit Grund (Pflicht) und Kommentar → erscheint in der Leitstelle unter „Klärung“ mit Grund, Kommentar und „!“ auf der Karte.
-- [ ] Leitstelle: Klärung an andere Einsatzleitung zuweisen → im Eingang dort. An Bauhof/THW → im Archiv als extern übergeben. Schließen mit Begründung → im Archiv.
-- [ ] Leitstelle: Tabelle mit Klassen-Spalte filtert nach Offen / Einsatzleitung / Archiv; Umverteilen und Verwerfen funktionieren.
-- [ ] Leitstelle: „Offline nehmen“ → Pill „Inaktiv · Meldeweg geschlossen“, Bürger-App ohne Button, offene Ereignisse bleiben bearbeitbar. „Online nehmen“ stellt den Meldeweg wieder her.
-- [ ] Leitstelle: Notfall-Kachel mit „An ELS übergeben (EIDO)“ und „Geprüft, kein Notfall“, beide nehmen den Treffer aus der Liste.
-- [ ] Karten zeigen echte Gebietspolygone aus `gebiete.geometry`; Marker je Ereignis mit Kategoriefarbe und +1-Zahl.
-- [ ] Daten kommen aus der API, wo sie existiert (Abschnitt 5); Felder aus 5a laufen über die Datenschicht und lassen sich ohne UI-Änderung auf die API umstellen.
+- [x] Beide Ansichten entsprechen dem Mock in Aufbau und Verhalten, mit Schrift und Farben aus dem Design System (6a), und sind über „Ansicht“ umschaltbar, eingeloggt mit einem KRL-Demo-User.
+- [x] Einsatzleitung: Eingang nach Klasse, +1 und Wartezeit sortiert; Filter Alle / Klasse A / Kategorie / +1 ab 3 funktionieren.
+- [x] Einsatzleitung: Ereignis anklicken oder ziehen → Einheiten zeigen „✓ passt“ / „✗ fehlt: …“; Kopf zeigt „Gezogen: E-… · braucht …“.
+- [x] Einsatzleitung: Ereignis auf eine Einheit ziehen → Eingang, Einheit (Status 4), Kennzahlen und Karte aktualisieren sich.
+- [x] Einsatzleitung: „Erledigt“ → verschwindet aus der Einheit, Zähler „erledigt“ steigt, Einheit wird Status 2, wenn leer.
+- [x] Einsatzleitung: „An Leitstelle abgeben“ → Inline-Formular mit Grund (Pflicht) und Kommentar → erscheint in der Leitstelle unter „Klärung“ mit Grund, Kommentar und „!“ auf der Karte.
+- [x] Leitstelle: Klärung an andere Einsatzleitung zuweisen → im Eingang dort. An Bauhof/THW → im Archiv als extern übergeben. Schließen mit Begründung → im Archiv.
+- [x] Leitstelle: Tabelle mit Klassen-Spalte filtert nach Offen / Einsatzleitung / Archiv; Umverteilen und Verwerfen funktionieren.
+- [x] Leitstelle: „Offline nehmen“ → Pill „Inaktiv · Meldeweg geschlossen“, Bürger-App ohne Button, offene Ereignisse bleiben bearbeitbar. „Online nehmen“ stellt den Meldeweg wieder her.
+- [x] Leitstelle: Notfall-Kachel mit „An ELS übergeben (EIDO)“ und „Geprüft, kein Notfall“, beide nehmen den Treffer aus der Liste.
+- [x] Karten zeigen echte Gebietspolygone aus `gebiete.geometry`; Marker je Ereignis mit Kategoriefarbe und +1-Zahl.
+- [x] Daten kommen aus der API, wo sie existiert (Abschnitt 5); Felder aus 5a laufen über die Datenschicht und lassen sich ohne UI-Änderung auf die API umstellen.
