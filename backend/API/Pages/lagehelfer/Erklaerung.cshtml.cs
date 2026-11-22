@@ -12,6 +12,7 @@ public class ErklaerungModel(MeldungService service) : LagehelferPageModel {
         if (lage is null) return RedirectToPage("Index", KommuneRoute);
         Lage = lage;
         TempData["AktiveLage"] = lage.Id.ToString();
+        TempData["LagehelferTitel"] = lage.Title;
         TempData.Remove(GefahrCheckModel.PrecheckPassedKey);
         return Page();
     }

@@ -1,13 +1,9 @@
 @page "/lagehelfer/gefahr-check"
 @model GefahrCheckModel
 @{
-  ViewData["Title"] = "Notfallprüfung";
+    ViewData["Title"] = "Notfallprüfung";
+    ViewData["FlowStep"] = 1;
 }
-
-<section class="danger-check-section">
-    <div class="card">
-      <form class="card__body danger-check" method="post">
-        <partial name="_GefahrCheckFrage" />
-      </form>
-    </div>
-  </section>
+<form class="flow-screen" method="post">
+    <partial name="_GefahrCheckFrage" />
+</form>

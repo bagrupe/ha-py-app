@@ -1,21 +1,30 @@
-<p>Schritt 1 von 4</p>
-<h1>Ist jemand in Gefahr?</h1>
+<h1>Kurz vorab: Ist jemand in Gefahr?</h1>
+<p>Drei Fragen, damit Sie sofort richtig geholfen bekommen.</p>
 @{
     var fragen = new[] { "Ist jemand verletzt oder eingeklemmt?", "Liegt eine Stromleitung am Boden?", "Brennt oder raucht etwas?" };
 }
 @for (var i = 0; i < fragen.Length; i++) {
-    <fieldset>
-        <legend>@fragen[i]</legend>
-        <label><input type="radio" name="answers[@i]" value="ja" required> Ja</label>
-        <label><input type="radio" name="answers[@i]" value="nein" required> Nein</label>
+    <fieldset class="card card__body flow-question" aria-labelledby="frage-@i">
+        <strong id="frage-@i">@fragen[i]</strong>
+        <div class="flow-choices">
+            <label class="flow-choice"><input type="radio" name="answers[@i]" value="ja" required><span>Ja</span></label>
+            <label class="flow-choice"><input type="radio" name="answers[@i]" value="nein" required><span>Nein</span></label>
+        </div>
     </fieldset>
 }
-<button class="btn btn--primary btn--block" type="submit">Weiter</button>
+<div class="flow-actions">
+    <button class="btn btn--block" type="submit">Weiter</button>
+</div>
 <script>
-document.currentScript.closest("form").addEventListener("change", function (event) {
-    if (event.target.value === "ja") {
-        this.noValidate = true;
-        this.submit();
+    const questions = document.currentScript.closest("form");
+    const proceed = questions.querySelector('button[type="submit"]');
+    function updateQuestions() {
+        proceed.disabled = questions.querySelectorAll('input:checked').length !== 3;
+        proceed.textContent = proceed.disabled ? "Bitte alle Fragen beantworten" : "Weiter";
     }
-});
+    questions.addEventListener("change", event => {
+        if (event.target.value === "ja") questions.submit();
+        else updateQuestions();
+    });
+    updateQuestions();
 </script>

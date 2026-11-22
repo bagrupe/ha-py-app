@@ -18,7 +18,7 @@ public class DankeModel(API.Features.DomainContext db) : LagehelferPageModel {
                 .Select(a => a.Meldungsnummer).SingleOrDefaultAsync(ct);
             if (nummer is null) return NotFound();
             PublicId = bestaetigt;
-            Confirmation = nummer.ToString()!;
+            Confirmation = $"E-{nummer}";
             return Page();
         }
         if (TempData.Peek(MeldenModel.ConfirmationKey) is not string confirmation) return RedirectToPage("Index", KommuneRoute);
@@ -27,7 +27,7 @@ public class DankeModel(API.Features.DomainContext db) : LagehelferPageModel {
         var report = await LageMeldungen.OfKommune(db, KommuneId).Where(a => a.CorrelationId == correlation)
             .Select(a => new { a.PublicId, a.Meldungsnummer }).SingleOrDefaultAsync(ct);
         if (report is null) return RedirectToPage("Index", KommuneRoute);
-        Confirmation = report.Meldungsnummer?.ToString() ?? correlation.ToString();
+        Confirmation = report.Meldungsnummer is { } number ? $"E-{number}" : correlation.ToString();
         PublicId = report.PublicId;
         return Page();
     }

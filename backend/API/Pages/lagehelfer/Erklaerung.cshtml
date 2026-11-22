@@ -2,13 +2,21 @@
 @model ErklaerungModel
 @{
     ViewData["Title"] = "Warum hier melden?";
+    ViewData["FlowHideHeader"] = true;
     var lage = Model.Lage;
 }
-    <section class="card"><div class="card__body">
-        <h1>@lage.Title</h1>
-        <p>Hier können Sie Schäden während dieser Lage melden. So bleibt der Notruf für Menschen in akuter Gefahr erreichbar.</p>
-        <h2>Sind Sie an einem sicheren Ort?</h2>
-        <p>Halten Sie Abstand zu Gefahrenstellen. Machen Sie Fotos nur aus sicherer Entfernung.</p>
-        <a class="btn btn--primary btn--block" asp-page="GefahrCheck" asp-route-kommuneId="@Model.KommuneId">Ich bin sicher, weiter</a>
-<a asp-page="Kontakt" asp-route-kommuneId="@Model.KommuneId" asp-route-lageId="@lage.Id" asp-route-rueckruf="true">Unsicher? Rückruf anfordern</a>
-    </div></section>
+<section class="flow-screen flow-explanation">
+    <p class="flow-notice flow-notice--success">Die Leitstelle ist besetzt und arbeitet.</p>
+    <h1>Sie handeln richtig.</h1>
+    <p>Im Landkreis gilt gerade die Lage <strong>@lage.Title</strong>. Die Leitstelle bekommt sehr viele Anrufe. Damit Menschen in Lebensgefahr sofort durchkommen, melden Sie Schäden ohne Gefahr für Menschen bitte hier.</p>
+    <p>Ihre Meldung landet bei <strong>derselben Leitstelle</strong> wie ein Anruf.</p>
+    <p class="flow-notice">Dieser Meldeweg ist <strong>nur während einer Lage</strong> geöffnet. Außerhalb einer Lage gilt wie immer: Im Notfall <a class="flow-emergency-link" href="tel:112">112</a>.</p>
+    <div class="card card__body">
+        <h2>Sind Sie selbst an einem sicheren Ort?</h2>
+        <p>Bleiben Sie weg von Bäumen und Stromleitungen. Fotos bitte nur aus sicherer Entfernung.</p>
+    </div>
+    <div class="flow-actions">
+        <a class="btn btn--block" asp-page="GefahrCheck" asp-route-kommuneId="@Model.KommuneId">Ich bin sicher, weiter</a>
+        <a asp-page="Kontakt" asp-route-kommuneId="@Model.KommuneId" asp-route-lageId="@lage.Id" asp-route-rueckruf="true">Unsicher? Rückruf anfordern</a>
+    </div>
+</section>

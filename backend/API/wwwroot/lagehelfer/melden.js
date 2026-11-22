@@ -21,6 +21,7 @@
     latInput.value = latlng.lat.toFixed(6);
     lngInput.value = latlng.lng.toFixed(6);
     sourceInput.value = source;
+    latInput.dispatchEvent(new Event("change", { bubbles: true }));
     if (source === "pin") addressDirty = false;
     if (address) setAddress(address); else {
       setAddress(latInput.value + ", " + lngInput.value);

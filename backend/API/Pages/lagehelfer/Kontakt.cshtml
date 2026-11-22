@@ -4,6 +4,9 @@
 <h1>@ViewData["Title"]</h1>
 @if (Model.Gespeichert) {
     <p role="status">@(Model.Rueckruf ? "Ihre Rückrufanfrage ist bei der Leitstelle eingegangen." : "Ihre Telefonnummer wurde zur Meldung gespeichert.")</p>
+    @if (Model.MeldungId is { } id) {
+        <a class="btn btn--block" asp-page="Status" asp-route-id="@id" asp-route-kommuneId="@Model.KommuneId">Status meiner Meldung</a>
+    }
 } else {
     <form class="card__body" method="post" asp-page="Kontakt" asp-route-kommuneId="@Model.KommuneId"
           asp-route-lageId="@Model.LageId" asp-route-meldungId="@Model.MeldungId" asp-route-rueckruf="@Model.Rueckruf">

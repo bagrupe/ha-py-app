@@ -7,30 +7,33 @@
   var categoryInvalid = Model.IsInvalid(nameof(Model.Input.Kategorie));
   var descriptionInvalid = Model.IsInvalid(nameof(Model.Input.Beschreibung));
   var photoInvalid = Model.IsInvalid(nameof(Model.Input.Foto));
+  var startDetails = Model.Input.Lat is not null && !Model.HasMissingLocation && !addressInvalid;
+  ViewData["FlowStep"] = startDetails ? 3 : 2;
 }
 
 @section Head {
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 }
 
-<section class="report-section">
+<section class="report-section flow-screen">
 
   @if (Model.Formular is null) {
     <div class="notice notice--danger" role="status" style="margin-top:8px">@Model.StatusMessage</div>
   } else {
   <form id="lagehelfer-report" data-report-form data-require-location data-nearby="@Url.Page("Umgebung", new { kommuneId = Model.KommuneId })"
-        data-start-details="@(Model.Input.Lat is not null && !Model.HasMissingLocation && !addressInvalid ? "true" : "false")"
-        class="card" style="margin-top:8px" method="post" enctype="multipart/form-data" novalidate>
+        data-start-details="@(startDetails ? "true" : "false")"
+        class="flow-form" method="post" enctype="multipart/form-data" novalidate>
     @if (Model.StatusMessage is not null) {
       <div class="card__body">
         <div class="notice notice--danger" data-report-summary tabindex="-1">@Model.StatusMessage</div>
       </div>
     }
     <div data-report-location class="card__body" style="gap:14px">
-      <h2 tabindex="-1"><span class="report-step-count">Schritt 2 von 4</span>Wo ist es passiert?</h2>
+      <h1 tabindex="-1">Wo ist es passiert?</h1>
+      <button class="btn btn--soft btn--block" type="button" id="locateBtn">Meinen Standort verwenden</button>
 
       <div class="field @(Model.IsInvalid(nameof(Model.Input.Adresse)) || Model.HasMissingLocation ? "invalid" : null)">
-        <label for="adresse">Adresse</label>
+        <label for="adresse">oder Adresse eingeben</label>
         <div class="input-row">
           <input class="input" id="adresse" asp-for="Input.Adresse" type="search" autocomplete="off" required placeholder="Straße, Hausnummer, Ort"
                  aria-invalid="@(addressInvalid || Model.HasMissingLocation ? "true" : null)"
@@ -42,45 +45,56 @@
         }
         <p id="location-error" data-report-location-error class="report-field-error" hidden="@(!Model.HasMissingLocation)">Wählen Sie einen Standort auf der Karte oder suchen Sie nach einer Adresse.</p>
         <div class="map" id="map" role="application" aria-label="Karte zur Standortwahl"></div>
+        <p class="flow-meta">Tippen Sie auf die Karte, um den Punkt zu setzen.</p>
         <span class="card__meta" id="mapStatus" role="status"></span>
-        <button class="btn btn--ghost" type="button" id="locateBtn">📍 Meinen Standort verwenden</button>
         <input type="hidden" id="lat" asp-for="Input.Lat">
         <input type="hidden" id="lng" asp-for="Input.Lng">
         <input type="hidden" id="standortQuelle" asp-for="Input.StandortQuelle">
       </div>
 
+      <button data-report-next class="btn btn--block" type="button" hidden>Weiter</button>
     </div>
 
     <div data-report-details class="card__body" style="gap:14px">
-      <h2 tabindex="-1"><span class="report-step-count">Schritt 3 von 4</span>Was ist passiert?</h2>
-      <div class="field @(Model.IsInvalid(nameof(Model.Input.Kategorie)) ? "invalid" : null)">
-        <label for="kategorie">@MeldenModel.KategorieLabel</label>
-        <select class="input" id="kategorie" asp-for="Input.Kategorie" required
-                aria-invalid="@(categoryInvalid ? "true" : null)" aria-describedby="@(categoryInvalid ? "category-error" : null)">
-          <option value="">Bitte wählen Sie</option>
+      <h1 tabindex="-1">Was ist passiert?</h1>
+      <fieldset class="field flow-category @(categoryInvalid ? "invalid" : null)">
+        <legend>Kurz auswählen</legend>
+        <div class="flow-chips">
           @foreach (var (key, label) in Model.Formular!.Kategorien) {
-            <option value="@key" selected="@(Model.Input.Kategorie == key)">@label</option>
+            <label class="flow-choice">
+              <input type="radio" name="Input.Kategorie" value="@key" checked="@(Model.Input.Kategorie == key)" required
+                     aria-invalid="@(categoryInvalid ? "true" : null)" aria-describedby="@(categoryInvalid ? "category-error" : null)">
+              <span>@label</span>
+            </label>
           }
-        </select>
+        </div>
         @if (categoryInvalid) {
-          <p class="report-field-error" id="category-error">Wählen Sie eine Ereignisart aus der Liste.</p>
+          <p class="report-field-error" id="category-error">Wählen Sie aus, was passiert ist.</p>
         }
-      </div>
+      </fieldset>
 
       <div class="field report-description @(Model.IsInvalid(nameof(Model.Input.Beschreibung)) ? "invalid" : null)">
-        <label for="beschreibung">Beschreibung</label>
+        <button hidden type="button" id="diktieren" class="btn btn--soft btn--block">Einfach erzählen statt tippen</button>
+        <span id="diktat-status" role="status"></span>
+        <label for="beschreibung">Beschreibung eingeben</label>
         <textarea class="input" id="beschreibung" asp-for="Input.Beschreibung" required
                   aria-invalid="@(descriptionInvalid ? "true" : null)" aria-describedby="@(descriptionInvalid ? "description-error" : null)" placeholder="z. B. Umgefallener Baum auf der Straße"></textarea>
-        <button hidden type="button" id="diktieren" class="btn btn--ghost">Beschreibung diktieren</button>
-        <span id="diktat-status" role="status"></span>
+        <p class="flow-meta">Beim Absenden wird Ihre Beschreibung auf Notfallhinweise geprüft.</p>
         @if (descriptionInvalid) {
           <p class="report-field-error" id="description-error">Beschreiben Sie kurz, was passiert ist.</p>
         }
       </div>
 
       <div class="field @(Model.IsInvalid(nameof(Model.Input.Foto)) ? "invalid" : null)">
-        <label for="foto">Fotos (optional, bis zu drei)</label>
-        <input type="file" id="foto" asp-for="Input.Foto" accept="image/*" multiple>
+        <strong>Fotos <span class="flow-meta">(optional, bis zu drei, nur aus sicherer Entfernung)</span></strong>
+        <input class="flow-photo-input" type="file" id="foto" asp-for="Input.Foto" accept="image/*" multiple>
+        <div class="flow-photos">
+          <label for="foto"><span aria-hidden="true">＋</span><span data-photo-picker-label>Fotos auswählen</span></label>
+          <div data-photo-preview aria-hidden="true"></div>
+          <div data-photo-preview aria-hidden="true"></div>
+          <div data-photo-preview aria-hidden="true"></div>
+        </div>
+        <span class="flow-meta" data-photo-count role="status"></span>
         @if (photoInvalid) {
           <p class="report-field-error" id="photo-error">Das Bild konnte nicht verarbeitet werden. Wählen Sie ein anderes Foto.</p>
         }
@@ -93,8 +107,8 @@
 
 @section FooterActions {
   @if (Model.Formular is not null) {
-    <button data-report-next class="lagehelfer-footer__next" type="button" hidden>Weiter</button>
-    <button data-report-send class="lagehelfer-footer__next lagehelfer-footer__send" type="submit" form="lagehelfer-report">Meldung senden</button>
+    <button data-report-send class="btn btn--block lagehelfer-footer__action" type="submit"
+            form="lagehelfer-report" hidden="@(!startDetails)">Meldung absenden</button>
   }
 }
 

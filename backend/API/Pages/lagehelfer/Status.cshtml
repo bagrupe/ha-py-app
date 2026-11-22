@@ -1,10 +1,43 @@
 @page
 @model StatusModel
-@{ ViewData["Title"] = "Status Ihrer Meldung"; }
-<section class="card"><div class="card__body">
-<h1>Status Ihrer Meldung</h1>
-<p>Meldungsnummer @Model.Nummer</p>
-<strong>@Model.StatusText</strong>
-<a class="btn btn--danger" asp-page="Notruf" asp-route-kommuneId="@Model.KommuneId">Es wird schlimmer</a>
-<a asp-page="Kontakt" asp-route-kommuneId="@Model.KommuneId" asp-route-meldungId="@Request.Query["id"]" asp-route-rueckruf="true">Unsicher? Rückruf anfordern</a>
-</div></section>
+@using API.Features.Prozess
+@{
+    ViewData["Title"] = "Status Ihrer Meldung";
+    ViewData["FlowHeader"] = Model.Nummer is { } number ? $"Meldung E-{number}" : "Meldungsstatus";
+    ViewData["HideBackFooter"] = true;
+    var current = Model.Status switch {
+        MeldungStatus.Eingegangen => 0,
+        MeldungStatus.Abgeschlossen => 2,
+        _ => 1
+    };
+    var stages = new[] {
+        (Title: "Eingegangen", Detail: $"Bei der Leitstelle angekommen · {Model.GemeldetUm} Uhr"),
+        (Title: "In Bearbeitung", Detail: Model.Status == MeldungStatus.HilfeUnterwegs ? "Hilfe ist unterwegs" : "Die Meldung wird geprüft oder bearbeitet."),
+        (Title: "Erledigt", Detail: current == 2 ? "Die Bearbeitung ist abgeschlossen." : "Wir informieren Sie hier.")
+    };
+}
+<section class="flow-screen">
+    <h1>Status Ihrer Meldung</h1>
+    <div class="card card__body">
+        @if (Model.LageTitel is { } lage) { <span class="flow-badge">@lage</span> }
+        <h2>@(Model.Beschreibung ?? "Ihre Meldung")</h2>
+        @if (Model.Gebiet is { } gebiet) { <p class="flow-meta">@gebiet · gemeldet um @Model.GemeldetUm Uhr</p> }
+    </div>
+    <ol class="flow-timeline" aria-label="Bearbeitungsstand">
+        @for (var i = 0; i < stages.Length; i++) {
+            var completed = i < current || current == 2;
+            <li class="@(completed ? "is-complete" : i == current ? "is-current" : null)" aria-current="@(i == current ? "step" : null)">
+                <span class="flow-timeline__marker" aria-hidden="true">@(completed ? "✓" : "")</span>
+                <div>
+                    <h2>@stages[i].Title</h2>
+                    @if (i <= current || i == 2) { <p class="flow-meta">@stages[i].Detail</p> }
+                </div>
+            </li>
+        }
+    </ol>
+    <div class="flow-actions">
+        <p>Wird es schlimmer, wählen Sie die <a class="flow-emergency-link" href="tel:112">112</a>.</p>
+        <a class="btn btn--block flow-call-outline" asp-page="Notruf" asp-route-kommuneId="@Model.KommuneId">Es wird schlimmer</a>
+        <a asp-page="Kontakt" asp-route-kommuneId="@Model.KommuneId" asp-route-meldungId="@Model.MeldungId" asp-route-rueckruf="true">Unsicher? Rückruf anfordern</a>
+    </div>
+</section>
