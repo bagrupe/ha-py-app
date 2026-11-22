@@ -44,6 +44,11 @@ const imEinsatz = (m: Meldung) =>
   m.ereignisStatus === EreignisStatus.Zugewiesen ||
   m.ereignisStatus === EreignisStatus.InBearbeitung;
 
+const zuweisbar = (m?: Meldung) =>
+  m !== undefined &&
+  (m.ereignisStatus === EreignisStatus.Eingegangen ||
+    (imEinsatz(m) && !m.einheit));
+
 export const EinsatzleitungAnsicht: FC<{
   data: LageDashboardData;
   gruppeId: string;
@@ -75,6 +80,12 @@ export const EinsatzleitungAnsicht: FC<{
       eigene
         .filter((m) => m.ereignisStatus === EreignisStatus.Eingegangen)
         .sort(nachDringlichkeit),
+    [eigene],
+  );
+  // Moved on in the process view ("Einsatz läuft") without an Einheit, so neither Eingang nor a unit lists them.
+  const ohneEinheit = useMemo(
+    () =>
+      eigene.filter((m) => imEinsatz(m) && !m.einheit).sort(nachDringlichkeit),
     [eigene],
   );
   const kategorien = [...new Set(eingang.map(kategorie))].sort();
@@ -132,6 +143,26 @@ export const EinsatzleitungAnsicht: FC<{
       if (id) onDrop(id);
     },
   });
+
+  const karte = (m: Meldung) => (
+    <EingangKarte
+      key={m.id}
+      meldung={m}
+      farbe={farbe}
+      now={now}
+      aktiv={m.id === aktivId}
+      abgabeOffen={abgabeOffen === m.id}
+      onSelect={() => setAusgewaehlt(m.id)}
+      onDragStart={(e) => onDragStart(e, m.id)}
+      onDragEnd={() => setGezogen(null)}
+      onAbgabeOeffnen={() => setAbgabeOffen(m.id)}
+      onAbgabeSchliessen={() => setAbgabeOffen(null)}
+      onAbgeben={async (grund, kommentar) => {
+        if (await aktionen.abgeben(m.id, grund, kommentar))
+          setAbgabeOffen(null);
+      }}
+    />
+  );
 
   const marker: KartenMarker[] = eigene
     .filter(
@@ -239,26 +270,23 @@ export const EinsatzleitungAnsicht: FC<{
                 Keine neuen Ereignisse.
               </p>
             )}
-            {sichtbar.map((m) => (
-              <EingangKarte
-                key={m.id}
-                meldung={m}
-                farbe={farbe}
-                now={now}
-                aktiv={m.id === aktivId}
-                abgabeOffen={abgabeOffen === m.id}
-                onSelect={() => setAusgewaehlt(m.id)}
-                onDragStart={(e) => onDragStart(e, m.id)}
-                onDragEnd={() => setGezogen(null)}
-                onAbgabeOeffnen={() => setAbgabeOffen(m.id)}
-                onAbgabeSchliessen={() => setAbgabeOffen(null)}
-                onAbgeben={async (grund, kommentar) => {
-                  if (await aktionen.abgeben(m.id, grund, kommentar))
-                    setAbgabeOffen(null);
-                }}
-              />
-            ))}
+            {sichtbar.map(karte)}
           </div>
+          {ohneEinheit.length > 0 && (
+            <section
+              aria-labelledby='ohne-einheit'
+              className='flex flex-col gap-3 border-t border-gray-200 pt-3'
+            >
+              <h3 id='ohne-einheit' className='font-bold'>
+                Läuft ohne Einheit · {ohneEinheit.length}
+              </h3>
+              <p className='text-xs text-gray-700'>
+                Im Vorgang weitergeschaltet, aber keiner Einheit zugewiesen. Zum
+                Zuweisen auf eine Einheit ziehen.
+              </p>
+              {ohneEinheit.map(karte)}
+            </section>
+          )}
         </Panel>
 
         <Panel
@@ -313,7 +341,7 @@ export const EinsatzleitungAnsicht: FC<{
                 Verwalten
               </Button>
             </div>
-            {aktiv && aktiv.ereignisStatus === EreignisStatus.Eingegangen ? (
+            {aktiv && zuweisbar(aktiv) ? (
               <span className='text-xs text-gray-700'>
                 {gezogen ? 'Gezogen' : 'Ausgewählt'}:{' '}
                 <strong>{nummer(aktiv)}</strong> · braucht{' '}
@@ -342,11 +370,7 @@ export const EinsatzleitungAnsicht: FC<{
               key={einheit.id}
               einheit={einheit}
               auftraege={auftraege(einheit)}
-              pruefen={
-                aktiv?.ereignisStatus === EreignisStatus.Eingegangen
-                  ? aktiv
-                  : undefined
-              }
+              pruefen={zuweisbar(aktiv) ? aktiv : undefined}
               dropProps={dropTarget((id) => void zuweisen(id, einheit))}
               onKlick={() => aktiv && void zuweisen(aktiv.id, einheit)}
               onDragStart={onDragStart}

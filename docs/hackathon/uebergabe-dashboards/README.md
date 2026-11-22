@@ -71,6 +71,7 @@ Der Umschalter „Ansicht“ (*Leitstelle*, *Einsatzleitung Nord*, *Einsatzleitu
 
 **Spalte 1 – Eingang**
 - Nur Ereignisse im Status *eingegangen*. Überschrift „Eingang · {Anzahl} Ereignisse“.
+- Darunter, nur wenn vorhanden: „Läuft ohne Einheit · {Anzahl}“. Das sind Ereignisse, die jemand in der Vorgangsansicht (Bereich A, „Anträge in Bearbeitung“) auf „Einsatz läuft“ geschaltet hat, ohne eine Einheit zu wählen. Sie lassen sich wie neue Ereignisse auf eine Einheit ziehen oder per Klick zuweisen.
 - Sortierung: Klasse (A vor B vor C vor D), dann +1-Anzahl absteigend, dann Wartezeit absteigend.
 - Filter-Chips (`aria-pressed`): *Alle* · *Klasse A* · je Kategorie (*Sturm*, *Überschwemmung*) · *+1 ab 3*.
 - Hinweis über der Liste: „Ereignis antippen oder ziehen: Passende Einheiten werden grün, unpassende rot.“
