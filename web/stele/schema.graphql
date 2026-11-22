@@ -1921,6 +1921,8 @@ type Mutation {
   removeGebietEinsatzleitung(input: RemoveGebietEinsatzleitungInput!): RemoveGebietEinsatzleitungPayload! @authorize
   "Legt eine Einheit einer Einsatzleitung an."
   createEinheit(input: CreateEinheitInput!): CreateEinheitPayload! @authorize
+  "Benennt eine Einheit um oder ändert ihre Ausrüstung. Null lässt den Wert unverändert."
+  updateEinheit(input: UpdateEinheitInput!): UpdateEinheitPayload! @authorize
   "Löscht eine Einheit. Ihre offenen Meldungen gehen zurück in den Eingang."
   deleteEinheit(input: DeleteEinheitInput!): DeleteEinheitPayload! @authorize
   "Weist eine Meldung einer Einheit der zuständigen Einsatzleitung zu. einheitId: null legt sie zurück in den Eingang."
@@ -2960,6 +2962,11 @@ type UpdateEhrenamtsbankEintragStatusPayload {
   errors: [UpdateEhrenamtsbankEintragStatusError!]
 }
 
+type UpdateEinheitPayload {
+  einheit: Einheit
+  errors: [UpdateEinheitError!]
+}
+
 type UpdateIstFreigegebenSlotValuePayload {
   ausfuehrung: Ausfuehrung
   errors: [UpdateIstFreigegebenSlotValueError!]
@@ -3530,6 +3537,8 @@ union UpdateEhrenamtsbankAnfrageStatusError = Unauthenticated | NotAllowedError 
 union UpdateEhrenamtsbankEintragError = NotAllowedError | EintragValidationError | EintragNotFoundError | EintragConflictError
 
 union UpdateEhrenamtsbankEintragStatusError = NotAllowedError | EintragStatusTransitionError | EintragNotFoundError | EintragConflictError
+
+union UpdateEinheitError = NotAllowedError | EinheitNotFoundError | EinheitNameVergebenError | EinheitNameErforderlichError
 
 union UpdateIstFreigegebenSlotValueError = BearbeitungNotFoundError | SlotValueNotFoundError
 
@@ -6553,6 +6562,12 @@ input UpdateEhrenamtsbankEintragInput {
 input UpdateEhrenamtsbankEintragStatusInput {
   id: UUID!
   status: EhrenamtsbankEintragStatus!
+}
+
+input UpdateEinheitInput {
+  einheitId: UUID!
+  name: String
+  ausruestung: [String!]
 }
 
 input UpdateIstFreigegebenSlotValueInput {

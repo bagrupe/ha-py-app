@@ -9,6 +9,17 @@ import {
 import gql from 'graphql-tag';
 import * as Urql from 'urql';
 export type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
+export type CreateEinheitInput = {
+  /** Ausrüstung an Bord. Null = Standard des Fahrzeugtyps aus dem Namen (z. B. "HLF"). */
+  ausruestung?: Array<string> | null;
+  mitarbeiterGruppeId: string;
+  name: string;
+};
+
+export type DeleteEinheitInput = {
+  einheitId: string;
+};
+
 export type MeldungAnLeitstelleAbgebenInput = {
   ausfuehrungId: string;
   grund: Types.AbgabeGrund;
@@ -55,6 +66,12 @@ export type MeldungVerwerfenInput = {
 export type SetLageMeldewegInput = {
   lageId: string;
   offen: boolean;
+};
+
+export type UpdateEinheitInput = {
+  ausruestung?: Array<string> | null;
+  einheitId: string;
+  name?: string | null;
 };
 
 export type DashboardMeldungFragment = {
@@ -324,6 +341,58 @@ export type DashboardMeldewegMutation = {
     errors?: Array<
       | {__typename: 'LageClosedError'; message: string}
       | {__typename: 'LageNotFoundError'; message: string}
+      | {__typename: 'NotAllowedError'; message: string}
+    > | null;
+  };
+};
+
+export type DashboardEinheitAnlegenMutationVariables = Types.Exact<{
+  input: CreateEinheitInput;
+}>;
+
+export type DashboardEinheitAnlegenMutation = {
+  __typename?: 'Mutation';
+  createEinheit: {
+    __typename?: 'CreateEinheitPayload';
+    einheit?: ({__typename?: 'Einheit'} & DashboardEinheitFragment) | null;
+    errors?: Array<
+      | {__typename: 'EinheitNameErforderlichError'; message: string}
+      | {__typename: 'EinheitNameVergebenError'; message: string}
+      | {__typename: 'MitarbeiterGruppeNotFoundError'; message: string}
+      | {__typename: 'NotAllowedError'; message: string}
+    > | null;
+  };
+};
+
+export type DashboardEinheitAendernMutationVariables = Types.Exact<{
+  input: UpdateEinheitInput;
+}>;
+
+export type DashboardEinheitAendernMutation = {
+  __typename?: 'Mutation';
+  updateEinheit: {
+    __typename?: 'UpdateEinheitPayload';
+    einheit?: ({__typename?: 'Einheit'} & DashboardEinheitFragment) | null;
+    errors?: Array<
+      | {__typename: 'EinheitNameErforderlichError'; message: string}
+      | {__typename: 'EinheitNameVergebenError'; message: string}
+      | {__typename: 'EinheitNotFoundError'; message: string}
+      | {__typename: 'NotAllowedError'; message: string}
+    > | null;
+  };
+};
+
+export type DashboardEinheitLoeschenMutationVariables = Types.Exact<{
+  input: DeleteEinheitInput;
+}>;
+
+export type DashboardEinheitLoeschenMutation = {
+  __typename?: 'Mutation';
+  deleteEinheit: {
+    __typename?: 'DeleteEinheitPayload';
+    einheit?: ({__typename?: 'Einheit'} & DashboardEinheitFragment) | null;
+    errors?: Array<
+      | {__typename: 'EinheitNotFoundError'; message: string}
       | {__typename: 'NotAllowedError'; message: string}
     > | null;
   };
@@ -653,4 +722,73 @@ export function useDashboardMeldewegMutation() {
     DashboardMeldewegMutation,
     DashboardMeldewegMutationVariables
   >(DashboardMeldewegDocument);
+}
+export const DashboardEinheitAnlegenDocument = gql`
+  mutation DashboardEinheitAnlegen($input: CreateEinheitInput!) {
+    createEinheit(input: $input) {
+      einheit {
+        ...DashboardEinheit
+      }
+      errors {
+        __typename
+        ... on Error {
+          message
+        }
+      }
+    }
+  }
+  ${DashboardEinheitFragmentDoc}
+`;
+
+export function useDashboardEinheitAnlegenMutation() {
+  return Urql.useMutation<
+    DashboardEinheitAnlegenMutation,
+    DashboardEinheitAnlegenMutationVariables
+  >(DashboardEinheitAnlegenDocument);
+}
+export const DashboardEinheitAendernDocument = gql`
+  mutation DashboardEinheitAendern($input: UpdateEinheitInput!) {
+    updateEinheit(input: $input) {
+      einheit {
+        ...DashboardEinheit
+      }
+      errors {
+        __typename
+        ... on Error {
+          message
+        }
+      }
+    }
+  }
+  ${DashboardEinheitFragmentDoc}
+`;
+
+export function useDashboardEinheitAendernMutation() {
+  return Urql.useMutation<
+    DashboardEinheitAendernMutation,
+    DashboardEinheitAendernMutationVariables
+  >(DashboardEinheitAendernDocument);
+}
+export const DashboardEinheitLoeschenDocument = gql`
+  mutation DashboardEinheitLoeschen($input: DeleteEinheitInput!) {
+    deleteEinheit(input: $input) {
+      einheit {
+        ...DashboardEinheit
+      }
+      errors {
+        __typename
+        ... on Error {
+          message
+        }
+      }
+    }
+  }
+  ${DashboardEinheitFragmentDoc}
+`;
+
+export function useDashboardEinheitLoeschenMutation() {
+  return Urql.useMutation<
+    DashboardEinheitLoeschenMutation,
+    DashboardEinheitLoeschenMutationVariables
+  >(DashboardEinheitLoeschenDocument);
 }

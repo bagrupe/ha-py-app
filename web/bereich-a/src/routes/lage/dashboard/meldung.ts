@@ -11,6 +11,16 @@ import {
 
 export type Meldung = DashboardMeldungFragment;
 
+/** Equipment the backend rules ask for; units may carry more. */
+export const AUSRUESTUNG = [
+  'Motorkettensäge',
+  'Drehleiter',
+  'Pumpe',
+  'Absperrung',
+  'Radlader',
+  'Seilwinde',
+];
+
 export const LANGE_WARTEZEIT_MS = 2 * 60 * 60 * 1000;
 
 export const nummer = (meldung: Meldung) =>

@@ -75,7 +75,7 @@ Fields on `Ausfuehrung`: `meldungsnummer` (from 1000, shown as "E-1042"), `ereig
 |---|---|---|
 | `lageMeldungen(lageId, offen)` | Reports of a Lage, oldest first; `offen: false` = closed ones | both |
 | `einheiten(mitarbeiterGruppeId)` | Units of the Kommune or of one Einsatzleitung | both |
-| `createEinheit(name, mitarbeiterGruppeId, ausruestung)` / `deleteEinheit` | Maintain units; deleting returns their open reports to the inbox | Leitstelle or the group itself |
+| `createEinheit(name, mitarbeiterGruppeId, ausruestung)` / `updateEinheit(einheitId, name, ausruestung)` / `deleteEinheit` | Maintain units (null in `updateEinheit` keeps the value); deleting returns their open reports to the inbox | Leitstelle or the group itself |
 | `meldungEinheitZuweisen(ausfuehrungId, einheitId)` | Assign to a unit of the responsible group; `null` = back to inbox | both |
 | `meldungFortsetzen(ausfuehrungId, aktion)` | `HILFE_EINLEITEN` or `EINSATZ_ABSCHLIESSEN` (initiates help first if needed); walks the process edges, so the citizen status follows | both |
 | `meldungAnLeitstelleAbgeben(ausfuehrungId, grund, kommentar)` | Hand over to the Leitstelle (`IN_KLAERUNG`); `grund` is an `AbgabeGrund`, comment required only for `SONSTIGES`; unit released | both |

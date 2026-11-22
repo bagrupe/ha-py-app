@@ -213,3 +213,45 @@ mutation DashboardMeldeweg($input: SetLageMeldewegInput!) {
     }
   }
 }
+
+mutation DashboardEinheitAnlegen($input: CreateEinheitInput!) {
+  createEinheit(input: $input) {
+    einheit {
+      ...DashboardEinheit
+    }
+    errors {
+      __typename
+      ... on Error {
+        message
+      }
+    }
+  }
+}
+
+mutation DashboardEinheitAendern($input: UpdateEinheitInput!) {
+  updateEinheit(input: $input) {
+    einheit {
+      ...DashboardEinheit
+    }
+    errors {
+      __typename
+      ... on Error {
+        message
+      }
+    }
+  }
+}
+
+mutation DashboardEinheitLoeschen($input: DeleteEinheitInput!) {
+  deleteEinheit(input: $input) {
+    einheit {
+      ...DashboardEinheit
+    }
+    errors {
+      __typename
+      ... on Error {
+        message
+      }
+    }
+  }
+}

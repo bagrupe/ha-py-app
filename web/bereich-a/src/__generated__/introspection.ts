@@ -15868,6 +15868,29 @@ export default {
             ],
           },
           {
+            name: 'updateEinheit',
+            type: {
+              kind: 'NON_NULL',
+              ofType: {
+                kind: 'OBJECT',
+                name: 'UpdateEinheitPayload',
+                ofType: null,
+              },
+            },
+            args: [
+              {
+                name: 'input',
+                type: {
+                  kind: 'NON_NULL',
+                  ofType: {
+                    kind: 'SCALAR',
+                    name: 'Any',
+                  },
+                },
+              },
+            ],
+          },
+          {
             name: 'updateIstFreigegebenSlotValue',
             type: {
               kind: 'NON_NULL',
@@ -24445,6 +24468,59 @@ export default {
                 ofType: {
                   kind: 'UNION',
                   name: 'UpdateEhrenamtsbankEintragStatusError',
+                  ofType: null,
+                },
+              },
+            },
+            args: [],
+          },
+        ],
+        interfaces: [],
+      },
+      {
+        kind: 'UNION',
+        name: 'UpdateEinheitError',
+        possibleTypes: [
+          {
+            kind: 'OBJECT',
+            name: 'EinheitNameErforderlichError',
+          },
+          {
+            kind: 'OBJECT',
+            name: 'EinheitNameVergebenError',
+          },
+          {
+            kind: 'OBJECT',
+            name: 'EinheitNotFoundError',
+          },
+          {
+            kind: 'OBJECT',
+            name: 'NotAllowedError',
+          },
+        ],
+      },
+      {
+        kind: 'OBJECT',
+        name: 'UpdateEinheitPayload',
+        fields: [
+          {
+            name: 'einheit',
+            type: {
+              kind: 'OBJECT',
+              name: 'Einheit',
+              ofType: null,
+            },
+            args: [],
+          },
+          {
+            name: 'errors',
+            type: {
+              kind: 'LIST',
+              ofType: {
+                kind: 'NON_NULL',
+                ofType: {
+                  kind: 'UNION',
+                  name: 'UpdateEinheitError',
                   ofType: null,
                 },
               },

@@ -56,7 +56,7 @@ export const ZielOptionen: FC<{
   </>
 );
 
-const DialogRahmen: FC<{
+export const DialogRahmen: FC<{
   title: string;
   onClose: () => void;
   children: ReactNode;

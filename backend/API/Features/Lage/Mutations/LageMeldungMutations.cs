@@ -82,6 +82,35 @@ public class LageMeldungMutations {
     }
 
     [Authorize]
+    [GraphQLDescription("Benennt eine Einheit um oder ändert ihre Ausrüstung. Null lässt den Wert unverändert.")]
+    [Error(typeof(NotAllowedException))]
+    [Error(typeof(EinheitNotFoundException))]
+    [Error(typeof(EinheitNameVergebenException))]
+    [Error(typeof(EinheitNameErforderlichException))]
+    public async Task<Einheit> UpdateEinheit(DomainContext db, CurrentUserAccessor currentUserAccessor,
+        Guid einheitId, string? name, List<string>? ausruestung, CancellationToken ct) {
+        var user = await LageHelferUser(currentUserAccessor);
+        var einheit = await db.Einheiten.AsTracking()
+            .SingleOrDefaultAsync(e => e.Id == einheitId && e.MitarbeiterGruppe.KommuneId == user.KommuneId, ct)
+            ?? throw new EinheitNotFoundException();
+        EnsureLeitstelleOderMitglied(user, einheit.MitarbeiterGruppeId);
+
+        if (name is not null) {
+            var trimmed = string.IsNullOrWhiteSpace(name) ? throw new EinheitNameErforderlichException() : name.Trim();
+            if (await db.Einheiten.AnyAsync(e => e.MitarbeiterGruppeId == einheit.MitarbeiterGruppeId
+                    && e.Id != einheit.Id && e.Name == trimmed, ct)) {
+                throw new EinheitNameVergebenException();
+            }
+            einheit.Name = trimmed;
+        }
+        if (ausruestung is not null) {
+            einheit.Ausruestung = ausruestung.Select(a => a.Trim()).Where(a => a.Length > 0).Distinct().ToList();
+        }
+        await db.SaveChangesAsync(ct);
+        return einheit;
+    }
+
+    [Authorize]
     [GraphQLDescription("Löscht eine Einheit. Ihre offenen Meldungen gehen zurück in den Eingang.")]
     [Error(typeof(NotAllowedException))]
     [Error(typeof(EinheitNotFoundException))]

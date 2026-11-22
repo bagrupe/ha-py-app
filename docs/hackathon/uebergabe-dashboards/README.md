@@ -32,15 +32,15 @@ Der Prototyp ist gebaut und lokal durchgeklickt.
 2. Eine aktive Lage in Hameln-Pyrmont anlegen (`/lage`), mindestens ein Gebiet live.
 3. `python3 docs/hackathon/uebergabe-dashboards/demo-daten.py backend/API/Seeders/LageHelfer/Data/krl/seed.json` schaltet alle Gebiete mit Einsatzleitung live, legt Einheiten an (u. a. DLK 23/12 Hameln) und reicht 16 Meldungen aus dem Mock ein, in allen Ständen. Mehrfach ausführbar.
 
-**Geprüft:** alle Backend-Tests (vollständig auf frischer Test-DB), Frontend `vitest`, `tsc`, ESLint. Im Browser: Auswahl und Passt-Anzeige, Zuweisen per Klick und per Drag & Drop, Rückfrage bei fehlender Ausrüstung, „Läuft“, Zurückziehen in den Eingang, Abgabe mit Grund, Meldeweg offline/online, Klärung an Bauhof, Tabelle offen/Archiv.
+**Geprüft:** alle Backend-Tests (vollständig auf frischer Test-DB), Frontend `vitest`, `tsc`, ESLint. Im Browser: Auswahl und Passt-Anzeige, Zuweisen per Klick und per Drag & Drop, Rückfrage bei fehlender Ausrüstung, „Läuft“, Zurückziehen in den Eingang, Abgabe mit Grund, Meldeweg offline/online, Klärung an Bauhof, Tabelle offen/Archiv, Einheiten anlegen/ändern/löschen (inkl. doppelter Name).
 
 ### Offene Punkte
 
 - **Primärfarbe der KRL ist Rot** (`data-kommune` Weserbergland). Dadurch sehen „Zuweisen“ und der Auswahlrahmen nach Warnung aus. Die Dashboards nutzen für Auswahl schon Grau; für Primäraktionen bräuchte es eine feste Aktionsfarbe oder eine andere KRL-Farbe.
-- **Regeln sind grob.** Beispiele: „ohne Lebensgefahr“ wird als möglicher Notfall erkannt (Verneinung nur bei „verletzt“ berücksichtigt); „Straße überflutet“ wird A statt B wie im Mock. Die Einsatzleitung bzw. Leitstelle korrigiert über „Bearbeiten“.
+- **Regeln sind grob.** Verneinungen („kein“, „nicht“, „ohne“, „niemand“ …) zählen nur in den drei Wörtern davor im selben Satzteil; Zweifel danach („nicht sicher, ob …“) lässt einen Notfall stehen. Nachgestellte Verneinungen („Lebensgefahr besteht nicht“) erkennt die Regel nicht, und „Straße überflutet“ wird A statt B wie im Mock. Bereits eingeschätzte Meldungen werden nicht neu bewertet. Die Einsatzleitung bzw. Leitstelle korrigiert über „Bearbeiten“.
 - **Bearbeiten** ändert nur Klasse und benötigte Ausrüstung. Kategorie, Beschreibung und Ort stammen aus der Bürgermeldung und sind nicht änderbar.
 - **Ausrüstungs-Prüfung** läuft nur im Client (Rückfrage). Das Backend nimmt jede Einheit der zuständigen Einsatzleitung an.
-- **Ausrüstung der Einheiten** ist nicht pflegbar, außer beim Anlegen (`createEinheit(ausruestung)`). Kein UI zum Anlegen oder Bearbeiten von Einheiten.
+- **Einheiten pflegen:** „Verwalten“ neben der Überschrift *Einheiten* in der Einsatzleitung öffnet einen Dialog zum Anlegen (Ausrüstung nach Fahrzeugtyp vorbelegt oder selbst gewählt), Umbenennen, Ausrüstung Ändern und Löschen. Die Auswahl bietet die sechs Ausrüstungen an, die die Regeln kennen; freie Einträge gehen nur über die API. Löschen legt zugewiesene Ereignisse zurück in den Eingang; ein Ereignis *in Bearbeitung* bleibt dabei in diesem Status, nur ohne Einheit.
 - **B-Team** („4 Plätze besetzt“, „≈ 4–5 Notrufplätze entlastet“) ist fest im Frontend. Die Maske „B-Team · Telefonerfassung“ aus dem Mock ist nicht gebaut.
 - **ELS-Status** (Status 2/4) ist abgeleitet; **EIDO** wird nicht übertragen, die Meldung wird nur als „an ELS übergeben“ geschlossen.
 - **Kategorien „Sturm“/„Überschwemmung“** stehen nur im lokalen, ignorierten `Data/krl/seed.json`. `Dokumente/seed.json` im Team-Ordner hat sie nicht.
@@ -170,7 +170,7 @@ Endpunkte, Token und Rezepte: Skill `.agents/skills/graphql-api` (vor allem `ref
 | Einsatzleitung eines Ereignisses | ✅ `istZustaendigkeit.mitarbeiterGruppe` | |
 | Wartezeit | ✅ `createdAt` | |
 | +1-Zähler | ✅ `anzahlBestaetigungen`, Details in `bestaetigungen { createdAt fotos }` | Bürger-App: `activeLagen.meldungen { id kategorie anzahlBestaetigungen }` und `meldungBestaetigen(publicId, fotos)` |
-| Einheiten | ✅ `einheiten(mitarbeiterGruppeId)`, `createEinheit`, `deleteEinheit`, `Ausfuehrung.einheit` | Status 2/4 aus den offenen Meldungen je Einheit ableiten. Demo-Einheiten über `einheiten` je Bereich in `seed.json` |
+| Einheiten | ✅ `einheiten(mitarbeiterGruppeId)`, `createEinheit`, `updateEinheit`, `deleteEinheit`, `Ausfuehrung.einheit` | Status 2/4 aus den offenen Meldungen je Einheit ableiten. Demo-Einheiten über `einheiten` je Bereich in `seed.json` |
 | Ereignis auf Einheit ziehen | ✅ `meldungEinheitZuweisen` | nur Einheiten der zuständigen Einsatzleitung |
 | „Erledigt“ / in Bearbeitung | ✅ `meldungFortsetzen(aktion)` | geht die Prozess-Kanten, Bürger:innen sehen den neuen Stand |
 | An Leitstelle abgeben, Klärung | ✅ `meldungAnLeitstelleAbgeben(grund, kommentar)`, `klaerungSeit`, `klaerungGrund`, `klaerungKommentar` | Kommentar nur bei `SONSTIGES` Pflicht |
@@ -181,7 +181,7 @@ Endpunkte, Token und Rezepte: Skill `.agents/skills/graphql-api` (vor allem `ref
 | Hinweise für Bürger | ✅ `updateLageWarningText(lageId, warningText)` | erscheint in `activeLagen.warningText`; im Dashboard-Mock kein Button mehr, ggf. in `/lage` |
 | Klasse A–D | ✅ `klasse`, Korrektur mit `meldungEinschaetzungSetzen` | beim Eingang regelbasiert gesetzt |
 | Braucht (Ausrüstung je Ereignis) | ✅ `benoetigteAusruestung`, Korrektur mit `meldungEinschaetzungSetzen` | beim Eingang regelbasiert gesetzt |
-| Ausrüstung der Einheiten, Passt-Anzeige | ✅ `Einheit.ausruestung`, `createEinheit(ausruestung)` | ohne Angabe Standard des Fahrzeugtyps (HLF, TLF, DLK, RW, MTW …); Abgleich im Client |
+| Ausrüstung der Einheiten, Passt-Anzeige | ✅ `Einheit.ausruestung`, `createEinheit(ausruestung)`, `updateEinheit(ausruestung)` | ohne Angabe Standard des Fahrzeugtyps (HLF, TLF, DLK, RW, MTW …); Abgleich im Client |
 | Möglicher Notfall, EIDO | ✅ `moeglicherNotfall`, `notfallPruefung`, `meldungNotfallPruefen` | EIDO wird nicht wirklich übertragen |
 | B-Team-Plätze, entlastete Notrufplätze | ❌ | fest im Frontend, als Beispielwert markiert |
 | Live-Aktualisierung | ⚠️ keine Subscriptions | Polling, z. B. alle 15 s mit `requestPolicy: 'network-only'` |

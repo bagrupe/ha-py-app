@@ -9,6 +9,9 @@ import {
 import {mutationFailed} from '../../../lib/mutation.ts';
 import {
   useDashboardAnLeitstelleAbgebenMutation,
+  useDashboardEinheitAendernMutation,
+  useDashboardEinheitAnlegenMutation,
+  useDashboardEinheitLoeschenMutation,
   useDashboardEinheitZuweisenMutation,
   useDashboardEinschaetzungSetzenMutation,
   useDashboardExternUebergebenMutation,
@@ -44,6 +47,9 @@ export const useMeldungAktionen = (onChange: () => void) => {
   const [, notfall] = useDashboardNotfallPruefenMutation();
   const [, einschaetzung] = useDashboardEinschaetzungSetzenMutation();
   const [, meldeweg] = useDashboardMeldewegMutation();
+  const [, einheitAnlegen] = useDashboardEinheitAnlegenMutation();
+  const [, einheitAendern] = useDashboardEinheitAendernMutation();
+  const [, einheitLoeschen] = useDashboardEinheitLoeschenMutation();
 
   const done = (success: boolean) => {
     onChange();
@@ -132,6 +138,35 @@ export const useMeldungAktionen = (onChange: () => void) => {
           await meldeweg({input: {lageId, offen}}),
           offen ? 'Meldeweg ist wieder online.' : 'Meldeweg ist offline.',
         ),
+      ),
+    /** ausruestung: null takes the standard equipment of the vehicle type in the name. */
+    einheitAnlegen: async (
+      mitarbeiterGruppeId: string,
+      name: string,
+      ausruestung: string[] | null,
+    ) =>
+      done(
+        ok(
+          await einheitAnlegen({
+            input: {mitarbeiterGruppeId, name, ausruestung},
+          }),
+          `${name.trim()} angelegt.`,
+        ),
+      ),
+    einheitAendern: async (
+      einheitId: string,
+      name: string,
+      ausruestung: string[],
+    ) =>
+      done(
+        ok(
+          await einheitAendern({input: {einheitId, name, ausruestung}}),
+          'Einheit gespeichert.',
+        ),
+      ),
+    einheitLoeschen: async (einheitId: string) =>
+      done(
+        ok(await einheitLoeschen({input: {einheitId}}), 'Einheit gelöscht.'),
       ),
   };
 };

@@ -9,6 +9,7 @@ import {useConfirm} from '../../../components/modal/confirm-modal.tsx';
 import {Button} from '../../../components/ui/button';
 import {Badge, Kennzahlen, MeldungBadges, Panel} from './dashboard-ui.tsx';
 import {type DashboardEinheitFragment} from './dashboard.generated.ts';
+import {EinheitenDialog} from './einheiten-dialog.tsx';
 import {type KartenMarker, LageKarte} from './lage-karte.tsx';
 import {
   LANGE_WARTEZEIT_MS,
@@ -49,6 +50,7 @@ export const EinsatzleitungAnsicht: FC<{
   const [ausgewaehlt, setAusgewaehlt] = useState<string | null>(null);
   const [gezogen, setGezogen] = useState<string | null>(null);
   const [abgabeOffen, setAbgabeOffen] = useState<string | null>(null);
+  const [einheitenOffen, setEinheitenOffen] = useState(false);
 
   const einsatzleitung = data.einsatzleitungen.find((e) => e.id === gruppeId);
   const eigene = useMemo(
@@ -290,9 +292,19 @@ export const EinsatzleitungAnsicht: FC<{
           className='flex min-w-0 flex-col gap-3'
         >
           <div className='flex flex-wrap items-baseline justify-between gap-2'>
-            <h2 id='einheiten' className='text-base font-bold'>
-              Einheiten
-            </h2>
+            <div className='flex items-baseline gap-3'>
+              <h2 id='einheiten' className='text-base font-bold'>
+                Einheiten
+              </h2>
+              <Button
+                type='button'
+                variant='text-secondary'
+                className='p-0 text-sm underline'
+                onClick={() => setEinheitenOffen(true)}
+              >
+                Verwalten
+              </Button>
+            </div>
             {aktiv && aktiv.ereignisStatus === EreignisStatus.Eingegangen ? (
               <span className='text-xs text-gray-700'>
                 {gezogen ? 'Gezogen' : 'Ausgewählt'}:{' '}
@@ -307,7 +319,14 @@ export const EinsatzleitungAnsicht: FC<{
           </div>
           {einheiten.length === 0 && (
             <p className='rounded-xl border border-dashed border-gray-300 bg-white p-4 text-sm text-gray-700'>
-              Diese Einsatzleitung hat noch keine Einheiten.
+              Diese Einsatzleitung hat noch keine Einheiten.{' '}
+              <button
+                type='button'
+                className='font-semibold underline'
+                onClick={() => setEinheitenOffen(true)}
+              >
+                Einheit anlegen
+              </button>
             </p>
           )}
           {einheiten.map((einheit) => (
@@ -329,6 +348,16 @@ export const EinsatzleitungAnsicht: FC<{
           ))}
         </section>
       </div>
+      {einheitenOffen && (
+        <EinheitenDialog
+          einsatzleitungName={einsatzleitung?.name ?? 'Einsatzleitung'}
+          gruppeId={gruppeId}
+          einheiten={einheiten}
+          auftraege={(einheit) => auftraege(einheit).length}
+          aktionen={aktionen}
+          onClose={() => setEinheitenOffen(false)}
+        />
+      )}
     </div>
   );
 };

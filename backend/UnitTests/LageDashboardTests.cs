@@ -392,6 +392,36 @@ public class LageDashboardTests(BackendApiFactory factory) : LageMeldungTestBase
         Assert.Equal(["Radlader"], eigene.GetProperty("ausruestung").EnumerateArray().Select(a => a.GetString()));
     }
 
+    [Fact]
+    public async Task Einsatzleitung_edits_and_deletes_its_own_einheiten_only() {
+        var s = await SeedSzenario();
+        var hlf = await CreateEinheit(s.West, s.EinsatzleitungWest.Id, "HLF 20 West");
+        await CreateEinheit(s.West, s.EinsatzleitungWest.Id, "TLF West");
+        Ok(await EinheitZuweisen(s.West, s.AusfuehrungId, hlf));
+
+        Task<JsonElement> Update(ClaimsPrincipal caller, string? name, string[]? ausruestung) =>
+            Mutation(caller, "updateEinheit", "UpdateEinheitInput",
+                new() { ["einheitId"] = hlf, ["name"] = name, ["ausruestung"] = ausruestung },
+                "einheit { name ausruestung }");
+
+        var geaendert = Ok(await Update(s.West, " HLF 10 West ", [" Pumpe", "Seilwinde", "Pumpe"]))
+            .GetProperty("einheit");
+        Assert.Equal("HLF 10 West", geaendert.GetProperty("name").GetString());
+        Assert.Equal(["Pumpe", "Seilwinde"],
+            geaendert.GetProperty("ausruestung").EnumerateArray().Select(a => a.GetString()));
+        Assert.Equal("HLF 10 West",
+            Ok(await Update(s.Leitstelle, null, [])).GetProperty("einheit").GetProperty("name").GetString());
+        Fails(await Update(s.West, "TLF West", null), "EinheitNameVergebenError");
+        Fails(await Update(s.West, " ", null), "EinheitNameErforderlichError");
+        Fails(await Update(s.Ost, "Fremd", null), "NotAllowedError");
+
+        Ok(await Mutation(s.West, "deleteEinheit", "DeleteEinheitInput", new() { ["einheitId"] = hlf },
+            "einheit { id }"));
+        var meldung = Assert.Single(await LageMeldungen(s.West, s.LageId));
+        Assert.Equal(JsonValueKind.Null, meldung.GetProperty("einheit").ValueKind);
+        Assert.Equal("EINGEGANGEN", meldung.GetProperty("ereignisStatus").GetString());
+    }
+
     private async Task<Guid[]> ActiveLageIds() {
         ActAnonymously();
         var data = await Data(null, "query($kommuneId: UUID!) { activeLagen(kommuneId: $kommuneId) { id } }",
