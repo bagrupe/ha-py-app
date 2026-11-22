@@ -83,7 +83,7 @@ const decryptAusfuehrung = async (
   }
 
   const beschreibung = a.prozessVersion.beschreibungstext.evaluate(slots);
-  const datum = format(a.createdAt, 'dd.MM.yyyy');
+  const datum = format(a.createdAt, 'dd.MM.yyyy HH:mm');
   const verantwortlich = verantwortlichText(a);
   const z = a.istZustaendigkeit;
   const person = z.zugewiesenePerson

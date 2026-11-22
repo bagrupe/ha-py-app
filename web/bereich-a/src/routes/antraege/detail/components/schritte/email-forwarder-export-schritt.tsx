@@ -73,8 +73,9 @@ export const EmailForwarderExportSchritt: FC<
           <div className='flex flex-col'>
             {bearbeitungsDatum && (
               <p className='text-sm font-light'>
-                {bearbeitungsDatum.toLocaleDateString('de-DE', {
+                {bearbeitungsDatum.toLocaleString('de-DE', {
                   dateStyle: 'medium',
+                  timeStyle: 'short',
                 })}
               </p>
             )}

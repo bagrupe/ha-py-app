@@ -71,7 +71,7 @@ export async function buildAusfuehrungenListCsvContent(
       ausfuehrung.prozessVersion.beschreibungstext.evaluate(slots);
 
     const row = [
-      format(ausfuehrung.createdAt, 'dd.MM.yyyy'),
+      format(ausfuehrung.createdAt, 'dd.MM.yyyy HH:mm'),
       ausfuehrung.prozessVersion.prozess.name,
       String(beschreibung ?? ''),
       formatVerantwortlicheGruppeLabel(ausfuehrung),

@@ -310,14 +310,18 @@ export const AntragDetail: FC = () => {
                 <span>
                   Dieser Antrag wurde über die Weiterleitung zur Abgabe per
                   E-Mail am{' '}
-                  {ausfuehrung.manuellAbgeschlossen.toLocaleDateString()}{' '}
+                  {format(
+                    ausfuehrung.manuellAbgeschlossen,
+                    "dd.MM.yyyy 'um' HH:mm 'Uhr'",
+                  )}{' '}
                   abgeschlossen.
                 </span>
               </div>
             )}
             <div className='flex flex-col gap-1 sm:flex-row sm:flex-wrap sm:items-center sm:gap-2 [&>*]:shrink-0'>
               <div className='text-sm font-bold leading-snug'>
-                Antrag vom {format(ausfuehrung.createdAt, 'dd.MM.yyyy')}
+                Antrag vom {format(ausfuehrung.createdAt, 'dd.MM.yyyy, HH:mm')}{' '}
+                Uhr
               </div>
               {ausfuehrung.istZustaendigkeit.zugewiesenePerson && (
                 <>
