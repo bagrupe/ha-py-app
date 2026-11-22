@@ -7,6 +7,12 @@ Prerequisites: backend running, KRL seed applied, an ACTIVE Lage whose Gebiete a
     python3 docs/hackathon/uebergabe-dashboards/live-demo.py --api http://localhost:5001/graphql
     python3 docs/hackathon/uebergabe-dashboards/live-demo.py --dry-run             # print the storyline only
 
+Process version, start step, first connection and public key are read from the API (anonymously, via the process
+tagged "Anonym"), so any server works. Override them with --process-version, --start-step, --first-connection and
+--public-key. Bestätigungen need the local Postgres and are skipped for any other server:
+
+    python3 docs/hackathon/uebergabe-dashboards/live-demo.py --api https://example.org/graphql
+
 The storyline has 28 entries; after that random non-emergency Meldungen follow until the count is reached.
 Meldungen get the next free number and the current time. Nothing is deleted, so a repeated run adds more Meldungen.
 """
@@ -21,6 +27,7 @@ import subprocess
 import sys
 import tempfile
 import time
+import urllib.parse
 import urllib.request
 from datetime import datetime
 
@@ -66,9 +73,17 @@ args_parser.add_argument("--interval", type=float, default=5, help="mean seconds
 args_parser.add_argument("--count", type=int, default=50, help="stop after this many Meldungen (default 50)")
 args_parser.add_argument("--confirm-chance", type=float, default=0.35,
                          help="chance per Meldung that a neighbour confirms an earlier one (+1), default 0.35")
+args_parser.add_argument("--process-tag", default="Anonym", help="tag of the process to report through (default Anonym)")
+args_parser.add_argument("--process-version", help="ProzessVersion id (default: current version of the tagged process)")
+args_parser.add_argument("--start-step", help="Schritt id of the process start (default: start of that version)")
+args_parser.add_argument("--first-connection", help="Verbindung id leaving the start step (default: first one of the start step)")
+args_parser.add_argument("--public-key", help="Kommune public key, base64 (default: fetched from the API)")
 args_parser.add_argument("--seed-random", type=int, default=7)
 args_parser.add_argument("--dry-run", action="store_true")
 args = args_parser.parse_args()
+LOCAL_API = urllib.parse.urlparse(args.api).hostname in ("localhost", "127.0.0.1")
+if not LOCAL_API:
+    args.confirm_chance = 0
 random.seed(args.seed_random)
 
 
@@ -116,6 +131,16 @@ def gql(query, variables=None, token=None):
     return body["data"]
 
 
+process = gql("query($k: UUID!, $tag: String!) { kommune(kommuneId: $k) { publicKey prozessByTag(tag: $tag) { "
+             "currentVersion { id start { id verbindungen { id } } } } } }",
+             {"k": KOMMUNE_ID, "tag": args.process_tag})["kommune"]
+current_version = process["prozessByTag"]["currentVersion"]
+process_version = args.process_version or current_version["id"]
+start_step = args.start_step or current_version["start"]["id"]
+first_connection = args.first_connection or current_version["start"]["verbindungen"][0]["id"]
+public_key = args.public_key or process["publicKey"]
+
+
 server_password = base64.b64encode(hashlib.pbkdf2_hmac(
     "sha512", seed["demo"]["passwort"].encode(), EMAIL.encode(), 100_000, 64)).decode()
 token = gql("mutation($i: LoginInput!) { login(input: $i) { token } }",
@@ -129,15 +154,6 @@ log(f"Lage '{lage['title']}', LIVE-Gebiete: {', '.join(sorted(gebiete))}")
 missing = {m[0] for m in STORYLINE} - set(gebiete)
 if missing:
     print(f"Warnung: nicht LIVE oder unbekannt, diese Meldungen werden übersprungen: {', '.join(sorted(missing))}", file=sys.stderr)
-
-process_version, start_step, first_connection = sql(
-    'select v."Id", v."StartId", vb."Id" from "ProzessVersionen" v '
-    'join "Verbindungen" vb on vb."VonId"=v."StartId" '
-    'join "UserFacingProzesse" p on p."Id"=v."ProzessId" '
-    f'where p."KommuneId"=$${KOMMUNE_ID}$$ and v."PublishedAt" is not null '
-    'order by v."PublishedAt" desc limit 1')[0]
-public_key = sql(f'select "PublicKey" from "Kommunen" where "Id"=$${KOMMUNE_ID}$$')[0][0]
-
 
 def shared_key():
     with tempfile.TemporaryDirectory() as directory:
