@@ -5,6 +5,7 @@ import {
   fehlendeAusruestung,
   formatDauer,
   nachDringlichkeit,
+  nachEingang,
   ort,
 } from './meldung.ts';
 
@@ -41,6 +42,36 @@ describe('nachDringlichkeit', () => {
     expect(
       [ohne, b, aNeu, aPlus, aAlt].sort(nachDringlichkeit).map((m) => m.id),
     ).toEqual(['a-plus', 'a-alt', 'a-neu', 'b', 'ohne']);
+  });
+});
+
+describe('nachEingang', () => {
+  it('puts the newest report first, whatever its class', () => {
+    const alt = meldung({
+      id: 'alt',
+      klasse: MeldungKlasse.A,
+      anzahlBestaetigungen: 5,
+      createdAt: new Date('2026-11-21T13:00:00Z'),
+    });
+    const neu = meldung({
+      id: 'neu',
+      klasse: MeldungKlasse.D,
+      createdAt: new Date('2026-11-21T15:00:00Z'),
+    });
+    const gleichzeitig = meldung({
+      id: 'gleichzeitig',
+      meldungsnummer: 1102,
+      createdAt: new Date('2026-11-21T15:00:00Z'),
+    });
+    const davor = meldung({
+      id: 'davor',
+      meldungsnummer: 1101,
+      createdAt: new Date('2026-11-21T15:00:00Z'),
+    });
+
+    expect(
+      [alt, davor, neu, gleichzeitig].sort(nachEingang).map((m) => m.id),
+    ).toEqual(['gleichzeitig', 'davor', 'neu', 'alt']);
   });
 });
 

@@ -31,13 +31,17 @@ import {
   kategorie,
   kategorieFarben,
   koordinaten,
-  nachDringlichkeit,
+  nachEingang,
   nummer,
   statusLabel,
   titel,
   wartetMs,
 } from './meldung.ts';
-import {type LageDashboardData, useNow} from './use-lage-dashboard.ts';
+import {
+  type LageDashboardData,
+  useNeueMeldungen,
+  useNow,
+} from './use-lage-dashboard.ts';
 import {type MeldungAktionen} from './use-meldung-aktionen.ts';
 
 const ALLE = 'alle';
@@ -57,6 +61,7 @@ export const LeitstelleAnsicht: FC<{
   const [elFilter, setElFilter] = useState(ALLE);
   const [dialog, setDialog] = useState<OffenerDialog>(null);
   const {meldungen, einsatzleitungen, einheiten} = data;
+  const neueMeldungen = useNeueMeldungen(meldungen, data.aktualisiert !== null);
   const live = useMemo(() => liveGebietIds(data.lage), [data.lage]);
 
   const farbe = useMemo(
@@ -121,7 +126,7 @@ export const LeitstelleAnsicht: FC<{
     )
     .sort(
       tab === 'offen'
-        ? nachDringlichkeit
+        ? nachEingang
         : (a, b) =>
             (b.abgeschlossenAm?.getTime() ?? 0) -
             (a.abgeschlossenAm?.getTime() ?? 0),
@@ -365,7 +370,14 @@ export const LeitstelleAnsicht: FC<{
               {tabelle.map((m) => {
                 const wartet = wartetMs(m, now);
                 return (
-                  <tr key={m.id} className='border-b border-gray-100'>
+                  <tr
+                    key={m.id}
+                    className={twMerge(
+                      'border-b border-gray-100',
+                      neueMeldungen.has(m.id) &&
+                        'animate-eingangFlash motion-reduce:animate-none',
+                    )}
+                  >
                     <td className='whitespace-nowrap px-2 py-2.5 text-gray-700'>
                       {nummer(m)}
                     </td>

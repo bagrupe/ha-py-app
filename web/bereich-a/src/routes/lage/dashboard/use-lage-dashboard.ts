@@ -1,4 +1,4 @@
-import {useEffect, useMemo, useState} from 'react';
+import {useEffect, useMemo, useRef, useState} from 'react';
 import {LageStatus} from '../../../__generated__/graphql.ts';
 import {
   type DashboardLageFragment,
@@ -6,7 +6,9 @@ import {
   useDashboardStammdatenQuery,
 } from './dashboard.generated.ts';
 
-const POLL_MS = 15_000;
+const POLL_MELDUNGEN_MS = 3_000;
+// Stammdaten carry the Gebiet geometries, so they are polled far less often than the reports.
+const POLL_STAMMDATEN_MS = 15_000;
 
 const aktuellsteLage = (lagen: DashboardLageFragment[]) =>
   lagen.find((l) => l.status === LageStatus.Active) ??
@@ -21,6 +23,46 @@ export const useNow = (intervalMs = 30_000) => {
     return () => clearInterval(id);
   }, [intervalMs]);
   return now;
+};
+
+/**
+ * Ids of reports that appeared after the first load, for `dauerMs` each. The first load never counts as new,
+ * otherwise every reload would flash the whole list.
+ */
+export const useNeueMeldungen = (
+  meldungen: {id: string}[],
+  bereit: boolean,
+  dauerMs = 3_000,
+): ReadonlySet<string> => {
+  const bekannt = useRef<Set<string> | null>(null);
+  const timers = useRef(new Set<ReturnType<typeof setTimeout>>());
+  const [neu, setNeu] = useState<ReadonlySet<string>>(new Set());
+
+  useEffect(() => {
+    if (!bereit) return;
+    const bisher = bekannt.current;
+    bekannt.current = new Set(meldungen.map((m) => m.id));
+    if (!bisher) return;
+    const hinzu = [...bekannt.current].filter((id) => !bisher.has(id));
+    if (hinzu.length === 0) return;
+    setNeu((aktuell) => new Set([...aktuell, ...hinzu]));
+    const timer = setTimeout(() => {
+      timers.current.delete(timer);
+      setNeu((aktuell) => {
+        const rest = new Set(aktuell);
+        hinzu.forEach((id) => rest.delete(id));
+        return rest;
+      });
+    }, dauerMs);
+    timers.current.add(timer);
+  }, [meldungen, bereit, dauerMs]);
+
+  useEffect(() => {
+    const offen = timers.current;
+    return () => offen.forEach(clearTimeout);
+  }, []);
+
+  return neu;
 };
 
 /**
@@ -52,11 +94,20 @@ export const useLageDashboard = (lageId?: string) => {
 
   useEffect(() => {
     if (!lage) return;
-    const id = setInterval(() => {
-      refetchMeldungen({requestPolicy: 'network-only'});
-      refetchStammdaten({requestPolicy: 'network-only'});
-    }, POLL_MS);
-    return () => clearInterval(id);
+    const pollIfVisible = (refetch: () => void) => () => {
+      if (!document.hidden) refetch();
+    };
+    const ids = [
+      setInterval(
+        pollIfVisible(() => refetchMeldungen({requestPolicy: 'network-only'})),
+        POLL_MELDUNGEN_MS,
+      ),
+      setInterval(
+        pollIfVisible(() => refetchStammdaten({requestPolicy: 'network-only'})),
+        POLL_STAMMDATEN_MS,
+      ),
+    ];
+    return () => ids.forEach(clearInterval);
   }, [lage, refetchMeldungen, refetchStammdaten]);
 
   const gebiete = useMemo(() => {

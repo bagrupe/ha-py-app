@@ -110,6 +110,11 @@ export const nachDringlichkeit = (a: Meldung, b: Meldung) =>
   b.anzahlBestaetigungen - a.anzahlBestaetigungen ||
   a.createdAt.getTime() - b.createdAt.getTime();
 
+/** Newest first; the Meldungsnummer breaks ties between reports with the same timestamp. */
+export const nachEingang = (a: Meldung, b: Meldung) =>
+  b.createdAt.getTime() - a.createdAt.getTime() ||
+  (b.meldungsnummer ?? 0) - (a.meldungsnummer ?? 0);
+
 const KATEGORIE_TOKENS = [
   'kategorie-1',
   'kategorie-2',

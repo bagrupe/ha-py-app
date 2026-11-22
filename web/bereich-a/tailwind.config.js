@@ -101,6 +101,10 @@ export default {
           from: {opacity: '0', transform: 'translateX(-2px)'},
           to: {opacity: '1', transform: 'translateX(0)'},
         },
+        eingangFlash: {
+          from: {backgroundColor: 'rgb(var(--color-neu) / 0.35)'},
+          to: {backgroundColor: 'rgb(var(--color-neu) / 0)'},
+        },
       },
       animation: {
         slideDownAndFade:
@@ -112,6 +116,7 @@ export default {
           'slideRightAndFade 200ms cubic-bezier(0.16, 1, 0.3, 1)',
         overlayShow: 'overlayShow 150ms cubic-bezier(0.16, 1, 0.3, 1)',
         contentShow: 'contentShow 150ms cubic-bezier(0.16, 1, 0.3, 1)',
+        eingangFlash: 'eingangFlash 2.5s ease-out',
       },
     },
   },
