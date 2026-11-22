@@ -2,29 +2,20 @@
 @model GefahrCheckModel
 @{
   ViewData["Title"] = "Notfallprüfung";
-  ViewData["Tab"] = "melden";
 }
 
-<section>
-  <div class="section-title"><h2>Bevor du eine Meldung machst</h2></div>
-  <div class="card" style="margin-top:8px">
-    <form class="card__body" style="gap:14px" method="post">
-      <fieldset class="choice">
-        <legend>Ist ein Mensch in unmittelbarer Lebensgefahr?</legend>
-        <div class="choice__row">
-          <button class="choice__opt choice__opt--danger" type="submit" name="answer" value="ja"><span>Ja</span></button>
-          <button class="choice__opt" type="submit" name="answer" value="nein"><span>Nein</span></button>
-        </div>
-      </fieldset>
-      @if (Model.DangerReported) {
-        <div class="notice notice--danger" role="alert">
-          <strong>Bitte rufe jetzt den Notruf 112 an. Nutze dieses Formular nicht bei akuter Lebensgefahr.</strong>
-          <a class="btn btn--danger btn--block" href="tel:112">112 anrufen</a>
-        </div>
-      } else {
-        <p class="card__meta" role="status" aria-live="polite">Bitte beantworte die Frage, um fortzufahren.</p>
-        <a class="btn btn--ghost btn--block" asp-page="Index" asp-route-kommuneId="@Model.KommuneId">Zurück</a>
-      }
-    </form>
+@if (Model.DangerReported) {
+  <div class="notice notice--danger danger-check-emergency" role="alert">
+    <strong>Bitte rufe jetzt den<br>Notruf 112 an.</strong>
+    <a class="btn btn--danger btn--block" href="tel:112">112 anrufen</a>
+    <p style="margin:0; font-size:70%; color:var(--text-dim)"><strong>Über die App kannst du einen<br>Vorfall melden, wenn niemand in<br>akuter Lebensgefahr ist.</strong></p>
   </div>
-</section>
+} else {
+  <section class="danger-check-section">
+    <div class="card">
+      <form class="card__body danger-check" method="post">
+        <partial name="_GefahrCheckFrage" />
+      </form>
+    </div>
+  </section>
+}

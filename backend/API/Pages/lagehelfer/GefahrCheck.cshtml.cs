@@ -25,6 +25,7 @@ public class GefahrCheckModel(MeldungService meldungService) : LagehelferPageMod
             return RedirectToPage("Melden", KommuneRoute);
         }
 
+        TempData.Remove(PrecheckPassedKey);
         DangerReported = answer == "ja";
         return Page();
     }

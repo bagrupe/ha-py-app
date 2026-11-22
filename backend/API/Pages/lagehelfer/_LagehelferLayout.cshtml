@@ -1,7 +1,3 @@
-@{
-  var activeTab = ViewData["Tab"] as string;
-  var kommuneId = ViewData["KommuneId"];
-}
 <!DOCTYPE html>
 <html lang="de">
 <head>
@@ -21,16 +17,12 @@
     </div>
   </main>
 
-  <nav class="tab-bar" aria-label="Hauptnavigation">
-    <a class="tab" asp-page="/lagehelfer/Index" asp-route-kommuneId="@kommuneId" aria-current="@(activeTab == "start" ? "page" : null)">
-      <span class="tab__icon icon-slot" aria-hidden="true"></span>
-      Start
-    </a>
-    <a class="tab" asp-page="/lagehelfer/GefahrCheck" asp-route-kommuneId="@kommuneId" aria-current="@(activeTab == "melden" ? "page" : null)">
-      <span class="tab__icon icon-slot" aria-hidden="true"></span>
-      Melden
-    </a>
-  </nav>
+  @if (ViewData["HideBackFooter"] is not true) {
+    <footer class="lagehelfer-footer">
+      <a class="lagehelfer-footer__back" asp-page="/lagehelfer/Index" asp-route-kommuneId="@(ViewData["KommuneId"])">Zurück</a>
+      @await RenderSectionAsync("FooterActions", required: false)
+    </footer>
+  }
 </div>
 @await RenderSectionAsync("Scripts", required: false)
 </body>

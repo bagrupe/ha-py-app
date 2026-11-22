@@ -2,16 +2,23 @@
 @model DankeModel
 @{
   ViewData["Title"] = "Danke";
+  const string confirmationPrefix = "Meldungs-Nr. ";
+  var confirmationNumber = Model.Confirmation.StartsWith(confirmationPrefix, StringComparison.Ordinal)
+    ? Model.Confirmation[confirmationPrefix.Length..]
+    : Model.Confirmation;
 }
 
-<section>
+<section class="report-confirmation">
   <div class="card" style="margin-top:8px">
     <div class="card__body" style="align-items:center;text-align:center;gap:10px">
-      <div style="font-size:3rem">✅</div>
-      <h2>Danke, deine Meldung ist eingegangen.</h2>
-      <p class="card__meta" style="margin:0">@Model.Confirmation</p>
-      <a class="btn btn--block" asp-page="Index" asp-route-kommuneId="@Model.KommuneId" style="margin-top:8px">Zur Startseite</a>
-      <a class="btn btn--ghost btn--block" asp-page="GefahrCheck" asp-route-kommuneId="@Model.KommuneId">Weitere Meldung</a>
+      <div aria-hidden="true" style="font-size:3rem">✅</div>
+      <h2>Deine Meldung ist eingegangen.</h2>
+      <p class="report-confirmation__message">Danke, dass du Bescheid gesagt hast. Wir kümmern uns um deine Meldung.<br>Du musst nichts mehr tun.</p>
+      <p class="card__meta" style="margin:0">Meldungs-Nr.<br><span style="white-space:nowrap">@confirmationNumber</span></p>
     </div>
   </div>
 </section>
+
+@section FooterActions {
+  <a class="lagehelfer-footer__next lagehelfer-footer__link" asp-page="GefahrCheck" asp-route-kommuneId="@Model.KommuneId">Weitere Meldung</a>
+}

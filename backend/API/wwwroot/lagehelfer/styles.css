@@ -7,6 +7,7 @@
    ========================================================== */
 
 :root {
+  color-scheme: light;
   --brand: #0e7c66;
   --brand-ink: #ffffff;
   --brand-soft: #e3f3ee;
@@ -31,16 +32,6 @@
   --shadow: 0 1px 2px rgba(0,0,0,.06), 0 4px 12px rgba(0,0,0,.05);
   --font: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 }
-@media (prefers-color-scheme: dark) {
-  :root {
-    --brand: #4fc3a8; --brand-ink: #06231c; --brand-soft: #16342d;
-    --bg: #0f1514; --surface: #182120; --text: #e8efed;
-    --text-dim: #9db0ab; --line: #2a3735;
-    --ok-soft: #1b3320; --warn-soft: #3a2c10; --info-soft: #142a44; --bad-soft: #3d1c1c;
-    --ok: #81c784; --warn: #ffb74d; --info: #90caf9; --bad: #ef9a9a;
-    --shadow: none;
-  }
-}
 
 * { box-sizing: border-box; }
 body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.45 var(--font); }
@@ -51,21 +42,10 @@ h1 { font-size: 1.5rem; } h2 { font-size: 1.15rem; } h3 { font-size: 1rem; }
 /* ---------- App shell ---------- */
 .app { max-width: 480px; min-height: 100svh; margin: 0 auto; display: flex;
        flex-direction: column; background: var(--bg); }
-.app-content { flex: 1; padding: calc(16px + env(safe-area-inset-top, 0px)) 16px 16px; display: flex; flex-direction: column; gap: 16px;
-               padding-bottom: 96px; }
+.app-content { flex: 1; padding: calc(16px + env(safe-area-inset-top, 0px)) 16px calc(16px + env(safe-area-inset-bottom, 0px));
+               display: flex; flex-direction: column; gap: 16px; }
 .section-title { display: flex; justify-content: space-between; align-items: baseline; }
 .section-title a { color: var(--brand); font-size: .9rem; text-decoration: none; font-weight: 600; }
-
-/* ---------- Tab bar ---------- */
-.tab-bar { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
-           width: min(100%, 480px); display: flex; background: var(--surface);
-           border-top: 1px solid var(--line);
-           padding-bottom: env(safe-area-inset-bottom, 0px); }
-.tab { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px;
-       padding: 8px 4px; font-size: .72rem; color: var(--text-dim); text-decoration: none; }
-.tab__icon { font-size: 1.35rem; line-height: 1; padding: 2px 16px; border-radius: var(--r-pill); }
-.tab[aria-current="page"] { color: var(--text); font-weight: 650; }
-.tab[aria-current="page"] .tab__icon { background: var(--brand-soft); }
 
 /* ---------- Card ---------- */
 .card { background: var(--surface); border-radius: var(--r-md); box-shadow: var(--shadow);
@@ -188,7 +168,6 @@ textarea.input { min-height: 96px; resize: vertical; }
 .view:focus { outline: none; }
 
 /* ---------- Map + address row + JSON output ---------- */
-.tab-bar { z-index: 10; }
 .map { height: 280px; border-radius: var(--r-md); border: 1px solid var(--line);
        overflow: hidden; isolation: isolate; /* keeps Leaflet's z-indexes under the bars */ }
 .input-row { display: flex; gap: 8px; }

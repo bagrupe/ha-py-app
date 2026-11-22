@@ -2,28 +2,44 @@
 @model MeldenModel
 @{
   ViewData["Title"] = "Melden";
-  ViewData["Tab"] = "melden";
+  var addressInvalid = Model.IsInvalid(nameof(Model.Input.Adresse));
+  var categoryInvalid = Model.IsInvalid(nameof(Model.Input.Kategorie));
+  var descriptionInvalid = Model.IsInvalid(nameof(Model.Input.Beschreibung));
+  var photoInvalid = Model.IsInvalid(nameof(Model.Input.Foto));
 }
 
 @section Head {
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 }
 
-<section>
-  <div class="section-title"><h2>Notlage melden</h2></div>
+<section class="report-section">
 
   @if (Model.Formular is null) {
     <div class="notice notice--danger" role="status" style="margin-top:8px">@Model.StatusMessage</div>
   } else {
-  <form class="card" style="margin-top:8px" method="post" enctype="multipart/form-data" novalidate>
-    <div class="card__body" style="gap:14px">
+  <form id="lagehelfer-report" data-report-form data-require-location
+        data-start-details="@(Model.StatusMessage is not null && !Model.HasMissingLocation && !addressInvalid ? "true" : "false")"
+        class="card" style="margin-top:8px" method="post" enctype="multipart/form-data" novalidate>
+    @if (Model.StatusMessage is not null) {
+      <div class="card__body">
+        <div class="notice notice--danger" data-report-summary tabindex="-1">@Model.StatusMessage</div>
+      </div>
+    }
+    <div data-report-location class="card__body" style="gap:14px">
+      <h2 tabindex="-1"><span class="report-step-count">Schritt 1 von 2</span>Wo ist es passiert?</h2>
 
       <div class="field @(Model.IsInvalid(nameof(Model.Input.Adresse)) || Model.HasMissingLocation ? "invalid" : null)">
-        <label for="adresse">@MeldenModel.AdresseLabel</label>
+        <label for="adresse">Adresse</label>
         <div class="input-row">
-          <input class="input" id="adresse" asp-for="Input.Adresse" type="search" autocomplete="off" required placeholder="Straße, Hausnummer, Ort">
+          <input class="input" id="adresse" asp-for="Input.Adresse" type="search" autocomplete="off" required placeholder="Straße, Hausnummer, Ort"
+                 aria-invalid="@(addressInvalid || Model.HasMissingLocation ? "true" : null)"
+                 aria-describedby="@(addressInvalid ? (Model.HasMissingLocation ? "address-error location-error" : "address-error") : (Model.HasMissingLocation ? "location-error" : null))">
           <button class="btn btn--soft" type="button" id="searchBtn">Suchen</button>
         </div>
+        @if (addressInvalid) {
+          <p class="report-field-error" id="address-error">Gib eine Adresse ein.</p>
+        }
+        <p id="location-error" data-report-location-error class="report-field-error" hidden="@(!Model.HasMissingLocation)">Wähle einen Standort auf der Karte oder suche nach einer Adresse.</p>
         <div class="map" id="map" role="application" aria-label="Karte zur Standortwahl"></div>
         <span class="card__meta" id="mapStatus" role="status"></span>
         <button class="btn btn--ghost" type="button" id="locateBtn">📍 Meinen Standort verwenden</button>
@@ -32,41 +48,59 @@
         <input type="hidden" id="standortQuelle" asp-for="Input.StandortQuelle">
       </div>
 
+    </div>
+
+    <div data-report-details class="card__body" style="gap:14px">
+      <h2 tabindex="-1"><span class="report-step-count">Schritt 2 von 2</span>Was ist passiert?</h2>
       <div class="field @(Model.IsInvalid(nameof(Model.Input.Kategorie)) ? "invalid" : null)">
         <label for="kategorie">@MeldenModel.KategorieLabel</label>
-        <select class="input" id="kategorie" asp-for="Input.Kategorie" required>
+        <select class="input" id="kategorie" asp-for="Input.Kategorie" required
+                aria-invalid="@(categoryInvalid ? "true" : null)" aria-describedby="@(categoryInvalid ? "category-error" : null)">
           <option value="">Bitte wählen</option>
           @foreach (var (key, label) in Model.Formular!.Kategorien) {
             <option value="@key" selected="@(Model.Input.Kategorie == key)">@label</option>
           }
         </select>
+        @if (categoryInvalid) {
+          <p class="report-field-error" id="category-error">Wähle eine Ereignisart aus der Liste.</p>
+        }
       </div>
 
-      <div class="field @(Model.IsInvalid(nameof(Model.Input.Beschreibung)) ? "invalid" : null)">
-        <label for="beschreibung">@MeldenModel.BeschreibungLabel</label>
-        <textarea class="input" id="beschreibung" asp-for="Input.Beschreibung" required placeholder="z. B. Umgefallener Baum auf der Straße"></textarea>
+      <div class="field report-description @(Model.IsInvalid(nameof(Model.Input.Beschreibung)) ? "invalid" : null)">
+        <label for="beschreibung">Beschreibung</label>
+        <textarea class="input" id="beschreibung" asp-for="Input.Beschreibung" required
+                  aria-invalid="@(descriptionInvalid ? "true" : null)" aria-describedby="@(descriptionInvalid ? "description-error" : null)" placeholder="z. B. Umgefallener Baum auf der Straße"></textarea>
+        @if (descriptionInvalid) {
+          <p class="report-field-error" id="description-error">Beschreibe kurz, was passiert ist.</p>
+        }
       </div>
 
       <div class="field @(Model.IsInvalid(nameof(Model.Input.Foto)) ? "invalid" : null)">
         <label for="fotoBtn">Foto (optional)</label>
         <input type="file" id="foto" asp-for="Input.Foto" accept="image/*" capture="environment" hidden>
-        <button class="btn btn--ghost" type="button" id="fotoBtn">📷 Foto aufnehmen</button>
+        <button class="btn btn--ghost" type="button" id="fotoBtn" aria-describedby="@(photoInvalid ? "photo-error" : null)">📷 Foto aufnehmen</button>
+        @if (photoInvalid) {
+          <p class="report-field-error" id="photo-error">Das Bild konnte nicht verarbeitet werden. Wähle ein anderes Foto.</p>
+        }
         <img id="fotoPreview" alt="Vorschau des Fotos" hidden
              style="width:100%;max-height:240px;object-fit:cover;border-radius:var(--r-md);border:1px solid var(--line)">
         <button class="btn btn--soft" type="button" id="fotoRemove" hidden>Foto entfernen</button>
       </div>
 
-      @if (Model.StatusMessage is not null) {
-        <div class="notice notice--danger" role="status">@Model.StatusMessage</div>
-      }
-      <button class="btn btn--block" type="submit">Meldung senden</button>
-      <a class="btn btn--ghost btn--block" asp-page="Index" asp-route-kommuneId="@Model.KommuneId">Abbrechen</a>
     </div>
   </form>
   }
 </section>
 
+@section FooterActions {
+  @if (Model.Formular is not null) {
+    <button data-report-next class="lagehelfer-footer__next" type="button" hidden>Weiter</button>
+    <button data-report-send class="lagehelfer-footer__next lagehelfer-footer__send" type="submit" form="lagehelfer-report">Meldung senden</button>
+  }
+}
+
 @section Scripts {
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="~/lagehelfer/melden.js" asp-append-version="true"></script>
+  <script src="~/lagehelfer/melden-schritte.js" asp-append-version="true"></script>
 }

@@ -5,3 +5,91 @@
 button.choice__opt { padding: 0; border: 0; background: none; color: inherit; font: inherit; cursor: pointer; }
 button.choice__opt:hover span { border-color: var(--brand); }
 button.choice__opt--danger:hover span { border-color: var(--bad); }
+
+.app-content:has(.danger-check-section) .view { flex: 1; }
+.app:has(.lagehelfer-footer) .app-content { padding-bottom: 16px; }
+
+.lagehelfer-footer {
+  position: sticky;
+  bottom: 0;
+  z-index: 10;
+  background: var(--surface);
+  border-top: 1px solid var(--line);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+.lagehelfer-footer__back {
+  display: grid;
+  place-items: center;
+  min-height: 48px;
+  color: var(--text);
+  font-weight: 650;
+  text-decoration: none;
+}
+
+.lagehelfer-footer__back:focus-visible { outline-offset: -3px; }
+.danger-check { gap: 16px; padding: 20px 16px; }
+.danger-check h2 { font-size: 1.45rem; font-weight: 750; line-height: 1.25; margin-bottom: 16px; text-align: center; }
+.danger-check-section,
+.danger-check-section > .card,
+.danger-check,
+.danger-check .choice { display: flex; flex: 1; flex-direction: column; }
+.danger-check .choice__row { flex: 1; flex-direction: column; }
+.danger-check .choice__opt { display: flex; width: 100%; }
+.danger-check .choice__opt span { flex: 1; display: grid; place-items: center; }
+.danger-check .choice__opt span { padding: 14px 18px; font-size: 1.5rem; font-weight: 750; }
+.danger-check .choice__opt--danger span { background: #c62828; color: #fff; border-color: #c62828; }
+.danger-check .choice__opt--continue span { background: #555555; color: #fff; border-color: #555555; }
+
+.app-content:has(.danger-check-emergency) .view { flex: 1; }
+.danger-check-emergency { flex: 1; border-left: 0; justify-content: center; gap: 20px; padding: 20px 16px; text-align: center; font-size: 1.45rem; }
+.danger-check-emergency .btn { font-size: 1.25rem; min-height: 56px; }
+
+[data-report-form] [hidden] { display: none; }
+
+.report-step-count { display: block; margin-bottom: 4px; font-size: .875rem; font-weight: 500; color: var(--text-dim); }
+.report-field-error { margin: 0; color: var(--bad); }
+
+.lagehelfer-footer { display: flex; }
+.lagehelfer-footer__back,
+.lagehelfer-footer__next { flex: 1; }
+
+.lagehelfer-footer__next {
+  min-height: 48px;
+  border: 0;
+  border-inline-start: 1px solid var(--line);
+  background: var(--brand);
+  color: var(--brand-ink);
+  font: inherit;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.lagehelfer-footer__next[hidden] { display: none; }
+.lagehelfer-footer__next:focus-visible { outline-color: var(--brand-ink); outline-offset: -4px; }
+
+.lagehelfer-footer__send { background: #c62828; color: #fff; }
+.lagehelfer-footer__send:focus-visible { outline-color: #fff; }
+
+.app-content:has([data-report-details]:not([hidden])) .view {
+  flex: 1;
+}
+
+.report-section:has([data-report-details]:not([hidden])),
+[data-report-form]:has([data-report-details]:not([hidden])) {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+}
+
+[data-report-details],
+.report-description,
+.report-description textarea {
+  flex: 1;
+}
+
+.report-confirmation .card { background: var(--brand-soft); }
+.report-confirmation h2 { font-size: 1.4rem; }
+.report-confirmation__message { margin: 0; font-size: 1.125rem; }
+
+.lagehelfer-footer__link { display: grid; place-items: center; text-decoration: none; }

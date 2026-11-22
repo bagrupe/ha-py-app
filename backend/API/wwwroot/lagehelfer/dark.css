@@ -1,0 +1,9 @@
+:root {
+  color-scheme: dark;
+  --brand: #4fc3a8; --brand-ink: #06231c; --brand-soft: #16342d;
+  --bg: #0f1514; --surface: #182120; --text: #e8efed;
+  --text-dim: #9db0ab; --line: #2a3735;
+  --ok-soft: #1b3320; --warn-soft: #3a2c10; --info-soft: #142a44; --bad-soft: #3d1c1c;
+  --ok: #81c784; --warn: #ffb74d; --info: #90caf9; --bad: #ef9a9a;
+  --shadow: none;
+}

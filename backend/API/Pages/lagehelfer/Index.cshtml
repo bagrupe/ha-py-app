@@ -2,7 +2,7 @@
 @model IndexModel
 @{
   ViewData["Title"] = "Start";
-  ViewData["Tab"] = "start";
+  ViewData["HideBackFooter"] = true;
 }
 
 <section>
@@ -32,13 +32,12 @@
   }
 </section>
 @if (Model.Lagen.Count > 0) {
-  <section>
+  <section class="danger-check-section">
     <div class="section-title"><h2>Vorfall melden</h2></div>
     <div class="card" style="margin-top:8px">
-      <div class="card__body">
-        <p style="margin:0">Du möchtest einen Vorfall melden? Der Lagehelfer leitet dich an die richtige Stelle weiter.</p>
-        <a class="btn btn--block" asp-page="GefahrCheck" asp-route-kommuneId="@Model.KommuneId" style="margin-top:8px">Vorfall melden</a>
-      </div>
+      <form class="card__body danger-check" method="post" asp-page="GefahrCheck" asp-route-kommuneId="@Model.KommuneId">
+        <partial name="_GefahrCheckFrage" />
+      </form>
     </div>
   </section>
 }
