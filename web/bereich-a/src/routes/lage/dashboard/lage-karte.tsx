@@ -1,9 +1,12 @@
 import * as maplibregl from 'maplibre-gl';
 import maplibreWorkerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url';
 import {type FC, useEffect, useMemo, useRef} from 'react';
-import {mapTheme} from '../../../utils/map-theme.ts';
 import 'maplibre-gl/dist/maplibre-gl.css';
-import {type DashboardGebietFragment} from './dashboard.generated.ts';
+import {LageGebietStatus} from '../../../__generated__/graphql.ts';
+import {
+  type DashboardGebietFragment,
+  type DashboardLageFragment,
+} from './dashboard.generated.ts';
 
 maplibregl.setWorkerUrl(maplibreWorkerUrl);
 
@@ -40,7 +43,18 @@ const positionsOf = (geometry: Geometry): Position[] =>
     ? geometry.coordinates.flat()
     : geometry.coordinates.flat(2);
 
-const GEBIET_FARBEN = ['#3B4CCA', '#0E6E7A', '#B8327A', '#5E7A1F', '#C2410C'];
+// The app's own map theme is tuned for street level and turns into noise at the regional zoom of a Lage.
+const REGIONAL_STYLE = 'https://tiles.openfreemap.org/styles/positron';
+
+const LIVE_FARBE = '#C81E1E';
+const RUHIG_FARBE = '#6B7280';
+
+export const liveGebietIds = (lage?: DashboardLageFragment) =>
+  new Set(
+    lage?.gebiete
+      .filter((g) => g.status === LageGebietStatus.Live)
+      .map((g) => g.gebietId),
+  );
 
 const markerElement = (marker: KartenMarker, onClick?: () => void) => {
   const root = document.createElement('button');
@@ -71,37 +85,36 @@ const markerElement = (marker: KartenMarker, onClick?: () => void) => {
 };
 
 /**
- * OSM map with the Gebiete as shaded areas and one marker per report. `gebiete` decides both the drawn areas
- * and the initial view.
+ * OSM map with the Gebiete as areas and one marker per report. `gebiete` decides both the drawn areas and the
+ * initial view; Gebiete in `live` stand out as taking reports, the others are only outlined.
  */
 export const LageKarte: FC<{
   gebiete: DashboardGebietFragment[];
+  live: ReadonlySet<string>;
   marker: KartenMarker[];
   onMarkerClick?: (id: string) => void;
   className?: string;
-}> = ({gebiete, marker, onMarkerClick, className}) => {
+}> = ({gebiete, live, marker, onMarkerClick, className}) => {
   const container = useRef<HTMLDivElement>(null);
   const map = useRef<maplibregl.Map | null>(null);
   const markerRefs = useRef<maplibregl.Marker[]>([]);
+  const eingepasst = useRef(false);
 
   const flaechen = useMemo(() => {
-    const features = gebiete.flatMap((gebiet, index) => {
+    const features = gebiete.flatMap((gebiet) => {
       const geometry = parseGeometry(gebiet.geometry);
       return geometry
         ? [
             {
               type: 'Feature' as const,
               geometry,
-              properties: {
-                name: gebiet.name,
-                farbe: GEBIET_FARBEN[index % GEBIET_FARBEN.length],
-              },
+              properties: {name: gebiet.name, live: live.has(gebiet.id)},
             },
           ]
         : [];
     });
     return {type: 'FeatureCollection' as const, features};
-  }, [gebiete]);
+  }, [gebiete, live]);
 
   const bounds = useMemo(() => {
     const positions = flaechen.features.flatMap((f) => positionsOf(f.geometry));
@@ -118,7 +131,7 @@ export const LageKarte: FC<{
     if (!container.current) return;
     const instance = new maplibregl.Map({
       container: container.current,
-      style: mapTheme,
+      style: REGIONAL_STYLE,
       center: [9.36, 52.1],
       zoom: 9,
       attributionControl: {compact: true},
@@ -145,39 +158,72 @@ export const LageKarte: FC<{
         source.setData(flaechen);
       } else {
         instance.addSource('gebiete', {type: 'geojson', data: flaechen});
-        instance.addLayer({
-          id: 'gebiete-fill',
-          type: 'fill',
-          source: 'gebiete',
-          paint: {'fill-color': ['get', 'farbe'], 'fill-opacity': 0.08},
-        });
-        instance.addLayer({
-          id: 'gebiete-line',
-          type: 'line',
-          source: 'gebiete',
-          paint: {
-            'line-color': ['get', 'farbe'],
-            'line-width': 1.5,
-            'line-opacity': 0.7,
+        const ersteBeschriftung = instance
+          .getStyle()
+          .layers.find((layer) => layer.type === 'symbol')?.id;
+        const live: maplibregl.ExpressionSpecification = ['get', 'live'];
+        instance.addLayer(
+          {
+            id: 'gebiete-fill',
+            type: 'fill',
+            source: 'gebiete',
+            paint: {
+              'fill-color': ['case', live, LIVE_FARBE, RUHIG_FARBE],
+              'fill-opacity': ['case', live, 0.12, 0.03],
+            },
           },
-        });
+          ersteBeschriftung,
+        );
+        instance.addLayer(
+          {
+            id: 'gebiete-line-ruhig',
+            type: 'line',
+            source: 'gebiete',
+            filter: ['!', live],
+            paint: {
+              'line-color': RUHIG_FARBE,
+              'line-width': 1.25,
+              'line-dasharray': [3, 2],
+            },
+          },
+          ersteBeschriftung,
+        );
+        instance.addLayer(
+          {
+            id: 'gebiete-line-live',
+            type: 'line',
+            source: 'gebiete',
+            filter: live,
+            paint: {'line-color': LIVE_FARBE, 'line-width': 3},
+          },
+          ersteBeschriftung,
+        );
         instance.addLayer({
           id: 'gebiete-label',
           type: 'symbol',
           source: 'gebiete',
           layout: {
             'text-field': ['get', 'name'],
-            'text-font': ['Noto Sans Regular'],
-            'text-size': 12,
+            'text-font': [
+              'case',
+              live,
+              ['literal', ['Noto Sans Bold']],
+              ['literal', ['Noto Sans Regular']],
+            ],
+            'text-size': ['case', live, 14, 12],
           },
           paint: {
-            'text-color': '#4E4E4E',
+            'text-color': ['case', live, '#111827', '#4B5563'],
             'text-halo-color': '#FFFFFF',
-            'text-halo-width': 1.5,
+            'text-halo-width': 2,
           },
         });
       }
-      if (bounds) instance.fitBounds(bounds, {padding: 24, duration: 0});
+      // Only the first time: every refetch passes new Gebiete and must not undo the user's zoom.
+      if (bounds && !eingepasst.current) {
+        instance.fitBounds(bounds, {padding: 24, duration: 0});
+        eingepasst.current = true;
+      }
     };
     if (instance.isStyleLoaded()) apply();
     else instance.once('load', apply);
@@ -208,3 +254,24 @@ export const LageKarte: FC<{
     />
   );
 };
+
+export const GebietLegende: FC = () => (
+  <>
+    <span className='flex items-center gap-1.5'>
+      <span
+        aria-hidden
+        className='h-3 w-4 rounded-sm border-2'
+        style={{borderColor: LIVE_FARBE, background: `${LIVE_FARBE}2E`}}
+      />
+      Gebiet mit aktiver Lage
+    </span>
+    <span className='flex items-center gap-1.5'>
+      <span
+        aria-hidden
+        className='h-3 w-4 rounded-sm border border-dashed'
+        style={{borderColor: RUHIG_FARBE}}
+      />
+      Gebiet ohne aktive Lage
+    </span>
+  </>
+);

@@ -10,7 +10,12 @@ import {Button} from '../../../components/ui/button';
 import {Badge, Kennzahlen, MeldungBadges, Panel} from './dashboard-ui.tsx';
 import {type DashboardEinheitFragment} from './dashboard.generated.ts';
 import {EinheitenDialog} from './einheiten-dialog.tsx';
-import {type KartenMarker, LageKarte} from './lage-karte.tsx';
+import {
+  GebietLegende,
+  type KartenMarker,
+  LageKarte,
+  liveGebietIds,
+} from './lage-karte.tsx';
 import {
   LANGE_WARTEZEIT_MS,
   type Meldung,
@@ -64,6 +69,7 @@ export const EinsatzleitungAnsicht: FC<{
     () => kategorieFarben(data.meldungen.map(kategorie)),
     [data.meldungen],
   );
+  const live = useMemo(() => liveGebietIds(data.lage), [data.lage]);
   const eingang = useMemo(
     () =>
       eigene
@@ -262,10 +268,12 @@ export const EinsatzleitungAnsicht: FC<{
         >
           <LageKarte
             gebiete={eigeneGebiete}
+            live={live}
             marker={marker}
             onMarkerClick={setAusgewaehlt}
           />
           <div className='flex flex-wrap gap-4 text-xs text-gray-700'>
+            <GebietLegende />
             {[
               ...new Set(
                 marker.map((mk) =>
