@@ -204,7 +204,9 @@
         "maengelmelder": "Mängelmelder",
         "waste_calendar": "Abfuhrkalender",
         "sensors": "Sensoren",
-        "lagehelfer": "Lagehelfer"
+        "lagehelfer": "Lagehelfer",
+        "report_incident": "Vorfall melden",
+        "dial_112_manually": "Die Telefon-App konnte nicht geöffnet werden. Bitte wählen Sie 112."
       }
     },
     "version_compatibility": {

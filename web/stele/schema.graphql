@@ -1663,6 +1663,17 @@ type LageGebietNotLiveError implements Error {
   message: String!
 }
 
+type LageKontakt {
+  id: UUID!
+  lageId: UUID!
+  lage: Lage!
+  meldungId: UUID
+  telefonnummer: String!
+  rueckruf: Boolean!
+  erstellt: Instant!
+  erledigt: Instant
+}
+
 type LageNotFoundError implements Error {
   message: String!
 }
@@ -1919,6 +1930,7 @@ type Mutation {
   deleteEhrenamtsbankEintrag(input: DeleteEhrenamtsbankEintragInput!): DeleteEhrenamtsbankEintragPayload! @authorize
   addGebietEinsatzleitung(input: AddGebietEinsatzleitungInput!): AddGebietEinsatzleitungPayload! @authorize
   removeGebietEinsatzleitung(input: RemoveGebietEinsatzleitungInput!): RemoveGebietEinsatzleitungPayload! @authorize
+  rueckrufAbschliessen(input: RueckrufAbschliessenInput!): RueckrufAbschliessenPayload! @authorize
   "Legt eine Einheit einer Einsatzleitung an."
   createEinheit(input: CreateEinheitInput!): CreateEinheitPayload! @authorize
   "Benennt eine Einheit um oder ändert ihre Ausrüstung. Null lässt den Wert unverändert."
@@ -2525,6 +2537,7 @@ type Query {
   kommunen: [Kommune!]! @allowAnonymous
   kommune(kommuneId: UUID!): Kommune! @allowAnonymous
   gebiete(withoutEinsatzleitung: Boolean): [Gebiet!]! @authorize
+  lageKontakte(lageId: UUID! offeneRueckrufe: Boolean): [LageKontakt!]! @authorize
   "Meldungen einer Lage, älteste zuerst. Leitstelle (Admin, Superadmin) sieht alle, eine Einsatzleitung nur die ihrer Gruppen. offen: true = nur nicht abgeschlossene, false = nur abgeschlossene, null = alle."
   lageMeldungen(lageId: UUID! offen: Boolean): [Ausfuehrung!]! @authorize
   "Einheiten der Kommune, optional nur die einer Einsatzleitung (Mitarbeitergruppe)."
@@ -2588,6 +2601,10 @@ type RichTextBlock @source(name: "RichTextBlock", schema: "BereichB") {
   id: String
   blockName: String
   blockType: String
+}
+
+type RueckrufAbschliessenPayload {
+  boolean: Boolean
 }
 
 type SensorArt @source(name: "SensorArt", schema: "BereichB") {
@@ -5560,6 +5577,10 @@ input ResetPasswordInput {
   personalPrivateKeySalt: String!
   personalPrivateKey: EncryptedValueInput!
   organizationPrivateKey: String!
+}
+
+input RueckrufAbschliessenInput {
+  id: UUID!
 }
 
 input RuleContextFilterInput {

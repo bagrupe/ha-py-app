@@ -12261,6 +12261,103 @@ export default {
       },
       {
         kind: 'OBJECT',
+        name: 'LageKontakt',
+        fields: [
+          {
+            name: 'erledigt',
+            type: {
+              kind: 'SCALAR',
+              name: 'Instant',
+              ofType: null,
+            },
+            args: [],
+          },
+          {
+            name: 'erstellt',
+            type: {
+              kind: 'NON_NULL',
+              ofType: {
+                kind: 'SCALAR',
+                name: 'Instant',
+                ofType: null,
+              },
+            },
+            args: [],
+          },
+          {
+            name: 'id',
+            type: {
+              kind: 'NON_NULL',
+              ofType: {
+                kind: 'SCALAR',
+                name: 'UUID',
+                ofType: null,
+              },
+            },
+            args: [],
+          },
+          {
+            name: 'lage',
+            type: {
+              kind: 'NON_NULL',
+              ofType: {
+                kind: 'OBJECT',
+                name: 'Lage',
+                ofType: null,
+              },
+            },
+            args: [],
+          },
+          {
+            name: 'lageId',
+            type: {
+              kind: 'NON_NULL',
+              ofType: {
+                kind: 'SCALAR',
+                name: 'UUID',
+                ofType: null,
+              },
+            },
+            args: [],
+          },
+          {
+            name: 'meldungId',
+            type: {
+              kind: 'SCALAR',
+              name: 'UUID',
+              ofType: null,
+            },
+            args: [],
+          },
+          {
+            name: 'rueckruf',
+            type: {
+              kind: 'NON_NULL',
+              ofType: {
+                kind: 'SCALAR',
+                name: 'Boolean',
+                ofType: null,
+              },
+            },
+            args: [],
+          },
+          {
+            name: 'telefonnummer',
+            type: {
+              kind: 'NON_NULL',
+              ofType: {
+                kind: 'SCALAR',
+                name: 'String',
+                ofType: null,
+              },
+            },
+            args: [],
+          },
+        ],
+        interfaces: [],
+      },
+      {
+        kind: 'OBJECT',
         name: 'LageNotFoundError',
         fields: [
           {
@@ -15592,6 +15689,29 @@ export default {
             ],
           },
           {
+            name: 'rueckrufAbschliessen',
+            type: {
+              kind: 'NON_NULL',
+              ofType: {
+                kind: 'OBJECT',
+                name: 'RueckrufAbschliessenPayload',
+                ofType: null,
+              },
+            },
+            args: [
+              {
+                name: 'input',
+                type: {
+                  kind: 'NON_NULL',
+                  ofType: {
+                    kind: 'SCALAR',
+                    name: 'Any',
+                  },
+                },
+              },
+            ],
+          },
+          {
             name: 'servicePortalLinkUpsert',
             type: {
               kind: 'NON_NULL',
@@ -15851,6 +15971,29 @@ export default {
               ofType: {
                 kind: 'OBJECT',
                 name: 'UpdateEhrenamtsbankEintragStatusPayload',
+                ofType: null,
+              },
+            },
+            args: [
+              {
+                name: 'input',
+                type: {
+                  kind: 'NON_NULL',
+                  ofType: {
+                    kind: 'SCALAR',
+                    name: 'Any',
+                  },
+                },
+              },
+            ],
+          },
+          {
+            name: 'updateEinheit',
+            type: {
+              kind: 'NON_NULL',
+              ofType: {
+                kind: 'OBJECT',
+                name: 'UpdateEinheitPayload',
                 ofType: null,
               },
             },
@@ -20230,6 +20373,44 @@ export default {
             ],
           },
           {
+            name: 'lageKontakte',
+            type: {
+              kind: 'NON_NULL',
+              ofType: {
+                kind: 'LIST',
+                ofType: {
+                  kind: 'NON_NULL',
+                  ofType: {
+                    kind: 'OBJECT',
+                    name: 'LageKontakt',
+                    ofType: null,
+                  },
+                },
+              },
+            },
+            args: [
+              {
+                name: 'lageId',
+                type: {
+                  kind: 'NON_NULL',
+                  ofType: {
+                    kind: 'SCALAR',
+                    name: 'UUID',
+                    ofType: null,
+                  },
+                },
+              },
+              {
+                name: 'offeneRueckrufe',
+                type: {
+                  kind: 'SCALAR',
+                  name: 'Boolean',
+                  ofType: null,
+                },
+              },
+            ],
+          },
+          {
             name: 'lageMeldungen',
             type: {
               kind: 'NON_NULL',
@@ -21296,6 +21477,22 @@ export default {
             type: {
               kind: 'SCALAR',
               name: 'String',
+              ofType: null,
+            },
+            args: [],
+          },
+        ],
+        interfaces: [],
+      },
+      {
+        kind: 'OBJECT',
+        name: 'RueckrufAbschliessenPayload',
+        fields: [
+          {
+            name: 'boolean',
+            type: {
+              kind: 'SCALAR',
+              name: 'Boolean',
               ofType: null,
             },
             args: [],
@@ -24445,6 +24642,59 @@ export default {
                 ofType: {
                   kind: 'UNION',
                   name: 'UpdateEhrenamtsbankEintragStatusError',
+                  ofType: null,
+                },
+              },
+            },
+            args: [],
+          },
+        ],
+        interfaces: [],
+      },
+      {
+        kind: 'UNION',
+        name: 'UpdateEinheitError',
+        possibleTypes: [
+          {
+            kind: 'OBJECT',
+            name: 'EinheitNameErforderlichError',
+          },
+          {
+            kind: 'OBJECT',
+            name: 'EinheitNameVergebenError',
+          },
+          {
+            kind: 'OBJECT',
+            name: 'EinheitNotFoundError',
+          },
+          {
+            kind: 'OBJECT',
+            name: 'NotAllowedError',
+          },
+        ],
+      },
+      {
+        kind: 'OBJECT',
+        name: 'UpdateEinheitPayload',
+        fields: [
+          {
+            name: 'einheit',
+            type: {
+              kind: 'OBJECT',
+              name: 'Einheit',
+              ofType: null,
+            },
+            args: [],
+          },
+          {
+            name: 'errors',
+            type: {
+              kind: 'LIST',
+              ofType: {
+                kind: 'NON_NULL',
+                ofType: {
+                  kind: 'UNION',
+                  name: 'UpdateEinheitError',
                   ofType: null,
                 },
               },

@@ -3,7 +3,7 @@
 (() => {
   if (!document.getElementById("map")) return;
 
-  const HAMELN = [51.1037, 9.3597];
+  const HAMELN = [52.1037, 9.3597];
   const NOMINATIM = "https://nominatim.openstreetmap.org";
 
   const addressInput = document.getElementById("adresse");
@@ -21,8 +21,12 @@
     latInput.value = latlng.lat.toFixed(6);
     lngInput.value = latlng.lng.toFixed(6);
     sourceInput.value = source;
+    latInput.dispatchEvent(new Event("change", { bubbles: true }));
     if (source === "pin") addressDirty = false;
-    if (address) setAddress(address); else reverseGeocode(latlng);
+    if (address) setAddress(address); else {
+      setAddress(latInput.value + ", " + lngInput.value);
+      reverseGeocode(latlng);
+    }
   }
 
   function setAddress(text) {
@@ -31,16 +35,16 @@
   }
 
   function locate() {
-    if (!navigator.geolocation) return setStatus("Standort nicht unterstützt. Gib eine Adresse ein.");
+    if (!navigator.geolocation) return setStatus("Standort nicht unterstützt. Geben Sie eine Adresse ein.");
     setStatus("Standort wird ermittelt …");
     navigator.geolocation.getCurrentPosition(
       position => {
         const latlng = L.latLng(position.coords.latitude, position.coords.longitude);
         map.setView(latlng, 16);
         placeAt(latlng, "gps");
-        setStatus("Dein aktueller Standort. Du kannst den Pin verschieben.");
+        setStatus("Ihr aktueller Standort. Sie können den Pin verschieben.");
       },
-      () => setStatus("Standort nicht verfügbar. Gib eine Adresse ein oder tippe auf die Karte."),
+      () => setStatus("Standort nicht verfügbar. Geben Sie eine Adresse ein oder tippen Sie auf die Karte."),
       { enableHighAccuracy: true, timeout: 10000 });
   }
 
@@ -55,9 +59,9 @@
       const latlng = L.latLng(+results[0].lat, +results[0].lon);
       map.setView(latlng, 17);
       placeAt(latlng, "adresse", results[0].display_name);
-      setStatus("Adresse gefunden. Du kannst den Pin verschieben.");
+      setStatus("Adresse gefunden. Sie können den Pin verschieben.");
     } catch {
-      setStatus("Suche fehlgeschlagen. Prüfe deine Verbindung.");
+      setStatus("Suche fehlgeschlagen. Prüfen Sie Ihre Verbindung.");
     }
   }
 
@@ -89,35 +93,11 @@
     });
     addressInput.addEventListener("input", () => {
       addressDirty = true;
-      setStatus("Drücke „Suchen“, um den Pin auf diese Adresse zu setzen.");
+      setStatus("Drücken Sie „Suchen“, um den Pin auf diese Adresse zu setzen.");
     });
 
     if (!hasPin) locate();
   }
-
-  const photoInput = document.getElementById("foto");
-  const photoButton = document.getElementById("fotoBtn");
-  const photoPreview = document.getElementById("fotoPreview");
-  const photoRemove = document.getElementById("fotoRemove");
-
-  function clearPhoto() {
-    if (photoPreview.src) URL.revokeObjectURL(photoPreview.src);
-    photoInput.value = "";
-    photoPreview.hidden = photoRemove.hidden = true;
-    photoPreview.removeAttribute("src");
-    photoButton.textContent = "📷 Foto aufnehmen";
-  }
-
-  photoButton.addEventListener("click", () => photoInput.click());
-  photoRemove.addEventListener("click", clearPhoto);
-  photoInput.addEventListener("change", () => {
-    const file = photoInput.files[0];
-    if (!file) return clearPhoto();
-    if (photoPreview.src) URL.revokeObjectURL(photoPreview.src);
-    photoPreview.src = URL.createObjectURL(file);
-    photoPreview.hidden = photoRemove.hidden = false;
-    photoButton.textContent = "📷 Anderes Foto aufnehmen";
-  });
 
   initMap();
 })();

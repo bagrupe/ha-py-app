@@ -1,3 +1,4 @@
+using API.Infrastructure;
 using API.Features.Auth;
 using API.Features.Funktionsberechtigungen;
 using API.Features.Prozess;
@@ -8,6 +9,17 @@ namespace API.Features.Lage.Queries;
 
 [QueryType]
 public static class LageMeldungQueries {
+    [Authorize]
+    public static async Task<IReadOnlyList<LageKontakt>> GetLageKontakte(Guid lageId, bool? offeneRueckrufe, DomainContext db,
+        CurrentUserAccessor currentUserAccessor, CancellationToken ct) {
+        var (user, rechte) = await currentUserAccessor.EnsureBackofficeUser();
+        rechte.Global(GlobaleFunktionsberechtigung.LageHelfer).Fordern();
+        if (!LageMeldungen.IstLeitstelle(user)) throw new NotAllowedException("Nur für die Leitstelle.");
+        return await db.LageKontakte.Where(k => k.LageId == lageId && k.Lage.Untereinheit.KommuneId == user.KommuneId)
+            .Where(k => offeneRueckrufe != true || (k.Rueckruf && k.Erledigt == null))
+            .OrderBy(k => k.Erstellt).ToListAsync(ct);
+    }
+
     [Authorize]
     [GraphQLDescription(
         "Meldungen einer Lage, älteste zuerst. Leitstelle (Admin, Superadmin) sieht alle, eine Einsatzleitung nur " +

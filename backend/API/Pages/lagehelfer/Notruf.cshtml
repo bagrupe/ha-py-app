@@ -1,0 +1,23 @@
+@page
+@model NotrufModel
+@{
+    ViewData["Title"] = "Notruf";
+    ViewData["HideBackFooter"] = true;
+}
+<section class="flow-screen">
+    <div class="flow-notice flow-notice--danger" role="alert">
+        <h1>Bitte rufen Sie jetzt den Notruf an.</h1>
+        <p>Schildern Sie der Leitstelle, was passiert ist. Sie müssen hier nichts weiter ausfüllen.</p>
+    </div>
+    <a class="btn btn--block flow-call" href="tel:112">112 anrufen</a>
+    <h2>Bis Hilfe da ist</h2>
+    <ul class="flow-safety">
+        <li>Bringen Sie sich selbst nicht in Gefahr.</li>
+        <li>Halten Sie Abstand zu Stromleitungen und Feuer.</li>
+        <li>Bleiben Sie erreichbar, falls die Leitstelle zurückruft.</li>
+    </ul>
+    <p class="card card__body">Sie können nicht sprechen? Nutzen Sie die offizielle <a href="https://www.nora-notruf.de/">Notruf-App nora</a>.</p>
+    <div class="flow-actions">
+        <a asp-page="GefahrCheck" asp-route-kommuneId="@Model.KommuneId">Zurück zu den Fragen</a>
+    </div>
+</section>

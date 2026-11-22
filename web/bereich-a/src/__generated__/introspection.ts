@@ -12261,6 +12261,103 @@ export default {
       },
       {
         kind: 'OBJECT',
+        name: 'LageKontakt',
+        fields: [
+          {
+            name: 'erledigt',
+            type: {
+              kind: 'SCALAR',
+              name: 'Instant',
+              ofType: null,
+            },
+            args: [],
+          },
+          {
+            name: 'erstellt',
+            type: {
+              kind: 'NON_NULL',
+              ofType: {
+                kind: 'SCALAR',
+                name: 'Instant',
+                ofType: null,
+              },
+            },
+            args: [],
+          },
+          {
+            name: 'id',
+            type: {
+              kind: 'NON_NULL',
+              ofType: {
+                kind: 'SCALAR',
+                name: 'UUID',
+                ofType: null,
+              },
+            },
+            args: [],
+          },
+          {
+            name: 'lage',
+            type: {
+              kind: 'NON_NULL',
+              ofType: {
+                kind: 'OBJECT',
+                name: 'Lage',
+                ofType: null,
+              },
+            },
+            args: [],
+          },
+          {
+            name: 'lageId',
+            type: {
+              kind: 'NON_NULL',
+              ofType: {
+                kind: 'SCALAR',
+                name: 'UUID',
+                ofType: null,
+              },
+            },
+            args: [],
+          },
+          {
+            name: 'meldungId',
+            type: {
+              kind: 'SCALAR',
+              name: 'UUID',
+              ofType: null,
+            },
+            args: [],
+          },
+          {
+            name: 'rueckruf',
+            type: {
+              kind: 'NON_NULL',
+              ofType: {
+                kind: 'SCALAR',
+                name: 'Boolean',
+                ofType: null,
+              },
+            },
+            args: [],
+          },
+          {
+            name: 'telefonnummer',
+            type: {
+              kind: 'NON_NULL',
+              ofType: {
+                kind: 'SCALAR',
+                name: 'String',
+                ofType: null,
+              },
+            },
+            args: [],
+          },
+        ],
+        interfaces: [],
+      },
+      {
+        kind: 'OBJECT',
         name: 'LageNotFoundError',
         fields: [
           {
@@ -15575,6 +15672,29 @@ export default {
               ofType: {
                 kind: 'OBJECT',
                 name: 'ResetPasswordPayload',
+                ofType: null,
+              },
+            },
+            args: [
+              {
+                name: 'input',
+                type: {
+                  kind: 'NON_NULL',
+                  ofType: {
+                    kind: 'SCALAR',
+                    name: 'Any',
+                  },
+                },
+              },
+            ],
+          },
+          {
+            name: 'rueckrufAbschliessen',
+            type: {
+              kind: 'NON_NULL',
+              ofType: {
+                kind: 'OBJECT',
+                name: 'RueckrufAbschliessenPayload',
                 ofType: null,
               },
             },
@@ -20253,6 +20373,44 @@ export default {
             ],
           },
           {
+            name: 'lageKontakte',
+            type: {
+              kind: 'NON_NULL',
+              ofType: {
+                kind: 'LIST',
+                ofType: {
+                  kind: 'NON_NULL',
+                  ofType: {
+                    kind: 'OBJECT',
+                    name: 'LageKontakt',
+                    ofType: null,
+                  },
+                },
+              },
+            },
+            args: [
+              {
+                name: 'lageId',
+                type: {
+                  kind: 'NON_NULL',
+                  ofType: {
+                    kind: 'SCALAR',
+                    name: 'UUID',
+                    ofType: null,
+                  },
+                },
+              },
+              {
+                name: 'offeneRueckrufe',
+                type: {
+                  kind: 'SCALAR',
+                  name: 'Boolean',
+                  ofType: null,
+                },
+              },
+            ],
+          },
+          {
             name: 'lageMeldungen',
             type: {
               kind: 'NON_NULL',
@@ -21319,6 +21477,22 @@ export default {
             type: {
               kind: 'SCALAR',
               name: 'String',
+              ofType: null,
+            },
+            args: [],
+          },
+        ],
+        interfaces: [],
+      },
+      {
+        kind: 'OBJECT',
+        name: 'RueckrufAbschliessenPayload',
+        fields: [
+          {
+            name: 'boolean',
+            type: {
+              kind: 'SCALAR',
+              name: 'Boolean',
               ofType: null,
             },
             args: [],

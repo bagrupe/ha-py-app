@@ -1,24 +1,41 @@
 @page "/lagehelfer/danke"
 @model DankeModel
 @{
-  ViewData["Title"] = "Danke";
-  const string confirmationPrefix = "Meldungs-Nr. ";
-  var confirmationNumber = Model.Confirmation.StartsWith(confirmationPrefix, StringComparison.Ordinal)
-    ? Model.Confirmation[confirmationPrefix.Length..]
-    : Model.Confirmation;
+    ViewData["Title"] = "Danke";
+    ViewData["FlowStep"] = 4;
+    var bestaetigt = Request.Query["bestaetigt"] == "true";
 }
-
-<section class="report-confirmation">
-  <div class="card" style="margin-top:8px">
-    <div class="card__body" style="align-items:center;text-align:center;gap:10px">
-      <div aria-hidden="true" style="font-size:3rem">✅</div>
-      <h2>Deine Meldung ist eingegangen.</h2>
-      <p class="report-confirmation__message">Danke, dass du Bescheid gesagt hast. Wir kümmern uns um deine Meldung.<br>Du musst nichts mehr tun.</p>
-      <p class="card__meta" style="margin:0">Meldungs-Nr.<br><span style="white-space:nowrap">@confirmationNumber</span></p>
+<section class="flow-screen flow-confirmation">
+    <div class="flow-notice flow-notice--success">
+        <div class="flow-confirmation__heading">
+            <span class="flow-check" aria-hidden="true">✓</span>
+            <h1>@(bestaetigt ? "Ihre Bestätigung ist eingegangen." : "Ihre Meldung ist bei der Leitstelle angekommen.")</h1>
+        </div>
+        <p>Wird es schlimmer, wählen Sie die <a class="flow-emergency-link" href="tel:112">112</a>.</p>
+        <p>Meldungsnummer @Model.Confirmation</p>
     </div>
-  </div>
+    <div class="flow-notice">
+        <h2>Danke für Ihre Meldung.</h2>
+        <p>Sie helfen damit der Leitstelle, Schäden während der Lage zu erfassen.</p>
+    </div>
+    <p>Halten Sie Abstand zu Gefahrenstellen und befolgen Sie die Hinweise zur Lage.</p>
+    @if (Model.PublicId is { } id) {
+        @if (!bestaetigt) {
+            <form class="card card__body field" method="post" asp-page="Kontakt" asp-route-kommuneId="@Model.KommuneId"
+                  asp-route-meldungId="@id">
+                <input type="hidden" name="Vorgang" value="@Guid.NewGuid()">
+                <label for="rueckfragen">Telefonnummer für Rückfragen <span class="flow-meta">(optional)</span></label>
+                <input class="input" id="rueckfragen" name="Nummer" type="tel" autocomplete="tel" maxlength="40" placeholder="0151 …" required>
+                <p class="flow-meta">Die Leitstelle kann Sie bei Fragen zu Ihrer Meldung erreichen.</p>
+                <button class="btn btn--ghost btn--block" type="submit">Nummer speichern</button>
+            </form>
+        }
+    }
 </section>
 
 @section FooterActions {
-  <a class="lagehelfer-footer__next lagehelfer-footer__link" asp-page="GefahrCheck" asp-route-kommuneId="@Model.KommuneId">Weitere Meldung</a>
+    @if (Model.PublicId is { } id) {
+        <a class="btn btn--block lagehelfer-footer__action" asp-page="Status" asp-route-id="@id"
+           asp-route-kommuneId="@Model.KommuneId">Status meiner Meldung</a>
+    }
 }

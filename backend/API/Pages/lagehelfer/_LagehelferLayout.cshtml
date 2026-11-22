@@ -1,3 +1,7 @@
+@{
+    var step = ViewData["FlowStep"] as int?;
+    var label = ViewData["FlowHeader"] as string ?? TempData.Peek("LagehelferTitel") as string;
+}
 <!DOCTYPE html>
 <html lang="de">
 <head>
@@ -7,10 +11,24 @@
   <link rel="stylesheet" href="~/lagehelfer/styles.css" asp-append-version="true">
   <link rel="stylesheet" href="~/lagehelfer/app.css" asp-append-version="true">
   @await RenderSectionAsync("Head", required: false)
+  <link rel="stylesheet" href="~/lagehelfer/meldeflow.css" asp-append-version="true">
 </head>
 <body>
 <div class="app">
 
+  @if (ViewData["FlowHideHeader"] is not true && (step.HasValue || label is not null)) {
+    <header class="flow-header">
+      @if (step is { } current) {
+        <span class="flow-meta" data-flow-step>Schritt @current von 4</span>
+        <progress class="flow-progress" aria-label="Fortschritt der Meldung" max="4" value="@current"></progress>
+      } else {
+        <div class="flow-header__row">
+          <strong>Lagehelfer</strong>
+          <span class="flow-badge">@label</span>
+        </div>
+      }
+    </header>
+  }
   <main class="app-content">
     <div class="view">
       @RenderBody()
@@ -19,8 +37,9 @@
 
   @if (ViewData["HideBackFooter"] is not true) {
     <footer class="lagehelfer-footer">
-      <a class="lagehelfer-footer__back" asp-page="/lagehelfer/Index" asp-route-kommuneId="@(ViewData["KommuneId"])">Zurück</a>
       @await RenderSectionAsync("FooterActions", required: false)
+      <a class="lagehelfer-footer__back" asp-page="/lagehelfer/Index" asp-route-kommuneId="@(ViewData["KommuneId"])">Zurück</a>
+      <span class="lagehelfer-footer__emergency">Lebensgefahr? <a class="flow-emergency-link" href="tel:112">112 anrufen</a></span>
     </footer>
   }
 </div>

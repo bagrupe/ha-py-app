@@ -8,7 +8,7 @@ namespace API.Pages.lagehelfer;
 public class GefahrCheckModel(MeldungService meldungService) : LagehelferPageModel {
     public const string PrecheckPassedKey = "LagehelferPrecheckPassed";
 
-    public bool DangerReported { get; private set; }
+
 
     public async Task<IActionResult> OnGetAsync(CancellationToken ct) {
         if ((await meldungService.LoadActiveLagenAsync(KommuneId, ct)).Count == 0) return RedirectToPage("Index", KommuneRoute);
@@ -17,16 +17,17 @@ public class GefahrCheckModel(MeldungService meldungService) : LagehelferPageMod
         return Page();
     }
 
-    public async Task<IActionResult> OnPostAsync(string? answer, CancellationToken ct) {
+    public async Task<IActionResult> OnPostAsync(CancellationToken ct) {
         if ((await meldungService.LoadActiveLagenAsync(KommuneId, ct)).Count == 0) return RedirectToPage("Index", KommuneRoute);
 
-        if (answer == "nein") {
+        var answers = Enumerable.Range(0, 3).Select(i => Request.Form[$"answers[{i}]"].ToString()).ToArray();
+        if (answers.Length == 3 && answers.All(a => a == "nein")) {
             TempData[PrecheckPassedKey] = true;
             return RedirectToPage("Melden", KommuneRoute);
         }
 
         TempData.Remove(PrecheckPassedKey);
-        DangerReported = answer == "ja";
+        if (answers.Contains("ja")) return RedirectToPage("Notruf", KommuneRoute);
         return Page();
     }
 }

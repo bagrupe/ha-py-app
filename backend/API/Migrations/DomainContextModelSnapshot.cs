@@ -885,6 +885,20 @@ namespace API.Migrations
                     b.ToTable("LageGebiete");
                 });
 
+            modelBuilder.Entity("API.Features.Lage.LageKontakt", b =>
+                {
+                    b.Property<Guid>("Id").ValueGeneratedOnAdd().HasColumnType("uuid");
+                    b.Property<Guid>("LageId").HasColumnType("uuid");
+                    b.Property<Guid?>("MeldungId").HasColumnType("uuid");
+                    b.Property<string>("Telefonnummer").IsRequired().HasMaxLength(40).HasColumnType("character varying(40)");
+                    b.Property<bool>("Rueckruf").HasColumnType("boolean");
+                    b.Property<Instant>("Erstellt").HasColumnType("timestamp with time zone");
+                    b.Property<Instant?>("Erledigt").HasColumnType("timestamp with time zone");
+                    b.HasKey("Id");
+                    b.HasIndex("LageId");
+                    b.ToTable("LageKontakte");
+                });
+
             modelBuilder.Entity("API.Features.Lage.MeldungBestaetigung", b =>
                 {
                     b.Property<Guid>("Id")
@@ -2334,6 +2348,17 @@ namespace API.Migrations
                         .IsRequired();
 
                     b.Navigation("Gebiet");
+
+                    b.Navigation("Lage");
+                });
+
+            modelBuilder.Entity("API.Features.Lage.LageKontakt", b =>
+                {
+                    b.HasOne("API.Features.Lage.Lage", "Lage")
+                        .WithMany()
+                        .HasForeignKey("LageId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Lage");
                 });

@@ -1,0 +1,31 @@
+@page
+@model UmgebungModel
+@{
+    ViewData["Title"] = "Schon gemeldet?";
+    ViewData["FlowStep"] = 2;
+}
+<section class="flow-screen">
+    <h1>Wurde das schon gemeldet?</h1>
+    @if (Model.Trefferliste.Count == 0) {
+        <p>Im Umkreis von 500 Metern liegen keine passenden Meldungen vor.</p>
+    } else {
+        <p>In der Nähe gibt es bereits diese Meldungen. Ist Ihre dabei, reicht ein Tipp auf „Sehe ich auch“.</p>
+    }
+    <a class="btn btn--ghost btn--block" asp-page="Melden" asp-route-kommuneId="@Model.KommuneId"
+       asp-route-lat="@Model.Lat" asp-route-lng="@Model.Lng" asp-route-adresse="@Model.Adresse">Nein, etwas anderes melden</a>
+    @foreach (var t in Model.Trefferliste) {
+        var count = t.Meldung.AnzahlBestaetigungen;
+        <article class="card card__body flow-result">
+            <h2>@(t.Meldung.Description ?? "Meldung in der Nähe")</h2>
+            <p class="flow-meta">@t.Meter m entfernt · @count @(count == 1 ? "Bestätigung" : "Bestätigungen")</p>
+            @if (Model.Bestaetigt == t.Meldung.Id) {
+                <strong role="status">Danke, bestätigt.</strong>
+                <a class="btn btn--block" asp-page="Danke" asp-route-bestaetigt="true" asp-route-kommuneId="@Model.KommuneId">Fertig</a>
+            } else {
+                <form method="post">
+                    <button class="btn btn--ghost btn--block" name="id" value="@t.Meldung.Id">+1 · Sehe ich auch</button>
+                </form>
+            }
+        </article>
+    }
+</section>

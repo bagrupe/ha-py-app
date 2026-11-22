@@ -13,6 +13,7 @@ import 'package:app/components/transition_page/transition_page_builders.dart';
 import 'package:app/graphql/__generated__/news.graphql.dart';
 import 'package:app/graphql/query_snapshot_store.dart';
 import 'package:app/routes/aktuelles/components/aktuelles_aktion/aktuelles_aktion.dart';
+import 'package:app/routes/aktuelles/components/lage_bubbles.dart';
 import 'package:app/routes/aktuelles/components/news_artikel_card/news_artikel_card.dart';
 import 'package:app/routes/aktuelles/components/weather_card_list/weather_card_list.dart';
 import 'package:app/routes/aktuelles/components/weather_card_list/weather_provider.dart';
@@ -310,6 +311,7 @@ class _AktuellesOverviewState extends ConsumerState<_AktuellesOverview> {
                     ),
                   ),
                   const SizedBox(height: 24),
+                  const LageBubbles(),
                   WeatherCardList(kommuneId: kommuneId),
                   const SizedBox(height: 24),
                   Padding(

@@ -89,6 +89,7 @@ public class DomainContext : DbContext, IDataProtectionKeyContext {
     public DbSet<Lage.LageGebiet> LageGebiete { get; set; } = null!;
     public DbSet<Lage.GebietEinsatzleitung> GebietEinsatzleitungen { get; set; } = null!;
     public DbSet<Lage.Einheit> Einheiten { get; set; } = null!;
+    public DbSet<Lage.LageKontakt> LageKontakte => Set<Lage.LageKontakt>();
     public DbSet<Lage.MeldungBestaetigung> MeldungBestaetigungen { get; set; } = null!;
 
     public DbSet<DataProtectionKey> DataProtectionKeys { get; set; } = null!;
