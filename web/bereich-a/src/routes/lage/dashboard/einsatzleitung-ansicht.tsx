@@ -59,6 +59,7 @@ export const EinsatzleitungAnsicht: FC<{
   const [filter, setFilter] = useState(FILTER_ALLE);
   const [ausgewaehlt, setAusgewaehlt] = useState<string | null>(null);
   const [gezogen, setGezogen] = useState<string | null>(null);
+  const [dropZielId, setDropZielId] = useState<string | null>(null);
   const [abgabeOffen, setAbgabeOffen] = useState<string | null>(null);
   const [einheitenOffen, setEinheitenOffen] = useState(false);
 
@@ -131,13 +132,21 @@ export const EinsatzleitungAnsicht: FC<{
     e.dataTransfer.setData(DRAG_TYPE, id);
     e.dataTransfer.effectAllowed = 'move';
     setGezogen(id);
+    setDropZielId(null);
   };
-  const dropTarget = (onDrop: (id: string) => void) => ({
+  const dropTarget = (zielId: string, onDrop: (id: string) => void) => ({
     onDragOver: (e: DragEvent) => {
-      if (e.dataTransfer.types.includes(DRAG_TYPE)) e.preventDefault();
+      if (!e.dataTransfer.types.includes(DRAG_TYPE)) return;
+      e.preventDefault();
+      setDropZielId(zielId);
+    },
+    onDragLeave: (e: DragEvent) => {
+      if (!e.currentTarget.contains(e.relatedTarget as Node | null))
+        setDropZielId((aktuell) => (aktuell === zielId ? null : aktuell));
     },
     onDrop: (e: DragEvent) => {
       e.preventDefault();
+      setDropZielId(null);
       const id = e.dataTransfer.getData(DRAG_TYPE);
       setGezogen(null);
       if (id) onDrop(id);
@@ -260,7 +269,7 @@ export const EinsatzleitungAnsicht: FC<{
           </p>
           <div
             className='flex min-h-24 flex-col gap-3'
-            {...dropTarget((id) => {
+            {...dropTarget('eingang', (id) => {
               const m = eigene.find((x) => x.id === id);
               if (m?.einheit) void aktionen.zuweisen(id, null);
             })}
@@ -371,7 +380,11 @@ export const EinsatzleitungAnsicht: FC<{
               einheit={einheit}
               auftraege={auftraege(einheit)}
               pruefen={zuweisbar(aktiv) ? aktiv : undefined}
-              dropProps={dropTarget((id) => void zuweisen(id, einheit))}
+              dropProps={dropTarget(
+                einheit.id,
+                (id) => void zuweisen(id, einheit),
+              )}
+              dropAktiv={gezogen !== null && dropZielId === einheit.id}
               onKlick={() => aktiv && void zuweisen(aktiv.id, einheit)}
               onDragStart={onDragStart}
               onDragEnd={() => setGezogen(null)}
@@ -565,8 +578,10 @@ const EinheitKachel: FC<{
   pruefen?: Meldung;
   dropProps: {
     onDragOver: (e: DragEvent) => void;
+    onDragLeave: (e: DragEvent) => void;
     onDrop: (e: DragEvent) => void;
   };
+  dropAktiv: boolean;
   onKlick: () => void;
   onDragStart: (e: DragEvent, id: string) => void;
   onDragEnd: () => void;
@@ -576,6 +591,7 @@ const EinheitKachel: FC<{
   auftraege,
   pruefen,
   dropProps,
+  dropAktiv,
   onKlick,
   onDragStart,
   onDragEnd,
@@ -587,12 +603,16 @@ const EinheitKachel: FC<{
     <div
       {...dropProps}
       className={twMerge(
-        'flex flex-col gap-2 rounded-xl border bg-white p-3',
+        'flex flex-col gap-2 rounded-xl border bg-white p-3 transition-shadow',
         pruefen
           ? passt
             ? 'border-2 border-success'
             : 'border-2 border-danger'
           : 'border-gray-300',
+        dropAktiv &&
+          (passt
+            ? 'bg-success-surface shadow-lg ring-4 ring-success/40'
+            : 'bg-danger-surface shadow-lg ring-4 ring-danger/40'),
       )}
     >
       <div className='flex items-start gap-2'>
@@ -660,6 +680,19 @@ const EinheitKachel: FC<{
         >
           {nummer(pruefen)} hierher zuweisen
         </button>
+      )}
+      {dropAktiv && pruefen && (
+        <div
+          aria-hidden
+          className={twMerge(
+            'rounded-lg border-2 border-dashed p-2 text-center text-sm font-semibold',
+            passt
+              ? 'border-success text-success-text'
+              : 'border-danger text-danger-text',
+          )}
+        >
+          Loslassen zum Zuweisen: {nummer(pruefen)}
+        </div>
       )}
     </div>
   );
