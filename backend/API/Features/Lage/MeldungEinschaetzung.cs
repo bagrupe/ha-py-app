@@ -77,14 +77,14 @@ public static partial class MeldungEinschaetzung {
 
     public static Einschaetzung Einschaetzen(string? kategorie, string? beschreibung) {
         var text = $"{kategorie} {beschreibung}".ToLowerInvariant();
-        var notfall = NotfallMuster().IsMatch(text);
+        var notfall = Trifft(NotfallMuster(), text);
         var ausruestung = AusruestungsRegeln
-            .Where(r => r.Muster.IsMatch(text))
+            .Where(r => Trifft(r.Muster, text))
             .Select(r => r.Ausruestung)
             .Distinct()
             .ToList();
-        var dringend = notfall || DringendMuster().IsMatch(text);
-        var wichtig = notfall || WichtigMuster().IsMatch(text);
+        var dringend = notfall || Trifft(DringendMuster(), text);
+        var wichtig = notfall || Trifft(WichtigMuster(), text);
         var klasse = (dringend, wichtig) switch {
             (true, true) => MeldungKlasse.A,
             (false, true) => MeldungKlasse.B,
@@ -94,7 +94,31 @@ public static partial class MeldungEinschaetzung {
         return new Einschaetzung(klasse, ausruestung, notfall);
     }
 
-    [GeneratedRegex(@"eingeklemmt|eingeschlossen|(?<!(niemand|nicht|keiner|keine)\s)verletzt|bewusstlos|noch drin|atmet nicht|blutet|lebensgefahr|brennt|flammen|\brauch\b|stromleitung|strom liegt")]
+    /// <summary>
+    /// True if a match is not negated by "kein", "nicht", "ohne", … in the three words before it within the same
+    /// clause. Doubt after the negation ("nicht sicher, ob jemand verletzt") keeps the match, because a missed
+    /// emergency costs more than a false alarm.
+    /// </summary>
+    private static bool Trifft(Regex muster, string text) =>
+        muster.Matches(text).Any(m => !Verneint(text[..m.Index]));
+
+    private static bool Verneint(string davor) {
+        var satzteil = SatzteilGrenze().Split(davor)[^1];
+        var woerter = satzteil.Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries).TakeLast(3).ToList();
+        var verneinung = woerter.FindLastIndex(w => Verneinungen.Contains(w));
+        return verneinung >= 0 && !woerter.Skip(verneinung + 1).Any(Zweifel.Contains);
+    }
+
+    private static readonly HashSet<string> Verneinungen =
+        ["kein", "keine", "keiner", "keinen", "keinem", "nicht", "ohne", "niemand", "nichts", "nie"];
+
+    private static readonly HashSet<string> Zweifel =
+        ["ob", "vielleicht", "eventuell", "evtl.", "evtl", "möglicherweise", "unklar", "sicher", "wohl"];
+
+    [GeneratedRegex(@"[.,;:!?\n]|\b(?:und|aber|sondern|doch|oder)\b")]
+    private static partial Regex SatzteilGrenze();
+
+    [GeneratedRegex(@"eingeklemmt|eingeschlossen|verletzt|bewusstlos|nicht ansprechbar|reagiert nicht|noch drin|atmet nicht|blutet|lebensgefahr|brennt|flammen|\brauch\b|stromleitung|strom liegt")]
     private static partial Regex NotfallMuster();
 
     [GeneratedRegex(@"baum|bäume|\bast\b|\bäste|stamm")]
